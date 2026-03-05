@@ -1,0 +1,606 @@
+<style>
+  /* --- ESTILOS DO FINANCEIRO --- */
+  .fin-container {
+    padding: 20px;
+    animation: fadeIn 0.3s;
+    color: #fff;
+  }
+
+  .fin-grid-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .fin-card {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #444;
+    text-align: center;
+  }
+
+  .fin-card h3 {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #aaa;
+    text-transform: uppercase;
+  }
+
+  .fin-card .valor {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-top: 5px;
+  }
+
+  .cor-verde {
+    color: #4caf50;
+  }
+
+  .cor-vermelho {
+    color: #f44336;
+  }
+
+  .cor-amarelo {
+    color: #FFD700;
+  }
+
+  .trx-list {
+    background: #1e1e1e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 20px;
+  }
+
+  .trx-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    border-bottom: 1px solid #333;
+    align-items: center;
+  }
+
+  .trx-info h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #fff;
+  }
+
+  .trx-info span {
+    font-size: 0.75rem;
+    color: #888;
+  }
+
+  .trx-valor {
+    font-weight: bold;
+  }
+
+  .admin-box {
+    background: #222;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px dashed #555;
+    margin-bottom: 20px;
+    display: none;
+  }
+
+  .form-group {
+    margin-bottom: 10px;
+  }
+
+  .input-fin {
+    width: 100%;
+    padding: 12px;
+    background: #333;
+    border: 1px solid #555;
+    color: #fff;
+    border-radius: 5px;
+    box-sizing: border-box;
+  }
+
+  .btn-lancar {
+    width: 100%;
+    padding: 15px;
+    background: #FFD700;
+    color: #000;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  /* Filtros Admin */
+  .filter-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 15px;
+    background: #222;
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .filter-full {
+    grid-column: span 2;
+  }
+
+  .btn-filtrar {
+    background: #333;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 5px;
+  }
+
+  /* Aluno Status */
+  .badge-plano {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    border: 1px solid #4caf50;
+    display: inline-block;
+    margin-top: 5px;
+  }
+
+  .badge-vencido {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+    border-color: #f44336;
+  }
+
+  /* Botão WhatsApp */
+  .btn-whatsapp {
+    background-color: #25D366;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 15px;
+    cursor: pointer;
+    text-decoration: none;
+    box-sizing: border-box;
+  }
+
+  .btn-whatsapp:hover {
+    background-color: #128C7E;
+  }
+</style>
+
+<div id="financeiro-screen" class="fin-container" style="display:none">
+
+  <div class="profile-header-nav" style="display:flex; align-items:center; gap:15px; margin-bottom:20px;">
+    <button onclick="fecharFinanceiro()" style="background:none; border:none; color:#fff; cursor:pointer;">
+      <span class="material-icons" style="font-size:32px">arrow_back</span>
+    </button>
+    <h2 style="margin:0; color:#FFD700">Financeiro</h2>
+  </div>
+
+  <div id="view-aluno">
+    <div class="fin-card"
+      style="width:100%; box-sizing:border-box; margin-bottom:20px; text-align:left; background: linear-gradient(135deg, #1e1e1e, #252525);">
+      <h3>Minha Assinatura</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+        <div>
+          <h2 id="aluno-plano" style="margin:0; color:#fff;">Carregando...</h2>
+          <div id="aluno-vencimento" style="color:#aaa; font-size:0.85rem; margin-top:5px;">Vencimento: --/--/----</div>
+        </div>
+        <div id="aluno-status-badge" class="badge-plano">...</div>
+      </div>
+
+      <a id="btn-cobranca-wpp" href="#" target="_blank" class="btn-whatsapp" style="display:none;">
+        <span class="material-icons">whatsapp</span> Regularizar / Renovar
+      </a>
+    </div>
+
+    <div style="text-align:center; color:#666; font-size:0.9rem; margin-top:20px;">
+      <span class="material-icons" style="font-size:48px; color:#333;">lock</span><br>
+        O histórico detalhado está disponível apenas na secretaria.
+    </div>
+  </div>
+
+  <div id="view-admin" style="display:none;">
+
+    <div class="filter-bar">
+      <div>
+        <label style="font-size:0.7rem; color:#aaa;">Início</label>
+        <input type="date" id="filtro-ini" class="input-fin" style="padding:5px;">
+      </div>
+      <div>
+        <label style="font-size:0.7rem; color:#aaa;">Fim</label>
+        <input type="date" id="filtro-fim" class="input-fin" style="padding:5px;">
+      </div>
+      <div class="filter-full">
+        <label style="font-size:0.7rem; color:#aaa;">Filtrar Academia (Admin)</label>
+        <select id="filtro-academia" class="input-fin" style="padding:5px;">
+                <option value="TODAS">Todas as Academias</option>
+            </select>
+      </div>
+      <div class="filter-full">
+        <button onclick="carregarDadosAdmin()" class="btn-filtrar">
+                <span class="material-icons" style="font-size:16px; vertical-align:middle;">filter_list</span> Filtrar
+            </button>
+      </div>
+    </div>
+
+    <div class="fin-grid-cards">
+      <div class="fin-card">
+        <h3>Entradas</h3>
+        <div id="adm-entradas" class="valor cor-verde">R$ 0,00</div>
+      </div>
+      <div class="fin-card">
+        <h3>Saídas</h3>
+        <div id="adm-saidas" class="valor cor-vermelho">R$ 0,00</div>
+      </div>
+    </div>
+    <div class="fin-card" style="margin-bottom:20px;">
+      <h3>Saldo Resultante</h3>
+      <div id="adm-saldo" class="valor cor-amarelo">R$ 0,00</div>
+    </div>
+
+    <button onclick="toggleForm()" style="width:100%; background:#333; color:#fff; padding:10px; border:1px solid #555; border-radius:5px; margin-bottom:15px;">
+      <span class="material-icons" style="vertical-align:middle">add</span> Novo Lançamento
+    </button>
+
+    <div id="form-lancamento" class="admin-box">
+      <h3 style="color:#FFD700; margin-top:0;">Registrar Movimentação</h3>
+
+      <div class="form-group">
+        <label style="font-size:0.8rem; color:#aaa">Unidade / Academia</label>
+        <select id="fin-academia" class="input-fin">
+           <option value="Matriz">Carregando...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <select id="fin-tipo" class="input-fin" onchange="ajustarFormulario()">
+          <option value="Receita">🟢 Entrada (Receita)</option>
+          <option value="Despesa">🔴 Saída (Despesa)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <select id="fin-categoria" class="input-fin">
+          <option value="Mensalidade">Mensalidade</option>
+          <option value="Venda Produto">Venda</option>
+          <option value="Aula Avulsa">Aula Avulsa</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+
+      <div id="area-aluno-input" class="form-group">
+        <label style="font-size:0.8rem; color:#aaa">Aluno</label>
+        <select id="fin-aluno-select" class="input-fin"><option value="">Carregando...</option></select>
+        <select id="fin-pacote" class="input-fin" style="margin-top:10px; display:none;"><option value="">Pacote</option></select>
+      </div>
+
+      <div class="form-group">
+        <label style="font-size:0.8rem; color:#aaa">Forma de Pagamento</label>
+        <select id="fin-forma" class="input-fin">
+          <option value="Pix">Pix</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Cartão">Cartão</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <input type="text" id="fin-desc" placeholder="Descrição" class="input-fin">
+      </div>
+      <div class="form-group">
+        <input type="number" id="fin-valor" placeholder="Valor (R$)" class="input-fin">
+      </div>
+
+      <button onclick="salvarMovimentacao()" class="btn-lancar">CONFIRMAR</button>
+    </div>
+
+    <h3 style="color:#fff; font-size:1rem; margin-bottom:10px;">Histórico (Filtrado)</h3>
+    <div id="lista-transacoes" class="trx-list">
+      <div style="padding:20px; text-align:center; color:#666;">Carregando...</div>
+    </div>
+  </div>
+
+  <div class="fin-grid-cards" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+    <div class="fin-card">
+      <h3><span class="material-icons" style="font-size:16px">people</span> Ativos</h3>
+      <div id="stat-ativos" class="valor" style="color:#4caf50">--</div>
+    </div>
+    <div class="fin-card">
+      <h3><span class="material-icons" style="font-size:16px">event_busy</span> Vencendo Hoje</h3>
+      <div id="stat-hoje" class="valor" style="color:#FFD700">--</div>
+    </div>
+    <div class="fin-card">
+      <h3><span class="material-icons" style="font-size:16px">block</span> Inadimplentes</h3>
+      <div id="stat-atrasados" class="valor" style="color:#f44336">--</div>
+    </div>
+    <div class="fin-card">
+      <h3><span class="material-icons" style="font-size:16px">payments</span> Fatura Mês</h3>
+      <div id="stat-fatura" class="valor" style="color:#fff">R$ --</div>
+    </div>
+  </div>
+
+  <div class="admin-box" style="display:block;">
+    <h3 style="color:#FFD700; margin-top:0;"><span class="material-icons">cake</span> Aniversariantes do Mês</h3>
+    <div id="lista-niver" style="max-height:200px; overflow-y:auto; padding-right:5px;">
+      <div style="text-align:center; color:#666; font-style:italic">Carregando...</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var usuarioAtual = null;
+
+
+  // Função para carregar o Dashboard ao abrir a tela Financeiro
+  function carregarDashboardComercial() {
+    google.script.run.withSuccessHandler(stats => {
+       // 1. Atualiza Números
+       document.getElementById('stat-ativos').innerText = stats.ativos;
+       document.getElementById('stat-hoje').innerText = stats.vencendoHoje;
+       document.getElementById('stat-atrasados').innerText = stats.atrasados;
+       document.getElementById('stat-fatura').innerText = "R$ " + stats.faturamentoMes.toFixed(2).replace('.', ',');
+
+       // 2. Renderiza Aniversariantes com Botão WhatsApp
+       const divNiver = document.getElementById('lista-niver');
+       divNiver.innerHTML = "";
+       
+       if(stats.aniversariantes.length === 0) {
+           divNiver.innerHTML = "<p style='color:#888; text-align:center'>Nenhum aniversariante neste mês.</p>";
+       } else {
+           stats.aniversariantes.forEach(p => {
+               // Mensagem Pré-definida de Aniversário
+               const primeiroNome = p.nome.split(' ')[0];
+               const msg = `Parabéns, ${primeiroNome}! 🎉 Que seja um novo ciclo de muitas vitórias e treinos pesados. Oss! 🥋`;
+               const link = `https://wa.me/55${p.contato}?text=${encodeURIComponent(msg)}`;
+               
+               divNiver.innerHTML += `
+                 <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #333; background:#2a2a2a; margin-bottom:5px; border-radius:5px;">
+                    <div>
+                        <span style="color:#FFD700; font-weight:bold;">${p.dia}</span> 
+                        <span style="color:#fff;">${p.nome}</span>
+                        <span style="color:#888; font-size:0.8rem;">(${p.idade} anos)</span>
+                    </div>
+                    <a href="${link}" target="_blank" class="btn-whatsapp" style="width:auto; margin:0; padding:5px 10px; font-size:0.8rem;">
+                       <span class="material-icons" style="font-size:14px">whatsapp</span> Parabéns
+                    </a>
+                 </div>`;
+           });
+       }
+    }).getResumoGerencial();
+  }
+
+  // Hook para carregar junto com o admin
+  const originalCarregarDadosAdmin = carregarDadosAdmin;
+  carregarDadosAdmin = function() {
+      originalCarregarDadosAdmin();
+      carregarDashboardComercial();
+  }
+  
+  function abrirFinanceiro() {
+    try {
+      document.getElementById('dashboard-grid').style.display = 'none';
+      var header = document.querySelector('.dashboard-header');
+      if(header) header.style.display = 'none';
+      document.getElementById('financeiro-screen').style.display = 'block';
+
+      var session = localStorage.getItem('userSession');
+      if(!session) { alert("Sessão expirada."); return; }
+      
+      usuarioAtual = JSON.parse(session);
+
+      if (usuarioAtual.isInstrutor) {
+        document.getElementById('view-admin').style.display = 'block';
+        document.getElementById('view-aluno').style.display = 'none';
+        carregarListasFormulario();
+        carregarDadosAdmin();
+      } else {
+        document.getElementById('view-admin').style.display = 'none';
+        document.getElementById('view-aluno').style.display = 'block';
+        carregarDadosAluno();
+      }
+    } catch(e) { console.error("Erro Fin:", e); }
+  }
+
+  function fecharFinanceiro() {
+    document.getElementById('financeiro-screen').style.display = 'none';
+    var header = document.querySelector('.dashboard-header');
+    if(header) header.style.display = 'flex';
+    document.getElementById('dashboard-grid').style.display = 'grid';
+  }
+
+  function toggleForm() {
+    var form = document.getElementById('form-lancamento');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  }
+
+  // --- ALUNO ---
+  function carregarDadosAluno() {
+    google.script.run.withSuccessHandler(function(dadosTexto) {
+      var dados = JSON.parse(dadosTexto);
+      
+      document.getElementById('aluno-plano').innerText = dados.plano || "Sem Plano";
+      document.getElementById('aluno-vencimento').innerText = "Vencimento: " + (dados.vencimento || "--");
+      
+      var badge = document.getElementById('aluno-status-badge');
+      badge.innerText = dados.status;
+      var isAtivo = String(dados.status).toLowerCase() === "ativo";
+      badge.className = isAtivo ? "badge-plano" : "badge-plano badge-vencido";
+
+      // Botão WhatsApp
+      var btnWpp = document.getElementById('btn-cobranca-wpp');
+      if (!isAtivo || (dados.diasRestantes !== -999 && dados.diasRestantes <= 5)) {
+          btnWpp.style.display = "flex";
+          var msg = "Olá! Gostaria de regularizar minha mensalidade (" + dados.plano + "). Login: " + usuarioAtual.LOGIN;
+          btnWpp.href = "https://wa.me/" + dados.contatoWhatsApp + "?text=" + encodeURIComponent(msg);
+      } else {
+          btnWpp.style.display = "none";
+      }
+
+    }).getFinanceiroPessoal(usuarioAtual.LOGIN);
+  }
+
+  // --- ADMIN / INSTRUTOR ---
+  
+  function carregarListasFormulario() {
+    google.script.run.withSuccessHandler(function(dados) {
+        if (!dados) return;
+
+        // 1. Select de Lançamento
+        var selAcad = document.getElementById('fin-academia');
+        selAcad.innerHTML = "";
+        
+        // 2. Select de Filtro
+        var selFiltro = document.getElementById('filtro-academia');
+        selFiltro.innerHTML = '<option value="TODAS">Todas as Academias</option>';
+
+        if(dados.locais) {
+            dados.locais.forEach(function(local) {
+                // Lançamento
+                var opt1 = document.createElement("option");
+                opt1.value = local; opt1.text = local;
+                if(usuarioAtual.academia && String(local).indexOf(usuarioAtual.academia) !== -1) opt1.selected = true;
+                selAcad.appendChild(opt1);
+
+                // Filtro
+                var opt2 = document.createElement("option");
+                opt2.value = local; opt2.text = local;
+                selFiltro.appendChild(opt2);
+            });
+        }
+
+        var selAluno = document.getElementById('fin-aluno-select');
+        selAluno.innerHTML = '<option value="">-- Selecione --</option>';
+        if(dados.alunos) {
+            dados.alunos.forEach(function(aluno) {
+                var opt = document.createElement("option");
+                opt.value = aluno.login; opt.text = aluno.nome;
+                selAluno.appendChild(opt);
+            });
+        }
+
+        carregarPacotesSelect();
+    }).getDadosParaLancamento();
+  }
+
+  function carregarDadosAdmin() {
+    var filtros = {
+        dataInicio: document.getElementById('filtro-ini').value,
+        dataFim: document.getElementById('filtro-fim').value,
+        academia: document.getElementById('filtro-academia').value
+    };
+
+    document.getElementById('lista-transacoes').innerHTML = "<div style='padding:20px;text-align:center'>Filtrando...</div>";
+
+    google.script.run.withSuccessHandler(function(resTexto) {
+        var dados = JSON.parse(resTexto);
+        
+        // Bloqueia filtro de academia se não for Super Admin
+        var selFiltro = document.getElementById('filtro-academia');
+        if (!dados.isSuperAdmin) {
+            selFiltro.disabled = true;
+            // Cria option se não existir
+            if(selFiltro.options.length > 0) selFiltro.innerHTML = "<option>" + (usuarioAtual.academia || "Sua Academia") + "</option>";
+        }
+
+        document.getElementById('adm-entradas').innerText = "R$ " + (dados.entradas || 0).toFixed(2);
+        document.getElementById('adm-saidas').innerText = "R$ " + (dados.saidas || 0).toFixed(2);
+        document.getElementById('adm-saldo').innerText = "R$ " + (dados.saldo || 0).toFixed(2);
+        
+        renderizarLista(dados.historico || []);
+    }).getRelatorioFinanceiroAdmin(usuarioAtual.LOGIN, filtros);
+  }
+
+  function renderizarLista(lista) {
+    var container = document.getElementById('lista-transacoes');
+    container.innerHTML = "";
+    if (!lista || lista.length === 0) {
+      container.innerHTML = "<div style='padding:20px; text-align:center; color:#666;'>Nenhum registro encontrado.</div>";
+      return;
+    }
+    lista.forEach(function(t) {
+      var dataF = t.data_registro || "--";
+      try { if(String(dataF).indexOf("T") !== -1) dataF = dataF.split("T")[0]; } catch(e){}
+      
+      var tipo = String(t.tipo).toLowerCase();
+      var isReceita = tipo.indexOf('receita') !== -1;
+      var cor = isReceita ? 'cor-verde' : 'cor-vermelho';
+      var sinal = isReceita ? '+ ' : '- ';
+      var div = document.createElement('div');
+      div.className = 'trx-item';
+      div.innerHTML = 
+        '<div class="trx-info">' +
+          '<h4 style="font-size:0.9rem">' + (t.descricao || t.categoria) + '</h4>' +
+          '<span>' + dataF + ' • ' + (t.login_aluno || t.academia_ref) + '</span>' +
+        '</div>' +
+        '<div class="trx-valor ' + cor + '">' + sinal + ' R$ ' + parseFloat(t.valor).toFixed(2) + '</div>';
+      container.appendChild(div);
+    });
+  }
+
+  function ajustarFormulario() {
+    var tipo = document.getElementById('fin-tipo').value;
+    var areaAluno = document.getElementById('area-aluno-input');
+    areaAluno.style.display = (tipo === 'Despesa') ? 'none' : 'block';
+  }
+
+  function carregarPacotesSelect() {
+    google.script.run.withSuccessHandler(function(pacotes) {
+      var sel = document.getElementById('fin-pacote');
+      sel.innerHTML = '<option value="">Selecione o Pacote</option>';
+      if(pacotes) {
+          pacotes.forEach(function(p) { 
+              var opt = document.createElement("option");
+              opt.value = p.nome_pacote;
+              opt.text = p.nome_pacote + " - R$ " + p.valor_padrao;
+              sel.appendChild(opt);
+          });
+      }
+      document.getElementById('fin-categoria').addEventListener('change', function() {
+        sel.style.display = (this.value === 'Mensalidade' || this.value === 'Pacote') ? 'block' : 'none';
+      });
+    }).getPacotesDisponiveis();
+  }
+
+  function salvarMovimentacao() {
+    var btn = document.querySelector('.btn-lancar');
+    var selAluno = document.getElementById('fin-aluno-select');
+    
+    if (!document.getElementById('fin-valor').value || !document.getElementById('fin-desc').value) {
+        alert("Preencha todos os campos!"); return;
+    }
+
+    btn.disabled = true; btn.innerText = "Salvando...";
+
+    var dados = {
+      tipo: document.getElementById('fin-tipo').value,
+      categoria: document.getElementById('fin-categoria').value,
+      descricao: document.getElementById('fin-desc').value,
+      valor: document.getElementById('fin-valor').value,
+      academia: document.getElementById('fin-academia').value,
+      alunoLogin: selAluno.value,
+      alunoNome: selAluno.options[selAluno.selectedIndex].text,
+      nomePacote: document.getElementById('fin-pacote').value,
+      responsavel: usuarioAtual.LOGIN,
+      forma: document.getElementById('fin-forma').value
+    };
+
+    google.script.run.withSuccessHandler(function(res) {
+      alert(res.msg);
+      toggleForm();
+      carregarDadosAdmin();
+      btn.disabled = false; btn.innerText = "CONFIRMAR";
+    }).registrarMovimentacao(dados);
+  }
+</script>

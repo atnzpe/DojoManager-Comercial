@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    @page {
+      margin: 0;
+      size: A4;
+      /* O Google imprime em A4, vamos posicionar a carteira no topo */
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      -webkit-print-color-adjust: exact;
+    }
+
+    /* Container da Frente */
+    .card {
+      position: relative;
+      width: 85.6mm;
+      /* Largura padrão Cartão de Crédito */
+      height: 53.98mm;
+      /* Altura padrão */
+      background-size: cover;
+      background-repeat: no-repeat;
+      page-break-inside: avoid;
+      margin-bottom: 5mm;
+      /* Espaço entre frente e verso */
+      border: 1px solid #ddd;
+      /* Borda fina para corte */
+    }
+
+    /* Estilos de Texto Comuns */
+    .field {
+      position: absolute;
+      color: #000080;
+      /* Azul Escuro do seu template */
+      font-size: 9pt;
+      line-height: 1.1;
+    }
+
+    .label {
+      font-weight: bold;
+      font-size: 7pt;
+      display: block;
+      margin-bottom: 1px;
+      color: #000080;
+    }
+
+    /* --- POSICIONAMENTO FRENTE --- */
+    /* Ajuste esses valores 'top' e 'left' se precisar alinhar milimetricamente com sua imagem */
+
+    .photo-box {
+      position: absolute;
+      top: 21mm;
+      /* Baseado no seu template */
+      left: 4mm;
+      width: 23mm;
+      height: 28mm;
+      object-fit: cover;
+      border: 1px solid #ccc;
+      background: #eee;
+    }
+
+    .frente-nome {
+      top: 21mm;
+      left: 30mm;
+      width: 50mm;
+    }
+
+    .frente-grad {
+      top: 30mm;
+      left: 30mm;
+      width: 50mm;
+    }
+
+    .frente-acad {
+      top: 39mm;
+      left: 30mm;
+      width: 50mm;
+    }
+
+    /* --- POSICIONAMENTO VERSO --- */
+    .verso-cpf {
+      top: 12mm;
+      left: 5mm;
+    }
+
+    .verso-filiacao {
+      top: 19mm;
+      left: 5mm;
+      width: 60mm;
+      font-size: 8pt;
+    }
+
+    .verso-nasc-box {
+      top: 35mm;
+      left: 5mm;
+    }
+
+    .verso-validade-box {
+      top: 35mm;
+      left: 45mm;
+    }
+
+    .verso-validade-val {
+      font-weight: bold;
+      color: #d32f2f;
+      /* Vermelho para validade */
+      font-size: 10pt;
+    }
+
+    .disclaimer {
+      position: absolute;
+      top: 5mm;
+      width: 100%;
+      text-align: center;
+      font-size: 6pt;
+      color: #d32f2f;
+      font-style: italic;
+    }
+
+    /* Rodapé Verso */
+    .rodape-verso {
+      position: absolute;
+      bottom: 3mm;
+      left: 5mm;
+      font-size: 6pt;
+      color: #555;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card" style="background-image: url('<?= bgFrente ?>');">
+
+    <img src="<?= fotoUrl ?>" class="photo-box" onerror="this.src='https://ui-avatars.com/api/?name=User'">
+
+    <div class="field frente-nome">
+      <span class="label">Nome:</span>
+      <?= nome ?>
+    </div>
+
+    <div class="field frente-grad">
+      <span class="label">Graduação:</span>
+      <?= graduacao ?>
+    </div>
+
+    <div class="field frente-acad">
+      <span class="label">Academia Vinculada:</span>
+      <?= academia ?>
+    </div>
+
+  </div>
+
+  <div class="card" style="background-image: url('<?= bgVerso ?>');">
+
+    <div class="disclaimer">Este documento não substitui o documento oficial com foto</div>
+
+    <div class="field verso-cpf">
+      <span class="label">CPF:</span>
+      <?= cpf ?>
+    </div>
+
+    <div class="field verso-filiacao">
+      <span class="label">Filiação:</span>
+      <?= filiacao ?>
+    </div>
+
+    <div class="field verso-nasc-box">
+      <span class="label">Data de Nascimento:</span>
+      <?= nascimento ?>
+    </div>
+
+    <div class="field verso-validade-box">
+      <span class="label">Validade:</span>
+      <span class="verso-validade-val"><?= validade ?></span>
+    </div>
+
+    <div class="rodape-verso">
+      Academia:
+      <?= academia ?><br>
+      Emissão:
+      <?= emissao ?>
+    </div>
+
+  </div>
+
+</body>
+
+</html>

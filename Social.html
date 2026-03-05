@@ -1,0 +1,94 @@
+<style>
+  .social-view {
+    display: none;
+    animation: fadeIn 0.3s;
+    padding-top: 40px;
+    text-align: center;
+  }
+
+  .social-container {
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .social-desc {
+    color: #ccc;
+    margin-bottom: 30px;
+    font-size: 16px;
+    line-height: 1.5;
+    padding: 0 20px;
+  }
+
+  .btn-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 18px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 18px;
+    color: white;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  .btn-social:hover {
+    transform: translateY(-3px);
+  }
+
+  .btn-social .material-icons {
+    font-size: 28px;
+  }
+
+  .btn-yt {
+    background: #FF0000;
+  }
+
+  .btn-insta {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  }
+</style>
+
+<div id="social-screen" class="social-view">
+
+  <div class="profile-header-nav">
+    <button class="btn-back" onclick="fecharSocial()">
+      <span class="material-icons" style="font-size: 32px;">arrow_back</span>
+    </button>
+    <h2 style="margin:0; font-size:1.8rem;">Mídias Sociais</h2>
+  </div>
+
+  <p class="social-desc">
+    Siga a Federação Leão do Norte nas redes sociais para ficar por dentro das novidades, eventos e dicas de treino.
+  </p>
+
+  <div class="social-container">
+    <a href="https://www.youtube.com/@KMLNDEFENSE" target="_blank" class="btn-social btn-yt">
+      <span class="material-icons">smart_display</span> Acessar Canal no YouTube
+    </a>
+
+    <a href="https://www.instagram.com/fbkmklnoficial/" target="_blank" class="btn-social btn-insta">
+      <span class="material-icons">camera_alt</span> Seguir no Instagram
+    </a>
+  </div>
+
+</div>
+
+<script>
+  function abrirSocial() {
+    document.getElementById('dashboard-grid').style.display = 'none';
+    document.querySelector('.dashboard-header').style.display = 'none';
+    document.getElementById('social-screen').style.display = 'block';
+  }
+
+  function fecharSocial() {
+    document.getElementById('social-screen').style.display = 'none';
+    document.querySelector('.dashboard-header').style.display = 'flex';
+    document.getElementById('dashboard-grid').style.display = 'grid';
+  }
+</script>

@@ -1,0 +1,679 @@
+<style>
+  /* --- ESTILOS DO RANKING (FINAL - V2 EMPATE) --- */
+  /* Define o container principal da tela de ranking. Inicialmente oculto. */
+  .ranking-view {
+    padding: 20px;
+    display: none;
+    /* Controlado via JS para mostrar/ocultar */
+    animation: fadeIn 0.3s;
+    /* Efeito suave de entrada */
+    padding-bottom: 120px;
+    /* Espaço extra no final para o botão flutuante não cobrir conteúdo */
+  }
+
+  /* Filtros: Container para os botões de seleção de escopo (Local vs Geral) */
+  .scope-filter {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  /* Estilo base dos botões de filtro */
+  .scope-btn {
+    background: #1e1e1e;
+    color: #888;
+    border: 1px solid #333;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: bold;
+    transition: all 0.3s;
+  }
+
+  /* Estilo do botão de filtro ativo (selecionado) */
+  .scope-btn.active {
+    background: #FFD700;
+    /* Dourado */
+    color: #000;
+    border-color: #FFD700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    /* Brilho */
+  }
+
+  /* Lista Agrupada: Container para os cards de ranking */
+  .ranking-list {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    /* Espaçamento entre cards */
+  }
+
+  /* Card do Grupo (Posição): Representa um grupo de alunos com a mesma pontuação */
+  .rank-group {
+    background: #1e1e1e;
+    border-radius: 12px;
+    border: 1px solid #333;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Cores da Borda Lateral baseada no Rank (1º, 2º, 3º e Comum) */
+  .group-1 {
+    border-left: 5px solid #FFD700;
+    /* Ouro */
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.1);
+  }
+
+  .group-2 {
+    border-left: 5px solid #C0C0C0;
+    /* Prata */
+  }
+
+  .group-3 {
+    border-left: 5px solid #CD7F32;
+    /* Bronze */
+  }
+
+  .group-common {
+    border-left: 5px solid #444;
+    /* Cinza escuro para 4º lugar em diante */
+  }
+
+  /* Cabeçalho do Card (Posição e Pontuação) */
+  .rank-header {
+    background: #252525;
+    padding: 8px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+  }
+
+  .rank-pos-badge {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #fff;
+  }
+
+  .rank-score-badge {
+    background: #333;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #FFD700;
+  }
+
+  /* Lista de Alunos dentro do Card: Container para as linhas de alunos empatados */
+  .rank-rows-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Linha individual de um aluno no ranking */
+  .rank-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+
+  .rank-row:last-child {
+    border-bottom: none;
+    /* Remove borda do último item para limpeza visual */
+  }
+
+  .rank-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #444;
+  }
+
+  .rank-info {
+    flex: 1;
+    /* Ocupa o espaço restante */
+  }
+
+  .rank-name {
+    font-weight: bold;
+    color: #fff;
+    font-size: 0.95rem;
+  }
+
+  .rank-details {
+    font-size: 0.75rem;
+    color: #888;
+  }
+
+  /* Cor dos Textos de Posição (Ouro, Prata, Bronze) */
+  .txt-1 {
+    color: #FFD700;
+  }
+
+  .txt-2 {
+    color: #C0C0C0;
+  }
+
+  .txt-3 {
+    color: #CD7F32;
+  }
+
+  /* BOTÃO FLUTUANTE (FAB) para gerar o card de pódio */
+  .fab-rank {
+    position: fixed;
+    bottom: 30px;
+    left: 20px;
+    background: #FFD700;
+    color: #000;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 24px;
+    font-weight: bold;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    z-index: 9995;
+    transition: transform 0.2s;
+  }
+
+  .fab-rank:active {
+    transform: scale(0.95);
+    /* Efeito de clique */
+  }
+
+  /* MODAL PODIUM: Overlay escuro que cobre a tela */
+  #podium-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 10000;
+    display: none;
+    /* Inicialmente oculto */
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    backdrop-filter: blur(5px);
+  }
+
+  /* Card visual do Pódio (Gerado para print/download) */
+  .podium-card {
+    width: 90%;
+    max-width: 360px;
+    background: linear-gradient(145deg, #121212, #1e1e1e);
+    border: 2px solid #FFD700;
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.1);
+  }
+
+  .podium-header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+  }
+
+  .podium-title {
+    color: #FFD700;
+    font-size: 1.5rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0;
+  }
+
+  .podium-subtitle {
+    color: #aaa;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    font-weight: 500;
+  }
+
+  /* Grid Pódio: Layout flex para alinhar os 3 vencedores */
+  .podium-grid {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    /* Alinha pela base (pés dos pódios) */
+    gap: 8px;
+    margin-bottom: 20px;
+    height: 180px;
+  }
+
+  .podium-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    width: 30%;
+    height: 100%;
+    position: relative;
+  }
+
+  .podium-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #FFD700;
+    margin-bottom: -15px;
+    /* Sobrepõe levemente a barra do pódio */
+    z-index: 5;
+    background: #000;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  }
+
+  .podium-place {
+    width: 100%;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 5px;
+    font-weight: 900;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 1.5rem;
+  }
+
+  /* Alturas e Cores das Barras do Pódio */
+  .place-1 {
+    height: 100px;
+    background: linear-gradient(to bottom, #FFD700, #B8860B);
+    order: 2;
+    z-index: 2;
+  }
+
+  /* Centro */
+  .place-2 {
+    height: 75px;
+    background: linear-gradient(to bottom, #C0C0C0, #757575);
+    order: 1;
+    opacity: 0.9;
+  }
+
+  /* Esquerda */
+  .place-3 {
+    height: 55px;
+    background: linear-gradient(to bottom, #CD7F32, #8B4513);
+    order: 3;
+    opacity: 0.9;
+  }
+
+  /* Direita */
+
+  .podium-name {
+    font-size: 0.75rem;
+    color: #fff;
+    margin-top: 10px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  .podium-count {
+    font-size: 0.7rem;
+    color: #FFD700;
+    margin-top: 2px;
+  }
+
+  .podium-footer {
+    font-size: 0.6rem;
+    color: #555;
+    margin-top: 15px;
+    border-top: 1px solid #333;
+    padding-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    width: 90%;
+    max-width: 360px;
+  }
+
+  .btn-action-podium {
+    flex: 1;
+    background: #333;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+  }
+
+  .btn-gold {
+    background: #FFD700;
+    color: #000;
+  }
+
+  /* Ajustes para Impressão (Só imprime o card do pódio) */
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+
+    /* Esconde tudo */
+    #podium-modal,
+    #card-to-print,
+    #card-to-print * {
+      visibility: visible;
+    }
+
+    /* Mostra só o modal */
+    #podium-modal {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: white;
+    }
+
+    #card-to-print {
+      box-shadow: none;
+      border: 2px solid #000;
+      color: #000 !important;
+      background: #fff !important;
+    }
+
+    .podium-title,
+    .rank-pos,
+    .podium-subtitle {
+      color: #000 !important;
+    }
+
+    .modal-actions {
+      display: none;
+    }
+
+    /* Esconde botões na impressão */
+  }
+</style>
+
+<div id="ranking-screen" class="ranking-view">
+  <div class="profile-header-nav">
+    <button class="btn-back" onclick="fecharRanking()"><span class="material-icons">arrow_back</span></button>
+    <h2>Ranking</h2>
+  </div>
+
+  <div style="text-align:center; margin-bottom:15px;">
+    <div style="font-size:1rem; color:#FFD700; font-weight:bold;" id="rank-mes-ano">...</div>
+  </div>
+
+  <div class="scope-filter">
+    <button class="scope-btn active" id="btn-scope-local" onclick="mudarEscopoRanking('local')">Minha Academia</button>
+    <button class="scope-btn" id="btn-scope-geral" onclick="mudarEscopoRanking('geral')">Ranking Geral</button>
+  </div>
+
+  <div id="ranking-container" class="ranking-list">
+    <div class="spinner"></div>
+  </div>
+
+  <button id="btn-gerar-card" class="fab-rank" style="display:none;" onclick="gerarCardPodium()">
+    <span class="material-icons">emoji_events</span> TOP 3 CARD
+  </button>
+</div>
+
+<div id="podium-modal">
+  <div class="podium-card" id="card-to-print">
+    <div class="podium-header">
+      <h1 class="podium-title">DESTAQUES</h1>
+      <div class="podium-subtitle" id="podium-subtitle">...</div>
+    </div>
+    <div class="podium-grid" id="podium-content"></div>
+    <div class="podium-footer" id="podium-footer">Federação Leão do Norte</div>
+  </div>
+  <div class="modal-actions">
+    <button class="btn-action-podium" onclick="fecharPodium()">FECHAR</button>
+    <button class="btn-action-podium btn-gold" onclick="window.print()"><span class="material-icons">print</span> SALVAR</button>
+  </div>
+</div>
+
+<script>
+  // --- VARIÁVEIS GLOBAIS DE ESTADO ---
+  let listaCompletaRanking = [];
+  let listaExibidaRanking = [];
+  let userRanking = {};
+  let escopoAtual = 'local';
+
+  // --- LOGGER FRONTEND (BLINDAGEM) ---
+  function logFront(acao, msg, dados = null) {
+    const timestamp = new Date().toLocaleTimeString();
+    const style = "color: #FFD700; font-weight: bold; background: #333; padding: 2px 5px; border-radius: 3px;";
+    console.log(`%c[RANKING - ${timestamp}] ${acao}:`, style, msg);
+    if (dados) console.dir(dados);
+  }
+
+  function tratarErroImagem(img, nome) {
+      // Silencioso visualmente, mas logado no console para debug
+      console.warn(`[IMG] Falha ao carregar foto de: ${nome}. Usando avatar gerado.`);
+      img.onerror = null; 
+      img.src = 'https://ui-avatars.com/api/?background=random&color=fff&name=' + encodeURIComponent(nome);
+  }
+
+  function abrirRanking() {
+    logFront("INIT", "Abrindo tela de Ranking...");
+    
+    try {
+      userRanking = JSON.parse(localStorage.getItem('userSession') || '{}');
+      if (!userRanking.academia) throw new Error("Sessão de usuário sem academia definida.");
+    } catch (e) {
+      console.error("Erro crítico de sessão:", e);
+      alert("Erro de sessão. Faça login novamente.");
+      return;
+    }
+
+    document.getElementById('dashboard-grid').style.display = 'none';
+    document.querySelector('.dashboard-header').style.display = 'none';
+    document.getElementById('ranking-screen').style.display = 'block';
+
+    const hoje = new Date();
+    const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    document.getElementById('rank-mes-ano').textContent = `${meses[hoje.getMonth()]} de ${hoje.getFullYear()}`;
+
+    // Validação de Permissões
+    const nivel = String(userRanking.nivel || "").toLowerCase();
+    const grad = String(userRanking.graduacao || "").toLowerCase();
+    const isInstrutor = userRanking.isInstrutor || nivel.includes('admin') || grad.includes('mestre');
+    
+    logFront("PERMISSÃO", `Usuário: ${userRanking.LOGIN}, Nível: ${nivel}, É Instrutor? ${isInstrutor}`);
+    document.getElementById('btn-gerar-card').style.display = isInstrutor ? 'flex' : 'none';
+
+    listaCompletaRanking = []; 
+    mudarEscopoRanking('local');
+  }
+
+  function mudarEscopoRanking(tipo) {
+    logFront("FILTRO", `Alterando escopo para: ${tipo.toUpperCase()}`);
+    escopoAtual = tipo;
+    document.getElementById('btn-scope-local').className = (tipo === 'local') ? 'scope-btn active' : 'scope-btn';
+    document.getElementById('btn-scope-geral').className = (tipo === 'geral') ? 'scope-btn active' : 'scope-btn';
+    
+    if(listaCompletaRanking.length > 0) {
+        logFront("CACHE", "Usando dados já carregados na memória.");
+        filtrarERenderizar();
+    } else {
+        const hoje = new Date();
+        logFront("BACKEND", `Solicitando dados ao servidor para Mês: ${hoje.getMonth() + 1}, Ano: ${hoje.getFullYear()}`);
+        buscarDadosBackend(hoje.getMonth() + 1, hoje.getFullYear());
+    }
+  }
+
+  function buscarDadosBackend(mes, ano) {
+    const div = document.getElementById('ranking-container');
+    div.innerHTML = '<div class="spinner" style="margin: 20px auto;"></div>';
+    
+    google.script.run
+      .withSuccessHandler(lista => {
+          logFront("SUCESSO", "Dados recebidos do servidor:", lista);
+          if (!Array.isArray(lista)) {
+             console.error("Formato inválido recebido:", lista);
+             div.innerHTML = '<p style="color:red; text-align:center">Erro: Formato de dados inválido.</p>';
+             return;
+          }
+          listaCompletaRanking = lista;
+          filtrarERenderizar();
+      })
+      .withFailureHandler(err => {
+          console.error("FALHA CRÍTICA BACKEND:", err);
+          div.innerHTML = `<p style="color:red; text-align:center">Erro de conexão: ${err.message}</p>`;
+      })
+      .getRankingPresenca(mes, ano);
+  }
+
+  function filtrarERenderizar() {
+    const div = document.getElementById('ranking-container');
+    div.innerHTML = "";
+    
+    // 1. Filtrar Escopo
+    if (escopoAtual === 'local') {
+        const minhaAcad = String(userRanking.academia).trim().toUpperCase();
+        logFront("RENDER", `Filtrando por academia: ${minhaAcad}`);
+        listaExibidaRanking = listaCompletaRanking.filter(r => String(r.academia).trim().toUpperCase() === minhaAcad);
+    } else {
+        logFront("RENDER", "Exibindo Ranking Geral");
+        listaExibidaRanking = listaCompletaRanking; 
+    }
+
+    logFront("RENDER", `Itens a exibir: ${listaExibidaRanking.length}`);
+
+    if(listaExibidaRanking.length === 0) {
+        div.innerHTML = `<div style="text-align:center; padding:30px; color:#666;"><span class="material-icons" style="font-size:40px; opacity:0.5">event_busy</span><p>Nenhuma presença registrada neste filtro.</p></div>`;
+        return;
+    }
+
+    // 2. Agrupar por Pontuação (Lógica de Empate "Dense Rank")
+    const grupos = new Map();
+    listaExibidaRanking.forEach(aluno => {
+        const score = aluno.count;
+        if (!grupos.has(score)) grupos.set(score, []);
+        grupos.get(score).push(aluno);
+    });
+
+    // 3. Ordenar Scores (Do maior para o menor)
+    const scoresOrdenados = Array.from(grupos.keys()).sort((a, b) => b - a);
+
+    // 4. Renderizar Grupos
+    scoresOrdenados.forEach((score, index) => {
+        const rankPos = index + 1;
+        const alunosEmpatados = grupos.get(score);
+        
+        let groupClass = 'group-common';
+        let textClass = '';
+        if (rankPos === 1) { groupClass = 'group-1'; textClass = 'txt-1'; }
+        else if (rankPos === 2) { groupClass = 'group-2'; textClass = 'txt-2'; }
+        else if (rankPos === 3) { groupClass = 'group-3'; textClass = 'txt-3'; }
+
+        const groupDiv = document.createElement('div');
+        groupDiv.className = `rank-group ${groupClass}`;
+
+        const icon = (rankPos <= 3) ? 'emoji_events' : 'leaderboard';
+        const headerHtml = `
+            <div class="rank-header">
+                <div class="rank-pos-badge ${textClass}">
+                    <span class="material-icons" style="font-size:16px; vertical-align:middle; margin-right:5px;">${icon}</span>
+                    ${rankPos}º Lugar
+                </div>
+                <div class="rank-score-badge">${score} Aulas</div>
+            </div>
+        `;
+
+        let rowsHtml = '<div class="rank-rows-container">';
+        alunosEmpatados.forEach(aluno => {
+            rowsHtml += `
+                <div class="rank-row">
+                    <img src="${aluno.foto}" class="rank-avatar" onerror="tratarErroImagem(this, '${aluno.login}')">
+                    <div class="rank-info">
+                        <div class="rank-name">${aluno.nome}</div>
+                        <div class="rank-details">${aluno.academia}</div>
+                    </div>
+                </div>
+            `;
+        });
+        rowsHtml += '</div>';
+
+        groupDiv.innerHTML = headerHtml + rowsHtml;
+        div.appendChild(groupDiv);
+    });
+  }
+
+  function gerarCardPodium() {
+    if(listaExibidaRanking.length === 0) { alert("Sem dados para gerar card."); return; }
+    logFront("PODIO", "Gerando visual do pódio...");
+    
+    // Recalcula agrupamento
+    const grupos = new Map();
+    listaExibidaRanking.forEach(aluno => {
+        if (!grupos.has(aluno.count)) grupos.set(aluno.count, []);
+        grupos.get(aluno.count).push(aluno);
+    });
+    const scoresOrdenados = Array.from(grupos.keys()).sort((a, b) => b - a);
+
+    const container = document.getElementById('podium-content');
+    container.innerHTML = "";
+    
+    const ordemVisual = [2, 1, 3]; 
+
+    ordemVisual.forEach(rankAlvo => {
+        const scoreDoRank = scoresOrdenados[rankAlvo - 1]; 
+        
+        if (scoreDoRank !== undefined) {
+            const alunosDoRank = grupos.get(scoreDoRank);
+            const aluno = alunosDoRank[0]; 
+            const isEmpate = alunosDoRank.length > 1;
+            let nomeDisplay = aluno.nome.split(' ')[0];
+            if (isEmpate) nomeDisplay += ` (+${alunosDoRank.length-1})`;
+
+            let placeClass = `place-${rankAlvo}`;
+            let orderCss = (rankAlvo === 1) ? 2 : (rankAlvo === 2 ? 1 : 3);
+
+            const html = `
+                <div class="podium-item" style="order:${orderCss}">
+                    <img src="${aluno.foto}" class="podium-avatar" onerror="tratarErroImagem(this, '${aluno.login}')">
+                    <div class="podium-place ${placeClass}">${rankAlvo}º</div>
+                    <div class="podium-name">${nomeDisplay}</div>
+                    <div class="podium-count">${aluno.count} Aulas</div>
+                </div>
+            `;
+            container.innerHTML += html;
+        } else {
+            let orderCss = (rankAlvo === 1) ? 2 : (rankAlvo === 2 ? 1 : 3);
+            container.innerHTML += `<div class="podium-item" style="order:${orderCss}; opacity:0;"></div>`;
+        }
+    });
+
+    const nomeContexto = (escopoAtual === 'local') ? userRanking.academia : "Geral";
+    document.getElementById('podium-subtitle').textContent = nomeContexto + " - " + document.getElementById('rank-mes-ano').textContent;
+    const agora = new Date();
+    document.getElementById('podium-footer').innerHTML = `Gerado em: ${agora.toLocaleDateString()} às ${agora.toLocaleTimeString()}`;
+    document.getElementById('podium-modal').style.display = 'flex';
+  }
+
+  function fecharPodium() { document.getElementById('podium-modal').style.display = 'none'; }
+  function fecharRanking() { 
+      document.getElementById('ranking-screen').style.display = 'none'; 
+      document.querySelector('.dashboard-header').style.display = 'flex'; 
+      document.getElementById('dashboard-grid').style.display = 'grid'; 
+  }
+</script>

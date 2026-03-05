@@ -1,0 +1,175 @@
+<style>
+  /* --- VARIÁVEIS GLOBAIS (DESIGN SYSTEM) --- */
+  :root {
+    --bg-color: #121212;
+    --surface-color: #1e1e1e;
+    --input-bg: #2d2d2d;
+    --primary-color: #FFD700;
+    /* Dourado Leão */
+    --primary-hover: #ffca28;
+    --whatsapp-color: #25D366;
+    --whatsapp-hover: #128C7E;
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+    --error-color: #cf6679;
+    --success-color: #00e676;
+    --border-radius: 12px;
+  }
+
+  /* --- RESET E ESTRUTURA RESPONSIVA --- */
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    /* Altura Mínima: Garante que cubra a tela, mas cresce se precisar */
+    min-height: 100vh;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+
+    /* Rolagem: Habilita scroll vertical se o conteúdo for maior que a tela */
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    /* Mobile: Remove o flash azul ao tocar */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Container Centralizado Padrão */
+  .container {
+    width: 100%;
+    max-width: 600px;
+    /* Foco em mobile, limite para PC */
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+    padding-bottom: 40px;
+    /* Espaço de respiro no rodapé */
+  }
+
+  /* --- COMPONENTES DE UI --- */
+
+  /* Botão Principal (Acessível e Grande) */
+  .primary-button {
+    width: 100%;
+    padding: 16px;
+    /* Área de toque generosa */
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.1s, opacity 0.2s;
+  }
+
+  .primary-button:active {
+    transform: scale(0.98);
+  }
+
+  /* Estado Desabilitado */
+  .primary-button:disabled {
+    background-color: #444;
+    color: #888;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  /* Botão Secundário (Texto) */
+  .text-button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    padding: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 1rem;
+    transition: color 0.2s;
+  }
+
+  .text-button:hover {
+    color: var(--text-primary);
+  }
+
+  /* Inputs (Campos de Texto) */
+  .form-field {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+
+  .form-field label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  .input-field,
+  select {
+    width: 100%;
+    background-color: var(--input-bg);
+    border: 1px solid #444;
+    color: white;
+    padding: 14px;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    outline: none;
+    box-sizing: border-box;
+    /* Garante que padding não estoure largura */
+    transition: border-color 0.3s;
+  }
+
+  .input-field:focus {
+    border-color: var(--primary-color);
+  }
+
+  /* Mensagens e Feedback */
+  .error-message {
+    color: var(--error-color);
+    font-size: 0.9rem;
+    margin-top: 5px;
+    text-align: center;
+  }
+
+  .success-message {
+    color: var(--success-color);
+    font-size: 0.9rem;
+    margin-top: 5px;
+    text-align: center;
+  }
+
+  /* Spinner de Carregamento */
+  .spinner {
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 0.8s linear infinite;
+    margin: 10px auto;
+  }
+
+  @keyframes spin {
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Utilitários */
+  .hidden {
+    display: none !important;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+</style>

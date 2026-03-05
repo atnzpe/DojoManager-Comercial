@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      font-family: 'Roboto', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    .rec-card {
+      background-color: #1e1e1e;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      border: 1px solid #333;
+    }
+
+    .rec-logo {
+      width: 100px;
+      margin-bottom: 20px;
+      border-radius: 50%;
+      box-shadow: 0 0 15px #FFD700;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      color: #FFD700;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    p {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 25px;
+      line-height: 1.4;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #aaa;
+      font-size: 12px;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background-color: #2c2c2c;
+      color: #fff;
+      font-size: 14px;
+      box-sizing: border-box;
+      transition: 0.3s;
+    }
+
+    .input-field:focus {
+      border-color: #FFD700;
+      outline: none;
+      background-color: #333;
+    }
+
+    .btn-action {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      background-color: #FFD700;
+      color: #000;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+    }
+
+    .btn-action:hover {
+      background-color: #ffea00;
+      transform: scale(1.02);
+    }
+
+    .btn-back {
+      background: transparent;
+      color: #888;
+      border: 1px solid #333;
+      margin-top: 10px;
+    }
+
+    .btn-back:hover {
+      background: #333;
+      color: #fff;
+    }
+
+    .alert-box {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      display: none;
+    }
+
+    .alert-error {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #ef9a9a;
+    }
+
+    .alert-success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #a5d6a7;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="rec-card">
+    <span style="font-size:40px; color:#FFD700;">🔒</span>
+
+    <h2>Redefinir Senha</h2>
+    <p>Para sua segurança, é necessário confirmar sua <b>senha atual</b> para definir uma nova.</p>
+
+    <form id="form-reset" onsubmit="handleReset(event)">
+
+      <div class="input-group">
+        <label>SEU CPF (Somente números)</label>
+        <input type="text" id="cpf" class="input-field" placeholder="000.000.000-00" required>
+      </div>
+
+      <div class="input-group">
+        <label>SENHA ATUAL (Antiga)</label>
+        <input type="password" id="senha_antiga" class="input-field" placeholder="••••••" required>
+      </div>
+
+      <div class="input-group">
+        <label>NOVA SENHA</label>
+        <input type="password" id="senha_nova" class="input-field" placeholder="Nova senha segura" required>
+      </div>
+
+      <div class="input-group">
+        <label>CONFIRMAR NOVA SENHA</label>
+        <input type="password" id="senha_confirma" class="input-field" placeholder="Repita a nova senha" required>
+      </div>
+
+      <button type="submit" class="btn-action" id="btn-submit">SALVAR NOVA SENHA</button>
+      <button type="button" class="btn-action btn-back" onclick="voltarLogin()">VOLTAR</button>
+    </form>
+
+    <div id="feedback" class="alert-box"></div>
+
+    <div style="margin-top:20px; border-top:1px solid #333; padding-top:15px;">
+      <p style="margin:0; font-size:11px; color:#666">
+        <span style="color:#FFD700">⚠️ Não sabe a senha antiga?</span><br>
+          Por segurança, solicite o reset diretamente ao seu Instrutor ou Administrador.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    function handleReset(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-submit');
+        const feedback = document.getElementById('feedback');
+        
+        const cpf = document.getElementById('cpf').value;
+        const antiga = document.getElementById('senha_antiga').value;
+        const nova = document.getElementById('senha_nova').value;
+        const confirma = document.getElementById('senha_confirma').value;
+
+        // Validação Frontend
+        if(nova !== confirma) {
+           mostrarErro("A nova senha e a confirmação não coincidem.");
+           return;
+        }
+        if(nova.length < 4) {
+           mostrarErro("A nova senha deve ter pelo menos 4 caracteres.");
+           return;
+        }
+
+        // Envio
+        btn.innerText = "VERIFICANDO...";
+        btn.disabled = true;
+        feedback.style.display = 'none';
+
+        const form = { cpf: cpf, senha_antiga: antiga, senha_nova: nova };
+
+        google.script.run
+          .withSuccessHandler(res => {
+             feedback.className = "alert-box alert-success";
+             feedback.innerText = res;
+             feedback.style.display = "block";
+             btn.innerText = "SUCESSO!";
+             
+             // Redireciona para login após 2s
+             setTimeout(() => { voltarLogin(); }, 2000);
+          })
+          .withFailureHandler(err => {
+             btn.innerText = "SALVAR NOVA SENHA";
+             btn.disabled = false;
+             mostrarErro(err.message);
+          })
+          .trocarSenhaUsuario(form);
+      }
+
+      function mostrarErro(msg) {
+        const fb = document.getElementById('feedback');
+        fb.className = "alert-box alert-error";
+        fb.innerText = msg;
+        fb.style.display = "block";
+      }
+
+      function voltarLogin() {
+        google.script.run.withSuccessHandler(url => {
+           window.top.location.href = url + "?page=login";
+        }).getScriptUrl();
+      }
+  </script>
+</body>
+
+</html>

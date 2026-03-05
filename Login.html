@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <base target="_top">
+  <title>Login - FBKMKLN | Federação Leão do Norte</title>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description"
+    content="Acesse a plataforma oficial da Federação Brasileira de Krav Magá e Kapap - Leão do Norte. Gestão de treinos, videoteca técnica, carteirinha digital e cursos.">
+  <meta name="keywords"
+    content="Krav Maga, Kapap, Defesa Pessoal, Artes Marciais, FBKMKLN, Leão do Norte, Recife, Treino, Sistema de Gestão, Carteirinha Digital">
+  <meta name="author" content="Gleyson Atanazio - FBKMKLN">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#FFD700">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="<?= scriptUrl ?>">
+  <meta property="og:title" content="Login - Federação Leão do Norte">
+  <meta property="og:description"
+    content="Área do Aluno e Instrutor: Acesse seus treinos, graduação e certificados oficiais.">
+  <meta property="og:image" content="https://lh3.googleusercontent.com/d/1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="FBKMKLN - Sistema de Gestão">
+  <meta name="twitter:description" content="Plataforma de gestão técnica e administrativa da Federação Leão do Norte.">
+  <meta name="twitter:image" content="https://lh3.googleusercontent.com/d/1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv">
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="icon" href="https://lh3.googleusercontent.com/d/1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv" type="image/x-icon">
+
+  <script type="application/ld+json">
+    {
+    "@context": "https://schema.org",
+    "@type": "SportsOrganization",
+    "name": "Federação Brasileira de Krav Magá e Kapap - Leão do Norte",
+    "url": "<?= scriptUrl ?>",
+    "logo": "https://lh3.googleusercontent.com/d/1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv",
+    "description": "Federação dedicada ao ensino e prática de defesa pessoal israelense no Brasil.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressRegion": "Pernambuco",
+      "addressCountry": "BR"
+    }
+  }
+  </script>
+
+  <?!= include('Style'); ?>
+
+  <style>
+    /* --- Estilos Específicos do Login --- */
+
+    /* Camada de Fundo (Fixa) */
+    .bg-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('<?= bgUrl ?>');
+      background-size: cover;
+      background-position: center;
+      z-index: -2;
+    }
+
+    /* Overlay Escuro (Fixa) */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.70);
+      z-index: -1;
+    }
+
+    /* Wrapper de Rolagem */
+    .scroll-wrapper {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    /* Card de Login */
+    .login-card {
+      background-color: rgba(30, 30, 30, 0.95);
+      padding: 40px 30px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+      margin: auto 0;
+      border: 1px solid #333;
+      backdrop-filter: blur(10px);
+    }
+
+    .logo-img {
+      width: 110px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 3px solid var(--primary-color, #FFD700);
+      margin-bottom: 25px;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+    }
+
+    /* Estilo dos Links de Apoio (Cadastro/Recuperar) */
+    .support-links {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+      font-size: 13px;
+    }
+
+    .link-gold {
+      color: #FFD700;
+      text-decoration: none;
+      border-bottom: 1px dotted transparent;
+      transition: 0.3s;
+    }
+
+    .link-gold:hover {
+      border-bottom-color: #FFD700;
+    }
+
+    .link-gray {
+      color: #aaa;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .link-gray:hover {
+      color: #fff;
+    }
+
+    /* Estilo do Rodapé do Desenvolvedor */
+    .dev-footer a {
+      text-decoration: none;
+      color: #666;
+      transition: color 0.3s ease;
+      font-weight: 500;
+    }
+
+    .dev-footer a:hover {
+      color: #FFD700;
+      /* Fica dourado ao passar o mouse */
+    }
+
+    /* Inputs aprimorados */
+    .form-field {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .form-field label {
+      display: block;
+      font-size: 0.85rem;
+      color: #ccc;
+      margin-bottom: 5px;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 12px;
+      background: #222;
+      border: 1px solid #444;
+      color: #fff;
+      border-radius: 6px;
+      box-sizing: border-box;
+      transition: 0.3s;
+    }
+
+    .input-field:focus {
+      border-color: #FFD700;
+      outline: none;
+      background: #2a2a2a;
+    }
+
+    /* Botões */
+    .primary-button {
+      width: 100%;
+      padding: 12px;
+      background: #FFD700;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      text-transform: uppercase;
+      margin-top: 10px;
+      transition: 0.2s;
+    }
+
+    .primary-button:hover {
+      background: #e6c200;
+      transform: translateY(-2px);
+    }
+
+    .text-button {
+      background: none;
+      border: 1px solid #444;
+      color: #ccc;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      width: 100%;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .text-button:hover {
+      background: #333;
+      color: #fff;
+      border-color: #666;
+    }
+
+    .spinner {
+      display: none;
+      margin: 0 auto;
+      border: 3px solid #333;
+      border-top: 3px solid #FFD700;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error-message {
+      color: #ff5252;
+      font-size: 0.9rem;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-layer"></div>
+  <div class="overlay"></div>
+
+  <div class="scroll-wrapper">
+    <div class="login-card">
+
+      <img src="<?= logoUrl ?>" class="logo-img" alt="Logo FBKMKLN" onerror="this.src='https://lh3.googleusercontent.com/d/1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv'">
+
+      <form onsubmit="handleLogin(event)">
+
+        <div class="form-field">
+          <label for="login">Usuário</label>
+          <input type="text" id="login" class="input-field" autocomplete="username" placeholder="Digite seu login" required>
+        </div>
+
+        <div class="form-field">
+          <label for="senha">Senha</label>
+          <input type="password" id="senha" class="input-field" autocomplete="current-password" placeholder="Sua senha" required>
+        </div>
+
+        <div id="feedback-area" style="min-height: 24px; margin-bottom: 15px;">
+          <div id="msg" class="error-message" style="display:none;"></div>
+          <div id="spin" class="spinner"></div>
+        </div>
+
+        <button id="btn-login" type="submit" class="primary-button">
+          ENTRAR
+        </button>
+
+        <div class="support-links">
+          <a href="https://forms.gle/B7CcnY62SgMawgDE9" target="_blank" class="link-gold">Cadastre-se</a>
+          <a href="#" onclick="event.preventDefault(); nav('recuperar');" class="link-gray">Esqueci a senha</a>
+        </div>
+
+      </form>
+
+      <div style="margin: 25px 0; border-top: 1px solid #444;"></div>
+
+      <button class="text-button" onclick="nav('agendar')">
+        <span class="material-icons">calendar_today</span> Agendar Aula Experimental
+      </button>
+
+      <button class="text-button" onclick="nav('cursos')">
+        <span class="material-icons">school</span> Cursos Disponíveis
+      </button>
+
+      <div class="dev-footer" style="margin-top:30px; font-size:11px; color:#666;">
+        <a href="https://www.linkedin.com/in/gleysonatanazio/" target="_blank">
+          Desenvolvido por Gleyson Atanazio
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // 1. Monitor de Erros Global
+    window.onerror = function (msg, url, line, col, error) {
+      console.error(`🚨 [ERRO FATAL NO LOGIN] ${msg} (Linha ${line})`);
+      return false; // Silencia o alert para UX, mantém no console
+    };
+
+    console.log("✅ [INIT] Tela de Login carregada (SEO Otimizado).");
+
+    /**
+     * Gerencia o processo de login
+     */
+    function handleLogin(e) {
+      e.preventDefault();
+      console.group("🔒 [FLUXO] Tentativa de Login");
+      
+      // Coleta dados
+      const loginVal = document.getElementById('login').value.trim();
+      const senhaVal = document.getElementById('senha').value.trim();
+      
+      console.log(`Usuário informado: "${loginVal}"`);
+
+      // Validação no Frontend
+      if(!loginVal || !senhaVal) {
+        console.warn("⚠️ Validação falhou: Campos vazios.");
+        showMsg("Preencha login e senha.", true);
+        console.groupEnd();
+        return;
+      }
+
+      // Ativa Estado de Carregamento
+      toggleLoading(true);
+
+      console.log("📡 [BACKEND] Enviando credenciais para verificarCredenciais()...");
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          console.log("[BACKEND] Resposta:", res);
+          
+          if(res.success) {
+            console.log("✅ Login SUCESSO. Salvando sessão...");
+            
+            try {
+              localStorage.setItem('userSession', JSON.stringify(res.user));
+              console.log("📦 Sessão salva no localStorage.");
+            } catch(storageErr) {
+              console.error("❌ Erro ao salvar no localStorage:", storageErr);
+            }
+
+            showMsg("Sucesso! Redirecionando...", false);
+            
+            // Redirecionamento IMEDIATO
+            console.log(`🚀 Redirecionando para: ${res.redirectUrl}`);
+            
+            try {
+                window.top.location.href = res.redirectUrl;
+            } catch (e) {
+                // Plano B: Botão manual
+                console.error("Bloqueio de popup detectado", e);
+                document.getElementById('feedback-area').innerHTML = 
+                    `<a href="${res.redirectUrl}" target="_top" class="primary-button" style="background:#00e676;text-decoration:none; display:block; line-height:40px;">CLIQUE PARA ENTRAR</a>`;
+            }
+
+          } else {
+            console.warn("⛔ Login FALHOU:", res.message);
+            toggleLoading(false);
+            showMsg(res.message, true); 
+          }
+          console.groupEnd();
+        })
+        .withFailureHandler(function(err) {
+          console.error("🔴 [ERRO] Falha de conexão:", err);
+          toggleLoading(false);
+          showMsg("Erro de conexão com o servidor.", true);
+          console.groupEnd();
+        })
+        .verificarCredenciais({login: loginVal, senha: senhaVal});
+    }
+
+    /**
+     * Alterna o estado visual de carregamento
+     */
+    function toggleLoading(isLoading) {
+      const btn = document.getElementById('btn-login');
+      const spin = document.getElementById('spin');
+      const msg = document.getElementById('msg');
+
+      if (isLoading) {
+        btn.disabled = true;
+        btn.style.opacity = 0.5;
+        btn.textContent = "VERIFICANDO...";
+        spin.style.display = 'block';
+        msg.style.display = 'none';
+      } else {
+        btn.disabled = false;
+        btn.style.opacity = 1;
+        btn.textContent = "ENTRAR";
+        spin.style.display = 'none';
+      }
+    }
+
+    function showMsg(text, isError) {
+      const msg = document.getElementById('msg');
+      msg.textContent = text;
+      msg.style.color = isError ? '#ff5252' : '#00e676';
+      msg.style.display = 'block';
+    }
+
+    /**
+     * Navegação segura
+     */
+    function nav(page) {
+      console.log(`[NAV] Navegando para rota: ${page}`);
+      google.script.run
+        .withSuccessHandler(url => {
+          window.top.location.href = url + "?page=" + page;
+        })
+        .withFailureHandler(err => console.error("Erro nav:", err))
+        .getScriptUrl();
+    }
+  </script>
+</body>
+
+</html>

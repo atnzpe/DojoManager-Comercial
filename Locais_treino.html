@@ -1,0 +1,399 @@
+<style>
+  /* --- ESTILOS GERAIS (MODO DARK) --- */
+  .locais-view {
+    display: none;
+    animation: fadeIn 0.3s;
+    padding-top: 20px;
+    padding-bottom: 80px;
+    /* Espaço para não cortar conteúdo no mobile */
+  }
+
+  /* GRID DE LOCAIS */
+  .locais-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  .local-card {
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, border-color 0.2s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  .local-card:hover {
+    transform: translateY(-4px);
+    border-color: #FFD700;
+  }
+
+  /* MAPA EMBUTIDO (IFRAME BLINDADO) */
+  .map-container {
+    width: 100%;
+    height: 180px;
+    background: #000;
+    position: relative;
+    border-bottom: 1px solid #333;
+    overflow: hidden;
+  }
+
+  .map-container iframe {
+    width: 100% !important;
+    height: 100% !important;
+    border: 0;
+    pointer-events: auto;
+    /* Permite interagir com o mapa */
+  }
+
+  .no-map {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 180px;
+    background: #2c2c2c;
+    color: #555;
+    font-size: 14px;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* CONTEÚDO DO CARD */
+  .local-content {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .local-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .local-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #FFD700;
+    margin-bottom: 5px;
+    line-height: 1.2;
+  }
+
+  .local-info-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 5px;
+  }
+
+  .local-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: #ccc;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .local-info .material-icons {
+    font-size: 18px;
+    color: #888;
+    margin-top: 1px;
+    width: 20px;
+  }
+
+  .local-actions {
+    padding: 15px 20px;
+    background: #151515;
+    border-top: 1px solid #333;
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-action {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+    outline: none;
+  }
+
+  .btn-maps {
+    background: #333;
+    color: #fff;
+    border: 1px solid #444;
+  }
+
+  .btn-maps:hover {
+    background: #444;
+    border-color: #666;
+  }
+
+  .btn-whats {
+    background: #25D366;
+    color: #fff;
+    border: 1px solid #25D366;
+  }
+
+  .btn-whats:hover {
+    background: #1ebe57;
+    border-color: #1ebe57;
+    box-shadow: 0 0 10px rgba(37, 211, 102, 0.3);
+  }
+
+  /* Botão Check-in (Novo) */
+  .btn-checkin-live {
+    background: #4caf50;
+    color: #fff;
+    border: 1px solid #43a047;
+    flex: 1.5;
+    /* Maior destaque */
+  }
+
+  .btn-checkin-live:hover {
+    background: #43a047;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.4);
+  }
+
+  /* LOADER */
+  .spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border-left-color: #FFD700;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
+<div id="locais-treino-screen" class="locais-view">
+
+  <div class="profile-header-nav">
+    <button class="btn-back" onclick="fecharLocaisTreino()">
+      <span class="material-icons" style="font-size: 32px;">arrow_back</span>
+    </button>
+    <h2 style="margin:0; font-size:1.8rem;">Onde Treinar</h2>
+  </div>
+
+  <div id="loading-locais-treino" style="text-align:center; margin-top:50px;">
+    <div class="spinner"></div>
+    <p style="color:#888; margin-top:10px;">Localizando academias...</p>
+  </div>
+
+  <div id="locais-treino-grid" class="locais-grid"></div>
+
+</div>
+
+<script>
+  console.log("✅ [SAFE MODE] Locais_treino.html carregado e blindado (Cache System Ativo)!");
+
+  function abrirLocaisTreino() {
+    // Gestão de Telas
+    document.getElementById('dashboard-grid').style.display = 'none';
+    document.querySelector('.dashboard-header').style.display = 'none';
+    document.getElementById('locais-treino-screen').style.display = 'block';
+
+    if (typeof carregarTreinosDeHoje === 'function') {
+        carregarTreinosDeHoje();
+    }
+    
+    // Se não houver cache, chama o backend
+    document.getElementById('loading-locais-treino').style.display = 'block';
+    document.getElementById('locais-treino-grid').innerHTML = '';
+    
+    // --- LÓGICA DE MATCH (Aulas Live + Fixas) ---
+    // 1. Busca Aulas Live
+    google.script.run.withSuccessHandler(aulasLive => {
+        
+        // 2. Busca Locais Fixos
+        google.script.run.withSuccessHandler(locaisFixos => {
+            
+            // Salva no cache se quiser (opcional)
+            if (typeof CacheSystem !== 'undefined') CacheSystem.set('locais_treino', locaisFixos, 1440);
+            
+            // Renderiza com Match
+            renderizarLocaisTreino(locaisFixos, aulasLive);
+            
+        }).withFailureHandler(err => {
+            alert("Erro locais: " + err.message);
+            document.getElementById('loading-locais-treino').style.display = 'none';
+        }).getLocaisTreino();
+
+    }).buscarAulasDisponiveisAluno("TODOS");
+  }
+
+  function renderizarLocaisTreino(locais, aulasLive = []) {
+    document.getElementById('loading-locais-treino').style.display = 'none';
+    var grid = document.getElementById('locais-treino-grid');
+    grid.innerHTML = '';
+
+    if (!locais || locais.length === 0) {
+       grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#666"><span class="material-icons" style="font-size:48px; opacity:0.5">location_off</span><p>Nenhuma academia encontrada.</p></div>';
+       return;
+    }
+    
+    // Mapa de Aulas Live para busca rápida
+    const mapLive = {};
+    if(aulasLive && aulasLive.length > 0) {
+        aulasLive.forEach(a => mapLive[String(a.academia).trim().toLowerCase()] = a);
+    }
+
+    var contadorAtivos = 0;
+
+    locais.forEach(function(local) {
+       // BLINDAGEM DE STATUS
+       var status = local.status ? String(local.status).toLowerCase().trim() : 'ativo';
+       if (status !== 'ativo') return;
+
+       contadorAtivos++;
+       
+       // Verifica Match de Aula
+       const nomeNorm = String(local.nome).trim().toLowerCase();
+       const aulaAtiva = mapLive[nomeNorm];
+       
+       var card = document.createElement('div');
+       card.className = 'local-card';
+       if(aulaAtiva) {
+           card.style.border = "1px solid #4caf50";
+           card.style.boxShadow = "0 0 15px rgba(76, 175, 80, 0.3)";
+       }
+
+       // 1. BLINDAGEM DO MAPA (SOLUÇÃO DE IFRAME)
+       var mapHtml = '';
+       
+       // Tenta usar o iframe fornecido, mas sanitiza
+       if (local.iframeHtml && local.iframeHtml.includes('<iframe')) {
+           // Remove atributos fixos que quebram o layout
+           var cleanIframe = local.iframeHtml
+               .replace(/width="[^"]*"/gi, 'width="100%"')
+               .replace(/height="[^"]*"/gi, 'height="100%"')
+               .replace(/style="[^"]*"/gi, '') // Remove estilos inline originais
+               .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, ""); // Remove scripts injetados que causam erros
+
+           mapHtml = '<div class="map-container">' + cleanIframe + '</div>';
+       } else if (local.linkMaps) {
+           // Fallback inteligente
+           mapHtml = '<div class="map-container no-map" onclick="window.open(\'' + local.linkMaps + '\', \'_blank\')" style="cursor:pointer; background-image: url(\'https://maps.googleapis.com/maps/api/staticmap?center=' + encodeURIComponent(local.endereco) + '&zoom=15&size=600x300&maptype=roadmap\'); background-size: cover;">';
+           mapHtml += '<span class="material-icons" style="font-size:40px; color:#fff; text-shadow:0 0 5px #000">map</span><span style="color:#fff; text-shadow:0 0 5px #000">Ver no Mapa</span></div>';
+       } else {
+           mapHtml = '<div class="map-container no-map"><span class="material-icons" style="font-size:40px; color:#444">map</span><span>Mapa indisponível</span></div>';
+       }
+
+       // 2. CONTEÚDO
+       var contentHtml = '<div class="local-content">';
+       
+       // Etiqueta Live (Se houver)
+       if(aulaAtiva) {
+           contentHtml += '<div style="background:#4caf50; color:#fff; font-size:0.75rem; font-weight:bold; padding:4px 8px; border-radius:4px; align-self:flex-start; margin-bottom:5px;">🔴 AULA ACONTECENDO AGORA</div>';
+       }
+       
+       contentHtml += '<div class="local-header"><div class="local-title">' + (local.nome || 'Academia Sem Nome') + '</div></div>';
+       contentHtml += '<div class="local-info-group">';
+       
+       if (local.responsavel) {
+          contentHtml += '<div class="local-info"><span class="material-icons" title="Responsável">person</span> ' + local.responsavel + '</div>';
+       }
+
+       if(local.endereco || local.cidade) {
+           var textoEnd = (local.endereco || '') + (local.cidade ? ' - ' + local.cidade : '');
+           contentHtml += '<div class="local-info"><span class="material-icons">place</span> ' + textoEnd + '</div>';
+       }
+
+       if(local.horarios || local.dias) {
+           var textoHora = (local.dias || '') + (local.horarios ? ': ' + local.horarios : '');
+           // Limpa quebras de linha excessivas
+           textoHora = textoHora.replace(/(\r\n|\n|\r)/gm, " "); 
+           contentHtml += '<div class="local-info"><span class="material-icons">schedule</span> ' + textoHora + '</div>';
+       }
+       
+       contentHtml += '</div></div>'; // fecha group e content
+
+       // 3. AÇÕES
+       var actionsHtml = '<div class="local-actions">';
+       
+       // A) BOTÃO CHECK-IN (PRIORIDADE)
+       if (aulaAtiva) {
+           actionsHtml += `<button onclick="irParaCheckinLocal('${aulaAtiva.pin}')" class="btn-action btn-checkin-live"><span class="material-icons">qr_code</span> CHECK-IN</button>`;
+       }
+       
+       // B) BOTÃO ROTA
+       if(local.linkMaps) {
+           actionsHtml += '<a href="' + local.linkMaps + '" target="_blank" class="btn-action btn-maps"><span class="material-icons">directions</span> Rota</a>';
+       } else {
+           actionsHtml += '<button class="btn-action btn-maps" disabled style="opacity:0.5; cursor:not-allowed"><span class="material-icons">directions_off</span> Rota</button>';
+       }
+
+       // C) BOTÃO WHATS
+       var whatsNum = local.contato ? String(local.contato).replace(/\D/g, '') : '';
+       if(whatsNum.length >= 10) {
+           if (!whatsNum.startsWith('55') && whatsNum.length <= 11) whatsNum = '55' + whatsNum;
+           var msg = encodeURIComponent("Kídá! Gostaria de informações sobre os treinos no " + (local.nome || "local") + ".");
+           var urlWhats = "https://wa.me/" + whatsNum + "?text=" + msg;
+           // Se tiver check-in, reduz o botão whats pra ícone
+           if(aulaAtiva) {
+               actionsHtml += '<a href="' + urlWhats + '" target="_blank" class="btn-action btn-whats" style="flex:0; padding:0 12px;" title="WhatsApp"><span class="material-icons">chat</span></a>';
+           } else {
+               actionsHtml += '<a href="' + urlWhats + '" target="_blank" class="btn-action btn-whats"><span class="material-icons">chat</span> WhatsApp</a>';
+           }
+       }
+
+       actionsHtml += '</div>';
+
+       card.innerHTML = mapHtml + contentHtml + actionsHtml;
+       grid.appendChild(card);
+    });
+
+    if (contadorAtivos === 0) {
+       grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#666"><p>Nenhuma academia ativa no momento.</p></div>';
+    }
+  }
+
+  function fecharLocaisTreino() {
+    document.getElementById('locais-treino-screen').style.display = 'none';
+    document.querySelector('.dashboard-header').style.display = 'flex';
+    document.getElementById('dashboard-grid').style.display = 'grid';
+  }
+
+  // Função auxiliar para redirecionar para o módulo de chamada
+  function irParaCheckinLocal(pin) {
+      if(typeof initChamadaDinamica === 'function') {
+          fecharLocaisTreino();
+          initChamadaDinamica('aluno');
+          setTimeout(() => {
+              const input = document.getElementById('input-pin');
+              if(input && pin) {
+                  input.value = pin;
+                  // Opcional: Tentar clicar no botão "Entrar" automaticamente
+                  // fazerCheckin(pin); 
+              }
+          }, 500);
+      } else {
+          alert("Módulo de chamada carregando...");
+      }
+  }
+</script>

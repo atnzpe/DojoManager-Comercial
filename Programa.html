@@ -1,0 +1,271 @@
+<style>
+  /* Estilos Específicos do Programa Técnico */
+  .program-view {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+    padding-top: 20px;
+  }
+
+  .program-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .pdf-card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .pdf-card.enabled:hover {
+    background-color: #2a2a2a;
+    transform: translateX(5px);
+    border-color: #FFD700;
+  }
+
+  .pdf-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .faixa-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #000;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  }
+
+  .pdf-title {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .pdf-status {
+    font-size: 0.8rem;
+    color: #888;
+  }
+
+  .bg-branca {
+    background-color: #fff;
+    border: 1px solid #ccc;
+  }
+
+  .bg-amarela {
+    background-color: #FFD700;
+  }
+
+  .bg-laranja {
+    background-color: #FF8C00;
+  }
+
+  .bg-verde {
+    background-color: #2E8B57;
+    color: #fff;
+  }
+
+  .bg-azul {
+    background-color: #1E90FF;
+    color: #fff;
+  }
+
+  .bg-marrom {
+    background-color: #8B4513;
+    color: #fff;
+  }
+
+  .bg-preta {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #555;
+  }
+
+  .pdf-card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #151515;
+  }
+
+  .spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border-left-color: #FFD700;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
+<div id="programa-screen" class="program-view">
+  <div class="profile-header-nav">
+    <button class="btn-back" onclick="fecharPrograma()">
+      <span class="material-icons" style="font-size: 32px;">arrow_back</span>
+    </button>
+    <h2 style="margin:0; font-size:1.8rem;">Programa Técnico</h2>
+  </div>
+
+  <div id="loading-program" style="text-align: center; margin-top: 50px;">
+    <div class="spinner"></div>
+    <p style="color: #888;">Buscando arquivos...</p>
+  </div>
+
+  <div id="lista-pdfs" class="program-list"></div>
+</div>
+
+<script>
+  console.log("✅ [SAFE MODE] Programa.html carregado e blindado (Cache: 6h)!");
+
+  function abrirPrograma(user) {
+    try {
+        // Gestão de visibilidade segura
+        const dashGrid = document.getElementById('dashboard-grid');
+        const dashHeader = document.querySelector('.dashboard-header');
+        const progScreen = document.getElementById('programa-screen');
+        
+        if (dashGrid) dashGrid.style.display = 'none';
+        if (dashHeader) dashHeader.style.display = 'none';
+        if (progScreen) progScreen.style.display = 'block';
+        
+        const loading = document.getElementById('loading-program');
+        const lista = document.getElementById('lista-pdfs');
+        
+        if (lista) lista.innerHTML = '';
+        if (loading) loading.style.display = 'block';
+
+        // --- CACHE ENGINE IMPLEMENTADA ---
+        // Chave única por nível do usuário
+        const userGrad = (user && user.graduacao) ? user.graduacao : 'branca';
+        const cacheKey = 'programa_' + userGrad;
+
+        if (typeof CacheSystem !== 'undefined') {
+            const cached = CacheSystem.get(cacheKey);
+            if (cached) {
+                console.log("⚡ [CACHE] Programa Técnico carregado da memória.");
+                renderizarProgramas(cached);
+                return; // Interrompe para não chamar o servidor
+            }
+        }
+
+        // Chamada segura ao backend
+        if (typeof google !== 'undefined' && google.script) {
+            google.script.run
+              .withSuccessHandler(function(programas) {
+                  // Salva no Cache por 360 minutos (6 horas)
+                  if (typeof CacheSystem !== 'undefined') {
+                      CacheSystem.set(cacheKey, programas, 360);
+                  }
+                  renderizarProgramas(programas);
+              })
+              .withFailureHandler(erroPrograma)
+              .listarProgramasTecnicos(user || {});
+        } else {
+            console.error("Ambiente Google Script não detectado.");
+        }
+    } catch (e) {
+        console.error("Erro em abrirPrograma:", e);
+    }
+  }
+
+  function renderizarProgramas(programas) {
+    try {
+        const loading = document.getElementById('loading-program');
+        if (loading) loading.style.display = 'none';
+        
+        const lista = document.getElementById('lista-pdfs');
+        if (!lista) return;
+
+        if (!programas || programas.length === 0) {
+            lista.innerHTML = '<p style="text-align:center; color:#666;">Nenhum programa disponível para sua graduação.</p>';
+            return;
+        }
+
+        programas.forEach(p => {
+            const item = document.createElement('a'); // É um link
+            const faixaStr = p.faixa || "Branca";
+            const classeCor = 'bg-' + faixaStr.split(' ')[0].toLowerCase(); // Pega a primeira palavra (Azul de Azul Escuro)
+            
+            if (p.disponivel) {
+                item.className = 'pdf-card enabled';
+                item.href = p.url || '#';
+                item.target = '_blank';
+            } else {
+                item.className = 'pdf-card disabled';
+                item.removeAttribute('href');
+            }
+
+            item.innerHTML = `
+                <div class="pdf-info">
+                    <div class="faixa-icon ${classeCor}">
+                       ${faixaStr.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                        <h3 class="pdf-title">Faixa ${faixaStr}</h3>
+                        <div class="pdf-status">
+                            ${p.disponivel ? 'Toque para abrir PDF' : 'Arquivo indisponível'}
+                        </div>
+                    </div>
+                </div>
+                <span class="material-icons" style="color: ${p.disponivel ? '#fff' : '#444'}">
+                    ${p.disponivel ? 'picture_as_pdf' : 'lock'}
+                </span>
+            `;
+            lista.appendChild(item);
+        });
+    } catch (e) {
+        console.error("Erro em renderizarProgramas:", e);
+    }
+  }
+
+  function erroPrograma(e) {
+    try {
+        const loading = document.getElementById('loading-program');
+        if (loading) loading.style.display = 'none';
+        console.error("Erro crítico no programa:", e);
+        alert("Erro ao carregar programas: " + e.message);
+    } catch (err) {
+        console.error("Erro ao tratar falha:", err);
+    }
+  }
+
+  function fecharPrograma() {
+    try {
+        const progScreen = document.getElementById('programa-screen');
+        const dashHeader = document.querySelector('.dashboard-header');
+        const dashGrid = document.getElementById('dashboard-grid');
+
+        if (progScreen) progScreen.style.display = 'none';
+        if (dashHeader) dashHeader.style.display = 'flex';
+        if (dashGrid) dashGrid.style.display = 'grid';
+    } catch (e) {
+        console.error("Erro em fecharPrograma:", e);
+    }
+  }
+</script>

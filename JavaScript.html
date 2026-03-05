@@ -1,0 +1,145 @@
+<script>
+  // Variável global para armazenar a URL base do Web App
+  let SCRIPT_URL = "";
+
+  // Cache para os dados das academias
+  let locaisCache = [];
+
+  /**
+   * Inicialização: Executa assim que a página carrega.
+   */
+  document.addEventListener("DOMContentLoaded", function() {
+    console.log("[SYSTEM] Inicializando...");
+    
+    // 1. Busca URL do backend
+    google.script.run
+      .withSuccessHandler(url => { 
+        SCRIPT_URL = url; 
+        console.log("[SYSTEM] URL carregada.");
+      })
+      .withFailureHandler(err => console.error("Erro URL:", err))
+      .getScriptUrl();
+
+    // 2. Se estivermos na página de Agendar, carrega os locais
+    // Verificamos se o elemento 'select-local' existe na tela
+    if (document.getElementById('select-local')) {
+      carregarLocais();
+      
+      // Adiciona evento de mudança no dropdown
+      document.getElementById('select-local').addEventListener('change', aoSelecionarLocal);
+    }
+  });
+
+  /**
+   * Sistema de Navegação Centralizado
+   * @param {string} pageName - Nome da rota (ex: 'dashboard', 'agendar').
+   */
+  function navigateTo(pageName) {
+    if (SCRIPT_URL) {
+      console.log(`[NAV] Indo para: ${pageName}`);
+      // _top força o recarregamento na janela inteira
+      window.open(SCRIPT_URL + "?page=" + pageName, "_top");
+    } else {
+      console.warn("[NAV] URL ainda não carregada.");
+      alert("O sistema está conectando... Aguarde um momento.");
+    }
+  }
+
+  
+
+  // --- Handlers (Ações dos Botões) ---
+
+  function handleLogin() {
+    console.log("[UI] Botão 'Entrar' clicado.");
+    showLoading(true); // Feedback visual imediato
+    
+    // Limpa mensagens anteriores
+    const msgDiv = document.getElementById("status-message");
+    if(msgDiv) msgDiv.innerText = "";
+
+    const login = document.getElementById("login").value;
+    const senha = document.getElementById("senha").value;
+
+    console.log(`[AUTH] Enviando credenciais...`);
+
+    google.script.run
+      .withSuccessHandler(onLoginSuccess)
+      .withFailureHandler(onLoginFailure)
+      .logarUsuario(login, senha);
+  }
+
+  function handleScheduleTrial() {
+    console.log("[UI] Clicou em Agendar");
+    navigateTo('agendar');
+  }
+
+  function handleCourses() {
+    console.log("[UI] Clicou em Cursos");
+    navigateTo('cursos');
+  }
+
+  // --- Respostas do Servidor ---
+
+  function onLoginSuccess(responseJson) {
+    console.log("[AUTH] Resposta recebida.");
+    
+    if (responseJson) {
+      const user = JSON.parse(responseJson);
+      console.log("[AUTH] Sucesso:", user.LOGIN);
+      
+      // 1. Salva sessão
+      localStorage.setItem("userData", responseJson);
+      
+      // 2. Feedback Visual
+      const msgDiv = document.getElementById("status-message");
+      if(msgDiv) {
+        msgDiv.className = "success-message";
+        msgDiv.innerText = "Login realizado! Redirecionando...";
+      }
+      
+
+
+
+      
+      // 3. Redirecionamento Automático
+      console.log("[NAV] Iniciando redirecionamento para Dashboard...");
+      setTimeout(() => {
+        navigateTo('dashboard'); 
+      }, 1000);
+
+    } else {
+      console.warn("[AUTH] Negado.");
+      onLoginFailure(new Error("Login ou senha inválidos."));
+    }
+  }
+
+  function onLoginFailure(error) {
+    console.error("[AUTH_ERROR]", error);
+    showLoading(false);
+    
+    const msgDiv = document.getElementById("status-message");
+    if(msgDiv) {
+      msgDiv.className = "error-message";
+      msgDiv.innerText = error.message || "Erro de conexão.";
+    }
+  }
+
+  // --- Utilitários UX ---
+
+  function showLoading(isLoading) {
+    const spinner = document.getElementById("loading-spinner");
+    const btn = document.getElementById("login-button");
+    
+    
+    
+    
+    if(spinner) spinner.style.display = isLoading ? "block" : "none";
+    if(btn) {
+      btn.disabled = isLoading;
+      btn.style.opacity = isLoading ? "0.7" : "1";
+    }
+  }
+
+  
+
+</script>

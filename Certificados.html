@@ -1,0 +1,115 @@
+<style>
+  .cert-view {
+    padding: 20px;
+    display: none;
+    animation: fadeIn 0.3s;
+  }
+
+  .cert-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .cert-card {
+    background: #fff;
+    color: #333;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-left: 5px solid #FFD700;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .cert-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.1rem;
+  }
+
+  .cert-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  .btn-down {
+    background: #1e1e1e;
+    color: #FFD700;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+</style>
+
+<div id="certificados-screen" class="cert-view">
+  <div class="profile-header-nav">
+    <button class="btn-back" onclick="fecharCertificados()"><span class="material-icons">arrow_back</span></button>
+    <h2 style="margin:0; font-size:1.8rem; color:#fff">Meus Certificados</h2>
+  </div>
+
+  <div class="cert-input-group">
+    <input type="text" id="cert-cpf" class="input-field" placeholder="Digite seu CPF (apenas números)" style="background:#2c2c2c; color:#fff; border:1px solid #444;">
+    <button class="primary-button" onclick="buscarCertificados()" style="width:auto; padding:0 20px;"><span class="material-icons">search</span></button>
+  </div>
+
+  <div id="lista-certificados">
+    <p style="color:#888; text-align:center;">Digite seu CPF acima para buscar.</p>
+  </div>
+</div>
+
+<script>
+  function abrirCertificados() {
+    document.getElementById('dashboard-grid').style.display = 'none';
+    document.querySelector('.dashboard-header').style.display = 'none';
+    document.getElementById('certificados-screen').style.display = 'block';
+    
+    // Tenta preencher automaticamente
+    const user = JSON.parse(localStorage.getItem('userSession') || '{}');
+    if(user.LOGIN) { 
+        document.getElementById('cert-cpf').value = user.LOGIN; // Supondo que LOGIN seja CPF ou similar
+        buscarCertificados(); 
+    }
+  }
+
+  function buscarCertificados() {
+    const cpf = document.getElementById('cert-cpf').value;
+    const div = document.getElementById('lista-certificados');
+    div.innerHTML = '<div class="spinner"></div>';
+
+    google.script.run.withSuccessHandler(lista => {
+        div.innerHTML = "";
+        if(lista.length === 0) {
+            div.innerHTML = "<p style='color:#cf6679; text-align:center'>Nenhum certificado encontrado para este documento.</p>";
+            return;
+        }
+        lista.forEach(c => {
+            div.innerHTML += `
+                <div class="cert-card">
+                    <div class="cert-info">
+                        <h3>${c.curso}</h3>
+                        <p>Emitido em: ${c.data}</p>
+                    </div>
+                    <a href="${c.link}" target="_blank" class="btn-down">
+                        <span class="material-icons">download</span> PDF
+                    </a>
+                </div>
+            `;
+        });
+    }).buscarCertificadosUsuario(cpf);
+  }
+
+  function fecharCertificados() {
+    document.getElementById('certificados-screen').style.display = 'none';
+    document.querySelector('.dashboard-header').style.display = 'flex';
+    document.getElementById('dashboard-grid').style.display = 'grid';
+  }
+</script>

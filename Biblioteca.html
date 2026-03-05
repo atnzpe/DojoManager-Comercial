@@ -1,0 +1,242 @@
+<style>
+  /* --- ESTILOS BIBLIOTECA --- */
+  .library-view {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+    padding-top: 20px;
+    padding-bottom: 40px;
+  }
+
+  .library-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .book-card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    height: 100%;
+  }
+
+  .book-card:hover {
+    transform: translateY(-5px);
+    border-color: #FFD700;
+  }
+
+  .book-cover {
+    height: 180px;
+    width: 100%;
+    object-fit: cover;
+    background-color: #2a2a2a;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+  }
+
+  .book-info {
+    padding: 12px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .book-title {
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    line-height: 1.3;
+  }
+
+  .book-desc {
+    color: #888;
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+    flex-grow: 1;
+  }
+
+  .book-action {
+    color: #FFD700;
+    font-size: 0.8rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border-left-color: #FFD700;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
+<div id="biblioteca-screen" class="library-view">
+  <div class="profile-header-nav">
+    <button class="btn-back" onclick="fecharBiblioteca()">
+      <span class="material-icons" style="font-size: 32px;">arrow_back</span>
+    </button>
+    <h2 style="margin:0; font-size:1.8rem;">Biblioteca</h2>
+  </div>
+
+  <div id="loading-lib" style="text-align: center; margin-top: 50px;">
+    <div class="spinner"></div>
+    <p style="color: #888;">Carregando acervo...</p>
+  </div>
+
+  <div id="library-container" class="library-grid"></div>
+</div>
+
+<script>
+  console.log("✅ [SAFE MODE] Biblioteca.html carregado e blindado (Cache: 24h)!");
+
+  function abrirBiblioteca() {
+    try {
+        // Gestão de visibilidade segura
+        const dashGrid = document.getElementById('dashboard-grid');
+        const dashHeader = document.querySelector('.dashboard-header');
+        const libScreen = document.getElementById('biblioteca-screen');
+        
+        if (dashGrid) dashGrid.style.display = 'none';
+        if (dashHeader) dashHeader.style.display = 'none';
+        if (libScreen) libScreen.style.display = 'block';
+        
+        const loading = document.getElementById('loading-lib');
+        const container = document.getElementById('library-container');
+        
+        if (container) container.innerHTML = '';
+        if (loading) loading.style.display = 'block';
+
+        // --- CACHE ENGINE IMPLEMENTADA ---
+        if (typeof CacheSystem !== 'undefined') {
+            const cached = CacheSystem.get('biblioteca_list');
+            if (cached) {
+                console.log("⚡ [CACHE] Biblioteca carregada da memória.");
+                renderizarBiblioteca(cached);
+                return; // Interrompe para não chamar o servidor
+            }
+        }
+
+        // Chamada segura ao backend
+        if (typeof google !== 'undefined' && google.script) {
+            google.script.run
+              .withSuccessHandler(function(livros) {
+                  // Salva no Cache por 1440 minutos (24 horas)
+                  if (typeof CacheSystem !== 'undefined') {
+                      CacheSystem.set('biblioteca_list', livros, 1440);
+                  }
+                  renderizarBiblioteca(livros);
+              })
+              .withFailureHandler(erroLib)
+              .listarBiblioteca();
+        } else {
+            console.error("Ambiente Google Script não detectado.");
+        }
+    } catch (e) {
+        console.error("Erro em abrirBiblioteca:", e);
+    }
+  }
+
+  function renderizarBiblioteca(livros) {
+    try {
+        const loading = document.getElementById('loading-lib');
+        if (loading) loading.style.display = 'none';
+        
+        const container = document.getElementById('library-container');
+        if (!container) return;
+
+        if (!livros || livros.length === 0) {
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#666;">A biblioteca está sendo organizada. Volte em breve.</p>';
+            return;
+        }
+
+        livros.forEach(function(livro) {
+            const item = document.createElement('a');
+            item.className = 'book-card';
+            item.href = livro.link || '#';
+            item.target = '_blank';
+
+            // Blindagem de imagem
+            let htmlImagem = '';
+            if (livro.capa) {
+                // Adiciona tratamento de erro na imagem
+                htmlImagem = '<img src="' + livro.capa + '" class="book-cover" onerror="this.onerror=null;this.parentNode.innerHTML=\'<div class=\\\'book-cover\\\'><span class=\\\'material-icons\\\' style=\\\'font-size: 64px;\\\'>menu_book</span></div>\'">';
+            } else {
+                htmlImagem = 
+                    '<div class="book-cover">' +
+                        '<span class="material-icons" style="font-size: 64px;">menu_book</span>' +
+                    '</div>';
+            }
+
+            // Sanitização básica
+            const titulo = livro.titulo || "Sem Título";
+            const desc = livro.descricao || "";
+
+            item.innerHTML = 
+                htmlImagem +
+                '<div class="book-info">' +
+                    '<div class="book-title">' + titulo + '</div>' +
+                    '<div class="book-desc">' + desc + '</div>' +
+                    '<div class="book-action">' +
+                        '<span class="material-icons" style="font-size:16px">download</span> BAIXAR' +
+                    '</div>' +
+                '</div>';
+            
+            container.appendChild(item);
+        });
+    } catch (e) {
+        console.error("Erro em renderizarBiblioteca:", e);
+    }
+  }
+
+  function erroLib(e) {
+    try {
+        const loading = document.getElementById('loading-lib');
+        if (loading) loading.style.display = 'none';
+        console.error("Erro crítico na biblioteca:", e);
+        alert("Erro: " + e.message);
+    } catch (err) {
+        console.error("Erro ao tratar falha:", err);
+    }
+  }
+
+  function fecharBiblioteca() {
+    try {
+        const libScreen = document.getElementById('biblioteca-screen');
+        const dashHeader = document.querySelector('.dashboard-header');
+        const dashGrid = document.getElementById('dashboard-grid');
+
+        if (libScreen) libScreen.style.display = 'none';
+        if (dashHeader) dashHeader.style.display = 'flex';
+        if (dashGrid) dashGrid.style.display = 'grid';
+    } catch (e) {
+        console.error("Erro em fecharBiblioteca:", e);
+    }
+  }
+</script>

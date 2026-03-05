@@ -1,0 +1,442 @@
+<style>
+  /* --- ESTILOS DO MODAL DE PERFIL (V2 - BLINDADO COM EDIÇÃO) --- */
+  .profile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 10000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  .profile-card {
+    background: linear-gradient(145deg, #1e1e1e, #252525);
+    border: 1px solid #333;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 380px;
+    padding: 30px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
+  }
+
+  /* Detalhe Dourado */
+  .profile-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: #FFD700;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+  }
+
+  .profile-img-container {
+    width: 120px;
+    height: 120px;
+    margin: 20px auto;
+    border-radius: 50%;
+    padding: 4px;
+    position: relative;
+    background: linear-gradient(45deg, #FFD700, #333);
+  }
+
+  .profile-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #1e1e1e;
+  }
+
+  /* --- NOVOS ESTILOS DE EDIÇÃO --- */
+  .edit-photo-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: #FFD700;
+    color: #000;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 2px solid #1e1e1e;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s;
+  }
+
+  .edit-photo-btn:hover {
+    transform: scale(1.1);
+  }
+
+  .profile-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: #fff;
+  }
+
+  .profile-login {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 20px;
+    font-family: monospace;
+  }
+
+  .profile-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    background: rgba(255, 215, 0, 0.15);
+    color: #FFD700;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+    margin-bottom: 25px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+  }
+
+  .profile-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 25px;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #888;
+    letter-spacing: 0.5px;
+  }
+
+  .stat-value {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #eee;
+  }
+
+  /* Botões */
+  .profile-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .btn-profile {
+    padding: 10px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    border: none;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .btn-back {
+    background: transparent;
+    border: 1px solid #444;
+    color: #aaa;
+  }
+
+  .btn-back:hover {
+    border-color: #fff;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .btn-action-main {
+    background: #333;
+    color: #fff;
+    border: 1px solid #444;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .btn-action-main:hover {
+    background: #444;
+    border-color: #666;
+  }
+
+  .btn-pdf {
+    background: #FFD700;
+    color: #333;
+  }
+
+  .btn-pdf:hover {
+    background: #F5C500;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.2);
+  }
+
+  /* --- SUB-MODAIS (Camas de Segurança) --- */
+  .sub-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 320px;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 12px;
+    padding: 20px;
+    display: none;
+    z-index: 10001;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  }
+
+  .sub-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-family: sans-serif;
+  }
+
+  .sub-btn-save {
+    width: 100%;
+    padding: 10px;
+    background: #FFD700;
+    color: #000;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .btn-close-sub {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 20px;
+  }
+</style>
+
+<div id="modal-perfil" class="profile-overlay">
+  <div class="profile-card">
+
+    <div class="profile-img-container">
+      <img id="p-foto" src="" class="profile-img" onerror="this.src='https://lh3.googleusercontent.com/d/1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv'">
+      <div class="edit-photo-btn" onclick="abrirEditFoto()">
+        <span class="material-icons" style="font-size:16px">edit</span>
+      </div>
+    </div>
+
+    <div id="p-nome" class="profile-name">Carregando...</div>
+    <div id="p-login" class="profile-login">@usuario</div>
+    <div id="p-faixa" class="profile-badge">FAIXA</div>
+
+    <div class="profile-stats">
+      <div class="stat-item" style="border-right: 1px solid #444;">
+        <span class="stat-label">Academia</span>
+        <span id="p-academia" class="stat-value">...</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Próximo Exame</span>
+        <span id="p-exame" class="stat-value">...</span>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-bottom:15px">
+      <button class="btn-profile btn-action-main" onclick="abrirTrocaSenha()">
+          <span class="material-icons" style="font-size:18px">lock</span> Senha
+       </button>
+      <button class="btn-profile btn-action-main" onclick="gerarPDFCarteirinha()" style="background:#FFD700; color:#000; border:none">
+          <span class="material-icons" style="font-size:18px">badge</span> Carteira
+       </button>
+    </div>
+
+    <div class="profile-actions">
+      <button class="btn-profile btn-back" onclick="fecharPerfil()">
+        <span class="material-icons" style="font-size: 18px;">arrow_back</span> Voltar
+      </button>
+    </div>
+
+    <div id="modal-senha" class="sub-modal">
+      <button class="btn-close-sub" onclick="fecharSubModal('modal-senha')">×</button>
+      <h4 style="margin-top:0; color:#FFD700">Alterar Senha</h4>
+      <form onsubmit="salvarNovaSenha(event)">
+        <input type="password" id="senha-antiga" class="sub-input" placeholder="Senha Atual" required>
+        <input type="password" id="senha-nova" class="sub-input" placeholder="Nova Senha" required>
+        <button type="submit" class="sub-btn-save">SALVAR</button>
+      </form>
+    </div>
+
+    <div id="modal-foto" class="sub-modal">
+      <button class="btn-close-sub" onclick="fecharSubModal('modal-foto')">×</button>
+      <h4 style="margin-top:0; color:#FFD700">Nova Foto</h4>
+      <p style="font-size:12px; color:#aaa">Cole o link público do Google Drive ou link da imagem.</p>
+      <form onsubmit="salvarNovaFoto(event)">
+        <input type="text" id="link-foto" class="sub-input" placeholder="https://..." required>
+        <button type="submit" class="sub-btn-save">ATUALIZAR</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Cache seguro do usuário para operações de edição
+  let userCache = {};
+
+  /**
+   * CARREGAMENTO BLINDADO DE PERFIL
+   */
+  function carregarDadosPerfil(user) {
+     console.log("[PROFILE] Iniciando renderização...", user);
+
+     // 1. Verificação de Segurança
+     if(!user) {
+        console.error("[PROFILE] Erro: Objeto user é null.");
+        alert("Erro de sessão. Faça login novamente.");
+        return;
+     }
+
+     userCache = user; // Armazena para uso nas edições
+
+     try {
+        const setTextSafe = (id, text) => {
+           const el = document.getElementById(id);
+           if(el) el.textContent = text;
+        };
+        const setSrcSafe = (id, src) => {
+           const el = document.getElementById(id);
+           if(el) el.src = src;
+        };
+
+        // 2. Preenchimento de Dados
+        setSrcSafe('p-foto', user.fotoUrl || "https://lh3.googleusercontent.com/d/1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv");
+        setTextSafe('p-nome', user.nomeCompleto || "Nome Indisponível");
+        setTextSafe('p-login', "@" + (user.LOGIN || "---"));
+        setTextSafe('p-faixa', user.graduacao || "Iniciante");
+        
+        setTextSafe('p-academia', user.academia || "---");
+        setTextSafe('p-exame', user.proximoExame || "A definir");
+
+        // 3. Exibição
+        const modal = document.getElementById('modal-perfil');
+        if(modal) modal.style.display = 'flex';
+
+     } catch (e) {
+        console.error("[PROFILE] Exceção:", e);
+        alert("Erro ao abrir perfil.");
+     }
+  }
+
+  function fecharPerfil() {
+     const modal = document.getElementById('modal-perfil');
+     if(modal) modal.style.display = 'none';
+     fecharSubModal('modal-senha');
+     fecharSubModal('modal-foto');
+  }
+
+  // --- SUB-MODAIS ---
+  function abrirTrocaSenha() { document.getElementById('modal-senha').style.display = 'block'; }
+  function abrirEditFoto() { document.getElementById('modal-foto').style.display = 'block'; }
+  function fecharSubModal(id) { document.getElementById(id).style.display = 'none'; }
+
+  // --- LÓGICA DE AÇÃO DO USUÁRIO ---
+
+  function salvarNovaSenha(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      const txtOrig = btn.innerText;
+      btn.innerText = "..."; btn.disabled = true;
+
+      const form = {
+          cpf: userCache.LOGIN, // Mapeia LOGIN para o campo que o backend espera (cpf)
+          senha_antiga: document.getElementById('senha-antiga').value,
+          senha_nova: document.getElementById('senha-nova').value
+      };
+
+      google.script.run
+        .withSuccessHandler(res => {
+            alert(res);
+            btn.innerText = txtOrig; btn.disabled = false;
+            if(res.includes('✅')) { e.target.reset(); fecharSubModal('modal-senha'); }
+        })
+        .withFailureHandler(err => {
+            alert("Erro: " + err.message);
+            btn.innerText = txtOrig; btn.disabled = false;
+        })
+        .trocarSenhaUsuario(form);
+  }
+
+  function salvarNovaFoto(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      const txtOrig = btn.innerText;
+      btn.innerText = "..."; btn.disabled = true;
+      
+      const novoLink = document.getElementById('link-foto').value;
+      const form = {
+          aluno_login: userCache.LOGIN,
+          nova_foto: novoLink
+      };
+
+      google.script.run
+        .withSuccessHandler(res => {
+            alert(res);
+            if(res.includes('✅')) {
+                // Atualiza visualmente e no cache local
+                document.getElementById('p-foto').src = novoLink;
+                userCache.fotoUrl = novoLink;
+                localStorage.setItem('userSession', JSON.stringify(userCache));
+                // Tenta atualizar header se possível
+                try { document.getElementById('header-img').src = novoLink; } catch(ex){}
+                fecharSubModal('modal-foto');
+                e.target.reset();
+            }
+            btn.innerText = txtOrig; btn.disabled = false;
+        })
+        .withFailureHandler(err => {
+            alert("Erro: " + err.message);
+            btn.innerText = txtOrig; btn.disabled = false;
+        })
+        .atualizarFotoPerfil(form);
+  }
+
+  function gerarPDFCarteirinha() {
+     // Placeholder mantido conforme solicitado
+     alert("⏳ A geração de PDF estará disponível na próxima atualização!");
+  }
+</script>

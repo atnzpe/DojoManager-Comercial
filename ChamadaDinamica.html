@@ -1,0 +1,650 @@
+<style>
+  /* --- ESTILOS VISUAIS (V6 - COM ADIÇÃO MANUAL) --- */
+  .chamada-wrapper {
+    padding: 20px;
+    text-align: center;
+    color: #fff;
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #121212;
+    border-radius: 12px;
+    min-height: 400px;
+    border: 1px solid #333;
+    position: relative;
+  }
+
+  .pin-box {
+    font-size: 4.5rem;
+    font-weight: 800;
+    color: #FFD700;
+    border: 4px dashed #FFD700;
+    padding: 20px;
+    border-radius: 16px;
+    margin: 20px 0;
+    background: rgba(255, 215, 0, 0.05);
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+    letter-spacing: 5px;
+  }
+
+  .grid-alunos {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+    border-top: 1px solid #333;
+    padding-top: 10px;
+  }
+
+  .card-aluno {
+    background: #1e1e1e;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-left: 5px solid #666;
+    animation: slideIn 0.3s;
+    transition: all 0.3s ease;
+  }
+
+  .card-aluno.status-ok {
+    border-left-color: #4caf50;
+    background: #252e25;
+    opacity: 0.9;
+  }
+
+  .card-aluno.status-vis {
+    border-left-color: #2196f3;
+  }
+
+  .info-flex {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-align: left;
+  }
+
+  .foto-perfil {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #444;
+  }
+
+  .btn-acao {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    transition: transform 0.1s;
+  }
+
+  .btn-acao:active {
+    transform: scale(0.85);
+  }
+
+  .cor-sim {
+    background: #4caf50;
+    color: white;
+  }
+
+  .cor-nao {
+    background: #f44336;
+    color: white;
+  }
+
+  .cor-gold {
+    background: #FFD700;
+    color: #000;
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+
+  /* Botão Manual */
+  .btn-manual-add {
+    background: #333;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+  }
+
+  .btn-manual-add:hover {
+    background: #444;
+    border-color: #777;
+  }
+
+  /* Inputs e Badges */
+  .input-std {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #222;
+    color: #fff;
+    box-sizing: border-box;
+    font-size: 1rem;
+  }
+
+  .input-std:focus {
+    border-color: #FFD700;
+    outline: none;
+  }
+
+  .badge-data {
+    background-color: #333;
+    color: #FFD700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    margin-left: 5px;
+    font-weight: normal;
+    border: 1px solid #555;
+  }
+
+  /* Modal Manual */
+  #modal-manual {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-box {
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    border: 1px solid #444;
+  }
+
+  .lista-busca {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 10px;
+  }
+
+  .item-busca {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+
+  .item-busca:hover {
+    background: #333;
+  }
+
+  #toast-box {
+    visibility: hidden;
+    min-width: 250px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 50px;
+    padding: 16px;
+    position: fixed;
+    z-index: 3000;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    font-size: 14px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.5s, bottom 0.5s;
+    font-weight: 500;
+  }
+
+  #toast-box.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 50px;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+</style>
+
+<div id="screen-chamada-final" class="chamada-wrapper" style="display:none">
+
+  <div id="toast-box">Notificação</div>
+
+  <div id="modal-manual">
+    <div class="modal-box">
+      <h3 style="margin-top:0; color:#FFD700">Adicionar Aluno</h3>
+      <input type="text" id="busca-aluno-input" class="input-std" placeholder="Digite o nome..." onkeyup="buscarAlunoDelay()">
+      <div id="resultado-busca" class="lista-busca"></div>
+      <button onclick="fecharModalManual()" style="width:100%; padding:10px; margin-top:15px; background:none; border:1px solid #555; color:#aaa; border-radius:6px; cursor:pointer;">Fechar</button>
+    </div>
+  </div>
+
+  <div id="painel-aluno" style="display:none">
+    <h2 style="color: #FFD700;">Check-in de Aula</h2>
+    <div id="feed-aulas-aluno" style="margin-bottom: 20px;">Carregando...</div>
+    <div style="display:flex; gap:10px;">
+      <input type="number" id="input-pin-aluno" class="input-std" placeholder="Digite o PIN">
+      <button onclick="executarCheckinFinal()" class="cor-gold" style="width:100px;">OK</button>
+    </div>
+    <p id="feedback-aluno" style="margin-top:15px; font-weight:bold; min-height: 20px;"></p>
+    <button onclick="voltarDashFinal()" style="background:none; border:none; color:#aaa; margin-top:20px; text-decoration:underline; cursor:pointer">Voltar ao Início</button>
+  </div>
+
+  <div id="painel-instrutor-live" style="display:none">
+    <h3 style="color:#aaa; margin:0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px;">Código de
+      Acesso</h3>
+    <div id="box-pin-live" class="pin-box">----</div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+      <div style="text-align:left;">
+        <span style="color:#aaa; font-size:0.9rem;">Alunos na sala:</span>
+        <b id="contador-live" style="color:#fff; font-size:1.4rem; margin-left: 5px;">0</b>
+      </div>
+      <button onclick="abrirModalManual()" class="btn-manual-add">
+          <span class="material-icons" style="font-size:16px">person_add</span> Manual
+      </button>
+    </div>
+
+    <div id="status-conexao" style="font-size:0.7rem; color:#4caf50; text-align:left; margin-top:5px;">● Online</div>
+
+    <div id="container-lista-live" class="grid-alunos">
+      <div style="padding:30px; color:#555; font-style: italic;">Aguardando alunos conectarem...</div>
+    </div>
+
+    <div style="margin-top: 25px;">
+      <button onclick="acaoFinalizarFinal()" class="cor-gold" style="background-color: #4caf50; color: #fff;">
+        <span class="material-icons" style="vertical-align:middle; margin-right:5px;">check_circle</span> FINALIZAR AULA
+      </button>
+      <button onclick="voltarDashFinal()" style="background:none; border:none; color:#FFD700; margin-top:15px; text-decoration:underline; cursor:pointer;">Sair (Manter Aula Ativa)</button>
+    </div>
+  </div>
+
+  <div id="painel-menu" style="display:none">
+    <h2>Minhas Aulas</h2>
+    <button onclick="irParaCriarFinal()" class="cor-gold" style="margin-bottom:20px;">+ NOVA AULA</button>
+    <div id="feed-aulas-instrutor">Buscando...</div>
+    <button onclick="voltarDashFinal()" style="background:none; color:#aaa; margin-top:20px; border:none; cursor:pointer">Voltar</button>
+  </div>
+
+  <div id="painel-criar" style="display:none; text-align:left;">
+    <h3 style="color:#FFD700; text-align:center;">Nova Aula</h3>
+    <label style="color:#aaa; font-size:0.8rem; margin-bottom:5px; display:block;">Local</label>
+    <select id="sel-local-final" class="input-std" style="margin-bottom:10px;"><option>Carregando...</option></select>
+    <input type="text" id="txt-local-custom" class="input-std" placeholder="Nome do local" style="display:none; margin-bottom:10px; border-color:#FFD700;">
+
+    <label style="color:#aaa; font-size:0.8rem; margin-bottom:5px; display:block;">Data</label>
+    <input type="date" id="txt-data-final" class="input-std" style="margin-bottom:10px;">
+
+    <div style="display:flex; gap:10px; margin-bottom:20px;">
+      <div style="flex:1"><label style="color:#aaa; font-size:0.8rem;">Início</label><input type="time" id="txt-inicio-final" class="input-std">
+      </div>
+      <div style="flex:1"><label style="color:#aaa; font-size:0.8rem;">Fim</label><input type="time" id="txt-fim-final" class="input-std">
+      </div>
+    </div>
+    <button onclick="salvarAulaFinal()" class="cor-gold">GERAR PIN</button>
+    <button onclick="voltarDashFinal()" style="background:#333; color:#fff; width:100%; padding:14px; border-radius:8px; border:none; margin-top:10px; cursor:pointer; font-weight:bold;">CANCELAR</button>
+  </div>
+
+</div>
+
+<script>
+  // --- VARIÁVEIS GLOBAIS ---
+  var _prodAulaId = null;
+  var _prodTimer = null;
+  var _prodCache = [];
+  var _prodConfirmadosLocal = {};
+  var _prodDataAula = "";
+  var _buscaTimer = null; // Para o delay da busca
+
+  function showToast(msg, tipo='info') {
+      var x = document.getElementById("toast-box");
+      x.innerText = msg;
+      x.style.borderLeft = tipo === 'erro' ? "5px solid #f44336" : "5px solid #4caf50";
+      x.className = "show";
+      setTimeout(() => { x.className = x.className.replace("show", ""); }, 3000);
+  }
+
+  function initChamadaDinamica(modo) {
+      document.getElementById('dashboard-grid').style.display = 'none';
+      document.querySelector('.dashboard-header').style.display = 'none';
+      var main = document.getElementById('main-content');
+      var screen = document.getElementById('screen-chamada-final');
+      if(screen.parentElement !== main) main.appendChild(screen);
+      screen.style.display = 'block';
+
+      ['painel-aluno','painel-menu','painel-criar','painel-instrutor-live'].forEach(id => document.getElementById(id).style.display = 'none');
+
+      var user = JSON.parse(localStorage.getItem('userSession'));
+      if (modo === 'instrutor') carregarMenuFinal(user);
+      else { document.getElementById('painel-aluno').style.display = 'block'; carregarAlunoFinal(user); }
+  }
+
+  // --- LÓGICA DE MONITORAMENTO ---
+  function iniciarMonitoramentoFinal(id, pin, dataAula) {
+      _prodAulaId = id;
+      _prodDataAula = dataAula || "";
+      document.getElementById('painel-menu').style.display = 'none';
+      document.getElementById('painel-criar').style.display = 'none';
+      document.getElementById('painel-instrutor-live').style.display = 'block';
+      document.getElementById('box-pin-live').innerText = pin;
+
+      if(_prodTimer) clearInterval(_prodTimer);
+      processarPollingFinal(); 
+      _prodTimer = setInterval(processarPollingFinal, 5000);
+  }
+
+  function processarPollingFinal() {
+      if (!_prodAulaId) return;
+      google.script.run.withSuccessHandler(res => {
+          if (!res.success || res.status === "ENCERRADA") {
+              clearInterval(_prodTimer);
+              showToast("Aula encerrada.", "erro");
+              setTimeout(voltarDashFinal, 2000);
+              return;
+          }
+          if (res.checkins) {
+              let listaMesclada = res.checkins.map(a => {
+                  if (_prodConfirmadosLocal[a.login]) a.status = 'Confirmado';
+                  return a;
+              });
+              desenharListaFinal(listaMesclada);
+          }
+      }).withFailureHandler(err => {
+          document.getElementById('status-conexao').innerText = "⚠ Reconectando...";
+          document.getElementById('status-conexao').style.color = "red";
+      }).buscarCheckinsAula(_prodAulaId);
+  }
+
+  function desenharListaFinal(lista) {
+      _prodCache = lista || [];
+      var container = document.getElementById('container-lista-live');
+      document.getElementById('contador-live').innerText = _prodCache.length;
+      container.innerHTML = "";
+
+      if (_prodCache.length === 0) {
+          container.innerHTML = `
+            <div style="padding:40px 20px; text-align:center; color:#666; display:flex; flex-direction:column; align-items:center;">
+                <span class="material-icons" style="font-size:48px; margin-bottom:10px; opacity:0.5;">qr_code_scanner</span>
+                <p style="margin:0; font-size:1rem; color:#888;">Sala vazia</p>
+                <p style="margin:5px 0 0; font-size:0.8rem;">Peça aos alunos para digitarem o PIN acima.</p>
+            </div>`;
+          return;
+      }
+
+      _prodCache.sort((a,b) => (a.status === 'Confirmado' ? 1 : -1));
+
+      _prodCache.forEach(aluno => {
+          var div = document.createElement('div');
+          var confirmado = aluno.status === 'Confirmado';
+          div.className = `card-aluno ${confirmado ? 'status-ok' : 'status-vis'}`;
+          var img = (aluno.foto && aluno.foto.length > 5) ? aluno.foto : 'https://via.placeholder.com/50';
+
+          div.innerHTML = `
+              <div class="info-flex">
+                  <img src="${img}" class="foto-perfil">
+                  <div>
+                      <div style="font-weight:bold; color:#fff; font-size:1rem;">${aluno.nome}</div>
+                      <div style="font-size:0.8rem; color:#ccc;">
+                          ${aluno.graduacao} • ${aluno.hora || '--:--'}
+                          <span class="badge-data">${_prodDataAula}</span>
+                      </div>
+                  </div>
+              </div>
+              <div style="display:flex; gap:10px;">
+                  ${!confirmado ? `
+                      <button class="btn-acao cor-nao" onclick="acaoRecusarFinal('${aluno.login}')">✕</button>
+                      <button class="btn-acao cor-sim" onclick="acaoAceitarFinal('${aluno.login}')">✓</button>
+                  ` : '<span class="material-icons" style="color:#4caf50; font-size:30px;">verified</span>'}
+              </div>
+          `;
+          container.appendChild(div);
+      });
+  }
+
+  // --- AÇÕES DO INSTRUTOR ---
+  function acaoAceitarFinal(login) {
+      _prodConfirmadosLocal[login] = true;
+      var item = _prodCache.find(a => a.login === login);
+      if(item) { item.status = 'Confirmado'; desenharListaFinal(_prodCache); }
+      showToast("Confirmado!", "sucesso");
+  }
+
+  function acaoRecusarFinal(login) {
+      if(!confirm("Remover aluno?")) return;
+      _prodCache = _prodCache.filter(a => a.login !== login);
+      delete _prodConfirmadosLocal[login]; 
+      desenharListaFinal(_prodCache);
+      showToast("Removido.", "info");
+  }
+
+  function acaoFinalizarFinal() {
+      if(_prodCache.length === 0 && !confirm("Encerrar vazio?")) return;
+      const pendentes = _prodCache.filter(a => a.status !== 'Confirmado').length;
+      if (pendentes > 0 && !confirm(`Existem ${pendentes} alunos PENDENTES. Continuar?`)) return;
+      if (pendentes === 0 && !confirm("Finalizar aula e salvar?")) return;
+
+      clearInterval(_prodTimer);
+      const listaFinal = _prodCache.map(a => ({...a, status: 'Confirmado'}));
+      google.script.run.withSuccessHandler(res => {
+          showToast(res.msg, "sucesso");
+          setTimeout(voltarDashFinal, 1500);
+      }).finalizarAulaDinamica(_prodAulaId, listaFinal);
+  }
+
+  // --- ADIÇÃO MANUAL ---
+  function abrirModalManual() {
+      document.getElementById('modal-manual').style.display = 'flex';
+      document.getElementById('busca-aluno-input').value = '';
+      document.getElementById('resultado-busca').innerHTML = '';
+      document.getElementById('busca-aluno-input').focus();
+  }
+
+  function fecharModalManual() {
+      document.getElementById('modal-manual').style.display = 'none';
+  }
+
+  function buscarAlunoDelay() {
+      clearTimeout(_buscaTimer);
+      _buscaTimer = setTimeout(executarBuscaManual, 500);
+  }
+
+  function executarBuscaManual() {
+      const termo = document.getElementById('busca-aluno-input').value;
+      if(termo.length < 3) return;
+      
+      const divRes = document.getElementById('resultado-busca');
+      divRes.innerHTML = '<div style="color:#888; padding:10px;">Buscando...</div>';
+
+      google.script.run.withSuccessHandler(lista => {
+          divRes.innerHTML = "";
+          
+          // 1. Renderiza os resultados do Banco de Dados
+          lista.forEach(a => {
+              const item = document.createElement('div');
+              item.className = 'item-busca';
+              item.innerHTML = `
+                  <img src="${a.foto}" style="width:30px; height:30px; border-radius:50%;">
+                  <div>
+                      <div style="font-weight:bold; color:#fff;">${a.nome}</div>
+                      <div style="font-size:0.7rem; color:#aaa;">${a.graduacao}</div>
+                  </div>
+              `;
+              item.onclick = () => adicionarNaLista(a.login);
+              divRes.appendChild(item);
+          });
+
+          // 2. OPÇÃO DE SEGURANÇA (UX): Adicionar como "Outro/Visitante"
+          // Aparece sempre no final, caso o aluno não esteja na lista acima
+          const itemVisitante = document.createElement('div');
+          itemVisitante.className = 'item-busca';
+          itemVisitante.style.borderTop = "1px solid #444";
+          itemVisitante.style.marginTop = "5px";
+          itemVisitante.innerHTML = `
+              <div style="width:30px; height:30px; border-radius:50%; background:#2196f3; display:flex; align-items:center; justify-content:center; color:#fff;">+</div>
+              <div>
+                  <div style="font-weight:bold; color:#2196f3;">Adicionar "${termo}"</div>
+                  <div style="font-size:0.7rem; color:#aaa;">Como Visitante / Sem Cadastro</div>
+              </div>
+          `;
+          // Passamos um código especial "VISITANTE_" para o backend saber que não é ID
+          itemVisitante.onclick = () => adicionarNaLista("VISITANTE_" + termo);
+          divRes.appendChild(itemVisitante);
+
+      }).buscarAlunosParaManual(termo);
+  }
+
+  function adicionarNaLista(login) {
+      fecharModalManual();
+      showToast("Adicionando...", "info");
+      
+      google.script.run.withSuccessHandler(res => {
+          if(res.success) {
+              showToast("Aluno adicionado!", "sucesso");
+              // Adiciona localmente para feedback instantâneo e marca como confirmado
+              _prodConfirmadosLocal[login] = true; 
+              processarPollingFinal(); // Atualiza a lista
+          } else {
+              showToast(res.msg, "erro");
+          }
+      }).adicionarAlunoManual(_prodAulaId, login);
+  }
+
+  // --- NAVEGAÇÃO ---
+  function voltarDashFinal() {
+      if(_prodTimer) clearInterval(_prodTimer);
+      document.getElementById('screen-chamada-final').style.display = 'none';
+      document.querySelector('.dashboard-header').style.display = 'flex';
+      document.getElementById('dashboard-grid').style.display = 'grid';
+  }
+
+  function carregarMenuFinal(user) {
+      document.getElementById('painel-menu').style.display = 'block';
+      const div = document.getElementById('feed-aulas-instrutor');
+      div.innerHTML = "<div style='color:#888; padding:10px;'>Buscando...</div>";
+      google.script.run.withSuccessHandler(aulas => {
+          div.innerHTML = "";
+          if(aulas.length===0) div.innerHTML = "<div style='color:#888; padding:10px;'>Nenhuma aula ativa.</div>";
+          aulas.forEach(a => {
+              const txtAlunos = a.qtd === 1 ? "aluno" : "alunos";
+              div.innerHTML += `
+              <div class='aula-card' onclick="iniciarMonitoramentoFinal('${a.id}','${a.pin}', '${a.data}')">
+                  <div style="text-align:left;">
+                      <h4 style="color:#FFD700; margin:0 0 5px 0;">${a.academia}</h4>
+                      <small style="color:#ccc; font-size:0.85rem; display:block;">📅 ${a.data} &nbsp; ⏰ ${a.horario}</small>
+                      <div style="margin-top:8px; font-size:0.8rem; color:#4caf50;">
+                          <span class="material-icons" style="font-size:12px; vertical-align:middle;">person</span> 
+                          <b>${a.qtd}</b> ${txtAlunos} na sala
+                      </div>
+                  </div>
+                  <div style="text-align:center;">
+                      <div style="font-weight:bold; color:#fff; font-size:1.2rem;">${a.pin}</div>
+                      <div style="font-size:0.6rem; color:#666; text-transform:uppercase;">PIN</div>
+                  </div>
+              </div>`;
+          });
+      }).buscarAulasAtivasInstrutor(user.nomeCompleto);
+  }
+
+  function irParaCriarFinal() {
+      document.getElementById('painel-menu').style.display = 'none';
+      document.getElementById('painel-criar').style.display = 'block';
+      const sel = document.getElementById('sel-local-final');
+      sel.innerHTML = "<option>Carregando...</option>";
+      google.script.run.withSuccessHandler(locais => {
+          sel.innerHTML = "";
+          locais.forEach(l => sel.innerHTML += `<option value="${l}">${l}</option>`);
+          sel.innerHTML += `<option value="OUTRO_CUSTOM">Outro Local...</option>`;
+          sel.onchange = function() { document.getElementById('txt-local-custom').style.display = (this.value === 'OUTRO_CUSTOM') ? 'block' : 'none'; }
+      }).getListaAcademias();
+      document.getElementById('txt-data-final').valueAsDate = new Date();
+  }
+
+  function salvarAulaFinal() {
+      const user = JSON.parse(localStorage.getItem('userSession'));
+      let local = document.getElementById('sel-local-final').value;
+      if(local === 'OUTRO_CUSTOM') local = document.getElementById('txt-local-custom').value;
+      const dataRaw = document.getElementById('txt-data-final').value;
+      const dados = { instrutor: user.nomeCompleto, academia: local, data: dataRaw, inicio: document.getElementById('txt-inicio-final').value, fim: document.getElementById('txt-fim-final').value };
+
+      if(!dados.inicio || !dados.academia) { showToast("Preencha todos os campos!", "erro"); return; }
+
+      const btn = document.querySelector('button[onclick="salvarAulaFinal()"]');
+      const originalText = btn.innerText;
+      btn.innerText = "CRIANDO..."; btn.disabled = true;
+      let dataFormatada = dataRaw.split('-').reverse().join('/');
+
+      google.script.run.withSuccessHandler(res => {
+          btn.innerText = originalText; btn.disabled = false;
+          if(res.success) iniciarMonitoramentoFinal(res.idAula, res.pin, dataFormatada);
+          else showToast("Erro: " + res.erro, "erro");
+      }).iniciarAulaDinamica(dados);
+  }
+
+  function carregarAlunoFinal(user) {
+      const div = document.getElementById('feed-aulas-aluno');
+      div.innerHTML = "<div style='color:#888;'>Buscando aulas...</div>";
+      google.script.run.withSuccessHandler(aulas => {
+          div.innerHTML = "";
+          if(aulas.length===0) div.innerHTML = "<div style='padding:20px; border:1px dashed #444; border-radius:8px; color:#888'>Nenhuma aula ativa na sua unidade.<br>Peça o PIN ao instrutor.</div>";
+          aulas.forEach(a => {
+              div.innerHTML += `<div class='aula-card' onclick="preencherPinFinal('${a.pin}')">
+                  <div><h4 style="color:#FFD700">${a.instrutor}</h4><small>${a.horario}</small></div>
+                  <div style="background:#333; padding:5px 10px; border-radius:4px; font-size:0.8rem">Selecionar</div>
+              </div>`;
+          });
+      }).buscarAulasDisponiveisAluno(user.academia);
+  }
+
+  function preencherPinFinal(pin) { document.getElementById('input-pin-aluno').value = pin; }
+
+  function executarCheckinFinal() {
+      const pin = document.getElementById('input-pin-aluno').value;
+      if(!pin) return;
+      const user = JSON.parse(localStorage.getItem('userSession'));
+      const feedback = document.getElementById('feedback-aluno');
+      feedback.innerText = "Verificando PIN..."; feedback.style.color = "#FFD700";
+      google.script.run.withSuccessHandler(res => {
+          feedback.innerText = res.msg;
+          feedback.style.color = res.success ? "#4caf50" : "#f44336";
+          if(res.success) showToast("Check-in realizado!", "sucesso");
+      }).realizarCheckinAluno(user.LOGIN, pin);
+  }
+</script>
