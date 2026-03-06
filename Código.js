@@ -29,8 +29,12 @@ const SCRIPT_URL = ScriptApp.getService().getUrl();
 
 // IDs de arquivos no Google Drive para assets padrão (Logo e Fundo)
 const DEFAULT_ASSETS = {
-  BACKGROUND_ID: "1JfeThTR7oe4w7fhg7XFk0ImdIRDOR1KF",
-  ICON_ID: "1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv"
+  BACKGROUND_ID: "Inclua o link do seu google drive",
+  ICON_ID: "Inclua o link do seu google drive",
+  PRIMARY_COLOR: "#FFFFFF", // Cor Padrão (Dourado)
+  SECONDARY_COLOR: "#1e1e1e",
+  TEXT_COLOR: "#ffffff",
+  BTN_TEXT_COLOR: "#000000"
 };
 
 
@@ -95,32 +99,49 @@ function salvarFinanceiroSeguro(nomeAba, dadosObjeto, linha = null) {
 // ============================================================================
 
 /**
- * AUTO-SETUP: Cria tabelas financeiras se não existirem
+ * AUTO-SETUP: Cria tabelas financeiras e de Configuração se não existirem
  */
 function verificarCriarAbasFinanceiras() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // Define a estrutura de todas as abas que o sistema precisa para funcionar sozinho
   const estrutura = [
-    {
-      nome: "Fin_Transacoes",
-      colunas: ["ID_Transacao", "Data_Registro", "Tipo", "Categoria", "Descricao", "Valor", "Forma_Pagto", "Responsavel", "Login_Aluno", "Academia_Ref", "Status", "Comprovante_Url"]
+    { 
+      nome: "Fin_Transacoes", 
+      colunas: ["ID_Transacao", "Data_Registro", "Tipo", "Categoria", "Descricao", "Valor", "Forma_Pagto", "Responsavel", "Login_Aluno", "Academia_Ref", "Status", "Comprovante_Url"] 
     },
-    {
-      nome: "Fin_Pacotes",
-      colunas: ["Nome_Pacote", "Valor_Padrao", "Duracao_Dias", "Academias_Permitidas", "Status_Pacote", "Descricao"]
+    { 
+      nome: "Fin_Pacotes", 
+      colunas: ["Nome_Pacote", "Valor_Padrao", "Duracao_Dias", "Academias_Permitidas", "Status_Pacote", "Descricao"] 
     },
-    {
-      nome: "Fin_Assinaturas",
-      colunas: ["Login_Aluno", "Pacote_Atual", "Data_Inicio", "Data_Fim", "Status_Assinatura", "ID_Ultima_Transacao"]
-    }
+    { 
+      nome: "Fin_Assinaturas", 
+      colunas: ["Login_Aluno", "Pacote_Atual", "Data_Inicio", "Data_Fim", "Status_Assinatura", "ID_Ultima_Transacao"] 
+    },
+    { 
+      // NOVA ESTRUTURA SAAS COMPLETA (Incluindo as novas cores de texto)
+      nome: "Config_App", 
+      colunas: ["Logo_URL", "Fundo_URL", "Cor_Primaria", "Cor_Secundaria", "Cor_Texto", "Cor_Texto_Botao"] 
+    } 
   ];
 
   estrutura.forEach(aba => {
     let sheet = ss.getSheetByName(aba.nome);
     if (!sheet) {
+      // Cria a aba se não existir
       sheet = ss.insertSheet(aba.nome);
+      // Adiciona o cabeçalho
       sheet.appendRow(aba.colunas);
+      // Formata o cabeçalho (Fundo escuro, letra branca, negrito)
       sheet.getRange(1, 1, 1, aba.colunas.length).setFontWeight("bold").setBackground("#2c3e50").setFontColor("#ffffff");
+      // Congela a primeira linha
       sheet.setFrozenRows(1);
+      
+      // Se for a aba de configuração, já injeta a Linha 2 com os padrões do sistema
+      if(aba.nome === "Config_App") {
+         // Valores padrão: Logo (Vazio), Fundo (Vazio), Primária (Dourado), Secundária (Cinza Escuro), Texto (Branco), Texto Botão (Preto)
+         sheet.appendRow(["", "", "#FFD700", "#1e1e1e", "#ffffff", "#000000"]);
+      }
     }
   });
 }
@@ -444,21 +465,27 @@ function getScriptUrl() { return SCRIPT_URL; }
 
 /**
  * Transforma links brutos do Google Drive em links diretos de imagem.
- * Resolve problemas de visualização de fotos de perfil.
+ * Resolve problemas de visualização de fotos de perfil, logos e fundos.
  */
 function padronizarLinkDrive(input) {
   if (!input) return "";
-  if (input.includes("googleusercontent.com/profile/picture/")) return input; // Já é link tratado
+
+  // Se já for um link blindado (já foi convertido), apenas retorna ele mesmo
+  if (input.includes("googleusercontent.com")) return input;
 
   let id = "";
-  // Tenta extrair ID via Regex (padrão id=XXX ou /d/XXX)
+  // Tenta extrair o ID do link original do Drive (padrão share link ou open link)
   const matchId = input.match(/id=([a-zA-Z0-9_-]+)/) || input.match(/\/d\/([a-zA-Z0-9_-]+)/);
 
-  if (matchId) id = matchId[1];
-  else if (input.length > 20 && !input.includes("/")) id = input; // Assume que o input já é o ID
-  else return input; // Retorna original se falhar
+  if (matchId) {
+    id = matchId[1];
+  } else if (input.length > 20 && !input.includes("/")) {
+    id = input; // Se o usuário colou APENAS o ID solto
+  } else {
+    return input; // Fallback: retorna o original se não conseguir extrair
+  }
 
-  // Retorna link de proxy do Google que funciona em tags <img>
+  // Retorna a URL blindada que sempre renderiza a imagem no HTML
   return "https://lh3.googleusercontent.com/d/" + id;
 }
 
@@ -580,10 +607,9 @@ function parseDataSegura(input) {
  */
 function doGet(e) {
   verificarCriarAbasFinanceiras();
-  const page = e.parameter.page || 'login'; // Padrão é login
+  const page = e.parameter.page || 'login';
   let htmlFile;
 
-  // Mapa de Rotas
   switch (page) {
     case 'agendar': htmlFile = 'Agendar'; break;
     case 'cursos': htmlFile = 'Cursos'; break;
@@ -597,27 +623,27 @@ function doGet(e) {
   }
 
   try {
-    // Cria o template HTML a partir do arquivo
     const template = HtmlService.createTemplateFromFile(htmlFile);
 
-    // Injeta variáveis globais no template
     template.scriptUrl = SCRIPT_URL;
-    template.bgUrl = ""; template.logoUrl = "";
+    template.bgUrl = ""; template.logoUrl = ""; template.primaryColor = "#FFD700";
 
-    // Tenta carregar configuração visual personalizada (Logo/Fundo)
     try {
       const config = getAppConfig();
       if (config) {
         template.bgUrl = getDriveImageUrl(config.bgId) || "";
         template.logoUrl = getDriveImageUrl(config.iconId) || "";
+        template.primaryColor = config.primaryColor || "#FFD700";
+        template.secondaryColor = config.secondaryColor || "#1e1e1e";
+        template.textColor = config.textColor || "#ffffff";
+        template.btnTextColor = config.btnTextColor || "#000000";
       }
     } catch (e) { }
 
-    // Renderiza e configura meta tags para mobile
     return template.evaluate()
-      .setTitle("FBKMK - Leão do Norte")
+      .setTitle("DojoManager - Portal do Aluno")
       .addMetaTag('viewport', 'width=device-width, initial-scale=1')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL); // Permite iframe
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 
   } catch (err) {
     return HtmlService.createHtmlOutput(`<h3>Erro Crítico</h3><p>${err.message}</p>`);
@@ -1091,15 +1117,64 @@ function salvarProgramaTecnico(form) {
 
 // --- CONFIGURAÇÃO E SUPORTE ---
 function getAppConfig() {
-  const props = PropertiesService.getScriptProperties();
-  return { bgId: props.getProperty('BG_ID') || DEFAULT_ASSETS.BACKGROUND_ID, iconId: props.getProperty('ICON_ID') || DEFAULT_ASSETS.ICON_ID };
+  const configBase = {
+    bgId: DEFAULT_ASSETS.BACKGROUND_ID,
+    iconId: DEFAULT_ASSETS.ICON_ID,
+    primaryColor: DEFAULT_ASSETS.PRIMARY_COLOR,
+    secondaryColor: DEFAULT_ASSETS.SECONDARY_COLOR,
+    textColor: DEFAULT_ASSETS.TEXT_COLOR,      // NOVO: Cor da fonte geral
+    btnTextColor: DEFAULT_ASSETS.BTN_TEXT_COLOR // Cor secundária padrão
+  };
+
+  try {
+    const configData = lerTabelaDinamica("Config_App");
+    
+    if (configData && configData.length > 0) {
+      const configRow = configData[0]; 
+      
+      if (configRow.logo_url) configBase.iconId = padronizarLinkDrive(configRow.logo_url);
+      if (configRow.fundo_url) configBase.bgId = padronizarLinkDrive(configRow.fundo_url);
+      if (configRow.cor_primaria) configBase.primaryColor = configRow.cor_primaria;
+      if (configRow.cor_secundaria) configBase.secondaryColor = configRow.cor_secundaria;
+      if (configRow.cor_texto) configBase.textColor = configRow.cor_texto;
+      if (configRow.cor_texto_botao) configBase.btnTextColor = configRow.cor_texto_botao;
+    }
+    
+    return configBase;
+  } catch (e) {
+    return configBase;
+  }
 }
 
 function salvarConfig(form) {
   try {
-    PropertiesService.getScriptProperties().setProperties({ 'BG_ID': padronizarLinkDrive(form.cfg_bg), 'ICON_ID': padronizarLinkDrive(form.cfg_icon) });
-    return "✅ Tema atualizado!";
-  } catch (e) { return "Erro"; }
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName("Config_App");
+
+    if (!sheet) { 
+        verificarCriarAbasFinanceiras(); 
+        sheet = ss.getSheetByName("Config_App"); 
+    }
+
+    const configsToSave = {
+      "Logo_URL": padronizarLinkDrive(form.cfg_icon) || "",
+      "Fundo_URL": padronizarLinkDrive(form.cfg_bg) || "",
+      "Cor_Primaria": form.cfg_color || "#FFD700",
+      "Cor_Secundaria": form.cfg_color_sec || "#1e1e1e",
+      "Cor_Texto": form.cfg_color_text || "#ffffff",
+      "Cor_Texto_Botao": form.cfg_color_btn_text || "#000000"
+    };
+
+    if (sheet.getLastRow() < 2) {
+       sheet.appendRow(["", "", "#FFD700", "#1e1e1e", "#ffffff", "#000000"]);
+    }
+
+    salvarDadosSeguro("Config_App", configsToSave, 2);
+    
+    return "✅ Tema atualizado com sucesso!";
+  } catch (e) {
+    return "❌ Erro ao salvar configuração: " + e.message;
+  }
 }
 
 function trocarSenhaUsuario(form) {
@@ -1734,75 +1809,4 @@ function getListaGraduacoes() {
   } catch (e) {
     return ["Branca", "Amarela", "Laranja", "Verde", "Azul", "Marrom", "Preta"];
   }
-}
-
-/**
- * 📊 RESUMO GERENCIAL PARA O DASHBOARD COMERCIAL
- * Retorna: Ativos, Inadimplentes, Vencendo Hoje, Aniversariantes e Faturamento.
- */
-function getResumoGerencial() {
-  const alunos = lerTabelaDinamica("cadastro_de_alunos");
-  const assinaturas = lerTabelaDinamica("Fin_Assinaturas");
-  const transacoes = lerTabelaDinamica("Fin_Transacoes");
-  const hoje = new Date();
-  hoje.setHours(0,0,0,0);
-  
-  let stats = {
-    ativos: 0,
-    inativos: 0,
-    vencendoHoje: 0,
-    atrasados: 0,
-    faturamentoMes: 0,
-    aniversariantes: []
-  };
-
-  // 1. Estatísticas de Alunos e Aniversários
-  alunos.forEach(a => {
-    // Contagem de Status
-    if (String(a.status).toLowerCase() === 'ativo') stats.ativos++;
-    else stats.inativos++;
-
-    // Detector de Aniversariantes
-    if (a.data_de_nascimento) {
-      const nasc = parseDataSegura(a.data_de_nascimento);
-      if (nasc && nasc.getMonth() === hoje.getMonth()) {
-        stats.aniversariantes.push({
-          nome: a.nome_completo,
-          dia: nasc.getDate(),
-          contato: String(a.telefone).replace(/\D/g, ""), // Limpa para WhatsApp
-          idade: hoje.getFullYear() - nasc.getFullYear()
-        });
-      }
-    }
-  });
-
-  // 2. Financeiro (Inadimplência e Vencimentos)
-  assinaturas.forEach(ass => {
-    const dtFim = parseDataSegura(ass.data_fim);
-    if (dtFim) {
-      // Vencendo Hoje
-      if (dtFim.getTime() === hoje.getTime()) stats.vencendoHoje++;
-      
-      // Bloqueio Automático (Lógica de Atraso)
-      // Se venceu e ainda está marcado como ativo na assinatura
-      if (dtFim < hoje && String(ass.status_assinatura).toLowerCase() === 'ativo') {
-        stats.atrasados++;
-      }
-    }
-  });
-
-  // 3. Faturamento do Mês Atual
-  const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-  transacoes.forEach(t => {
-    const dtTrx = parseDataSegura(t.data_registro);
-    if (dtTrx >= primeiroDiaMes && String(t.tipo).toLowerCase() === 'receita') {
-       let val = parseFloat(String(t.valor).replace("R$", "").trim().replace(",", "."));
-       if (!isNaN(val)) stats.faturamentoMes += val;
-    }
-  });
-
-  // Ordena aniversariantes por dia
-  stats.aniversariantes.sort((a,b) => a.dia - b.dia);
-
-  return stats;
 }

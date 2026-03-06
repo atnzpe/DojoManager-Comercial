@@ -1,14 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 
 <head>
   <base target="_top">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
   <style>
-    /* --- ESTILOS GERAIS --- */
+    /* Injeta variáveis de segurança caso a tela seja carregada solta */
+    :root {
+      --primary-color: <?= primaryColor ?> !important;
+      --secondary-color: <?= secondaryColor ?> !important;
+      --text-color: <?= textColor ?> !important;
+    }
+  </style>
+
+  
+
+  <style>
+    /* --- ESTILOS GERAIS DA PÁGINA DE AJUDA --- */
     body {
-      background-color: #121212;
-      color: #fff;
+      background-color: var(--bg-color, #121212);
+      /* Caso o admin configure um fundo, aplicamos aqui também */
+      background-image: url('<?= bgUrl ?>');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: var(--text-color, #fff);
       font-family: 'Roboto', sans-serif;
       margin: 0;
       padding-bottom: 80px;
@@ -18,6 +35,16 @@
       max-width: 600px;
       margin: 0 auto;
       padding: 20px;
+      position: relative;
+      z-index: 2; /* Garante leitura sobre o fundo */
+    }
+
+    /* Película para dar leitura caso usem imagem de fundo */
+    .bg-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      z-index: 1;
     }
 
     /* Header */
@@ -25,78 +52,87 @@
       display: flex;
       align-items: center;
       margin-bottom: 25px;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 15px;
-      background: #121212;
+      background: transparent;
       position: sticky;
       top: 0;
       z-index: 10;
       padding-top: 10px;
+      backdrop-filter: blur(10px);
     }
 
     .btn-back {
       background: none;
       border: none;
-      color: #FFD700;
+      color: var(--primary-color, #FFD700);
       cursor: pointer;
       padding: 0;
       margin-right: 15px;
+      transition: transform 0.2s;
+    }
+    
+    .btn-back:hover {
+      transform: scale(1.1);
     }
 
     .ajuda-title {
       font-size: 1.5rem;
       font-weight: bold;
-      color: #FFD700;
+      color: var(--primary-color, #FFD700);
       margin: 0;
     }
 
     /* Acordeão (Tópicos) */
     .accordion {
-      background-color: #1e1e1e;
-      color: #fff;
+      background-color: var(--secondary-color, #1e1e1e);
+      color: var(--text-color, #fff);
       cursor: pointer;
       padding: 18px;
       width: 100%;
       text-align: left;
-      border: none;
+      border: 1px solid rgba(255,255,255,0.05);
       outline: none;
       transition: 0.4s;
-      border-bottom: 1px solid #333;
       font-size: 1rem;
       font-weight: bold;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-radius: 4px;
-      margin-bottom: 5px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
 
     .active,
     .accordion:hover {
-      background-color: #333;
-      color: #FFD700;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: var(--primary-color, #FFD700);
+      border-color: var(--primary-color, #FFD700);
     }
 
     .panel {
       padding: 0 18px;
-      background-color: #252525;
+      background-color: rgba(0, 0, 0, 0.4);
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.3s ease-out;
-      border-bottom: 1px solid #333;
-      border-radius: 0 0 4px 4px;
-      margin-bottom: 10px;
+      border-radius: 0 0 8px 8px;
+      margin-bottom: 15px;
+      margin-top: -5px; /* Junta com o botão do acordeão */
     }
 
     .panel p,
     .panel li {
-      color: #ccc;
+      color: var(--text-color, #ccc);
+      opacity: 0.9;
       line-height: 1.6;
       font-size: 0.95rem;
       margin-bottom: 10px;
     }
 
-    .panel ul {
+    .panel ul,
+    .panel ol {
       padding-left: 20px;
       margin-top: 5px;
     }
@@ -104,7 +140,7 @@
     .icon-topic {
       margin-right: 10px;
       vertical-align: middle;
-      color: #FFD700;
+      color: var(--primary-color, #FFD700);
       font-size: 24px;
     }
 
@@ -118,16 +154,13 @@
 
     /* Destaques no texto */
     strong {
-      color: #fff;
+      color: var(--primary-color, #FFD700);
       font-weight: 600;
     }
 
-    .highlight {
-      color: #FFD700;
-    }
-
     .chapter-title {
-      color: #888;
+      color: var(--text-color, #888);
+      opacity: 0.6;
       font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -138,6 +171,8 @@
 </head>
 
 <body>
+  
+  <div class="bg-overlay"></div>
 
   <div class="ajuda-container">
 
@@ -146,8 +181,8 @@
         <span class="material-icons" style="font-size: 32px;">arrow_back</span>
       </button>
       <div>
-        <h1 class="ajuda-title">Manual do App</h1>
-        <span style="font-size:0.8rem; color:#888;">Versão 3.5 - Atualização Chamada V6</span>
+        <h1 class="ajuda-title">Manual do Sistema</h1>
+        <span style="font-size:0.8rem; color:var(--text-color); opacity: 0.6;">DojoManager SaaS - Versão 4.0</span>
       </div>
     </div>
 
@@ -158,184 +193,162 @@
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>Para entrar no sistema, use seus dados cadastrados:</p>
+      <p>Para entrar no sistema, utilize as credenciais fornecidas pela sua academia:</p>
       <ul>
-        <li><strong>Usuário:</strong> Seu Login oficial (Ex: <em>Atanazio</em>). O sistema aceita letras maiúsculas ou
-          minúsculas.</li>
-        <li><strong>Senha:</strong> Sua senha pessoal.</li>
+        <li><strong>Usuário:</strong> Seu Login de aluno (o sistema não diferencia maiúsculas de minúsculas).</li>
+        <li><strong>Senha:</strong> Sua senha pessoal cadastrada.</li>
       </ul>
-      <p>Caso tenha esquecido, clique no link <strong>"Esqueci a senha"</strong> na tela inicial para iniciar a
-        recuperação.</p>
+      <p>Caso tenha esquecido seus dados de acesso, clique em <strong>"Esqueci a senha"</strong> na tela inicial para iniciar a recuperação via CPF.</p>
     </div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">person_add</span> Sou novo, como me cadastro?</span>
+      <span><span class="material-icons icon-topic">person_add</span> Como realizar o Cadastro Inicial?</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>Se você ainda não tem acesso:</p>
+      <p>O cadastro é gerenciado diretamente pela administração da sua academia:</p>
       <ol>
-        <li>Na tela de login, clique no link dourado <strong>"Cadastre-se"</strong>.</li>
-        <li>Você será levado ao formulário oficial da Federação.</li>
-        <li>Preencha todos os dados (Nome, CPF, Academia, etc).</li>
-        <li>Aguarde a validação do seu Mestre ou Admin para liberar seu acesso.</li>
+        <li>Procure o seu <strong>Professor ou a Secretaria</strong>.</li>
+        <li>Forneça seus dados básicos para a criação da ficha de aluno.</li>
+        <li>Você receberá o seu <strong>Login e Senha</strong> padrão.</li>
+        <li>Recomendamos alterar sua senha no primeiro acesso por motivos de segurança.</li>
       </ol>
     </div>
 
     <div class="chapter-title">2. Treinos e Check-in</div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">event_available</span> Como saber se tem treino hoje?</span>
+      <span><span class="material-icons icon-topic">event_available</span> Como visualizar a grade de treinos?</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>Agora ficou fácil! Ao abrir o App, olhe para o topo do Dashboard:</p>
+      <p>Acompanhar os horários das aulas é simples e direto:</p>
       <ul>
-        <li>O widget <strong>"TREINOS DE HOJE"</strong> mostra automaticamente todas as aulas disponíveis para o dia da
-          semana atual.</li>
-        <li>Ele exibe tanto as aulas fixas (grade da academia) quanto aulas extras criadas na hora.</li>
-        <li>Você pode clicar em <strong>"ROTA"</strong> para abrir o GPS direto para o local.</li>
+        <li>No topo do seu Painel Principal (Dashboard), o módulo <strong>"TREINOS DE HOJE"</strong> exibirá automaticamente todas as turmas e aulas abertas no dia atual.</li>
+        <li>O sistema lista as aulas regulares (cadastradas pela academia) e também eventos ou treinos ao vivo iniciados pelo seu instrutor.</li>
+        <li>Caso a aula seja em um local diferente, clique no ícone de <strong>"Localização" (Seta/Rota)</strong> para abrir o mapa direto para o treino.</li>
       </ul>
     </div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">qr_code_scanner</span> Como marcar presença?</span>
+      <span><span class="material-icons icon-topic">qr_code_scanner</span> Como registrar minha presença (Check-in)?</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>Existem duas formas de garantir seus pontos no Ranking:</p>
-      <p><strong>1. Pelo Dashboard (Rápido):</strong><br>
-      Se o instrutor já abriu a aula, aparecerá um botão verde <strong>"CHECK-IN"</strong> no widget "Treinos de Hoje".
-        Basta clicar!</p>
-      <p><strong>2. Pelo Menu "Check-in Aula":</strong><br>
-      Clique no card "Check-in Aula". Digite o <strong>PIN</strong> (código de 4 números) que o instrutor mostrar na tela.
+      <p>Para pontuar no Ranking e registrar sua frequência no tatame, utilize uma das opções abaixo:</p>
+      <p><strong>1. Pelo Atalho Rápido (Recomendado):</strong><br>
+      Se o seu professor iniciou a aula no sistema, aparecerá um botão <strong>"CHECK-IN"</strong> ao lado do nome do treino no seu Dashboard. Clique nele para abrir a tela de confirmação.</p>
+      <p><strong>2. Pelo Menu "Check-in":</strong><br>
+      Acesse o módulo <strong>Check-in Aula</strong> e insira o código <strong>PIN de 4 dígitos</strong> que o instrutor compartilhará no início ou final da aula.</p>
+    </div>
+
+    <div class="chapter-title">3. Mensalidades e Planos</div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">attach_money</span> Como consultar a situação do meu plano?</span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>Você pode acompanhar o status da sua matrícula a qualquer momento através do módulo <strong>"Financeiro"</strong>.</p>
+      <ul>
+        <li>A tela exibirá o tipo de plano contratado e a próxima data de vencimento.</li>
+        <li><strong>Status Ativo:</strong> Seu acesso ao sistema e aos check-ins de aula estão liberados.</li>
+        <li><strong>Status Inativo/Vencido:</strong> Seu plano encontra-se expirado e algumas funções do sistema podem ser bloqueadas até a renovação.</li>
+      </ul>
+    </div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">whatsapp</span> Como renovar ou regularizar minha mensalidade?</span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>Se o seu plano estiver próximo ao vencimento ou já vencido, o sistema exibirá automaticamente um botão de <strong>"Regularizar / Renovar"</strong>.</p>
+      <p>Ao clicar neste botão, você será direcionado para o <strong>WhatsApp</strong> do setor responsável (Financeiro/Secretaria) com uma mensagem pré-preenchida contendo seus dados para facilitar o envio do comprovante de pagamento.</p>
+    </div>
+
+    <div class="chapter-title">4. Guia para Instrutores e Gestores</div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">add_location_alt</span> Iniciando uma Nova Aula (Chamada Digital)</span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>Professores e administradores podem abrir salas de aula virtuais para registrar a presença dos alunos:</p>
+      <ul>
+        <li>Acesse o módulo <strong>"Lista de Presença"</strong> e clique em <strong>"+ NOVA AULA"</strong>.</li>
+        <li>Selecione o local do treino na lista ou adicione um endereço temporário escolhendo a opção <strong>"Outro Local"</strong>.</li>
+        <li>Confirme a data e os horários de início e término.</li>
+        <li>Ao clicar em <strong>Gerar PIN</strong>, o sistema criará um código de 4 dígitos e a aula aparecerá imediatamente nos aplicativos de todos os alunos vinculados à unidade.</li>
+      </ul>
+    </div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">person_add_alt</span> Adicionando Alunos Manualmente</span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>Se um aluno esqueceu o celular ou for um visitante de primeira viagem, o instrutor pode adicioná-lo manualmente à lista de presença para não perder o registro do treino:</p>
+      <ol>
+        <li>Com a aula aberta (tela do PIN), clique no botão <strong>"Manual"</strong> (ícone de pessoa com sinal de +).</li>
+        <li>Digite o nome do aluno. O sistema iniciará uma busca em tempo real na base de dados da academia.</li>
+        <li><strong>Aluno Cadastrado:</strong> Clique sobre o nome do aluno nos resultados da busca para confirmar o check-in imediatamente.</li>
+        <li><strong>Visitante / Aula Experimental:</strong> Se o aluno não possuir cadastro, o sistema exibirá a opção <strong>"Adicionar [Nome] como Visitante"</strong> no final da lista. Clique para registrá-lo na chamada atual.</li>
+      </ol>
+    </div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">trending_up</span> Registrando Entradas no Caixa</span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>A gestão financeira permite o controle detalhado do fluxo de caixa:</p>
+      <ol>
+        <li>Acesse o módulo <strong>"Financeiro"</strong> e clique em <strong>"Novo Lançamento"</strong>.</li>
+        <li>Selecione o tipo <strong>Receita</strong> (Entrada de Dinheiro).</li>
+        <li><strong>Atenção:</strong> Ao registrar o pagamento de uma <strong>Mensalidade</strong>, é essencial selecionar o nome do <strong>Aluno</strong> e o respectivo <strong>Pacote de Plano</strong>. Isso fará com que o sistema renove automaticamente a data de vencimento na ficha do aluno.</li>
+        <li>Preencha o valor, a forma de pagamento e confirme.</li>
+      </ol>
+    </div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">trending_down</span> Registrando Saídas (Despesas)</span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>Para manter o fluxo de caixa preciso, registre todos os custos operacionais (aluguel, contas, manutenção):</p>
+      <ol>
+        <li>No <strong>Financeiro</strong>, clique em <strong>"Novo Lançamento"</strong>.</li>
+        <li>Selecione o tipo <strong>Despesa</strong> (Saída de Dinheiro). <em>(Os campos de aluno serão ocultados automaticamente).</em></li>
+        <li>Escolha a categoria da despesa e adicione uma descrição clara (Ex: "Material de Limpeza - Maio").</li>
+        <li>Insira o valor e confirme a operação para atualizar o saldo resultante.</li>
+      </ol>
+    </div>
+
+    <div class="chapter-title">5. Dúvidas Frequentes</div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">emoji_events</span> Como funciona a pontuação do Ranking?</span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>O Ranking gamifica a frequência dos alunos, baseando-se no número de check-ins validados no mês atual:</p>
+      <ul>
+        <li><strong>Filtro "Minha Academia":</strong> Compara a sua assiduidade exclusivamente com os alunos da sua unidade de treino.</li>
+        <li><strong>Filtro "Geral":</strong> Exibe a classificação global da rede de academias (quando aplicável).</li>
+        <li><strong>Empates:</strong> Se dois ou mais alunos possuírem exatamente a mesma quantidade de aulas registradas, eles ocuparão a mesma posição (colocação) no Ranking.</li>
+      </ul>
+    </div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">help_outline</span> Dúvidas e Problemas Comuns</span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p><strong>Esqueci de realizar o Check-in no horário da aula, e agora?</strong><br>
+      A chamada digital opera em tempo real e aulas encerradas não aceitam novos check-ins via PIN. Caso isso ocorra, solicite ao seu instrutor que inclua sua presença via adição manual no próximo treino ou entre em contato com a administração.
       </p>
-    </div>
-
-    <div class="chapter-title">3. Financeiro & Planos</div>
-
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">attach_money</span> Como ver meu plano?</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>Acesse o card <strong>"Financeiro"</strong> no Dashboard.</p>
-      <ul>
-        <li>Você verá o nome do seu plano (ex: Mensalidade Padrão) e a data de vencimento.</li>
-        <li><strong>Status Verde:</strong> Pagamento em dia. Check-in liberado.</li>
-        <li><strong>Status Vermelho:</strong> Plano vencido ou cancelado. Check-in bloqueado.</li>
-      </ul>
-    </div>
-
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">whatsapp</span> Plano Vencido: O que fazer?</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>Se sua mensalidade vencer (ou faltarem 5 dias para vencer), aparecerá um botão verde
-        <strong>"Regularizar / Renovar"</strong> na tela Financeira.</p>
-      <p>Clique nele para abrir uma conversa direta no <strong>WhatsApp</strong> com o responsável da sua academia para
-        enviar o comprovante do Pix.</p>
-    </div>
-
-    <div class="chapter-title">4. Para Instrutores (Gestão)</div>
-
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">add_location_alt</span> Criar Aula (Fixa ou Avulsa)</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>O sistema agora permite aulas em qualquer lugar!</p>
-      <ul>
-        <li>Vá em <strong>"Lista de Presença"</strong> > <strong>"CRIAR NOVA AULA"</strong>.</li>
-        <li>No campo "Local", selecione sua academia OU escolha a opção
-          <strong>"📍 Outro Local / Evento Externo"</strong>.</li>
-        <li><strong>Importante:</strong> Verifique se a DATA está correta. Ela agora aparece na lista para facilitar a
-          conferência.</li>
-        <li>Ao gerar o PIN, essa aula aparecerá imediatamente no App de todos os alunos.</li>
-      </ul>
-    </div>
-
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">person_add_alt</span> Adicionar Manual / Visitante <span style="font-size:0.6rem; background:#FFD700; color:#000; padding:2px 4px; border-radius:3px;">NOVO</span></span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>Se o aluno esqueceu o celular, está sem internet ou é um visitante:</p>
-      <ol>
-        <li>Na tela do PIN (dentro da aula), clique no botão cinza <strong>"Manual"</strong> (ícone de bonequinho com +).</li>
-        <li>Digite o nome do aluno na busca. O sistema irá sugerir nomes do banco de dados em tempo real.</li>
-        <li><strong>Aluno Cadastrado:</strong> Clique no nome dele. Ele entrará na lista já com presença confirmada.</li>
-        <li><strong>Visitante / Aula Experimental:</strong> Se o nome não aparecer na lista, clique na opção azul <strong>"Adicionar [Nome] como Visitante"</strong> no final da lista.</li>
-      </ol>
-      <p><em>Isso garante que o treino nunca pare por problemas técnicos!</em></p>
-    </div>
-
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">trending_up</span> Lançar Entrada (Receita)</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>Para registrar pagamentos de alunos (Mensalidades, Cursos, Equipamentos):</p>
-      <ol>
-        <li>Vá em <strong>Financeiro</strong> > <strong>Novo Lançamento</strong>.</li>
-        <li>Selecione <strong>Receita</strong> e a Categoria (Ex: <strong>Mensalidade</strong>).</li>
-        <li><strong>CRÍTICO:</strong> Selecione o <strong>ALUNO</strong> e o <strong>PACOTE</strong> no menu. Isso garante que o sistema renove o plano dele automaticamente.</li>
-        <li>Informe o Valor e a Forma de Pagamento.</li>
-      </ol>
-    </div>
-
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">trending_down</span> Lançar Saída (Despesa)</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>Para registrar gastos da unidade (Contas, Aluguel, Manutenção):</p>
-      <ol>
-        <li>Vá em <strong>Financeiro</strong> > <strong>Novo Lançamento</strong>.</li>
-        <li>Selecione <strong>Despesa</strong>.</li>
-        <li><em>Note que os campos de "Aluno" desaparecerão.</em></li>
-        <li>Escolha a Categoria (Ex: <strong>Contas</strong> ou <strong>Aluguel</strong>).</li>
-        <li>Na descrição, detalhe o gasto (Ex: "Conta de Luz Fev/26").</li>
-        <li>Informe o Valor e Confirme. Isso abaterá do seu caixa.</li>
-      </ol>
-    </div>
-
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">filter_alt</span> Visualizar Caixa</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p><strong>Instrutores:</strong> Veem apenas o caixa da sua própria unidade.</p>
-      <p><strong>Mestres/Admins:</strong> Podem usar o filtro no topo da tela para ver "Todas as Academias" ou selecionar uma unidade específica para auditoria.</p>
-    </div>
-
-    <div class="chapter-title">5. Performance e Suporte</div>
-
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">emoji_events</span> Entendendo o Ranking</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>Acompanhe sua assiduidade e pontuação:</p>
-      <ul>
-        <li><strong>Filtro "Minha Academia":</strong> Mostra sua posição apenas entre os alunos da sua unidade.</li>
-        <li><strong>Filtro "Geral":</strong> Compara sua pontuação com toda a rede FBKMK.</li>
-        <li><strong>Critério de Desempate:</strong> Se dois alunos têm a mesma quantidade de aulas, eles dividem a mesma
-          posição.</li>
-      </ul>
-    </div>
-
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">help_outline</span> Dúvidas Frequentes</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p><strong>Esqueci de dar presença na hora, e agora?</strong><br>
-      O sistema é Dinâmico (tempo real). Se esquecer, peça ao seu Instrutor para usar o botão "Manual" na próxima aula ou falar com a administração.
-      </p>
-      <p><strong>Meu nome está duplicado no Ranking?</strong><br>
-      O sistema novo corrige letras maiúsculas automaticamente. Se o problema persistir, use o botão de suporte (Headphone Amarelo) para relatar.
+      <p><strong>Encontrei um erro ou bug no sistema. O que fazer?</strong><br>
+      Utilize o botão de suporte (Ícone de Headset) flutuante localizado no canto inferior do Dashboard. Selecione a opção "Relatar Erro" e descreva o problema. A mensagem será enviada diretamente para a equipe técnica da plataforma.
       </p>
     </div>
 
@@ -351,7 +364,6 @@
         if (panel.style.maxHeight) {
           panel.style.maxHeight = null;
         } else {
-          // Ajusta altura automaticamente conforme o conteúdo
           panel.style.maxHeight = panel.scrollHeight + "px";
         } 
       });

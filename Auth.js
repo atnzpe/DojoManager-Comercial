@@ -1,57 +1,88 @@
 /**
+ * ============================================================================
  * ARQUIVO: Auth.gs
- * DESCRIÇÃO: Backend de Autenticação.
+ * DESCRIÇÃO: Backend de Autenticação (Arquitetura SaaS / White-Label).
+ * ============================================================================
  */
 
-const SHEET_ID = "11uTU-BIiLvvXWD1rDmff-lcP3vHYKCr_1cZJUM-nL7U";
-const COLUNA_LOGIN_CADASTRO = "LOGIN"; // Corrigido (adicionado ;)
+const COLUNA_LOGIN_CADASTRO = "LOGIN";
 
 function logarUsuario(login_attempt, senha) {
-  Logger.log(`[AUTH] Tentativa: ${login_attempt}`);
+  console.log(`[AUTH] Tentativa de login: ${login_attempt}`);
 
-  if (!login_attempt || !senha) return null;
+  if (!login_attempt || !senha) {
+    console.warn("[AUTH] Login ou senha vazios.");
+    return null;
+  }
 
   const inputLogin = String(login_attempt).trim().toLowerCase();
   const inputSenha = String(senha).trim();
 
   try {
-    const ss = SpreadsheetApp.openById(SHEET_ID);
-    
-    // 1. Validação em 'Acessos'
+    // 🛡️ CORREÇÃO CRÍTICA PARA SAAS: Usa a planilha ativa em vez de um ID fixo.
+    // Quando o cliente copiar a planilha, o código apontará automaticamente para a cópia dele!
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+    // 1. Validação na aba 'Acessos'
     const accessSheet = ss.getSheetByName("Acessos");
+
+    if (!accessSheet) {
+      console.error("[AUTH ERROR] Aba 'Acessos' não encontrada na planilha.");
+      return null;
+    }
+
     const data = accessSheet.getDataRange().getValues();
-    const headers = data.shift();
+    if (data.length < 2) return null; // Planilha vazia
+
+    // Pega os cabeçalhos e limpa espaços
+    const headers = data.shift().map(h => String(h).trim());
 
     const idxLogin = headers.indexOf("LOGIN");
     const idxSenha = headers.indexOf("Senha");
     const idxStatus = headers.indexOf("STATUS");
 
-    if (idxLogin === -1) return null;
+    if (idxLogin === -1 || idxSenha === -1) {
+      console.error("[AUTH ERROR] Colunas 'LOGIN' ou 'Senha' não encontradas na aba Acessos.");
+      return null;
+    }
 
     let autenticado = false;
     for (let row of data) {
       if (String(row[idxLogin]).trim().toLowerCase() === inputLogin &&
-          String(row[idxSenha]).trim() === inputSenha) {
-        if (String(row[idxStatus]).trim() === "Ativo") {
+        String(row[idxSenha]).trim() === inputSenha) {
+
+        // Verifica o Status (se a coluna não existir, assume como Ativo por padrão)
+        const statusUser = idxStatus !== -1 ? String(row[idxStatus]).trim() : "Ativo";
+
+        if (statusUser.toLowerCase() === "ativo") {
           autenticado = true;
           break;
         } else {
-          Logger.log("[AUTH] Usuário Inativo");
+          console.warn(`[AUTH] Usuário Inativo tentou logar: ${inputLogin}`);
           return null;
         }
       }
     }
 
-    if (!autenticado) return null;
+    if (!autenticado) {
+      console.warn(`[AUTH] Credenciais inválidas para: ${inputLogin}`);
+      return null;
+    }
 
-    // 2. Dados em 'cadastro_de_alunos'
+    // 2. Coleta de Dados em 'cadastro_de_alunos'
     const userSheet = ss.getSheetByName("cadastro_de_alunos");
+    if (!userSheet) {
+      // Se a aba de cadastro não existir, retorna dados mínimos para não quebrar a sessão
+      return JSON.stringify({ "LOGIN": inputLogin, "STATUS": "Ativo" });
+    }
+
     const userData = userSheet.getDataRange().getValues();
-    const userHeaders = userData.shift();
+    if (userData.length < 2) return JSON.stringify({ "LOGIN": inputLogin, "STATUS": "Ativo" });
+
+    const userHeaders = userData.shift().map(h => String(h).trim());
     const idxUserLogin = userHeaders.indexOf(COLUNA_LOGIN_CADASTRO);
 
     if (idxUserLogin === -1) {
-      // Retorna dados básicos se não achar a coluna na outra aba
       return JSON.stringify({ "LOGIN": inputLogin, "STATUS": "Ativo" });
     }
 
@@ -59,17 +90,19 @@ function logarUsuario(login_attempt, senha) {
     for (let row of userData) {
       if (String(row[idxUserLogin]).trim().toLowerCase() === inputLogin) {
         for (let i = 0; i < userHeaders.length; i++) {
-            perfil[userHeaders[i]] = row[i];
+          perfil[userHeaders[i]] = row[i];
         }
         perfil["STATUS"] = "Ativo";
+        console.log(`[AUTH] Sucesso. Perfil carregado para: ${inputLogin}`);
         return JSON.stringify(perfil);
       }
     }
 
+    // Fallback: Autenticado na aba Acesso, mas sem ficha no Cadastro
     return JSON.stringify({ "LOGIN": inputLogin, "STATUS": "Ativo" });
 
   } catch (err) {
-    Logger.log(`[AUTH ERROR] ${err}`);
+    console.error(`[AUTH FATAL ERROR] ${err.message}`);
     return null;
   }
 }

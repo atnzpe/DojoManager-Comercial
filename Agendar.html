@@ -7,18 +7,53 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
+  <meta name="theme-color" content="<?= primaryColor ?>">
+
+  <style>
+    /* Injeção das variáveis do backend */
+    :root {
+      --primary-color: <?=primaryColor ?> !important;
+      --secondary-color: <?=secondaryColor ?> !important;
+      --text-color: <?=textColor ?> !important;
+      --btn-text-color: <?=btnTextColor ?> !important;
+    }
+  </style>
+
   <?!= include('Style'); ?>
 
   <style>
-    /* --- DESIGN SYSTEM (LANDING PAGE OTIMIZADA) --- */
+    /* --- ESTILOS DE FUNDO DINÂMICO --- */
+    .bg-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('<?= bgUrl ?>');
+      background-size: cover;
+      background-position: center;
+      z-index: -2;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      z-index: -1;
+    }
+
+    /* --- DESIGN SYSTEM (LANDING PAGE) --- */
     body {
-      background-color: #121212;
-      color: #fff;
+      color: var(--text-color, #fff);
       display: flex;
       flex-direction: column;
       min-height: 100vh;
       margin: 0;
       font-family: 'Roboto', sans-serif;
+      background: transparent;
     }
 
     .agendar-container {
@@ -30,6 +65,8 @@
       flex-grow: 1;
       display: flex;
       flex-direction: column;
+      position: relative;
+      z-index: 1;
     }
 
     /* Cabeçalho */
@@ -38,7 +75,7 @@
       align-items: center;
       margin-bottom: 20px;
       padding-bottom: 15px;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .header-title {
@@ -46,13 +83,14 @@
       text-align: center;
       font-size: 1.4rem;
       font-weight: 700;
-      color: #FFD700;
+      color: var(--primary-color);
       margin-right: 32px;
     }
 
     .intro-text {
       text-align: center;
-      color: #ccc;
+      color: var(--text-color);
+      opacity: 0.8;
       margin-bottom: 25px;
       font-size: 1rem;
       line-height: 1.5;
@@ -66,7 +104,8 @@
     .input-label {
       display: block;
       margin-bottom: 8px;
-      color: #aaa;
+      color: var(--text-color);
+      opacity: 0.7;
       font-size: 0.85rem;
       font-weight: 500;
       text-transform: uppercase;
@@ -75,37 +114,41 @@
     .custom-input {
       width: 100%;
       padding: 16px;
-      /* Aumentei a área de toque */
       border-radius: 12px;
-      border: 1px solid #333;
-      background: #1e1e1e;
-      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.4);
+      color: var(--text-color);
       font-size: 1.1rem;
-      /* Fonte maior para digitar fácil */
       box-sizing: border-box;
       transition: all 0.3s;
     }
 
     .custom-input:focus {
-      border-color: #FFD700;
+      border-color: var(--primary-color);
       outline: none;
-      box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.1);
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .custom-input option {
+      background-color: var(--secondary-color);
+      color: var(--text-color);
     }
 
     /* Card de Detalhes */
     #details-area {
       display: none;
-      background: #1e1e1e;
-      border: 1px solid #333;
+      background: var(--secondary-color);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 12px;
       padding: 20px;
       margin-top: 10px;
       animation: slideUp 0.4s ease-out;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
 
     .academy-name {
       margin-top: 0;
-      color: #FFD700;
+      color: var(--primary-color);
       font-size: 1.3rem;
       margin-bottom: 15px;
     }
@@ -118,13 +161,15 @@
     }
 
     .d-icon {
-      color: #888;
+      color: var(--primary-color);
+      opacity: 0.8;
       font-size: 20px;
       margin-top: 2px;
     }
 
     .d-text {
-      color: #ddd;
+      color: var(--text-color);
+      opacity: 0.9;
       font-size: 0.95rem;
       line-height: 1.4;
       flex: 1;
@@ -137,7 +182,7 @@
       background: #000;
       border-radius: 8px;
       margin: 15px 0;
-      border: 1px solid #333;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       overflow: hidden;
     }
 
@@ -147,17 +192,17 @@
       border: 0;
     }
 
-    /* Botão CTA */
+    /* Botão CTA do WhatsApp (Mantido em verde para conversão) */
     .btn-whatsapp {
       background-color: #25D366;
-      color: white;
+      color: #ffffff;
+      /* Fixo branco por ser verde escuro */
       width: 100%;
       margin-top: 10px;
       font-size: 1.1rem;
       padding: 16px;
       border: none;
       border-radius: 50px;
-      /* Mais arredondado = mais amigável */
       cursor: pointer;
       font-weight: bold;
       display: flex;
@@ -194,10 +239,13 @@
 
 <body>
 
+  <div class="bg-layer"></div>
+  <div class="overlay"></div>
+
   <div class="agendar-container">
 
     <div class="header-nav">
-      <button onclick="voltarLogin()" style="background:none; border:none; cursor:pointer; color:#fff; padding:5px;">
+      <button onclick="voltarLogin()" style="background:none; border:none; cursor:pointer; color:var(--text-color); padding:5px;">
         <span class="material-icons" style="font-size: 28px;">arrow_back</span>
       </button>
       <div class="header-title">Aula Experimental</div>
@@ -215,8 +263,8 @@
     <div class="input-group">
       <label class="input-label">Onde deseja treinar?</label>
 
-      <div id="loading-locais" style="text-align:center; color:#888; padding: 10px;">
-        <span class="material-icons" style="animation: spin 1s infinite linear">refresh</span> Carregando unidades...
+      <div id="loading-locais" style="text-align:center; color:var(--text-color); opacity: 0.7; padding: 10px;">
+        <span class="material-icons" style="animation: spin 1s infinite linear; color: var(--primary-color);">refresh</span><br>Carregando unidades...
       </div>
 
       <select id="location-select" class="custom-input" style="display:none" onchange="selecionarLocal()">
@@ -249,7 +297,6 @@
     var locaisCache = [];
     var localSelecionado = null;
 
-    // Inicialização
     window.onload = function() {
       google.script.run
         .withSuccessHandler(popularLista)
@@ -291,7 +338,6 @@
         document.getElementById('sel-end').textContent = localSelecionado.endereco || "Endereço sob consulta";
         document.getElementById('sel-hora').textContent = (localSelecionado.dias || "") + " " + (localSelecionado.horarios || "");
         
-        // Mapa
         var mapBox = document.getElementById('map-box');
         mapBox.innerHTML = '';
         mapBox.style.display = 'none';
@@ -315,11 +361,9 @@
       }
     }
 
-    // --- NOVA LÓGICA DE ENVIO (Sem telefone) ---
     function enviarWhatsApp() {
       var nomeUser = document.getElementById('user-name').value.trim();
       
-      // Validação única: Só precisamos do nome!
       if (!nomeUser) {
         alert("Por favor, digite seu nome.");
         document.getElementById('user-name').focus();
@@ -331,7 +375,6 @@
         if (num.length >= 10) {
            if (num.substring(0,2) !== '55') num = '55' + num;
            
-           // Mensagem otimizada: Nome + Intenção
            var msg = "Olá! Me chamo *" + nomeUser + "*. Gostaria de agendar uma aula experimental na *" + localSelecionado.nome + "*.";
            
            var url = "https://wa.me/" + num + "?text=" + encodeURIComponent(msg);

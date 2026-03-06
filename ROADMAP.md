@@ -11,13 +11,14 @@ Acompanhe a evolução do nosso sistema.
 - [x] CRUD Administrativo completo (Alunos, Turmas, Locais).
 
 ## 🧹 Fase 1.5: Auditoria e White-Label (Prioridade Atual)
+- [  ] Validar todos os arquivos que fazem parte do projeto independente do que o arquivo representa. Devemos fazer um pente finissimo em todos so arquivos 
+- [ ] Validar se a planilha Mestra funciona.
+- [ ] Validar se ao fazer a cópia da planilha, para venda, se o SaaS continua a funcionar.
 - [ ] **Código.js:** Alterar `.setTitle("FBKMK - Leão do Norte")` para buscar o nome da academia dinamicamente.
 - [ ] **Ajuda.html:** Reescrever o manual com texto neutro de suporte técnico (remover menções a "Krav Maga", "Atanazio" e "FBKMK").
 - [ ] **Social.html:** Transformar botões de Youtube e Instagram (atualmente hardcoded para a Federação Leão do Norte) em links gerenciáveis/dinâmicos.
 - [ ] **CardTemplate.html:** Recriar a carteirinha usando apenas HTML e CSS puro, substituindo as imagens estáticas para que a logo e as cores da academia do cliente apareçam dinamicamente.
-- [  ] Validar todos os arquivos que fazem parte do projeto independente do que o arquivo representa. Devemos fazer um pente finissimo em todos so arquivos 
-- [ ] Validar se a planilha Mestra funciona.
-- [ ] Validar se ao fazer a cópia da planilha, para venda, se o SaaS continua a funcionar.
+
 
 
 ## 🚧 Fase 2: Gestão Financeira e Turmas (Em Andamento)

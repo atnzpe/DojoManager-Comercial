@@ -1,14 +1,19 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 <style>
-  /* --- ESTILOS GERAIS --- */
-  body {
-    background-color: #121212;
-    color: #fff;
-    margin: 0;
-    font-family: 'Roboto', sans-serif;
+  /* Injeta as cores para garantir que o CSS interno as reconheça caso o arquivo seja carregado solto */
+  :root {
+    --primary-color: <?=primaryColor ?> !important;
+    --secondary-color: <?=secondaryColor ?> !important;
+    --text-color: <?=textColor ?> !important;
+    --btn-text-color: <?=btnTextColor ?> !important;
   }
+</style>
 
+
+
+<style>
+  /* --- ESTILOS GERAIS DA TELA DE CURSOS --- */
   .cursos-view {
     display: none;
     animation: fadeIn 0.3s ease-in-out;
@@ -18,6 +23,9 @@
     margin: 0 auto;
     width: 100%;
     box-sizing: border-box;
+    /* Evita que o fundo do Dashboard transborde e prejudique a leitura, 
+       mas ainda permite que a imagem de fundo principal (body) apareça */
+    background: transparent;
   }
 
   /* HEADER DE NAVEGAÇÃO */
@@ -32,11 +40,16 @@
   .btn-back {
     background: none;
     border: none;
-    color: #fff;
+    color: var(--text-color, #fff);
     cursor: pointer;
     padding: 0;
     display: block;
-    /* Garante que sempre aparece */
+    transition: transform 0.2s;
+  }
+
+  .btn-back:hover {
+    transform: scale(1.1);
+    color: var(--primary-color);
   }
 
   /* FILTROS */
@@ -50,28 +63,30 @@
   }
 
   .filter-chip {
-    background: #333;
-    color: #aaa;
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text-color);
+    opacity: 0.7;
     padding: 8px 16px;
     border-radius: 20px;
     font-size: 13px;
     cursor: pointer;
-    border: 1px solid #444;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s;
     font-weight: 500;
   }
 
   .filter-chip:hover {
-    background: #444;
-    color: #fff;
-    border-color: #666;
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 1;
+    border-color: var(--text-color);
   }
 
   .filter-chip.active {
-    background: #ffd700;
-    color: #000;
-    border-color: #ffd700;
+    background: var(--primary-color);
+    color: var(--btn-text-color, #000);
+    border-color: var(--primary-color);
     font-weight: bold;
+    opacity: 1;
   }
 
   /* GRID DE CURSOS */
@@ -83,18 +98,20 @@
   }
 
   .course-card {
-    background: #1e1e1e;
-    border: 1px solid #333;
+    background: var(--secondary-color, #1e1e1e);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s;
+    transition: transform 0.2s, border-color 0.2s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
   }
 
   .course-card:hover {
     transform: translateY(-4px);
-    border-color: #ffd700;
+    border-color: var(--primary-color);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
   }
 
   /* IMAGEM COM ZOOM */
@@ -103,7 +120,7 @@
     height: 160px;
     object-fit: cover;
     background: #000;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     cursor: zoom-in;
     transition: opacity 0.2s;
   }
@@ -152,14 +169,15 @@
   .course-title {
     font-size: 1.1rem;
     font-weight: bold;
-    color: #fff;
+    color: var(--text-color, #fff);
     margin-bottom: 8px;
     line-height: 1.3;
   }
 
   .course-meta {
     font-size: 0.85rem;
-    color: #888;
+    color: var(--text-color);
+    opacity: 0.7;
     margin-bottom: 5px;
     display: flex;
     align-items: center;
@@ -169,7 +187,8 @@
   /* DESCRIÇÃO COM SCROLL */
   .course-desc {
     font-size: 0.9rem;
-    color: #ccc;
+    color: var(--text-color);
+    opacity: 0.8;
     margin: 10px 0 15px 0;
     line-height: 1.5;
     flex: 1;
@@ -184,11 +203,11 @@
   }
 
   .course-desc::-webkit-scrollbar-track {
-    background: #222;
+    background: rgba(0, 0, 0, 0.2);
   }
 
   .course-desc::-webkit-scrollbar-thumb {
-    background: #555;
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 2px;
   }
 
@@ -202,31 +221,32 @@
     cursor: pointer;
     text-transform: uppercase;
     font-size: 13px;
-    transition: background 0.2s;
+    transition: background 0.2s, filter 0.2s;
     margin-top: auto;
   }
 
   .btn-inscricao.primary {
-    background: #ffd700;
-    color: #000;
+    background: var(--primary-color, #ffd700);
+    color: var(--btn-text-color, #000);
   }
 
   .btn-inscricao.primary:hover {
-    background: #e6c200;
+    filter: brightness(1.1);
   }
 
   .btn-inscricao.disabled {
-    background: #333;
+    background: rgba(0, 0, 0, 0.5);
     color: #666;
     cursor: not-allowed;
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .spinner {
+  .spinner-cursos {
     border: 4px solid rgba(255, 255, 255, 0.1);
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    border-left-color: #ffd700;
+    border-left-color: var(--primary-color);
     animation: spin 1s linear infinite;
     margin: 0 auto;
   }
@@ -245,25 +265,32 @@
     align-items: center;
     flex-direction: column;
     animation: fadeIn 0.2s;
+    backdrop-filter: blur(5px);
   }
 
   #lightbox-img {
     max-width: 90%;
     max-height: 80vh;
-    border: 2px solid #ffd700;
+    border: 2px solid var(--primary-color);
     border-radius: 8px;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
   }
 
   .lightbox-close {
     margin-top: 20px;
-    color: #fff;
+    color: var(--text-color, #fff);
     font-size: 1.2rem;
     cursor: pointer;
-    background: #333;
+    background: var(--secondary-color, #333);
     padding: 10px 20px;
     border-radius: 30px;
-    border: 1px solid #555;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: 0.2s;
+  }
+
+  .lightbox-close:hover {
+    background: var(--primary-color);
+    color: var(--btn-text-color);
   }
 
   @keyframes spin {
@@ -293,7 +320,7 @@
     <button id="btn-back-cursos" class="btn-back" onclick="fecharCursos()">
        <span class="material-icons" style="font-size: 32px">arrow_back</span>
     </button>
-    <h2 style="margin: 0; font-size: 1.8rem; color: #fff;">Cursos e Eventos</h2>
+    <h2 style="margin: 0; font-size: 1.8rem; color: var(--text-color, #fff);">Cursos e Eventos</h2>
   </div>
 
   <div class="filter-container">
@@ -303,13 +330,14 @@
   </div>
 
   <div id="loading-cursos" style="text-align: center; margin-top: 50px">
-    <div class="spinner"></div>
-    <p style="color: #888; margin-top: 10px">Carregando agenda...</p>
+    <div class="spinner-cursos"></div>
+    <p style="color: var(--text-color); opacity: 0.7; margin-top: 10px">Carregando agenda...</p>
   </div>
 
   <div id="cursos-grid" class="courses-grid"></div>
 
-  <div id="empty-msg" style="text-align: center; color: #666; display: none; margin-top: 30px">
+  <div id="empty-msg"
+    style="text-align: center; color: var(--text-color); opacity: 0.5; display: none; margin-top: 30px">
     Nenhum evento encontrado nesta categoria.
   </div>
 </div>
@@ -320,7 +348,7 @@
 </div>
 
 <script>
-  console.log("✅ [SAFE MODE] Cursos.html atualizado: Voltar e Detalhes Liberados!");
+  console.log("✅ [SAFE MODE] Cursos.html atualizado: White-Label Integrado");
 
   var todosCursos = [];
   var isUsuarioLogado = false;
@@ -339,16 +367,13 @@
 
   function abrirCursos() {
     try {
-        // Verifica login
         const userSession = localStorage.getItem('userSession');
         isUsuarioLogado = (userSession && userSession !== '{}');
 
-        // Gestão de telas
         const dashGrid = document.getElementById("dashboard-grid");
         const dashHeader = document.querySelector(".dashboard-header");
         const cursosScreen = document.getElementById("cursos-screen");
         
-        // Botão voltar SEMPRE visível agora
         const btnBack = document.getElementById('btn-back-cursos');
         if (btnBack) btnBack.style.display = 'block';
 
@@ -364,7 +389,6 @@
         if (grid) grid.innerHTML = "";
         if (msg) msg.style.display = "none";
 
-        // Cache
         if (typeof CacheSystem !== 'undefined') {
             const cached = CacheSystem.get('cursos_list');
             if (cached) {
@@ -453,10 +477,9 @@
             if (statusLower.indexOf("encerrad") !== -1) btnText = "Encerrado";
 
             var btnHtml = '<button class="' + btnClass + '">' + btnText + '</button>';
-            var imgUrl = curso.imagem || "https://via.placeholder.com/400x200/1e1e1e/333?text=Leao+do+Norte";
+            // Alterado para um Placeholder genérico
+            var imgUrl = curso.imagem || "https://via.placeholder.com/400x200/1e1e1e/333?text=Imagem+Indisponivel";
 
-            // Monta o HTML do Card
-            // OBS: Data e Vagas agora aparecem para TODOS (removemos o if(isLogado))
             var metaDataHtml = '';
             if (curso.data) metaDataHtml += '<div class="course-meta"><span class="material-icons" style="font-size:16px">calendar_today</span> ' + curso.data + '</div>';
             if (curso.vagas) metaDataHtml += '<div class="course-meta"><span class="material-icons" style="font-size:16px">group</span> Vagas: ' + curso.vagas + '</div>';
@@ -489,8 +512,6 @@
 
   function fecharCursos() {
     try {
-        // LOGICA DE VOLTAR:
-        // Se estiver logado e no ambiente do app (dashboard existe) -> Volta pro Dashboard
         if (isUsuarioLogado && document.getElementById('dashboard-grid')) {
             const cursosScreen = document.getElementById("cursos-screen");
             const dashHeader = document.querySelector(".dashboard-header");
@@ -500,7 +521,6 @@
             if (dashHeader) dashHeader.style.display = "flex";
             if (dashGrid) dashGrid.style.display = "grid";
         } else {
-            // Se for VISITANTE -> Redireciona para LOGIN
             if (typeof google !== 'undefined' && google.script) {
                  google.script.run.withSuccessHandler(function(url){
                       window.top.location.href = url + "?page=login";
@@ -512,7 +532,6 @@
     }
   }
 
-  // AUTO-START
   document.addEventListener("DOMContentLoaded", function() {
       if (!document.getElementById('dashboard-grid')) {
           console.log("🚀 [AUTO-START] Modo Visitante.");

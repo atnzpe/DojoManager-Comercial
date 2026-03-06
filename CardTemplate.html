@@ -136,57 +136,45 @@
 <body>
 
   <div class="card" style="background-image: url('<?= bgFrente ?>');">
-
     <img src="<?= fotoUrl ?>" class="photo-box" onerror="this.src='https://ui-avatars.com/api/?name=User'">
-
     <div class="field frente-nome">
       <span class="label">Nome:</span>
       <?= nome ?>
     </div>
-
     <div class="field frente-grad">
       <span class="label">Graduação:</span>
       <?= graduacao ?>
     </div>
-
     <div class="field frente-acad">
       <span class="label">Academia Vinculada:</span>
       <?= academia ?>
     </div>
-
   </div>
 
   <div class="card" style="background-image: url('<?= bgVerso ?>');">
-
     <div class="disclaimer">Este documento não substitui o documento oficial com foto</div>
-
     <div class="field verso-cpf">
       <span class="label">CPF:</span>
       <?= cpf ?>
     </div>
-
     <div class="field verso-filiacao">
       <span class="label">Filiação:</span>
       <?= filiacao ?>
     </div>
-
     <div class="field verso-nasc-box">
       <span class="label">Data de Nascimento:</span>
       <?= nascimento ?>
     </div>
-
     <div class="field verso-validade-box">
       <span class="label">Validade:</span>
       <span class="verso-validade-val"><?= validade ?></span>
     </div>
-
     <div class="rodape-verso">
       Academia:
       <?= academia ?><br>
       Emissão:
       <?= emissao ?>
     </div>
-
   </div>
 
 </body>

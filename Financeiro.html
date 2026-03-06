@@ -311,83 +311,11 @@
     </div>
   </div>
 
-  <div class="fin-grid-cards" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
-    <div class="fin-card">
-      <h3><span class="material-icons" style="font-size:16px">people</span> Ativos</h3>
-      <div id="stat-ativos" class="valor" style="color:#4caf50">--</div>
-    </div>
-    <div class="fin-card">
-      <h3><span class="material-icons" style="font-size:16px">event_busy</span> Vencendo Hoje</h3>
-      <div id="stat-hoje" class="valor" style="color:#FFD700">--</div>
-    </div>
-    <div class="fin-card">
-      <h3><span class="material-icons" style="font-size:16px">block</span> Inadimplentes</h3>
-      <div id="stat-atrasados" class="valor" style="color:#f44336">--</div>
-    </div>
-    <div class="fin-card">
-      <h3><span class="material-icons" style="font-size:16px">payments</span> Fatura Mês</h3>
-      <div id="stat-fatura" class="valor" style="color:#fff">R$ --</div>
-    </div>
-  </div>
-
-  <div class="admin-box" style="display:block;">
-    <h3 style="color:#FFD700; margin-top:0;"><span class="material-icons">cake</span> Aniversariantes do Mês</h3>
-    <div id="lista-niver" style="max-height:200px; overflow-y:auto; padding-right:5px;">
-      <div style="text-align:center; color:#666; font-style:italic">Carregando...</div>
-    </div>
-  </div>
-
 </div>
 
 <script>
   var usuarioAtual = null;
 
-
-  // Função para carregar o Dashboard ao abrir a tela Financeiro
-  function carregarDashboardComercial() {
-    google.script.run.withSuccessHandler(stats => {
-       // 1. Atualiza Números
-       document.getElementById('stat-ativos').innerText = stats.ativos;
-       document.getElementById('stat-hoje').innerText = stats.vencendoHoje;
-       document.getElementById('stat-atrasados').innerText = stats.atrasados;
-       document.getElementById('stat-fatura').innerText = "R$ " + stats.faturamentoMes.toFixed(2).replace('.', ',');
-
-       // 2. Renderiza Aniversariantes com Botão WhatsApp
-       const divNiver = document.getElementById('lista-niver');
-       divNiver.innerHTML = "";
-       
-       if(stats.aniversariantes.length === 0) {
-           divNiver.innerHTML = "<p style='color:#888; text-align:center'>Nenhum aniversariante neste mês.</p>";
-       } else {
-           stats.aniversariantes.forEach(p => {
-               // Mensagem Pré-definida de Aniversário
-               const primeiroNome = p.nome.split(' ')[0];
-               const msg = `Parabéns, ${primeiroNome}! 🎉 Que seja um novo ciclo de muitas vitórias e treinos pesados. Oss! 🥋`;
-               const link = `https://wa.me/55${p.contato}?text=${encodeURIComponent(msg)}`;
-               
-               divNiver.innerHTML += `
-                 <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #333; background:#2a2a2a; margin-bottom:5px; border-radius:5px;">
-                    <div>
-                        <span style="color:#FFD700; font-weight:bold;">${p.dia}</span> 
-                        <span style="color:#fff;">${p.nome}</span>
-                        <span style="color:#888; font-size:0.8rem;">(${p.idade} anos)</span>
-                    </div>
-                    <a href="${link}" target="_blank" class="btn-whatsapp" style="width:auto; margin:0; padding:5px 10px; font-size:0.8rem;">
-                       <span class="material-icons" style="font-size:14px">whatsapp</span> Parabéns
-                    </a>
-                 </div>`;
-           });
-       }
-    }).getResumoGerencial();
-  }
-
-  // Hook para carregar junto com o admin
-  const originalCarregarDadosAdmin = carregarDadosAdmin;
-  carregarDadosAdmin = function() {
-      originalCarregarDadosAdmin();
-      carregarDashboardComercial();
-  }
-  
   function abrirFinanceiro() {
     try {
       document.getElementById('dashboard-grid').style.display = 'none';

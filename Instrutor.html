@@ -8,11 +8,11 @@
 
   .inst-tabs {
     display: flex;
-    background: #1e1e1e;
+    background: var(--secondary-color, #1e1e1e);
     border-radius: 12px;
     padding: 4px;
     margin-bottom: 20px;
-    border: 1px solid #333;
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .inst-tab {
@@ -20,7 +20,8 @@
     text-align: center;
     padding: 12px;
     cursor: pointer;
-    color: #888;
+    color: var(--text-color, #888);
+    opacity: 0.6;
     font-weight: bold;
     border-radius: 8px;
     transition: 0.3s;
@@ -28,8 +29,9 @@
   }
 
   .inst-tab.active {
-    background: #FFD700;
-    color: #000;
+    background: var(--primary-color, #FFD700);
+    color: var(--btn-text-color, #000);
+    opacity: 1;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   }
 
@@ -38,10 +40,10 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
-    background: #1e1e1e;
+    background: var(--secondary-color, #1e1e1e);
     padding: 15px;
     border-radius: 12px;
-    border: 1px solid #333;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     margin-bottom: 15px;
   }
 
@@ -51,25 +53,32 @@
 
   .inst-input {
     width: 100%;
-    background: #2c2c2c;
-    border: 1px solid #444;
-    color: #fff;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-color, #fff);
     padding: 10px;
     border-radius: 6px;
     box-sizing: border-box;
     font-size: 0.9rem;
+    transition: 0.3s;
   }
 
   .inst-input:focus {
-    border-color: #FFD700;
+    border-color: var(--primary-color, #FFD700);
     outline: none;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .inst-input option {
+    background: var(--secondary-color);
+    color: var(--text-color);
   }
 
   .student-card {
-    background: #252525;
+    background: var(--secondary-color, #252525);
     padding: 12px;
     border-radius: 8px;
-    border: 1px solid #333;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
     gap: 15px;
@@ -80,7 +89,7 @@
 
   .student-card.checked {
     background: rgba(255, 215, 0, 0.1);
-    border-color: #FFD700;
+    border-color: var(--primary-color, #FFD700);
   }
 
   .st-avatar {
@@ -89,15 +98,15 @@
     border-radius: 50%;
     object-fit: cover;
     background: #000;
-    border: 2px solid #444;
+    border: 2px solid var(--primary-color, #444);
   }
 
   .hist-item {
-    background: #1e1e1e;
+    background: var(--secondary-color, #1e1e1e);
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 10px;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -108,26 +117,27 @@
   }
 
   .hist-date {
-    color: #FFD700;
+    color: var(--primary-color, #FFD700);
     font-weight: bold;
     font-size: 0.9rem;
   }
 
   .hist-local {
-    color: #fff;
+    color: var(--text-color, #fff);
     margin: 4px 0;
     font-size: 0.95rem;
   }
 
   .hist-detail {
-    color: #888;
+    color: var(--text-color, #888);
+    opacity: 0.7;
     font-size: 0.8rem;
   }
 
   .btn-pdf-mini {
-    background: #333;
-    color: #FFD700;
-    border: 1px solid #FFD700;
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--primary-color, #FFD700);
+    border: 1px solid var(--primary-color, #FFD700);
     padding: 8px 12px;
     border-radius: 6px;
     cursor: pointer;
@@ -136,11 +146,12 @@
     flex-direction: column;
     align-items: center;
     gap: 2px;
+    transition: 0.2s;
   }
 
   .btn-pdf-mini:hover {
-    background: #FFD700;
-    color: #000;
+    background: var(--primary-color, #FFD700);
+    color: var(--btn-text-color, #000);
   }
 
   /* FAB na Esquerda */
@@ -148,8 +159,8 @@
     position: fixed;
     bottom: 30px;
     left: 30px;
-    background: #FFD700;
-    color: #000;
+    background: var(--primary-color, #FFD700);
+    color: var(--btn-text-color, #000);
     border: none;
     border-radius: 50px;
     padding: 15px 25px;
@@ -160,9 +171,15 @@
     gap: 10px;
     cursor: pointer;
     z-index: 90;
+    transition: 0.2s;
   }
 
-  /* --- MODAL RELATÓRIO A4 RESPONSIVO (CORRIGIDO) --- */
+  .fab-save:hover {
+    filter: brightness(1.1);
+    transform: scale(1.05);
+  }
+
+  /* --- MODAL RELATÓRIO A4 RESPONSIVO --- */
   #modal-relatorio {
     position: fixed;
     top: 0;
@@ -176,7 +193,6 @@
     align-items: center;
     overflow-y: auto;
     padding-top: 80px;
-    /* ESPAÇO PARA O MENU SUPERIOR NÃO COBRIR O PAPEL */
     padding-bottom: 40px;
     box-sizing: border-box;
   }
@@ -187,22 +203,21 @@
     top: 0;
     left: 0;
     width: 100%;
-    background: #1e1e1e;
+    background: var(--secondary-color, #1e1e1e);
     padding: 15px;
     display: flex;
     justify-content: center;
     gap: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
     z-index: 10001;
+    border-bottom: 1px solid var(--primary-color);
   }
 
   .paper-a4 {
     background: #fff;
     color: #000;
     width: 210mm;
-    /* Largura A4 padrão */
     max-width: 95%;
-    /* Em celular, usa 95% da tela */
     min-height: 297mm;
     padding: 15mm;
     box-sizing: border-box;
@@ -210,7 +225,6 @@
     position: relative;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
     margin: 0 auto;
-    /* Centraliza */
   }
 
   .rep-header {
@@ -242,7 +256,6 @@
     font-size: 11pt;
   }
 
-  /* Em telas muito pequenas, empilha os dados do cabeçalho */
   @media (max-width: 600px) {
     .rep-grid {
       grid-template-columns: 1fr;
@@ -324,8 +337,9 @@
 <div id="instrutor-view" class="instrutor-view">
   <div class="profile-header-nav">
     <button class="btn-back" onclick="fecharInstrutor()"><span class="material-icons">arrow_back</span></button>
-    <h2 style="margin:0; font-size:1.5rem; color:#FFD700">Área do Instrutor</h2>
+    <h2 style="margin:0; font-size:1.5rem; color:var(--text-color, #fff)">Gestão de Turmas</h2>
   </div>
+
   <div class="inst-tabs">
     <div class="inst-tab active" onclick="navInst('chamada', this)">Nova Chamada</div>
     <div class="inst-tab" onclick="navInst('historico', this)">Histórico</div>
@@ -339,16 +353,22 @@
         <label class="adm-label">MINISTRANTE</label><select id="c-ministrante" class="inst-input"><option value="" disabled selected>Carregando...</option></select>
       </div>
       <div class="full-col">
-        <label class="adm-label">LOCAL</label><select id="c-local" class="inst-input" onchange="checkOutro(this)"><option value="" disabled selected>Carregando...</option></select><input type="text" id="c-local-outro" class="inst-input" style="display:none; margin-top:10px;" placeholder="Digite o nome do local...">
+        <label class="adm-label">LOCAL</label><select id="c-local" class="inst-input" onchange="checkOutro(this)"><option value="" disabled selected>Carregando...</option></select>
+        <input type="text" id="c-local-outro" class="inst-input" style="display:none; margin-top:10px;" placeholder="Digite o nome do local...">
       </div>
     </div>
+
     <div class="adm-toolbar">
       <input type="text" id="c-busca" class="inst-input" placeholder="Buscar aluno..." onkeyup="filtrarListaChamada()">
-      <label style="display:flex; align-items:center; gap:5px; color:#aaa; font-size:0.9rem; margin-top:10px;"><input type="checkbox" id="c-todos" onchange="filtrarListaChamada()"> Incluir Visitantes</label>
+      <label style="display:flex; align-items:center; gap:5px; color:var(--text-color); opacity:0.8; font-size:0.9rem; margin-top:10px;">
+        <input type="checkbox" id="c-todos" onchange="filtrarListaChamada()"> Incluir Visitantes
+      </label>
     </div>
+
     <div id="lista-chamada">
-      <p style="text-align:center; color:#666; margin-top:20px;">Aguardando dados...</p>
+      <p style="text-align:center; color:var(--text-color); opacity:0.6; margin-top:20px;">Aguardando dados...</p>
     </div>
+
     <button class="fab-save" onclick="salvarChamada()"><span class="material-icons">save</span> SALVAR (<span id="count-sel">0</span>)</button>
   </div>
 
@@ -360,7 +380,8 @@
         <label class="adm-label">LOCAL</label><select id="h-local" class="inst-input"><option value="">Todos</option></select>
       </div>
       <div class="full-col">
-        <button class="adm-btn" style="width:100%" onclick="carregarHistoricoFiltrado()">FILTRAR</button></div>
+        <button class="adm-btn" style="width:100%" onclick="carregarHistoricoFiltrado()">FILTRAR</button>
+      </div>
     </div>
     <div id="historico-container"></div>
   </div>
@@ -375,9 +396,9 @@
 
   <div class="paper-a4" id="conteudo-relatorio">
     <div class="rep-header">
-      <img src="https://lh3.googleusercontent.com/d/1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv" class="rep-logo">
+      <img id="pdf-logo" src="https://lh3.googleusercontent.com/d/1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv" class="rep-logo">
       <div class="rep-title">Relatório de Treinamento</div>
-      <div style="font-size:10pt;">Federação Brasileira de Krav Magá e Kapap - Leão do Norte</div>
+      <div style="font-size:10pt;">Lista Oficial de Presença</div>
     </div>
     <div class="rep-grid">
       <div><span class="rep-label">Data:</span> <span id="r-data"></span></div>
@@ -397,7 +418,7 @@
       </thead>
       <tbody id="r-lista-body"></tbody>
     </table>
-    <div class="rep-footer">Relatório gerado digitalmente em <span id="r-gerado"></span>.<br>Sistema de Gestão FBKMKLN.
+    <div class="rep-footer">Relatório gerado digitalmente em <span id="r-gerado"></span>.<br>Gerado via Sistema DojoManager.
     </div>
   </div>
 </div>
@@ -412,6 +433,11 @@
     selecao.clear();
     document.getElementById('dashboard-grid').style.display = 'none';
     document.querySelector('.dashboard-header').style.display = 'none';
+    
+    // Oculta o widget de treinos de hoje para abrir espaço
+    const widgetHoje = document.getElementById('widget-treino-hoje');
+    if(widgetHoje) widgetHoje.style.display = 'none';
+    
     document.getElementById('instrutor-view').style.display = 'block';
     
     atualizarContador(); 
@@ -424,6 +450,13 @@
         document.getElementById('h-inicio').value = passado.toISOString().split('T')[0];
         document.getElementById('h-fim').value = hoje.toISOString().split('T')[0];
     } catch(e){}
+    
+    // Tenta injetar a logo no PDF se ela existir no cache/variáveis
+    try {
+        const logo = document.getElementById("header-img").src;
+        if(logo) document.getElementById("pdf-logo").src = logo;
+    } catch(e){}
+    
     google.script.run.withSuccessHandler(initChamada).getDadosParaChamada();
   }
 
@@ -431,6 +464,7 @@
     document.getElementById('instrutor-view').style.display = 'none';
     document.querySelector('.dashboard-header').style.display = 'flex';
     document.getElementById('dashboard-grid').style.display = 'grid';
+    // O widget hoje pode ser recarregado se quiser
   }
 
   function navInst(tab, el) {
@@ -478,25 +512,46 @@
     const container = document.getElementById('lista-chamada');
     if(!container) return;
     container.innerHTML = "";
+    
     const filtrados = dbAlunos.filter(a => {
         const matchNome = a.nome.toLowerCase().includes(termo);
         const matchLocal = global ? true : (a.academia === localInst);
         return matchNome && matchLocal;
     });
-    if(filtrados.length === 0) { container.innerHTML = '<p style="text-align:center; color:#666; margin-top:20px;">Nenhum aluno encontrado.</p>'; return; }
+    
+    if(filtrados.length === 0) { container.innerHTML = '<p style="text-align:center; color:var(--text-color); opacity:0.6; margin-top:20px;">Nenhum aluno encontrado.</p>'; return; }
+    
     filtrados.forEach(a => {
         const div = document.createElement('div');
         const isSel = selecao.has(a.login);
         div.className = `student-card ${isSel ? 'checked' : ''}`;
         div.onclick = () => toggleSel(a.login, div);
-        div.innerHTML = `<img src="${a.foto}" class="st-avatar" onerror="this.src='https://ui-avatars.com/api/?name=${a.login}'"><div style="flex:1"><div style="font-weight:bold; color:#fff">${a.nome}</div><div style="font-size:0.8rem; color:#888">${a.graduacao} • ${a.academia}</div></div><span class="material-icons" style="color:${isSel?'#FFD700':'#444'}">${isSel ? 'check_circle' : 'radio_button_unchecked'}</span>`;
+        
+        div.innerHTML = `
+          <img src="${a.foto}" class="st-avatar" onerror="this.src='https://ui-avatars.com/api/?name=${a.login}'">
+          <div style="flex:1">
+            <div style="font-weight:bold; color:var(--text-color)">${a.nome}</div>
+            <div style="font-size:0.8rem; color:var(--text-color); opacity:0.6">${a.graduacao} • ${a.academia}</div>
+          </div>
+          <span class="material-icons" style="color:${isSel?'var(--primary-color)':'rgba(255,255,255,0.2)'}">${isSel ? 'check_circle' : 'radio_button_unchecked'}</span>
+        `;
         container.appendChild(div);
     });
   }
 
   function toggleSel(login, div) {
-    if(selecao.has(login)) { selecao.delete(login); div.classList.remove('checked'); div.querySelector('.material-icons').textContent = 'radio_button_unchecked'; div.querySelector('.material-icons').style.color = '#444'; } 
-    else { selecao.add(login); div.classList.add('checked'); div.querySelector('.material-icons').textContent = 'check_circle'; div.querySelector('.material-icons').style.color = '#FFD700'; }
+    const icon = div.querySelector('.material-icons');
+    if(selecao.has(login)) { 
+        selecao.delete(login); 
+        div.classList.remove('checked'); 
+        icon.textContent = 'radio_button_unchecked'; 
+        icon.style.color = 'rgba(255,255,255,0.2)'; 
+    } else { 
+        selecao.add(login); 
+        div.classList.add('checked'); 
+        icon.textContent = 'check_circle'; 
+        icon.style.color = 'var(--primary-color)'; 
+    }
     atualizarContador();
   }
 
@@ -507,24 +562,59 @@
     let local = document.getElementById('c-local').value;
     if(local === "Outros") local = document.getElementById('c-local-outro').value;
     if(!local) { alert("Informe o local."); return; }
-    const btn = document.querySelector('.fab-save'); const txt = btn.innerHTML; btn.innerText = "SALVANDO..."; btn.disabled = true;
+    
+    const btn = document.querySelector('.fab-save'); 
+    const txt = btn.innerHTML; 
+    btn.innerText = "SALVANDO..."; 
+    btn.disabled = true;
+    
     const listaFinal = dbAlunos.filter(a => selecao.has(a.login));
-    const payload = { instrutor: document.getElementById('c-ministrante').value, local: local, dataTreino: document.getElementById('c-data').value, horaTreino: document.getElementById('c-hora').value, alunos: listaFinal };
+    const payload = { 
+        instrutor: document.getElementById('c-ministrante').value, 
+        local: local, 
+        dataTreino: document.getElementById('c-data').value, 
+        horaTreino: document.getElementById('c-hora').value, 
+        alunos: listaFinal 
+    };
+    
     google.script.run.withSuccessHandler(res => {
-        alert(res.message); selecao.clear(); atualizarContador(); filtrarListaChamada(); btn.innerHTML = txt; btn.disabled = false;
+        alert(res.message); 
+        selecao.clear(); 
+        atualizarContador(); 
+        filtrarListaChamada(); 
+        btn.innerHTML = txt; 
+        btn.disabled = false;
     }).salvarChamada(payload);
   }
 
   function carregarHistoricoFiltrado() {
     const div = document.getElementById('historico-container');
     if(!div) return;
-    div.innerHTML = '<div class="spinner"></div>';
-    const filtros = { inicio: document.getElementById('h-inicio').value, fim: document.getElementById('h-fim').value, local: document.getElementById('h-local').value, instrutor: "" };
+    div.innerHTML = '<div class="spinner" style="margin-top:20px; border-left-color:var(--primary-color)"></div>';
+    
+    const filtros = { 
+        inicio: document.getElementById('h-inicio').value, 
+        fim: document.getElementById('h-fim').value, 
+        local: document.getElementById('h-local').value, 
+        instrutor: "" 
+    };
+    
     google.script.run.withSuccessHandler(lista => {
         div.innerHTML = "";
-        if(lista.length === 0) { div.innerHTML = "<p style='text-align:center; color:#666'>Nenhum registro neste período.</p>"; return; }
+        if(lista.length === 0) { div.innerHTML = "<p style='text-align:center; color:var(--text-color); opacity:0.6'>Nenhum registro neste período.</p>"; return; }
+        
         lista.forEach(h => {
-            div.innerHTML += `<div class="hist-item"><div class="hist-info"><div class="hist-date">${h.data} - ${h.hora}</div><div class="hist-local">${h.local}</div><div class="hist-detail">${h.instrutor} • ${h.qtd} Alunos</div></div><div class="btn-pdf-mini" onclick="gerarRelatorioPDF('${h.id}')"><span class="material-icons">picture_as_pdf</span> PDF</div></div>`;
+            div.innerHTML += `
+              <div class="hist-item">
+                <div class="hist-info">
+                  <div class="hist-date" style="color:var(--primary-color)">${h.data} - ${h.hora}</div>
+                  <div class="hist-local" style="color:var(--text-color)">${h.local}</div>
+                  <div class="hist-detail" style="color:var(--text-color); opacity:0.6">${h.instrutor} • ${h.qtd} Alunos</div>
+                </div>
+                <div class="btn-pdf-mini" onclick="gerarRelatorioPDF('${h.id}')">
+                  <span class="material-icons">picture_as_pdf</span> PDF
+                </div>
+              </div>`;
         });
     }).getHistoricoFiltrado(filtros);
   }
@@ -532,22 +622,31 @@
   function gerarRelatorioPDF(idChamada) {
     google.script.run.withSuccessHandler(data => {
         if(!data) { alert("Erro ao carregar dados."); return; }
-        document.getElementById('r-data').innerText = data.data; document.getElementById('r-hora').innerText = data.hora; document.getElementById('r-local').innerText = data.local; document.getElementById('r-inst').innerText = data.instrutor; document.getElementById('r-id').innerText = data.id; document.getElementById('r-gerado').innerText = new Date().toLocaleString();
+        document.getElementById('r-data').innerText = data.data; 
+        document.getElementById('r-hora').innerText = data.hora; 
+        document.getElementById('r-local').innerText = data.local; 
+        document.getElementById('r-inst').innerText = data.instrutor; 
+        document.getElementById('r-id').innerText = data.id; 
+        document.getElementById('r-gerado').innerText = new Date().toLocaleString();
+        
         const tbody = document.getElementById('r-lista-body');
-        if(tbody) { tbody.innerHTML = ""; const nomes = data.listaNomes ? data.listaNomes.split(",") : []; nomes.forEach((nome, idx) => { tbody.innerHTML += `<tr><td>${idx+1}</td><td>${nome.trim()}</td><td></td></tr>`; }); }
+        if(tbody) { 
+            tbody.innerHTML = ""; 
+            const nomes = data.listaNomes ? data.listaNomes.split(",") : []; 
+            nomes.forEach((nome, idx) => { 
+                tbody.innerHTML += `<tr><td>${idx+1}</td><td>${nome.trim()}</td><td></td></tr>`; 
+            }); 
+        }
         
-        // Verifica suporte a Share API
         if(navigator.share) document.getElementById('btn-share').style.display = 'inline-flex';
-        
         document.getElementById('modal-relatorio').style.display = 'flex';
     }).getDetalhesChamada(idChamada);
   }
 
   function compartilharRelatorio() {
       if(navigator.share) {
-          // Compartilha apenas texto e link (limitação de Web Apps sem blob)
           navigator.share({
-              title: 'Relatório FBKMKLN',
+              title: 'Relatório DojoManager',
               text: 'Relatório de Treino: ' + document.getElementById('r-data').innerText,
               url: window.location.href
           }).catch(console.error);

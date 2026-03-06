@@ -1,4 +1,29 @@
 <style>
+  /* =======================================================================
+     VARIÁVEIS GLOBAIS (DESIGN SYSTEM - BASE) 
+     (Garante que o Profile tenha as cores mesmo isolado)
+     ======================================================================= */
+  :root {
+    --bg-color: #121212;
+    --surface-color: #1e1e1e;
+    --input-bg: #2d2d2d;
+
+    /* Fallbacks de Segurança (Herdam do Dashboard se injetados, ou usam esses) */
+    --primary-color: #FFD700;
+    --secondary-color: #1e1e1e;
+    --text-color: #ffffff;
+    --btn-text-color: #000000;
+
+    --primary-hover: #ffca28;
+    --whatsapp-color: #25D366;
+    --whatsapp-hover: #128C7E;
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+    --error-color: #cf6679;
+    --success-color: #00e676;
+    --border-radius: 12px;
+  }
+
   /* --- ESTILOS DO MODAL DE PERFIL (V2 - BLINDADO COM EDIÇÃO) --- */
   .profile-overlay {
     position: fixed;
@@ -10,6 +35,7 @@
     backdrop-filter: blur(5px);
     z-index: 10000;
     display: none;
+    /* Controlado via JS */
     justify-content: center;
     align-items: center;
     padding: 20px;
@@ -17,20 +43,20 @@
   }
 
   .profile-card {
-    background: linear-gradient(145deg, #1e1e1e, #252525);
-    border: 1px solid #333;
+    background: linear-gradient(145deg, var(--secondary-color), rgba(0, 0, 0, 0.6));
+    border: 1px solid var(--primary-color);
     border-radius: 20px;
     width: 100%;
     max-width: 380px;
     padding: 30px;
     text-align: center;
     position: relative;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    color: #fff;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+    color: var(--text-color);
     font-family: 'Roboto', sans-serif;
   }
 
-  /* Detalhe Dourado */
+  /* Detalhe Superior */
   .profile-card::before {
     content: '';
     position: absolute;
@@ -39,9 +65,9 @@
     transform: translateX(-50%);
     width: 60px;
     height: 4px;
-    background: #FFD700;
+    background: var(--primary-color);
     border-radius: 0 0 10px 10px;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    box-shadow: 0 0 15px var(--primary-color);
   }
 
   .profile-img-container {
@@ -51,7 +77,7 @@
     border-radius: 50%;
     padding: 4px;
     position: relative;
-    background: linear-gradient(45deg, #FFD700, #333);
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
   }
 
   .profile-img {
@@ -59,7 +85,7 @@
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid #1e1e1e;
+    border: 4px solid var(--secondary-color);
   }
 
   /* --- NOVOS ESTILOS DE EDIÇÃO --- */
@@ -67,8 +93,8 @@
     position: absolute;
     bottom: 0;
     right: 0;
-    background: #FFD700;
-    color: #000;
+    background: var(--primary-color);
+    color: var(--btn-text-color);
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -76,8 +102,8 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    border: 2px solid #1e1e1e;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--secondary-color);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
     transition: transform 0.2s;
   }
 
@@ -89,12 +115,13 @@
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 5px;
-    color: #fff;
+    color: var(--text-color);
   }
 
   .profile-login {
     font-size: 0.9rem;
-    color: #888;
+    color: var(--text-color);
+    opacity: 0.6;
     margin-bottom: 20px;
     font-family: monospace;
   }
@@ -103,14 +130,14 @@
     display: inline-block;
     padding: 6px 16px;
     border-radius: 20px;
-    background: rgba(255, 215, 0, 0.15);
-    color: #FFD700;
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--primary-color);
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
     font-size: 0.85rem;
     margin-bottom: 25px;
-    border: 1px solid rgba(255, 215, 0, 0.3);
+    border: 1px solid var(--primary-color);
   }
 
   .profile-stats {
@@ -121,6 +148,7 @@
     border-radius: 12px;
     padding: 15px;
     margin-bottom: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .stat-item {
@@ -132,14 +160,16 @@
   .stat-label {
     font-size: 0.7rem;
     text-transform: uppercase;
-    color: #888;
+    color: var(--text-color);
+    opacity: 0.6;
     letter-spacing: 0.5px;
   }
 
   .stat-value {
     font-size: 0.95rem;
     font-weight: 500;
-    color: #eee;
+    color: var(--text-color);
+    opacity: 0.9;
   }
 
   /* Botões */
@@ -163,40 +193,42 @@
     gap: 5px;
   }
 
-  .btn-back {
+  .btn-back-prof {
     background: transparent;
-    border: 1px solid #444;
-    color: #aaa;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+    opacity: 0.7;
   }
 
-  .btn-back:hover {
-    border-color: #fff;
-    color: #fff;
+  .btn-back-prof:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
     background: rgba(255, 255, 255, 0.05);
+    opacity: 1;
   }
 
   .btn-action-main {
-    background: #333;
-    color: #fff;
-    border: 1px solid #444;
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text-color);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     flex: 1;
     justify-content: center;
   }
 
   .btn-action-main:hover {
-    background: #444;
-    border-color: #666;
+    background: rgba(0, 0, 0, 0.6);
+    border-color: var(--primary-color);
   }
 
   .btn-pdf {
-    background: #FFD700;
-    color: #333;
+    background: var(--primary-color);
+    color: var(--btn-text-color);
   }
 
   .btn-pdf:hover {
-    background: #F5C500;
+    filter: brightness(1.15);
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
   }
 
   /* --- SUB-MODAIS (Camas de Segurança) --- */
@@ -207,8 +239,8 @@
     transform: translate(-50%, -50%);
     width: 90%;
     max-width: 320px;
-    background: #2a2a2a;
-    border: 1px solid #444;
+    background: var(--secondary-color);
+    border: 1px solid var(--primary-color);
     border-radius: 12px;
     padding: 20px;
     display: none;
@@ -220,23 +252,33 @@
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
-    background: #1a1a1a;
-    border: 1px solid #444;
-    color: #fff;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
     border-radius: 6px;
     box-sizing: border-box;
     font-family: sans-serif;
   }
 
+  .sub-input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+  }
+
   .sub-btn-save {
     width: 100%;
     padding: 10px;
-    background: #FFD700;
-    color: #000;
+    background: var(--primary-color);
+    color: var(--btn-text-color);
     font-weight: bold;
     border: none;
     border-radius: 6px;
     cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .sub-btn-save:hover {
+    filter: brightness(1.15);
   }
 
   .btn-close-sub {
@@ -245,9 +287,15 @@
     right: 10px;
     background: none;
     border: none;
-    color: #888;
+    color: var(--text-color);
+    opacity: 0.5;
     cursor: pointer;
     font-size: 20px;
+  }
+
+  .btn-close-sub:hover {
+    opacity: 1;
+    color: #ff5252;
   }
 </style>
 
@@ -255,7 +303,7 @@
   <div class="profile-card">
 
     <div class="profile-img-container">
-      <img id="p-foto" src="" class="profile-img" onerror="this.src='https://lh3.googleusercontent.com/d/1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv'">
+      <img id="p-foto" src="" class="profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=333&color=fff'">
       <div class="edit-photo-btn" onclick="abrirEditFoto()">
         <span class="material-icons" style="font-size:16px">edit</span>
       </div>
@@ -266,7 +314,7 @@
     <div id="p-faixa" class="profile-badge">FAIXA</div>
 
     <div class="profile-stats">
-      <div class="stat-item" style="border-right: 1px solid #444;">
+      <div class="stat-item" style="border-right: 1px solid rgba(255,255,255,0.1);">
         <span class="stat-label">Academia</span>
         <span id="p-academia" class="stat-value">...</span>
       </div>
@@ -280,20 +328,20 @@
       <button class="btn-profile btn-action-main" onclick="abrirTrocaSenha()">
           <span class="material-icons" style="font-size:18px">lock</span> Senha
        </button>
-      <button class="btn-profile btn-action-main" onclick="gerarPDFCarteirinha()" style="background:#FFD700; color:#000; border:none">
+      <button class="btn-profile btn-action-main btn-pdf" onclick="gerarPDFCarteirinha()" style="border:none">
           <span class="material-icons" style="font-size:18px">badge</span> Carteira
        </button>
     </div>
 
     <div class="profile-actions">
-      <button class="btn-profile btn-back" onclick="fecharPerfil()">
+      <button class="btn-profile btn-back-prof" onclick="fecharPerfil()">
         <span class="material-icons" style="font-size: 18px;">arrow_back</span> Voltar
       </button>
     </div>
 
     <div id="modal-senha" class="sub-modal">
       <button class="btn-close-sub" onclick="fecharSubModal('modal-senha')">×</button>
-      <h4 style="margin-top:0; color:#FFD700">Alterar Senha</h4>
+      <h4 style="margin-top:0; color:var(--primary-color)">Alterar Senha</h4>
       <form onsubmit="salvarNovaSenha(event)">
         <input type="password" id="senha-antiga" class="sub-input" placeholder="Senha Atual" required>
         <input type="password" id="senha-nova" class="sub-input" placeholder="Nova Senha" required>
@@ -303,8 +351,9 @@
 
     <div id="modal-foto" class="sub-modal">
       <button class="btn-close-sub" onclick="fecharSubModal('modal-foto')">×</button>
-      <h4 style="margin-top:0; color:#FFD700">Nova Foto</h4>
-      <p style="font-size:12px; color:#aaa">Cole o link público do Google Drive ou link da imagem.</p>
+      <h4 style="margin-top:0; color:var(--primary-color)">Nova Foto</h4>
+      <p style="font-size:12px; color:var(--text-color); opacity:0.6; margin-bottom:10px;">Cole o link público do Google
+        Drive ou da imagem.</p>
       <form onsubmit="salvarNovaFoto(event)">
         <input type="text" id="link-foto" class="sub-input" placeholder="https://..." required>
         <button type="submit" class="sub-btn-save">ATUALIZAR</button>
@@ -315,7 +364,6 @@
 </div>
 
 <script>
-  // Cache seguro do usuário para operações de edição
   let userCache = {};
 
   /**
@@ -369,12 +417,9 @@
      fecharSubModal('modal-foto');
   }
 
-  // --- SUB-MODAIS ---
   function abrirTrocaSenha() { document.getElementById('modal-senha').style.display = 'block'; }
   function abrirEditFoto() { document.getElementById('modal-foto').style.display = 'block'; }
   function fecharSubModal(id) { document.getElementById(id).style.display = 'none'; }
-
-  // --- LÓGICA DE AÇÃO DO USUÁRIO ---
 
   function salvarNovaSenha(e) {
       e.preventDefault();
@@ -383,7 +428,7 @@
       btn.innerText = "..."; btn.disabled = true;
 
       const form = {
-          cpf: userCache.LOGIN, // Mapeia LOGIN para o campo que o backend espera (cpf)
+          cpf: userCache.LOGIN,
           senha_antiga: document.getElementById('senha-antiga').value,
           senha_nova: document.getElementById('senha-nova').value
       };
@@ -417,11 +462,9 @@
         .withSuccessHandler(res => {
             alert(res);
             if(res.includes('✅')) {
-                // Atualiza visualmente e no cache local
                 document.getElementById('p-foto').src = novoLink;
                 userCache.fotoUrl = novoLink;
-                localStorage.setItem('userSession', JSON.stringify(userCache));
-                // Tenta atualizar header se possível
+                try { localStorage.setItem('userSession', JSON.stringify(userCache)); } catch(ex){}
                 try { document.getElementById('header-img').src = novoLink; } catch(ex){}
                 fecharSubModal('modal-foto');
                 e.target.reset();
@@ -436,7 +479,6 @@
   }
 
   function gerarPDFCarteirinha() {
-     // Placeholder mantido conforme solicitado
      alert("⏳ A geração de PDF estará disponível na próxima atualização!");
   }
 </script>
