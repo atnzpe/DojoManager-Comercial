@@ -1,9 +1,11 @@
+
+
 /**
  * ============================================================================
- * ARQUIVO: Código.gs
+ * ARQUIVO: Código.gs 
+ *  
  * DESCRIÇÃO: Controller Principal e API de Dados (Versão 7.0 - CRUDs Totais)
- * AUTOR: Equipe de Desenvolvimento FBKMKLN
- *
+ * AUTOR: Gleyson Atanazio  *
  * ESTE ARQUIVO É O CÉREBRO DA APLICAÇÃO.
  * ELE GERENCIA:
  * 1. Conexão com o Banco de Dados (Google Sheets).
