@@ -1,362 +1,309 @@
 <style>
   /* =======================================================================
-     VARIÁVEIS GLOBAIS (DESIGN SYSTEM - BASE) 
-     (Garante que o Profile tenha as cores mesmo isolado)
+     MÓDULO DE PERFIL - DESIGN SÓLIDO (INDEPENDENTE)
      ======================================================================= */
-  :root {
-    --bg-color: #121212;
-    --surface-color: #1e1e1e;
-    --input-bg: #2d2d2d;
-
-    /* Fallbacks de Segurança (Herdam do Dashboard se injetados, ou usam esses) */
-    --primary-color: #FFD700;
-    --secondary-color: #1e1e1e;
-    --text-color: #ffffff;
-    --btn-text-color: #000000;
-
-    --primary-hover: #ffca28;
-    --whatsapp-color: #25D366;
-    --whatsapp-hover: #128C7E;
-    --text-primary: #ffffff;
-    --text-secondary: #b0b0b0;
-    --error-color: #cf6679;
-    --success-color: #00e676;
-    --border-radius: 12px;
-  }
-
-  /* --- ESTILOS DO MODAL DE PERFIL (V2 - BLINDADO COM EDIÇÃO) --- */
-  .profile-overlay {
+  #modal-perfil {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(5px);
+    /* Fundo escurecido para isolar do resto do sistema */
+    background: rgba(0, 0, 0, 0.90);
     z-index: 10000;
     display: none;
-    /* Controlado via JS */
+    /* Controlado pelo JS */
     justify-content: center;
     align-items: center;
     padding: 20px;
     box-sizing: border-box;
-  }
-
-  .profile-card {
-    background: linear-gradient(145deg, var(--secondary-color), rgba(0, 0, 0, 0.6));
-    border: 1px solid var(--primary-color);
-    border-radius: 20px;
-    width: 100%;
-    max-width: 380px;
-    padding: 30px;
-    text-align: center;
-    position: relative;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-    color: var(--text-color);
     font-family: 'Roboto', sans-serif;
   }
 
-  /* Detalhe Superior */
-  .profile-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 4px;
-    background: var(--primary-color);
-    border-radius: 0 0 10px 10px;
-    box-shadow: 0 0 15px var(--primary-color);
+  /* O Card Principal do Perfil */
+  #modal-perfil .profile-card {
+    /* Cor secundária (Ex: Branco ou Grafite) vinda do Dashboard */
+    background-color: var(--secondary-color, #1e1e1e);
+    border: 2px solid var(--primary-color, #FFD700);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 400px;
+    padding: 30px 25px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
   }
 
-  .profile-img-container {
+  /* Avatar Central */
+  #modal-perfil .profile-img-container {
     width: 120px;
     height: 120px;
-    margin: 20px auto;
+    margin: 0 auto 15px auto;
     border-radius: 50%;
     padding: 4px;
     position: relative;
-    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    background-color: var(--primary-color, #FFD700);
+    /* Anel ao redor da foto */
   }
 
-  .profile-img {
+  #modal-perfil .profile-img {
     width: 100%;
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid var(--secondary-color);
+    border: 4px solid var(--secondary-color, #1e1e1e);
+    background-color: #333;
   }
 
-  /* --- NOVOS ESTILOS DE EDIÇÃO --- */
-  .edit-photo-btn {
+  /* Botão Lápis (Câmera) - Editar Foto */
+  #modal-perfil .edit-photo-btn {
     position: absolute;
     bottom: 0;
     right: 0;
-    background: var(--primary-color);
-    color: var(--btn-text-color);
-    width: 32px;
-    height: 32px;
+    background-color: var(--primary-color, #FFD700);
+    color: var(--btn-text-color, #000);
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    border: 2px solid var(--secondary-color);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    border: 3px solid var(--secondary-color, #1e1e1e);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     transition: transform 0.2s;
   }
 
-  .edit-photo-btn:hover {
+  #modal-perfil .edit-photo-btn:hover {
     transform: scale(1.1);
+    filter: brightness(1.1);
   }
 
-  .profile-name {
-    font-size: 1.5rem;
-    font-weight: 700;
+  /* Textos Principais - Forçando a cor do Texto Global */
+  #modal-perfil .profile-name {
+    font-size: 1.6rem;
+    font-weight: 900;
     margin-bottom: 5px;
-    color: var(--text-color);
+    color: var(--text-color, #fff);
   }
 
-  .profile-login {
-    font-size: 0.9rem;
-    color: var(--text-color);
-    opacity: 0.6;
+  #modal-perfil .profile-login {
+    font-size: 0.95rem;
+    color: var(--text-color, #ccc);
+    opacity: 0.8;
     margin-bottom: 20px;
     font-family: monospace;
+    font-weight: bold;
   }
 
-  .profile-badge {
+  /* Faixa/Graduação Destaque */
+  #modal-perfil .profile-badge {
     display: inline-block;
-    padding: 6px 16px;
-    border-radius: 20px;
-    background: rgba(0, 0, 0, 0.3);
-    color: var(--primary-color);
-    font-weight: bold;
+    padding: 8px 25px;
+    border-radius: 30px;
+    background-color: var(--primary-color, #FFD700);
+    color: var(--btn-text-color, #000);
+    font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 1px;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     margin-bottom: 25px;
-    border: 1px solid var(--primary-color);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   }
 
-  .profile-stats {
+  /* Grid de Estatísticas (Academia e Exame) */
+  #modal-perfil .profile-stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px;
-    background: rgba(0, 0, 0, 0.2);
+    /* Fundo levemente translúcido usando a cor do texto para contraste */
+    background-color: rgba(128, 128, 128, 0.15);
     border-radius: 12px;
     padding: 15px;
     margin-bottom: 25px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(128, 128, 128, 0.2);
   }
 
-  .stat-item {
+  #modal-perfil .stat-item {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-  }
-
-  .stat-label {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    color: var(--text-color);
-    opacity: 0.6;
-    letter-spacing: 0.5px;
-  }
-
-  .stat-value {
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--text-color);
-    opacity: 0.9;
-  }
-
-  /* Botões */
-  .profile-actions {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
-  }
-
-  .btn-profile {
-    padding: 10px 20px;
-    border-radius: 30px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.3s;
-    border: none;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
     gap: 5px;
   }
 
-  .btn-back-prof {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--text-color);
-    opacity: 0.7;
+  #modal-perfil .stat-item:first-child {
+    border-right: 1px solid rgba(128, 128, 128, 0.3);
   }
 
-  .btn-back-prof:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-    background: rgba(255, 255, 255, 0.05);
-    opacity: 1;
+  #modal-perfil .stat-label {
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: var(--text-color, #fff);
+    opacity: 0.6;
   }
 
-  .btn-action-main {
-    background: rgba(0, 0, 0, 0.4);
-    color: var(--text-color);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    flex: 1;
+  #modal-perfil .stat-value {
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--text-color, #fff);
+  }
+
+  /* Botoes de Ação (Senhas e IDs) */
+  #modal-perfil .profile-actions-row {
+    display: flex;
     justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    width: 100%;
   }
 
-  .btn-action-main:hover {
-    background: rgba(0, 0, 0, 0.6);
-    border-color: var(--primary-color);
+  #modal-perfil .btn-prof {
+    padding: 12px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex: 1;
+    border: none;
+    background-color: var(--primary-color, #FFD700);
+    color: var(--btn-text-color, #000);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   }
 
-  .btn-pdf {
-    background: var(--primary-color);
-    color: var(--btn-text-color);
-  }
-
-  .btn-pdf:hover {
+  #modal-perfil .btn-prof:hover {
     filter: brightness(1.15);
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
   }
 
-  /* --- SUB-MODAIS (Camas de Segurança) --- */
-  .sub-modal {
+  /* Botão Voltar (Sólido e Diferenciado) */
+  #modal-perfil .btn-back {
+    width: 100%;
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+  }
+
+  #modal-perfil .btn-back:hover {
+    background-color: #444;
+    color: #fff;
+  }
+
+  /* Sub-Modais (Formulários de Edição) */
+  #modal-perfil .sub-modal {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 90%;
     max-width: 320px;
-    background: var(--secondary-color);
-    border: 1px solid var(--primary-color);
+    background-color: var(--secondary-color, #1e1e1e);
+    border: 2px solid var(--primary-color, #FFD700);
     border-radius: 12px;
-    padding: 20px;
+    padding: 25px;
     display: none;
     z-index: 10001;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9);
   }
 
-  .sub-input {
+  #modal-perfil .sub-input {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--text-color);
-    border-radius: 6px;
+    padding: 14px;
+    margin-bottom: 15px;
+    background-color: rgba(128, 128, 128, 0.1);
+    border: 1px solid rgba(128, 128, 128, 0.5);
+    color: var(--text-color, #fff);
+    border-radius: 8px;
     box-sizing: border-box;
-    font-family: sans-serif;
+    font-size: 1rem;
   }
 
-  .sub-input:focus {
-    border-color: var(--primary-color);
+  #modal-perfil .sub-input:focus {
+    border-color: var(--primary-color, #FFD700);
     outline: none;
+    background-color: rgba(128, 128, 128, 0.2);
   }
 
-  .sub-btn-save {
-    width: 100%;
-    padding: 10px;
-    background: var(--primary-color);
-    color: var(--btn-text-color);
-    font-weight: bold;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-
-  .sub-btn-save:hover {
-    filter: brightness(1.15);
-  }
-
-  .btn-close-sub {
+  #modal-perfil .btn-close-sub {
     position: absolute;
     top: 10px;
     right: 10px;
     background: none;
     border: none;
-    color: var(--text-color);
-    opacity: 0.5;
+    color: #ff5252;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 26px;
+    opacity: 0.8;
   }
 
-  .btn-close-sub:hover {
+  #modal-perfil .btn-close-sub:hover {
     opacity: 1;
-    color: #ff5252;
+    transform: scale(1.1);
   }
 </style>
 
-<div id="modal-perfil" class="profile-overlay">
+<div id="modal-perfil">
   <div class="profile-card">
 
     <div class="profile-img-container">
-      <img id="p-foto" src="" class="profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=333&color=fff'">
+      <img id="p-foto" src="" class="profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=333&color=fff&size=200'">
       <div class="edit-photo-btn" onclick="abrirEditFoto()">
-        <span class="material-icons" style="font-size:16px">edit</span>
+        <span class="material-icons" style="font-size:18px">edit</span>
       </div>
     </div>
 
-    <div id="p-nome" class="profile-name">Carregando...</div>
-    <div id="p-login" class="profile-login">@usuario</div>
+    <h2 id="p-nome" class="profile-name">Carregando...</h2>
+    <p id="p-login" class="profile-login">@usuario</p>
+
     <div id="p-faixa" class="profile-badge">FAIXA</div>
 
     <div class="profile-stats">
-      <div class="stat-item" style="border-right: 1px solid rgba(255,255,255,0.1);">
+      <div class="stat-item">
         <span class="stat-label">Academia</span>
-        <span id="p-academia" class="stat-value">...</span>
+        <span id="p-academia" class="stat-value">---</span>
       </div>
       <div class="stat-item">
         <span class="stat-label">Próximo Exame</span>
-        <span id="p-exame" class="stat-value">...</span>
+        <span id="p-exame" class="stat-value">---</span>
       </div>
     </div>
 
-    <div style="display:flex; gap:10px; margin-bottom:15px">
-      <button class="btn-profile btn-action-main" onclick="abrirTrocaSenha()">
-          <span class="material-icons" style="font-size:18px">lock</span> Senha
-       </button>
-      <button class="btn-profile btn-action-main btn-pdf" onclick="gerarPDFCarteirinha()" style="border:none">
-          <span class="material-icons" style="font-size:18px">badge</span> Carteira
-       </button>
-    </div>
-
-    <div class="profile-actions">
-      <button class="btn-profile btn-back-prof" onclick="fecharPerfil()">
-        <span class="material-icons" style="font-size: 18px;">arrow_back</span> Voltar
+    <div class="profile-actions-row">
+      <button class="btn-prof" onclick="abrirTrocaSenha()">
+        <span class="material-icons" style="font-size:18px">lock</span> Senha
+      </button>
+      <button class="btn-prof" onclick="gerarPDFCarteirinha()">
+        <span class="material-icons" style="font-size:18px">badge</span> Carteira
       </button>
     </div>
 
+    <button class="btn-prof btn-back" onclick="fecharPerfil()">
+      <span class="material-icons" style="font-size: 18px;">arrow_back</span> Fechar
+    </button>
+
     <div id="modal-senha" class="sub-modal">
-      <button class="btn-close-sub" onclick="fecharSubModal('modal-senha')">×</button>
-      <h4 style="margin-top:0; color:var(--primary-color)">Alterar Senha</h4>
+      <button class="btn-close-sub" type="button" onclick="fecharSubModal('modal-senha')">×</button>
+      <h3 style="margin-top:0; color:var(--primary-color); margin-bottom: 20px;">Alterar Senha</h3>
       <form onsubmit="salvarNovaSenha(event)">
         <input type="password" id="senha-antiga" class="sub-input" placeholder="Senha Atual" required>
         <input type="password" id="senha-nova" class="sub-input" placeholder="Nova Senha" required>
-        <button type="submit" class="sub-btn-save">SALVAR</button>
+        <button type="submit" class="btn-prof" style="width:100%">Confirmar</button>
       </form>
     </div>
 
     <div id="modal-foto" class="sub-modal">
-      <button class="btn-close-sub" onclick="fecharSubModal('modal-foto')">×</button>
-      <h4 style="margin-top:0; color:var(--primary-color)">Nova Foto</h4>
-      <p style="font-size:12px; color:var(--text-color); opacity:0.6; margin-bottom:10px;">Cole o link público do Google
-        Drive ou da imagem.</p>
+      <button class="btn-close-sub" type="button" onclick="fecharSubModal('modal-foto')">×</button>
+      <h3 style="margin-top:0; color:var(--primary-color); margin-bottom: 10px;">Nova Foto</h3>
+      <p style="font-size:12px; color:var(--text-color); opacity: 0.7; margin-bottom: 15px;">Cole o link público da
+        imagem ou do Google Drive.</p>
       <form onsubmit="salvarNovaFoto(event)">
         <input type="text" id="link-foto" class="sub-input" placeholder="https://..." required>
-        <button type="submit" class="sub-btn-save">ATUALIZAR</button>
+        <button type="submit" class="btn-prof" style="width:100%">Atualizar Foto</button>
       </form>
     </div>
 
@@ -366,53 +313,40 @@
 <script>
   let userCache = {};
 
-  /**
-   * CARREGAMENTO BLINDADO DE PERFIL
-   */
   function carregarDadosPerfil(user) {
-     console.log("[PROFILE] Iniciando renderização...", user);
+     console.log("🛡️ [MILITARY LOG] Profile Injetado e Iniciado.");
 
-     // 1. Verificação de Segurança
      if(!user) {
-        console.error("[PROFILE] Erro: Objeto user é null.");
         alert("Erro de sessão. Faça login novamente.");
         return;
      }
 
-     userCache = user; // Armazena para uso nas edições
+     userCache = user; 
 
      try {
-        const setTextSafe = (id, text) => {
-           const el = document.getElementById(id);
-           if(el) el.textContent = text;
-        };
-        const setSrcSafe = (id, src) => {
-           const el = document.getElementById(id);
-           if(el) el.src = src;
-        };
+        const setTextSafe = (id, text) => { const el = document.getElementById(id); if(el) el.textContent = text; };
+        const setSrcSafe = (id, src) => { const el = document.getElementById(id); if(el) el.src = src; };
 
-        // 2. Preenchimento de Dados
-        setSrcSafe('p-foto', user.fotoUrl || "https://lh3.googleusercontent.com/d/1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv");
+        // Fallback UI Avatars Dinâmico
+        const nomeLimpo = encodeURIComponent(user.nomeCompleto || 'Aluno');
+        const fallback = `https://ui-avatars.com/api/?name=${nomeLimpo}&background=1e1e1e&color=fff&size=200`;
+        
+        setSrcSafe('p-foto', user.fotoUrl || fallback);
         setTextSafe('p-nome', user.nomeCompleto || "Nome Indisponível");
         setTextSafe('p-login', "@" + (user.LOGIN || "---"));
         setTextSafe('p-faixa', user.graduacao || "Iniciante");
-        
         setTextSafe('p-academia', user.academia || "---");
         setTextSafe('p-exame', user.proximoExame || "A definir");
 
-        // 3. Exibição
-        const modal = document.getElementById('modal-perfil');
-        if(modal) modal.style.display = 'flex';
+        document.getElementById('modal-perfil').style.display = 'flex';
 
      } catch (e) {
-        console.error("[PROFILE] Exceção:", e);
-        alert("Erro ao abrir perfil.");
+        console.error("🚨 Erro UI Perfil:", e);
      }
   }
 
   function fecharPerfil() {
-     const modal = document.getElementById('modal-perfil');
-     if(modal) modal.style.display = 'none';
+     document.getElementById('modal-perfil').style.display = 'none';
      fecharSubModal('modal-senha');
      fecharSubModal('modal-foto');
   }
@@ -425,60 +359,44 @@
       e.preventDefault();
       const btn = e.target.querySelector('button');
       const txtOrig = btn.innerText;
-      btn.innerText = "..."; btn.disabled = true;
+      btn.innerText = "Enviando..."; btn.disabled = true;
 
-      const form = {
-          cpf: userCache.LOGIN,
-          senha_antiga: document.getElementById('senha-antiga').value,
-          senha_nova: document.getElementById('senha-nova').value
-      };
+      const form = { cpf: userCache.LOGIN, senha_antiga: document.getElementById('senha-antiga').value, senha_nova: document.getElementById('senha-nova').value };
 
-      google.script.run
-        .withSuccessHandler(res => {
-            alert(res);
-            btn.innerText = txtOrig; btn.disabled = false;
-            if(res.includes('✅')) { e.target.reset(); fecharSubModal('modal-senha'); }
-        })
-        .withFailureHandler(err => {
-            alert("Erro: " + err.message);
-            btn.innerText = txtOrig; btn.disabled = false;
-        })
-        .trocarSenhaUsuario(form);
+      google.script.run.withSuccessHandler(res => {
+          alert(res); btn.innerText = txtOrig; btn.disabled = false;
+          if(res.includes('✅')) { e.target.reset(); fecharSubModal('modal-senha'); }
+      }).withFailureHandler(err => {
+          alert("Erro: " + err.message); btn.innerText = txtOrig; btn.disabled = false;
+      }).trocarSenhaUsuario(form);
   }
 
   function salvarNovaFoto(e) {
       e.preventDefault();
       const btn = e.target.querySelector('button');
       const txtOrig = btn.innerText;
-      btn.innerText = "..."; btn.disabled = true;
+      btn.innerText = "Atualizando..."; btn.disabled = true;
       
       const novoLink = document.getElementById('link-foto').value;
-      const form = {
-          aluno_login: userCache.LOGIN,
-          nova_foto: novoLink
-      };
+      const form = { aluno_login: userCache.LOGIN, nova_foto: novoLink };
 
-      google.script.run
-        .withSuccessHandler(res => {
-            alert(res);
-            if(res.includes('✅')) {
-                document.getElementById('p-foto').src = novoLink;
-                userCache.fotoUrl = novoLink;
-                try { localStorage.setItem('userSession', JSON.stringify(userCache)); } catch(ex){}
-                try { document.getElementById('header-img').src = novoLink; } catch(ex){}
-                fecharSubModal('modal-foto');
-                e.target.reset();
-            }
-            btn.innerText = txtOrig; btn.disabled = false;
-        })
-        .withFailureHandler(err => {
-            alert("Erro: " + err.message);
-            btn.innerText = txtOrig; btn.disabled = false;
-        })
-        .atualizarFotoPerfil(form);
+      google.script.run.withSuccessHandler(res => {
+          alert(res);
+          if(res.includes('✅')) {
+              document.getElementById('p-foto').src = novoLink;
+              userCache.fotoUrl = novoLink;
+              try {
+                  const prefix = typeof CacheSystem !== 'undefined' ? CacheSystem.PREFIX : 'fbkmkln_cache_';
+                  localStorage.setItem(prefix + 'userSession', JSON.stringify({ value: userCache, expiry: Date.now() + 3600000 }));
+              } catch(ex) { }
+              try { document.getElementById('header-img').src = novoLink; } catch(ex){}
+              fecharSubModal('modal-foto'); e.target.reset();
+          }
+          btn.innerText = txtOrig; btn.disabled = false;
+      }).withFailureHandler(err => {
+          alert("Erro: " + err.message); btn.innerText = txtOrig; btn.disabled = false;
+      }).atualizarFotoPerfil(form);
   }
 
-  function gerarPDFCarteirinha() {
-     alert("⏳ A geração de PDF estará disponível na próxima atualização!");
-  }
+  function gerarPDFCarteirinha() { alert("⏳ A geração de PDF da carteirinha estará disponível na próxima atualização!"); }
 </script>

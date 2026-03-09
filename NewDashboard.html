@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <base target="_top" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <?!= include('Style'); ?>
+  <style>
+    /* WIDGET DE TREINO HOJE */
+    .widget-hoje {
+      background: linear-gradient(135deg, #2c2c2c, #1e1e1e);
+      border-left: 5px solid #FFD700;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      display: none;
+      /* Escondido até carregar */
+      animation: slideDown 0.5s ease;
+    }
+
+    .widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .widget-title {
+      color: #FFD700;
+      font-weight: bold;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .lista-treinos-hoje {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .item-treino {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 10px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .info-treino h4 {
+      margin: 0;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .info-treino p {
+      margin: 3px 0 0;
+      color: #aaa;
+      font-size: 0.8rem;
+    }
+
+    .btn-rota-sm {
+      background: #333;
+      color: #FFD700;
+      border: 1px solid #FFD700;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* CSS DASHBOARD */
+    :root {
+      --primary-color: <?=primaryColor ?> !important;
+      --secondary-color: <?=secondaryColor ?> !important;
+      --text-color: <?=textColor ?> !important;
+      --btn-text-color: <?=btnTextColor ?> !important;
+      --border-radius: 12px;
+      --bg-color: var(--secondary-color);
+      --card-bg: var(--secondary-color);
+      --text-primary: var(--text-color);
+      --gold-color: var(--primary-color);
+    }
+
+    body {
+      margin: 0;
+      font-family: "Roboto", sans-serif;
+      background: var(--bg-color);
+      color: var(--text-primary);
+      background-color: transparent !important;
+      overflow-y: auto;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--primary-color);
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+    }
+
+    .header-logo {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #333;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .dash-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border: 1px solid transparent;
+      transition: 0.2s;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-3px);
+      border-color: #333;
+      background: #2c2c2c;
+    }
+
+    .card-icon {
+      color: #fff;
+      font-size: 28px;
+    }
+
+    .card-title {
+      font-weight: 700;
+    }
+
+    .card-subtitle {
+      font-size: 0.85rem;
+      color: #aaa;
+    }
+
+    .card-special {
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      background: linear-gradient(135deg, #1e1e1e, #2c2900);
+    }
+
+    .card-special .card-icon {
+      color: var(--gold-color);
+    }
+
+    #error-banner {
+      display: none;
+      background: #ff5252;
+      color: #fff;
+      padding: 10px;
+      text-align: center;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #121212;
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .spinner-main {
+      border: 4px solid #333;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border-left-color: var(--gold-color);
+      animation: spin 1s linear infinite;
+      margin-bottom: 15px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg)
+      }
+
+      100% {
+        transform: rotate(360deg)
+      }
+    }
+
+    /* ESTILOS SUPORTE FLUTUANTE */
+    #btn-ajuda-fab {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #FFD700;
+      color: #1e1e1e;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+      cursor: pointer;
+      z-index: 9990;
+      transition: transform 0.2s;
+    }
+
+    #btn-ajuda-fab:hover {
+      transform: scale(1.1);
+    }
+
+    #btn-ajuda-fab .material-icons {
+      font-size: 28px;
+    }
+
+    .modal-overlay-ajuda {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-box-ajuda {
+      background: #fff;
+      width: 90%;
+      max-width: 400px;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 1px solid #FFD700;
+    }
+
+    .modal-header-ajuda {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+
+    .modal-header-ajuda h3 {
+      margin: 0;
+      color: #333;
+      font-size: 18px;
+    }
+
+    .btn-close-ajuda {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #999;
+    }
+
+    .input-ajuda {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      margin-top: 5px;
+      font-family: sans-serif;
+    }
+
+    .btn-enviar-ajuda {
+      width: 100%;
+      padding: 12px;
+      background: #1e1e1e;
+      color: #FFD700;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .btn-enviar-ajuda:hover {
+      background: #333;
+    }
+
+    .btn-enviar-ajuda:disabled {
+      background: #ccc;
+      color: #666;
+      cursor: not-allowed;
+    }
+
+    .btn-manual {
+      width: 100%;
+      padding: 12px;
+      background: #2196f3;
+      /* Azul para diferenciar */
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 15px;
+      /* Espaço para o formulário */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: 0.2s;
+    }
+
+    .btn-manual:hover {
+      background: #1976d2;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    window.onerror = function (m, s, l) {
+      document.getElementById('error-banner').style.display = 'block';
+      document.getElementById('error-banner').innerText = `⚠️ Erro: ${m} (Linha ${l})`;
+    };
+  </script>
+
+  <div id="loading-screen">
+    <div class="spinner-main"></div>
+    <div style="color:#888">Carregando...</div>
+  </div>
+
+  <div class="container" id="main-content" style="display:none">
+    <div id="error-banner"></div>
+    <header class="dashboard-header">
+      <div style="display:flex; gap:15px; align-items:center;">
+        <img id="header-img" src="" class="header-logo" onerror="this.src='https://lh3.googleusercontent.com/d/1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv'" />
+        <div>
+          <h1 id="greeting" style="margin:0; font-size:1.5rem">Olá!</h1>
+          <p style="margin:0; color:#aaa; font-size:0.9rem">Central de Treino</p>
+        </div>
+      </div>
+      <button onclick="logout()" style="background:none; border:none; color:#aaa; cursor:pointer;"><span class="material-icons" style="font-size:30px">logout</span></button>
+    </header>
+
+    <div id="widget-treino-hoje" class="widget-hoje">
+      <div class="widget-header">
+        <div class="widget-title">
+          <span class="material-icons">event_available</span> TREINOS DE HOJE
+          <span id="lbl-dia-semana" style="color:#fff; font-weight:normal; margin-left:5px"></span>
+        </div>
+        <span class="material-icons" style="color:#555; font-size:18px; cursor:pointer" onclick="this.parentElement.parentElement.style.display='none'">close</span>
+      </div>
+      <div id="lista-hoje-container" class="lista-treinos-hoje">
+      </div>
+    </div>
+
+    <div id="dashboard-grid" class="grid-container"></div>
+
+    <?!= include('Profile');?>
+    <?!= include('Programa');?>
+    <?!= include('Biblioteca');?>
+    <?!= include('Videoteca'); ?>
+    <?!= include('Locais_treino'); ?>
+    <?!= include('Cursos'); ?>
+    <?!= include('Social'); ?>
+    <?!= include('Instrutor'); ?>
+    <?!= include('GestaoAlunos'); ?>
+    <?!= include('Certificados'); ?>
+    <?!= include('Ranking');?>
+    <?!= include('ChamadaDinamica'); ?>
+    <?!= include('Financeiro'); ?>
+  </div>
+
+  <div id="admin-module-wrapper" style="display:none;">
+    <?!= include('Adm'); ?>
+  </div>
+
+  <div id="btn-ajuda-fab" onclick="abrirModalAjuda()" title="Precisa de ajuda?">
+    <span class="material-icons">support_agent</span>
+  </div>
+
+  <div id="modal-ajuda" class="modal-overlay-ajuda">
+    <div class="modal-box-ajuda">
+
+      <div class="modal-header-ajuda">
+        <h3><span class="material-icons" style="vertical-align:bottom; color:#FFD700">support_agent</span> Central de
+          Ajuda</h3>
+        <button onclick="fecharModalAjuda()" class="btn-close-ajuda"><span class="material-icons">close</span></button>
+      </div>
+
+      <button onclick="irParaManual()" class="btn-manual">
+        <span class="material-icons">menu_book</span> LER MANUAL DO APP
+      </button>
+
+      <div style="display:flex; align-items:center; margin: 15px 0; color:#aaa; font-size:11px;">
+        <hr style="flex:1; border:0; border-top:1px solid #ddd;">
+        <span style="padding:0 10px;">OU RELATE UM PROBLEMA</span>
+        <hr style="flex:1; border:0; border-top:1px solid #ddd;">
+      </div>
+
+      <form onsubmit="enviarAjuda(event)">
+        <input type="hidden" name="sup_login" id="sup_login">
+        <input type="hidden" name="sup_nome" id="sup_nome">
+
+        <div style="margin-bottom:10px">
+          <label style="font-size:11px; font-weight:bold; color:#666">TIPO</label>
+          <select name="sup_tipo" class="input-ajuda" required>
+            <option value="" disabled selected>Selecione...</option>
+            <option value="Dúvida">Minha Dor / Dúvida</option>
+            <option value="Sugestão">Sugestão de Melhoria</option>
+            <option value="Elogio">Elogio</option>
+            <option value="Erro">Relatar Erro / Bug</option>
+            <option value="Outros">Outros</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:10px">
+          <label style="font-size:11px; font-weight:bold; color:#666">ASSUNTO</label>
+          <input type="text" name="sup_assunto" class="input-ajuda" placeholder="Resumo..." required>
+        </div>
+
+        <div style="margin-bottom:15px">
+          <label style="font-size:11px; font-weight:bold; color:#666">MENSAGEM</label>
+          <textarea name="sup_msg" class="input-ajuda" rows="3" placeholder="Descreva aqui..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn-enviar-ajuda">ENVIAR MENSAGEM</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const LOGO_PADRAO = "<?= logoUrl ?>";
+    let currentUser = {};
+    const LISTA_INSTRUTOR = ["INSTRUTOR N1", "INSTRUTOR N2", "INSTRUTOR N3", "PROFESSOR", "MESTRE", "VERDE ESCURO", "AZUL ESCURO", "MARROM", "PRETA", "PRETA E BRANCA"];
+    const LISTA_ADMIN = ["MESTRE", "ADMIN", "PRETA E BRANCA", "VERMELHA"];
+
+    // --- ENGINE DE CACHE (BLINDAGEM DE PERFORMANCE) ---
+    const CacheSystem = {
+      PREFIX: 'fbkmkln_cache_',
+      set: function(key, data, minutes = 60) {
+        try {
+          const payload = { value: data, expiry: Date.now() + (minutes * 60 * 1000), version: '1.0' };
+          localStorage.setItem(this.PREFIX + key, JSON.stringify(payload));
+          console.log(`[CACHE] Salvo: ${key}`);
+        } catch (e) { console.warn("Cache Full", e); }
+      },
+      get: function(key) {
+        try {
+          const recordStr = localStorage.getItem(this.PREFIX + key);
+          if (!recordStr) return null;
+          const record = JSON.parse(recordStr);
+          if (Date.now() > record.expiry) { localStorage.removeItem(this.PREFIX + key); return null; }
+          console.log(`[CACHE] Hit: ${key}`);
+          return record.value;
+        } catch (e) { return null; }
+      },
+      clearAll: function() {
+        Object.keys(localStorage).forEach(k => { if(k.startsWith(this.PREFIX)) localStorage.removeItem(k); });
+      }
+    };
+
+    // Função auxiliar atualizada para suportar MÚLTIPLOS BOTÕES
+    function criarCardTreino(nome, hora, detalhe, checkinAtivo, linkMaps, pin, corDetalhe = "#888") {
+        const div = document.createElement('div');
+        div.className = 'item-treino';
+        
+        let areaBotoes = '<div style="display:flex; gap:8px; align-items:center;">';
+        
+        // 1. Botão ROTA (Se tiver link) - Ícone menor para caber
+        if (linkMaps) {
+            areaBotoes += `
+                <a href="${linkMaps}" target="_blank" class="btn-rota-sm" style="background:#333; border:1px solid #555; color:#fff; padding:5px 8px;" title="Ver Rota">
+                    <span class="material-icons" style="font-size:16px">near_me</span>
+                </a>`;
+        }
+
+        // 2. Botão CHECK-IN (Se estiver ativo)
+        if (checkinAtivo) {
+            areaBotoes += `
+                <button onclick="irParaCheckin('${pin}')" class="btn-rota-sm" style="background:#4caf50; border-color:#4caf50; color:#fff;">
+                    <span class="material-icons" style="font-size:14px">qr_code</span> CHECK-IN
+                </button>`;
+        } 
+        
+        // 3. Fallback: Se não tiver nada (apenas info)
+        if (!checkinAtivo && !linkMaps) {
+             areaBotoes += `<span style="font-size:0.65rem; color:#666; border:1px solid #444; padding:2px 6px; border-radius:4px;">Aguarde</span>`;
+        }
+
+        areaBotoes += '</div>';
+
+        div.innerHTML = `
+            <div class="info-treino">
+                <h4 style="color:${checkinAtivo ? '#FFD700' : '#fff'}">${nome}</h4>
+                <p><span class="material-icons" style="font-size:12px; vertical-align:middle">schedule</span> ${hora}</p>
+                <p style="font-size:0.7rem; color:${corDetalhe}; margin-top:4px;">${detalhe}</p>
+            </div>
+            ${areaBotoes}
+        `;
+        return div;
+    }
+
+    function irParaCheckin(pin) {
+        // Redireciona para o módulo de chamada já injetando o PIN (opcional) ou só abrindo
+        if(typeof initChamadaDinamica === 'function') {
+            initChamadaDinamica('aluno');
+            // Pequeno hack para preencher o PIN se quiser
+            setTimeout(() => {
+                const input = document.getElementById('input-pin');
+                if(input && pin) input.value = pin;
+            }, 500);
+        } else {
+            alert("Módulo de chamada carregando...");
+        }
+    }
+
+    // --- LÓGICA DE TREINO DO DIA (VERSÃO FINAL 2.0: BOTÕES SIMULTÂNEOS) ---
+    function carregarTreinosDeHoje() {
+        const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+        const hoje = new Date();
+        const diaHojeStr = diasSemana[hoje.getDay()];
+        
+        document.getElementById('lbl-dia-semana').textContent = `(${diaHojeStr})`;
+        const container = document.getElementById('lista-hoje-container');
+        container.innerHTML = '<div style="text-align:center;color:#888;">Buscando treinos...</div>';
+
+        // 1. Busca Aulas LIVE (Dinâmicas)
+        google.script.run.withSuccessHandler(aulasLive => {
+            
+            // 2. Busca Locais FIXOS (Planilha)
+            google.script.run.withSuccessHandler(locaisFixos => {
+                
+                container.innerHTML = "";
+                let encontrouAlgum = false;
+                const nomesFixos = locaisFixos ? locaisFixos.map(l => l.nome.trim().toLowerCase()) : [];
+
+                // --- A) PROCESSAR AULAS LIVE ---
+                if (aulasLive && aulasLive.length > 0) {
+                    aulasLive.forEach(aula => {
+                        encontrouAlgum = true;
+                        
+                        const nomeLocalAtual = String(aula.academia).trim().toLowerCase();
+                        const nomeInstrutor = aula.instrutor.split(' ')[0];
+                        
+                        // Busca o objeto local completo para pegar o link
+                        const localObj = locaisFixos ? locaisFixos.find(l => l.nome.trim().toLowerCase() === nomeLocalAtual) : null;
+                        const isLocalConhecido = !!localObj;
+                        
+                        let detalheTexto = "";
+                        let corTexto = "#888";
+                        let linkMapa = null;
+
+                        if (isLocalConhecido) {
+                            // Local Conhecido: Mostra nome instrutor + Link do Mapa
+                            detalheTexto = `Aula Ativa com ${nomeInstrutor}`;
+                            corTexto = "#fff";
+                            linkMapa = localObj.linkMaps; // <--- PEGA O LINK DO MAPA
+                        } else {
+                            // Local Avulso: Alerta
+                            detalheTexto = `⚠️ Consulte ${nomeInstrutor} para o local exato.`;
+                            corTexto = "#FFD700";
+                            linkMapa = null;
+                        }
+
+                        const div = criarCardTreino(
+                            aula.academia, 
+                            aula.horario, 
+                            detalheTexto, 
+                            true, // Check-in Ativo
+                            linkMapa, // Passa o link se existir
+                            aula.pin,
+                            corTexto
+                        );
+                        container.appendChild(div);
+                    });
+                }
+
+                // --- B) PROCESSAR AULAS FIXAS (Apenas as que NÃO estão Live) ---
+                if (locaisFixos) {
+                    locaisFixos.forEach(local => {
+                        const diasLocal = String(local.dias).toLowerCase();
+                        const diaBusca = diaHojeStr.toLowerCase().slice(0, 3);
+
+                        if (diasLocal.includes(diaBusca) || diasLocal.includes("todos")) {
+                            const jaEstaLive = aulasLive.some(al => al.academia.toLowerCase() === local.nome.toLowerCase());
+                            
+                            if (!jaEstaLive) {
+                                encontrouAlgum = true;
+                                const div = criarCardTreino(
+                                    local.nome, 
+                                    local.horarios, 
+                                    local.cidade || "Unidade Oficial", 
+                                    false, // Check-in Fechado
+                                    local.linkMaps
+                                );
+                                container.appendChild(div);
+                            }
+                        }
+                    });
+                }
+
+                document.getElementById('widget-treino-hoje').style.display = encontrouAlgum ? 'block' : 'none';
+
+            }).getLocaisTreino();
+
+        }).buscarAulasDisponiveisAluno("TODOS");
+    }
+
+    window.onload = function () {
+      try {
+        const s = localStorage.getItem("userSession");
+        if (!s) { logout(); return; }
+        renderizarDashboard(JSON.parse(s));
+
+        carregarTreinosDeHoje();
+      } catch (e) { logout(); }
+    };
+
+    function renderizarDashboard(user) {
+      currentUser = user;
+      const nome = user.nomeCompleto || user.LOGIN || "Aluno";
+      document.getElementById("greeting").textContent = `Kidá, ${nome.split(" ")[0]}!`;
+      if (user.fotoUrl) document.getElementById("header-img").src = user.fotoUrl;
+
+      const grid = document.getElementById("dashboard-grid");
+      grid.innerHTML = "";
+      getMenuCards(user).forEach(item => {
+        const div = document.createElement("div");
+        div.className = item.special ? "dash-card card-special" : "dash-card";
+        div.onclick = () => handleAction(item.action);
+        div.innerHTML = `<span class="material-icons card-icon">${item.icon}</span><div class="card-title">${item.title}</div><div class="card-subtitle">${item.subtitle}</div>`;
+        grid.appendChild(div);
+      });
+
+      document.getElementById("loading-screen").style.display = "none";
+      document.getElementById("main-content").style.display = "block";
+    }
+
+    function getMenuCards(user) {
+      // 1. Definição da Base de Cards (Todos veem)
+      const list = [
+
+        { title: "Perfil do Aluno", subtitle: "Dados e carteirinha", icon: "person", action: "perfil" },
+        { title: "Vídeo Aulas", subtitle: "Vídeos separados por Graduação", icon: "ondemand_video", action: "videos" },
+        { title: "Programa Técnico da Graduação", subtitle: "PDFs das faixas", icon: "description", action: "programa" },
+        { title: "Cursos e Eventos", subtitle: "Faça aqui sua inscriçõa para Curos e Eventos abertos", icon: "school", action: "cursos" },
+        { title: "Ranking", subtitle: "Destaques do mês", icon: "emoji_events", action: "ranking" },
+        { title: "Loja", subtitle: "Compra e receba diacs de Equipamentos e produtos para treino", icon: "shopping_cart", action: "shop" },
+        
+        
+        { title: "Locais de Treino", subtitle: "Locais disponivies para Treino, Aulas em Aberto", icon: "location_on", action: "locais" },
+        { title: "Mídias Sociais", subtitle: "Nossas redes", icon: "groups", action: "social" },
+        
+        { title: "Biblioteca", subtitle: "Manuais, Livors e artigos", icon: "menu_book", action: "biblioteca" },
+        { title: "Certificados", subtitle: "Diplomas e Certificados", icon: "workspace_premium", action: "certificados" },
+        
+        {title: "Financeiro", subtitle: "Pagamentos e Planos", icon: "attach_money", action: "financeiro" },
+      ];
+
+      // 2. Validação de Nível
+      const grad = String(user.graduacao || "").toUpperCase();
+      const nivel = String(user.nivel || "").toUpperCase();
+      const ehInstrutor = user.isInstrutor === true || LISTA_INSTRUTOR.some(f => grad.includes(f) || nivel.includes(f));
+      const ehAdmin = LISTA_ADMIN.some(f => grad.includes(f) || nivel.includes(f));
+
+      // 3. Lógica de Chamada (Diferente para Aluno e Instrutor)
+      if (ehInstrutor || ehAdmin) {
+        list.push({ title: "Lista de Presença", subtitle: "Gerenciar Aula (PIN)", icon: "qr_code_2", action: "chamada_instrutor", special: true });
+        list.push({ title: "Gestão de Alunos", subtitle: "Cadastros e Edição", icon: "manage_accounts", action: "view_instrutor", special: true });
+        list.push({ title: "Cadastrar Aluno", subtitle: "Link Externo", icon: "person_add", action: "form_cadastro", special: true });
+      } else {
+        // Aluno vê apenas "Check-in"
+        list.push({ title: "Check-in Aula", subtitle: "Marcar Presença", icon: "qr_code_scanner", action: "chamada_aluno", special: true });
+      }
+
+      // 4. Admin
+      if (ehAdmin) {
+        list.push({ title: "Painel Admin", subtitle: "Gestão Total", icon: "settings_suggest", action: "view_admin", special: true });
+      }
+      
+      return list;
+    }
+
+    function handleAction(action) {
+      // Rotas de Chamada
+      if (action === "chamada_instrutor") { 
+          if(typeof initChamadaDinamica === 'function') initChamadaDinamica('instrutor'); 
+          else alert("Módulo de Chamada carregando...");
+          return; 
+      }
+      if (action === "chamada_aluno") { 
+          if(typeof initChamadaDinamica === 'function') initChamadaDinamica('aluno'); 
+          else alert("Módulo de Chamada carregando...");
+          return; 
+      }
+
+      // Rotas Especiais
+      if (action === "view_admin") { abrirAdminView(); if (typeof carregarAlunos === 'function') carregarAlunos(); return; }
+      if (action === "view_instrutor") { 
+          if(typeof abrirGestaoAlunos === 'function') abrirGestaoAlunos(); 
+          else alert("Erro: Módulo de Gestão não carregado.");
+          return; 
+      }
+      if (action === "shop") { window.open("https://wa.me/5581997629232", "_blank"); return; }
+      if (action === "form_cadastro") { window.open("https://forms.gle/3vXp86VCmuLzHrk46", "_blank"); return; }
+
+      // Rotas Padrão
+      const map = { 
+          "perfil": () => carregarDadosPerfil(currentUser), 
+          "programa": () => abrirPrograma(currentUser), 
+          "biblioteca": () => abrirBiblioteca(), 
+          "videos": () => abrirVideoteca(), 
+          "locais": () => abrirLocaisTreino(), 
+          "cursos": () => abrirCursos(), 
+          "social": () => abrirSocial(),
+          "financeiro": () => abrirFinanceiro(), 
+          "ranking": () => abrirRanking(), 
+          "certificados": () => abrirCertificados()
+      };
+      if (map[action]) map[action]();
+    }
+
+    function abrirAdminView() { document.getElementById("main-content").style.display = "none"; document.getElementById("admin-module-wrapper").style.display = "block"; }
+    window.fecharAdmin = function () { document.getElementById("admin-module-wrapper").style.display = "none"; document.getElementById("main-content").style.display = "block"; };
+    
+    function logout() { 
+        localStorage.removeItem("userSession"); 
+        CacheSystem.clearAll(); 
+        google.script.run.withSuccessHandler(u => window.top.location.href = u + "?page=login").getScriptUrl(); 
+    }
+
+    // --- FUNÇÕES DE SUPORTE ---
+    function abrirModalAjuda() {
+        try {
+            if(currentUser) {
+                document.getElementById('sup_login').value = currentUser.LOGIN || "Desconhecido";
+                document.getElementById('sup_nome').value = currentUser.nomeCompleto || "Desconhecido";
+            }
+        } catch(e) {}
+        document.getElementById('modal-ajuda').style.display = 'flex';
+    }
+
+    function fecharModalAjuda() { document.getElementById('modal-ajuda').style.display = 'none'; }
+
+    // Função para abrir o Manual (Ajuda.html)
+    function irParaManual() {
+        const btn = document.querySelector('.btn-manual');
+        btn.innerHTML = "CARREGANDO..."; 
+        
+        google.script.run
+          .withSuccessHandler(url => {
+             window.top.location.href = url + "?page=ajuda";
+          })
+          .getScriptUrl();
+    }
+
+    function enviarAjuda(e) {
+        e.preventDefault();
+        const btn = document.querySelector('.btn-enviar-ajuda');
+        const originalTxt = btn.innerText;
+        btn.innerText = "ENVIANDO..."; btn.disabled = true;
+        const form = document.querySelector('#modal-ajuda form');
+        
+        google.script.run.withSuccessHandler(res => {
+            alert(res); form.reset(); fecharModalAjuda(); btn.innerText = originalTxt; btn.disabled = false;
+        }).withFailureHandler(err => {
+            alert("Erro: " + err.message); btn.innerText = originalTxt; btn.disabled = false;
+        }).salvarTicketSuporte(form);
+    }
+  </script>
+</body>
+
+</html>

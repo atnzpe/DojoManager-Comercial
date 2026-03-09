@@ -4,7 +4,7 @@ CONTEXTO DO PROJETO:
 Estou desenvolvendo o "DojoManager", um sistema SaaS White-Label para gestão de academias de artes marciais (Jiu-Jitsu, Krav Maga, Muay Thai, etc). O sistema não usa bancos de dados tradicionais; ele utiliza o Google Sheets como banco de dados relacional e o Google Apps Script como Backend (API) e Servidor Web.
 
 ARQUITETURA TÉCNICA:
-- Frontend: SPA (Single Page Application) em HTML/CSS/JS puro (sem frameworks como React ou Vue). Interface em Dark Mode (Design System baseado na cor Dourada e Grafite).
+- Frontend: SPA (Single Page Application) em HTML/CSS/JS puro (sem frameworks como React ou Vue). Interface Personalizável  atrves do arquivo Adm.html (Design System baseado na leitura do conteúdo da planilha).
 - Roteamento: O index (Dashboard.html) carrega os módulos via Includes do Apps Script (<?!= include('Modulo'); ?>) e a navegação esconde/mostra divs usando display:none / block.
 - Backend: Código.gs com funções de leitura/escrita blindadas (Anti-Block Writing), mapeando colunas dinamicamente pelos cabeçalhos (headers) da planilha.
 - Autenticação: Customizada, cruzando login/senha com a aba "Acessos" e trazendo os dados da aba "cadastro_de_alunos". As sessões são guardadas no localStorage do navegador.
@@ -18,16 +18,41 @@ MÓDULOS EXISTENTES:
 6. Ranking de Presenças.
 
 OBJETIVO ATUAL:
+
 Estou evoluindo a plataforma para ser vendida para outras academias. Preciso implementar as seguintes funcionalidades:
-1. Check-in Antecipado (Agendamento de aulas futuras).
-2. Envio de notificações de cobrança automáticas via WhatsApp (usando Triggers do Apps Script e chamadas fetch para APIs externas).
-3. Generalização do sistema (tornar as faixas, graduações e modalidades totalmente dinâmicas, lendo do banco de dados e não hardcoded).
+1. Aplicar o Style.html em todas as páginas atulamente ja foi aplicado a pagina Login.html e Agendar.html. Preciso atulizar a pagina Dashboard.html apara que utilize o mesmo estilo css da pagina login.html que foi definido por Style.html
+2. Generalização do sistema (tornar personalizavel, cores do sistema, as faixas, graduações, e modalidades totalmente dinâmicas, lendo do banco de dados e não hardcoded).
+3. Check-in Antecipado (Agendamento de aulas futuras).
+4. Envio de notificações de cobrança automáticas via WhatsApp (usando Triggers do Apps Script e chamadas fetch para APIs externas).
+5. Generalização do sistema (tornar personalizável chave PIX, cores do sistema, as faixas, graduações, e modalidades totalmente dinâmicas, lendo do banco de dados e não hardcoded).
+6. Controle todas as graduações do início ao fim.
+7. Gestao do que foi dado em aula, exempoo técnica 1 , 2 ou três. Podemos anexar vídeos ou conteúdos que ja estão disponiveis na base de ddos., com possiblidade de consuta futura através de rrlatoriso e atulizaçõa da carreira do aluno o seu desenvolvimento e o que ele ja consumiu de acorod com sua graduaçõa.
+Features
+Gestão de alunos
+Gestão de graduações
+Agendamento de aulas e treinos por modalidade e nível	
+Controle de presenças	
+Gestão de contratos	
+Fluxo de caixa	
+Cobrança automática
+Cadastro completo com graduações, modalidades e número de alunos ilimitado
+Métricas de receita, frequência e performance da academia
+Gestão de leads e conversão de prospects	
+Notificações	
+Relatórios
+Contratos	
+Inadimplentes	
+Vendas	
+Suporte
+suporte online 24/7	
+Atendimento via whatsapp
 
 REGRAS DE CÓDIGO:
 - Forneça códigos modulares.
-- Todo CSS deve estar contido em tags <style> no próprio arquivo HTML do módulo.
+- Todo CSS deve estar contido em tags <style> no próprio arquivo HTML do módulo e importa as propriedades de Style.html ou da pagina pai Dashboard.html.
 - Todo JS do frontend deve estar em tags <script> no próprio arquivo HTML do módulo.
 - Priorize performance para não exceder o limite de execução de 6 minutos do Apps Script.
-- Seja extremamente cuidadoso ao manipular arrays vindos do Sheets para evitar erros de índices.
+- Seja extremamente cuidadoso ao manipular arrays vindos do Sheets para evitar erros de índices use sempre cabelcalhos aou invés de índices de coluna.
+- Crie um branch , e issues a cada etapa do roadmap.
 
 Com base neste contexto, aguarde minha primeira instrução/pedido de código.
