@@ -1,200 +1,198 @@
-<!--Ajuda - Página de Ajuda - Interface moderna e responsiva para suporte e informações aos alunos. -->
-
-
 <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
   <base target="_top">
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 
   <style>
-    /* Injeção Dinâmica das Variáveis do Backend */
+    /* --- INJEÇÃO DE VARIÁVEIS GLOBAIS DO BACKEND (WHITE-LABEL) --- */
+    /* Sobrescreve as cores padrão do sistema pelas cores da Academia (lidas da planilha) */
     :root {
-      --primary-color: <?=primaryColor ?> !important;
-      --secondary-color: <?=secondaryColor ?> !important;
-      --text-color: <?=textColor ?> !important;
-      --btn-text-color: <?=btnTextColor ?> !important;
+      --primary-color: <?=primaryColor ?> !important;   /* Cor Destaque / Identidade */
+      --secondary-color: <?=secondaryColor ?> !important; /* Cor de Fundo de Cards */
+      --text-color: <?=textColor ?> !important;         /* Cor das Fontes */
+      --btn-text-color: <?=btnTextColor ?> !important;  /* Cor do texto em botões ativos */
     }
   </style>
 
   <?!= include('Style'); ?>
 
   <style>
-    /* --- ESTRUTURA BASE DA PÁGINA (Com Fundo Dinâmico) --- */
-    body {
-      background-color: transparent !important;
-    }
+    /* --- ESTILOS EXCLUSIVOS DESTE MÓDULO (SCOPED CSS) --- */
+    
+    /* Remove a cor de fundo do body global para permitir ver a imagem de fundo */
+    body { background-color: transparent !important; }
 
+    /* BG-LAYER: Imagem de fundo institucional da academia */
     .bg-layer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url('<?= bgUrl ?>');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      z-index: -2;
+      position: fixed;               /* Fixa no fundo da tela (não rola com o texto) */
+      top: 0; left: 0; width: 100%; height: 100%; /* Cobre viewport total */
+      background-image: url('<?= bgUrl ?>'); /* Traz a imagem da planilha */
+      background-size: cover;        /* Redimensiona sem distorcer a proporção */
+      background-position: center;   /* Foco no centro da foto */
+      background-repeat: no-repeat;  /* Evita textura repetida */
+      z-index: -2;                   /* Camada mais funda possível */
     }
 
+    /* OVERLAY: Camada de escurecimento sobre a imagem para garantir leitura do texto */
     .overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.80);
-      /* Fundo bem escuro para facilitar leitura */
-      z-index: -1;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.80); /* 80% de opacidade preta (bem escuro) */
+      z-index: -1;                   /* Fica entre a foto e o conteúdo */
     }
 
+    /* CONTAINER PRINCIPAL: Centraliza o conteúdo da página */
     .ajuda-container {
-      width: 100%;
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-      box-sizing: border-box;
-      position: relative;
-      z-index: 1;
-      padding-bottom: 60px;
+      width: 100%;                   /* Responsivo */
+      max-width: 600px;              /* Limite para não esticar muito no PC */
+      margin: 0 auto;                /* Centraliza na tela */
+      padding: 20px;                 /* Respiro interno */
+      box-sizing: border-box;        /* Garante que o padding não fure o limite de 600px */
+      position: relative;            /* Necessário para o z-index funcionar */
+      z-index: 1;                    /* Coloca o conteúdo acima do fundo */
+      padding-bottom: 60px;          /* Espaço extra no final da rolagem */
     }
 
-    /* HEADER FIXO */
+    /* HEADER FIXO: O título "Manual do App" que fica grudado no topo */
     .ajuda-header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 25px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid var(--primary-color);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      /* Usando a cor secundária com leve transparência para dar destaque ao topo */
-      background-color: var(--secondary-color);
-      padding: 15px;
-      border-radius: 0 0 12px 12px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      display: flex;                 /* Alinha o botão de voltar e os textos lado a lado */
+      align-items: center;           /* Centraliza verticalmente */
+      margin-bottom: 25px;           /* Afasta do primeiro item de ajuda */
+      padding-bottom: 15px;          /* Respiro interno inferior */
+      border-bottom: 2px solid var(--primary-color); /* Linha divisória da cor da academia */
+      position: sticky;              /* CSS moderno: gruda o elemento no topo ao rolar */
+      top: 0;                        /* Define onde ele "gruda" (no pixel 0) */
+      z-index: 10;                   /* Mantém o header sempre acima do texto rolado */
+      background-color: var(--secondary-color); /* Usa o fundo do card para não ficar transparente */
+      padding: 15px;                 /* Respiro geral do header */
+      border-radius: 0 0 12px 12px;  /* Arredonda apenas as pontas de baixo */
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* Sombra para dar noção de profundidade */
     }
 
+    /* BOTÃO VOLTAR NO HEADER */
     .btn-back {
-      background: none;
-      border: none;
-      color: var(--text-color);
-      cursor: pointer;
-      padding: 0;
-      margin-right: 15px;
-      transition: 0.2s;
+      background: none; border: none; /* Tira estilo nativo de botão */
+      color: var(--text-color);       /* Herda cor da fonte */
+      cursor: pointer;                /* Cursor de mãozinha */
+      padding: 0; margin-right: 15px; /* Afasta do título */
+      transition: 0.2s;               /* Suaviza hover */
     }
 
+    /* Efeito ao passar o mouse no botão voltar */
     .btn-back:hover {
-      color: var(--primary-color);
-      transform: translateX(-3px);
+      color: var(--primary-color);    /* Fica da cor da marca */
+      transform: translateX(-3px);    /* Move 3px para a esquerda (efeito visual de "voltar") */
     }
 
+    /* TÍTULO DA PÁGINA */
     .ajuda-title {
-      font-size: 1.5rem;
-      font-weight: 900;
-      color: var(--primary-color);
-      margin: 0;
-      text-transform: uppercase;
+      font-size: 1.5rem;             /* Tamanho grande */
+      font-weight: 900;              /* Negrito extra pesado (fonte Roboto 900 importada) */
+      color: var(--primary-color);   /* Cor da marca */
+      margin: 0;                     /* Remove margens nativas do h1 */
+      text-transform: uppercase;     /* Tudo em maiúsculo */
     }
 
-    /* ACORDEÃO SÓLIDO (Design System) */
+    /* TÍTULO DE CAPÍTULO (Ex: 1. Primeiros Passos) */
+    .chapter-title {
+      color: var(--text-color);      
+      opacity: 0.5;                  /* Apagado para servir de organizador, não de conteúdo principal */
+      font-size: 0.8rem;             /* Letra miúda */
+      text-transform: uppercase;     /* Maiúsculo */
+      letter-spacing: 1px;           /* Espaça as letras para ficar elegante */
+      margin: 30px 0 10px 5px;       /* Afasta do bloco anterior */
+      font-weight: 900;              /* Negrito */
+    }
+
+    /* --- COMPONENTE: ACORDEÃO (Botão que expande) --- */
     .accordion {
-      background-color: var(--secondary-color);
-      color: var(--text-color);
-      cursor: pointer;
-      padding: 18px 20px;
-      width: 100%;
-      text-align: left;
-      border: 1px solid var(--primary-color);
-      outline: none;
-      transition: 0.3s;
-      font-size: 1rem;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-radius: 12px;
-      margin-bottom: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      background-color: var(--secondary-color); /* Fundo padrão de card */
+      color: var(--text-color);      /* Cor da fonte do cliente */
+      cursor: pointer;               /* Clicável */
+      padding: 18px 20px;            /* Área de toque generosa (Mobile) */
+      width: 100%;                   /* Largura total */
+      text-align: left;              /* Alinha texto à esquerda */
+      border: 1px solid var(--primary-color); /* Borda da cor da academia */
+      outline: none;                 /* Remove borda feia de acessibilidade padrão */
+      transition: 0.3s;              /* Suavidade ao abrir/fechar */
+      font-size: 1rem;               /* Tamanho base de leitura */
+      font-weight: bold;             /* Destaque */
+      display: flex;                 /* Flexbox para alinhar texto e setinha */
+      justify-content: space-between;/* Separa o texto da seta ao máximo */
+      align-items: center;           /* Alinha no meio verticalmente */
+      border-radius: 12px;           /* Arredonda o card */
+      margin-bottom: 8px;            /* Espaço entre um botão e outro */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* Sombra de elevação */
     }
 
-    .active,
-    .accordion:hover {
-      background-color: rgba(0, 0, 0, 0.4);
-      filter: brightness(1.1);
+    /* ESTADO ATIVO OU HOVER DO ACORDEÃO */
+    .active, .accordion:hover {
+      background-color: rgba(0, 0, 0, 0.4); /* Escurece um pouco ao clicar */
+      filter: brightness(1.1);       /* Aumenta o brilho da cor da borda */
     }
 
-    /* Painel Expansível */
+    /* --- COMPONENTE: PAINEL DE TEXTO OCULTO --- */
     .panel {
-      padding: 0 20px;
-      background-color: rgba(0, 0, 0, 0.3);
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease-out;
-      border-left: 2px solid var(--primary-color);
-      border-radius: 0 0 12px 12px;
-      margin-bottom: 15px;
-      margin-top: -10px;
+      padding: 0 20px;               /* Zero padding vertical inicialmente para esconder perfeitamente */
+      background-color: rgba(0, 0, 0, 0.3); /* Fundo sutilmente translúcido */
+      max-height: 0;                 /* A "mágica" CSS: altura zero esconde o elemento */
+      overflow: hidden;              /* Corta qualquer conteúdo que tente vazar da altura zero */
+      transition: max-height 0.3s ease-out; /* Anima a altura de 0 para o tamanho real do texto */
+      border-left: 2px solid var(--primary-color); /* Tracinho colorido na esquerda para design */
+      border-radius: 0 0 12px 12px;  /* Arredonda só em baixo para colar no botão */
+      margin-bottom: 15px;           /* Afasta do próximo bloco */
+      margin-top: -10px;             /* "Engole" a margem do botão de cima para parecer uma peça só */
     }
 
-    .panel p,
-    .panel li {
+    /* Tipografia dentro do painel escondido */
+    .panel p, .panel li {
       color: var(--text-color);
-      opacity: 0.85;
-      line-height: 1.6;
+      opacity: 0.85;                 /* Texto secundário */
+      line-height: 1.6;              /* Espaço entre linhas para facilitar leitura */
       font-size: 0.95rem;
       margin-bottom: 10px;
       margin-top: 15px;
     }
 
-    .panel ul,
-    .panel ol {
-      padding-left: 20px;
+    /* Listas dentro do painel */
+    .panel ul, .panel ol {
+      padding-left: 20px;            /* Recuo padrão para listas HTML */
       margin-top: 5px;
     }
 
+    /* Ícone ao lado do título da pergunta */
     .icon-topic {
       margin-right: 10px;
-      vertical-align: middle;
-      color: var(--primary-color);
+      vertical-align: middle;        /* Alinha com o texto */
+      color: var(--primary-color);   /* Fica da cor da marca */
       font-size: 24px;
     }
 
+    /* Setinha (Chevron) na direita do botão */
     .chevron {
-      transition: transform 0.3s;
+      transition: transform 0.3s;    /* A animação de girar demora 0.3s */
       color: var(--primary-color);
     }
 
-    .active .chevron {
-      transform: rotate(180deg);
-    }
+    /* Quando o botão recebe a classe .active via JS, gira a setinha de cabeça para baixo */
+    .active .chevron { transform: rotate(180deg); }
 
+    /* Destaques em negrito dentro das respostas */
     strong {
       color: var(--text-color);
       font-weight: 900;
-      opacity: 1;
-    }
-
-    .chapter-title {
-      color: var(--text-color);
-      opacity: 0.5;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin: 30px 0 10px 5px;
-      font-weight: 900;
+      opacity: 1;                    /* Tira a transparência do parágrafo pai */
     }
   </style>
 </head>
 
 <body>
-
   <div class="bg-layer"></div>
   <div class="overlay"></div>
 
@@ -222,8 +220,7 @@
         <li><strong>Usuário:</strong> Seu Login oficial. O sistema aceita letras maiúsculas ou minúsculas.</li>
         <li><strong>Senha:</strong> Sua senha pessoal.</li>
       </ul>
-      <p>Caso tenha esquecido, clique no link <strong>"Esqueci a senha"</strong> na tela inicial para iniciar a
-        recuperação.</p>
+      <p>Caso tenha esquecido, clique no link <strong>"Esqueci a senha"</strong> na tela inicial para iniciar a recuperação.</p>
     </div>
 
     <button class="accordion">
@@ -260,11 +257,9 @@
     <div class="panel">
       <p>Existem duas formas de garantir seus pontos de assiduidade:</p>
       <p><strong>1. Pelo Atalho Rápido:</strong><br>
-      Se o instrutor já abriu a aula, aparecerá um botão <strong>"CHECK-IN"</strong> ao lado da aula no Dashboard. Basta
-        clicar!</p>
+      Se o instrutor já abriu a aula, aparecerá um botão <strong>"CHECK-IN"</strong> ao lado da aula no Dashboard. Basta clicar!</p>
       <p><strong>2. Pelo Menu "Check-in Aula":</strong><br>
-      Clique no card "Check-in Aula" e digite o <strong>PIN de 4 dígitos</strong> que o instrutor escrever no quadro ou
-        mostrar na tela.</p>
+      Clique no card "Check-in Aula" e digite o <strong>PIN de 4 dígitos</strong> que o instrutor escrever no quadro ou mostrar na tela.</p>
     </div>
 
     <div class="chapter-title">3. Financeiro & Planos</div>
@@ -320,8 +315,7 @@
       <ol>
         <li>Vá em <strong>Financeiro</strong> > <strong>Novo Lançamento</strong>.</li>
         <li>Selecione <strong>Receita</strong>.</li>
-        <li><strong>CRÍTICO:</strong> Selecione o <strong>ALUNO</strong> e o <strong>PACOTE</strong>. Isso renovará a
-          data de vencimento dele automaticamente.</li>
+        <li><strong>CRÍTICO:</strong> Selecione o <strong>ALUNO</strong> e o <strong>PACOTE</strong>. Isso renovará a data de vencimento dele automaticamente.</li>
       </ol>
     </div>
 
@@ -335,37 +329,75 @@
       <p><strong>Esqueci de dar presença, e agora?</strong><br>
       O sistema é travado por data. Peça ao seu Instrutor para usar o lançamento "Manual" na próxima aula.</p>
       <p><strong>Encontrei um erro na plataforma!</strong><br>
-      Use o botão de suporte (Ícone de Headset) na tela inicial do Dashboard para relatar bugs diretamente à engenharia.
-      </p>
+      Use o botão de suporte (Ícone de Headset) na tela inicial do Dashboard para relatar bugs diretamente à administração.</p>
     </div>
 
   </div>
 
   <script>
-    // Lógica do Acordeão
+    /**
+     * ============================================================================
+     * CONTROLLER JAVASCRIPT: Lógica de Interação da Interface (UI)
+     * ============================================================================
+     */
+
+    // Log de inicialização para o time de QA rastrear a execução no console (F12)
+    console.log("📚 [QA/Debug] Módulo de Ajuda (FAQ) inicializado com sucesso.");
+
+    // LÓGICA DO ACORDEÃO (Expansão de Abas)
+    // 1. Busca todos os botões que possuem a classe 'accordion'
     var acc = document.getElementsByClassName("accordion");
+    
+    // 2. Cria um laço (loop) para adicionar o evento de clique em cada um deles
     for (var i = 0; i < acc.length; i++) {
       acc[i].addEventListener("click", function() {
+        
+        // [ESTAGIÁRIO] 'this' refere-se ao elemento específico que foi clicado.
+        // Adiciona ou remove a classe "active", que gira a setinha via CSS.
         this.classList.toggle("active");
+        
+        // Pega o próximo elemento no HTML após o botão (que é a <div> com a class="panel")
         var panel = this.nextElementSibling;
+        
+        // Lógica de altura condicional:
         if (panel.style.maxHeight) {
+          // Se já tem altura definida (está aberto), zera a altura para esconder (fechar)
           panel.style.maxHeight = null;
+          console.log("🖱️ [QA/Debug] Aba fechada.");
         } else {
+          // Se está fechado, pega a altura total do texto interno (scrollHeight) e seta como limite.
+          // Isso força a transição CSS (animação) a ocorrer de 0px até o tamanho exato do texto.
           panel.style.maxHeight = panel.scrollHeight + "px";
+          
+          // Log útil para rastrear o que os usuários estão lendo na aba de ajuda
+          console.log("🖱️ [QA/Debug] Aba aberta: ", this.innerText.replace('expand_more', '').trim());
         } 
       });
     }
 
-    // Navegação (Volta para a Nave Mãe)
+    /**
+     * NAVEGAÇÃO SPA (Single Page Application no contexto do Apps Script)
+     * Volta para a tela principal do aluno.
+     */
     function voltarAoDash() {
+       console.log("🔄 [QA/Debug] Iniciando retorno para o Dashboard...");
+       
+       // UX: Troca o ícone de voltar por um spinner giratório para mostrar carregamento
        const btn = document.querySelector('.btn-back');
-       btn.innerHTML = `<span class="material-icons spin">sync</span>`;
+       btn.innerHTML = `<span class="material-icons spinner" style="display:block; border-color:transparent; border-top-color:var(--text-color);">sync</span>`;
+       
+       // Chama a função do Backend (Codigo.gs) para pegar a URL base e anexar o parâmetro ?page=dashboard
        google.script.run
-         .withSuccessHandler(function(url) { window.top.location.href = url + "?page=dashboard"; })
+         .withSuccessHandler(function(url) { 
+             console.log("✅ [QA/Debug] URL recebida, redirecionando para:", url);
+             window.top.location.href = url + "?page=dashboard"; 
+         })
+         .withFailureHandler(function(err) {
+             console.error("❌ [QA/Debug] Falha de roteamento:", err);
+         })
          .getScriptUrl();
     }
   </script>
 
 </body>
-
 </html>

@@ -1,36 +1,41 @@
-<!--DOJO MANAGER - PORTAL DO ALUNO -->
-<!--Página de Login - Interface moderna e responsiva para acesso dos alunos à plataforma.-->
-
 <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
   <base target="_top">
   <title>Portal do Aluno | DojoManager</title>
-
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="Acesse a plataforma oficial da sua academia. Gestão de treinos e agenda.">
-  <meta name="author" content="DojoManager SaaS">
+  <meta name="description" content="Acesse a plataforma oficial da sua academia.">
   <meta name="theme-color" content="<?= primaryColor ?>">
-
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="icon" href="<?= logoUrl ?>" type="image/x-icon">
 
   <style>
-    /* --- INJEÇÃO DE VARIÁVEIS GLOBAIS DO BACKEND --- */
+    /**
+     * ============================================================================
+     * INJEÇÃO DE VARIÁVEIS DO BACKEND (WHITE-LABEL)
+     * O Apps Script troca as tags do servidor pelos valores reais do Sheets 
+     * ANTES de enviar o HTML para o navegador do cliente.
+     * ============================================================================
+     */
     :root {
-      --primary-color: <?= primaryColor ?> !important;
-      --secondary-color: <?= secondaryColor ?> !important;
-      --text-color: <?= textColor ?> !important;
-      --btn-text-color: <?= btnTextColor ?> !important;
+      /* Mapeia a 5ª Cor (Fundo Geral) */
+      --dynamic-bg: <?=bgColor ?> !important;
+
+      /* Cor da marca da academia (Ex: Dourado, Vermelho) */
+      --dynamic-prim: <?=primaryColor ?> !important;
+
+      /* Cor de fundo do Card de Login (Superfície) */
+      --dynamic-sec: <?=secondaryColor ?> !important;
+
+      /* Cor da fonte principal do cliente */
+      --dynamic-text: <?=textColor ?> !important;
+
+      /* Cor do texto DENTRO dos botões principais */
+      --dynamic-btn-text: <?=btnTextColor ?> !important;
     }
-  </style>
 
-  <?!= include('Style'); ?>
-
-  <style>
-    /* CORREÇÃO DO FUNDO: Força a transparência sobre o Style.html */
     body {
       background-color: transparent !important;
     }
@@ -42,9 +47,9 @@
       width: 100%;
       height: 100%;
       background-image: url('<?= bgUrl ?>');
+      background-color: var(--bg-color);
       background-size: cover;
       background-position: center;
-      background-repeat: no-repeat;
       z-index: -2;
     }
 
@@ -68,7 +73,6 @@
       box-sizing: border-box;
     }
 
-    /* CARD DE LOGIN ADAPTÁVEL */
     .login-card {
       background-color: var(--secondary-color);
       padding: 40px 30px;
@@ -88,86 +92,8 @@
       border-radius: 50%;
       border: 3px solid var(--primary-color);
       margin-bottom: 25px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
       background-color: var(--secondary-color);
-    }
-
-    /* TEXTOS E INPUTS ADAPTÁVEIS */
-    .form-field {
-      margin-bottom: 15px;
-      text-align: left;
-    }
-
-    .form-field label {
-      display: block;
-      font-size: 0.85rem;
-      color: var(--text-color);
-      opacity: 0.9;
-      margin-bottom: 5px;
-    }
-
-    .input-field {
-      width: 100%;
-      padding: 12px;
-      background-color: rgba(0, 0, 0, 0.2); /* Deixei levemente translúcido */
-      border: 1px solid var(--text-color);
-      color: var(--text-color);
-      border-radius: 6px;
-      box-sizing: border-box;
-      transition: 0.3s;
-      opacity: 0.7;
-    }
-
-    .input-field:focus {
-      border-color: var(--primary-color);
-      background-color: rgba(0, 0, 0, 0.4);
-      opacity: 1;
-      outline: none;
-    }
-
-    /* BOTÕES ADAPTÁVEIS */
-    .primary-button {
-      width: 100%;
-      padding: 12px;
-      background-color: var(--primary-color);
-      color: var(--btn-text-color);
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      text-transform: uppercase;
-      margin-top: 10px;
-      transition: 0.2s;
-    }
-
-    .primary-button:hover {
-      filter: brightness(1.15);
-      transform: translateY(-2px);
-    }
-
-    .text-button {
-      background: transparent;
-      border: 1px solid var(--text-color);
-      color: var(--text-color);
-      opacity: 0.8;
-      padding: 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 10px;
-      width: 100%;
-      justify-content: center;
-      font-size: 0.9rem;
-      transition: 0.2s;
-    }
-
-    .text-button:hover {
-      opacity: 1;
-      border-color: var(--primary-color);
-      color: var(--primary-color);
-      background-color: rgba(255, 255, 255, 0.05); /* Leve feedback de hover */
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
     }
 
     .support-links {
@@ -180,51 +106,23 @@
     .link-gold {
       color: var(--primary-color);
       text-decoration: none;
-      border-bottom: 1px dotted transparent;
-      transition: 0.3s;
       font-weight: bold;
-    }
-
-    .link-gold:hover {
-      border-bottom-color: var(--primary-color);
     }
 
     .link-gray {
       color: var(--text-color);
       opacity: 0.7;
       text-decoration: none;
-      transition: 0.3s;
     }
 
-    .link-gray:hover {
-      opacity: 1;
-      color: var(--primary-color);
-    }
-
-    .spinner {
-      display: none;
-      margin: 0 auto;
-      border: 3px solid transparent;
-      border-top: 3px solid var(--primary-color);
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .error-message {
-      color: #ff5252;
-      font-size: 0.9rem;
-      text-align: center;
-      margin-bottom: 10px;
-      font-weight: bold;
+    .divider {
+      margin: 25px 0;
+      border-top: 1px solid var(--text-color);
+      opacity: 0.2;
     }
   </style>
+
+  <?!= include('Style'); ?>
 </head>
 
 <body>
@@ -233,19 +131,17 @@
 
   <div class="scroll-wrapper">
     <div class="login-card">
-
-      <img src="<?= logoUrl ?>" class="logo-img" alt="Logo" onerror="this.src='https://ui-avatars.com/api/?name=Dojo+Manager&background=1e1e1e&color=fff'">
+      <img src="<?= logoUrl ?>" class="logo-img" alt="Logo" onerror="this.src='https://ui-avatars.com/api/?name=Dojo+Manager'">
 
       <form onsubmit="handleLogin(event)">
-
         <div class="form-field">
           <label for="login">Usuário</label>
-          <input type="text" id="login" class="input-field" autocomplete="username" placeholder="Digite seu login" required>
+          <input type="text" id="login" class="input-field" placeholder="Digite seu login" required>
         </div>
 
         <div class="form-field">
           <label for="senha">Senha</label>
-          <input type="password" id="senha" class="input-field" autocomplete="current-password" placeholder="Sua senha" required>
+          <input type="password" id="senha" class="input-field" placeholder="Sua senha" required>
         </div>
 
         <div id="feedback-area" style="min-height: 24px; margin-bottom: 15px;">
@@ -256,13 +152,13 @@
         <button id="btn-login" type="submit" class="primary-button">ENTRAR</button>
 
         <div class="support-links">
-          <a href="#" onclick="alert('O cadastro de novos alunos é feito na secretaria ou pelo Instrutor. Procure a administração!'); event.preventDefault();" class="link-gold">Como me cadastrar?</a>
+          <a href="#" onclick="alert('Procure a administração!'); event.preventDefault();" class="link-gold">Como me
+            cadastrar?</a>
           <a href="#" onclick="event.preventDefault(); nav('recuperar');" class="link-gray">Esqueci a senha</a>
         </div>
-
       </form>
 
-      <div style="margin: 25px 0; border-top: 1px solid var(--text-color); opacity: 0.2;"></div>
+      <div class="divider"></div>
 
       <button class="text-button" onclick="nav('agendar')">
         <span class="material-icons">calendar_today</span> Agendar Aula Experimental
@@ -277,35 +173,30 @@
 
   <script>
     function handleLogin(e) {
-      e.preventDefault();
-      const loginVal = document.getElementById('login').value.trim();
-      const senhaVal = document.getElementById('senha').value.trim();
+      e.preventDefault(); 
+      const loginVal = document.getElementById('login').value.trim(); 
+      const senhaVal = document.getElementById('senha').value.trim(); 
       
-      if(!loginVal || !senhaVal) {
-        showMsg("Preencha login e senha.", true);
-        return;
-      }
-      toggleLoading(true);
+      if(!loginVal || !senhaVal) { showMsg("Preencha login e senha.", true); return; }
+      
+      toggleLoading(true); 
 
       google.script.run
-        .withSuccessHandler(function(res) {
-          if(res.success) {
-            try { localStorage.setItem('userSession', JSON.stringify(res.user)); } catch(err) {}
+        .withSuccessHandler(function(res) { 
+          if(res.success) { 
+            try { localStorage.setItem('userSession', JSON.stringify(res.user)); } catch(err) {} 
             showMsg("Sucesso! Redirecionando...", false);
-            try { window.top.location.href = res.redirectUrl; } catch (e) {
-                document.getElementById('feedback-area').innerHTML = 
-                    `<a href="${res.redirectUrl}" target="_top" class="primary-button" style="text-decoration:none; display:block; line-height:40px;">CLIQUE PARA ENTRAR</a>`;
-            }
-          } else {
-            toggleLoading(false);
+            window.top.location.href = res.redirectUrl; 
+          } else { 
+            toggleLoading(false); 
             showMsg(res.message, true); 
           }
         })
-        .withFailureHandler(function(err) {
+        .withFailureHandler(function(err) { 
           toggleLoading(false);
           showMsg("Erro de conexão com o servidor.", true);
         })
-        .verificarCredenciais({login: loginVal, senha: senhaVal});
+        .verificarCredenciais({login: loginVal, senha: senhaVal}); 
     }
 
     function toggleLoading(isLoading) {
@@ -314,7 +205,7 @@
       const msg = document.getElementById('msg');
       if (isLoading) {
         btn.disabled = true; btn.style.opacity = 0.5; btn.textContent = "VERIFICANDO...";
-        spin.style.display = 'block'; msg.style.display = 'none';
+        spin.style.display = 'block'; msg.style.display = 'none'; 
       } else {
         btn.disabled = false; btn.style.opacity = 1; btn.textContent = "ENTRAR";
         spin.style.display = 'none';
@@ -323,12 +214,15 @@
 
     function showMsg(text, isError) {
       const msg = document.getElementById('msg');
-      msg.textContent = text; msg.style.color = isError ? '#ff5252' : '#00e676';
+      msg.textContent = text; 
+      msg.style.color = isError ? 'var(--error-color)' : 'var(--success-color)';
       msg.style.display = 'block';
     }
 
     function nav(page) {
-      google.script.run.withSuccessHandler(url => { window.top.location.href = url + "?page=" + page; }).getScriptUrl();
+      google.script.run.withSuccessHandler(url => { 
+        window.top.location.href = url + "?page=" + page; 
+      }).getScriptUrl();
     }
   </script>
 </body>

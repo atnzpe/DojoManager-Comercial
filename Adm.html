@@ -1,4 +1,3 @@
-
 <!--DOJO MANAGER - PORTAL DO ALUNO -->
 <!--Página de Administração - Interface moderna e responsiva para gerenciamento de alunos e aulas. -->
 
@@ -552,46 +551,48 @@
           pré-configuradas para o App.</p>
 
         <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
-          <button type="button" class="theme-preset" onclick="aplicarTema('#FFD700', '#1e1e1e', '#ffffff', '#000000')" style="background: linear-gradient(135deg, #1e1e1e 50%, #FFD700 50%); border-color: #FFD700;">Dourado</button>
-          <button type="button" class="theme-preset" onclick="aplicarTema('#2196F3', '#ffffff', '#333333', '#ffffff')" style="background: linear-gradient(135deg, #ffffff 50%, #2196F3 50%); border-color: #2196F3; color: #333; text-shadow: none;">CleanPRO</button>
-          <button type="button" class="theme-preset" onclick="aplicarTema('#E53935', '#121212', '#ffffff', '#ffffff')" style="background: linear-gradient(135deg, #121212 50%, #E53935 50%); border-color: #E53935;">Vermelho</button>
-          <button type="button" class="theme-preset" onclick="aplicarTema('#00E676', '#1E272E', '#ffffff', '#000000')" style="background: linear-gradient(135deg, #1E272E 50%, #00E676 50%); border-color: #00E676;">Zen Verde</button>
-        </div>
-      </div>
-
-      <div
-        style="display: flex; flex-wrap: wrap; gap: 20px; background: rgba(0,0,0,0.2); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-        <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 5px;">
-          <label class="adm-label">Cores Customizadas</label>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div><span style="font-size:11px; opacity:0.6">Primária (Botões)</span><input type="color" name="cfg_color" id="cfg_color" class="adm-input" oninput="atualizarPreviewCores()">
-            </div>
-            <div><span style="font-size:11px; opacity:0.6">Secundária (Fundo)</span><input type="color" name="cfg_color_sec" id="cfg_color_sec" class="adm-input" oninput="atualizarPreviewCores()">
-            </div>
-            <div><span style="font-size:11px; opacity:0.6">Texto Fundo</span><input type="color" name="cfg_color_text" id="cfg_color_text" class="adm-input" oninput="atualizarPreviewCores()">
-            </div>
-            <div><span style="font-size:11px; opacity:0.6">Texto Botão</span><input type="color" name="cfg_color_btn_text" id="cfg_color_btn_text" class="adm-input" oninput="atualizarPreviewCores()">
-            </div>
-          </div>
+          <button type="button" class="theme-preset" onclick="aplicarTema('#FFD700', '#1e1e1e', '#ffffff', '#000000', '#121212')" style="background: linear-gradient(135deg, #1e1e1e 50%, #FFD700 50%); border-color: #FFD700;">Dourado</button>
+          <button type="button" class="theme-preset" onclick="aplicarTema('#2196F3', '#ffffff', '#333333', '#ffffff', '#f4f4f4')" style="background: linear-gradient(135deg, #ffffff 50%, #2196F3 50%); border-color: #2196F3; color: #333; text-shadow: none;">CleanPRO</button>
+          <button type="button" class="theme-preset" onclick="aplicarTema('#E53935', '#1e1e1e', '#ffffff', '#ffffff', '#0a0a0a')" style="background: linear-gradient(135deg, #121212 50%, #E53935 50%); border-color: #E53935;">Vermelho</button>
+          <button type="button" class="theme-preset" onclick="aplicarTema('#00E676', '#1E272E', '#ffffff', '#000000', '#111518')" style="background: linear-gradient(135deg, #1E272E 50%, #00E676 50%); border-color: #00E676;">Zen Verde</button>
         </div>
 
         <div
-          style="flex: 1; min-width: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.5); border-radius: 12px; padding: 20px; border: 1px dashed rgba(255,255,255,0.3);">
-          <label class="adm-label" style="text-align: center; margin-top: 0; margin-bottom: 15px; opacity: 0.5;">Preview em Tempo Real</label>
-          <div id="live-preview-card"
-            style="width: 100%; max-width: 280px; padding: 20px; border-radius: 12px; border: 2px solid #FFD700; background-color: #1e1e1e; text-align: center; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
-            <h3 id="preview-title" style="margin-top: 0; color: #FFD700; font-weight:900;">App Preview</h3>
-            <p id="preview-text" style="font-size: 0.85rem; color: #ffffff; margin-bottom: 20px;">
-              Verifique a leitura das cores neste card antes de salvar.
-            </p>
-            <button id="preview-btn" type="button" style="width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 900; text-transform: uppercase; background-color: #FFD700; color: #000000; transition: 0.3s;">
+          style="display: flex; flex-wrap: wrap; gap: 20px; background: rgba(0,0,0,0.2); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+
+          <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 5px;">
+            <label class="adm-label">Cores Customizadas</label>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap:10px;">
+              <div><span style="font-size:11px; opacity:0.6">Fundo Geral</span><input type="color" name="cfg_color_bg" id="cfg_color_bg" class="adm-input" oninput="atualizarPreviewCores()">
+              </div>
+              <div><span style="font-size:11px; opacity:0.6">Primária (Botões)</span><input type="color" name="cfg_color" id="cfg_color" class="adm-input" oninput="atualizarPreviewCores()">
+              </div>
+              <div><span style="font-size:11px; opacity:0.6">Secundária (Cards)</span><input type="color" name="cfg_color_sec" id="cfg_color_sec" class="adm-input" oninput="atualizarPreviewCores()">
+              </div>
+              <div><span style="font-size:11px; opacity:0.6">Texto Fundo</span><input type="color" name="cfg_color_text" id="cfg_color_text" class="adm-input" oninput="atualizarPreviewCores()">
+              </div>
+              <div><span style="font-size:11px; opacity:0.6">Texto Botão</span><input type="color" name="cfg_color_btn_text" id="cfg_color_btn_text" class="adm-input" oninput="atualizarPreviewCores()">
+              </div>
+            </div>
+          </div>
+
+          <div
+            style="flex: 1; min-width: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.5); border-radius: 12px; padding: 20px; border: 1px dashed rgba(255,255,255,0.3);">
+            <label class="adm-label" style="text-align: center; margin-top: 0; margin-bottom: 15px; opacity: 0.5;">Preview em Tempo Real</label>
+            <div id="live-preview-card"
+              style="width: 100%; max-width: 280px; padding: 20px; border-radius: 12px; border: 2px solid #FFD700; background-color: #1e1e1e; text-align: center; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+              <h3 id="preview-title" style="margin-top: 0; color: #FFD700; font-weight:900;">App Preview</h3>
+              <p id="preview-text" style="font-size: 0.85rem; color: #ffffff; margin-bottom: 20px;">
+                Verifique a leitura das cores neste card antes de salvar.
+              </p>
+              <button id="preview-btn" type="button" style="width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 900; text-transform: uppercase; background-color: #FFD700; color: #000000; transition: 0.3s;">
               TESTE DE BOTÃO
             </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <button type="submit" class="adm-btn" style="margin-top:25px; background:#4caf50; color:white; width: 100%; padding: 18px; font-size: 14px; box-shadow:0 5px 15px rgba(76,175,80,0.4);">
+        <button type="submit" class="adm-btn" style="margin-top:25px; background:#4caf50; color:white; width: 100%; padding: 18px; font-size: 14px; box-shadow:0 5px 15px rgba(76,175,80,0.4);">
         <span class="material-icons">save</span> Salvar e Reiniciar App
       </button>
     </form>
@@ -877,33 +878,41 @@
       document.getElementById('cfg_color_sec').value = cfg.secondaryColor || '#1e1e1e'; 
       document.getElementById('cfg_color_text').value = cfg.textColor || '#ffffff'; 
       document.getElementById('cfg_color_btn_text').value = cfg.btnTextColor || '#000000'; 
+      document.getElementById('cfg_color_bg').value = cfg.bgColor || '#121212'; // NOVO
       atualizarPreviewCores();
     }).getAppConfig(); 
   }
 
   function atualizarPreviewCores() {
-      const primary = document.getElementById('cfg_color').value;
-      const secondary = document.getElementById('cfg_color_sec').value;
-      const text = document.getElementById('cfg_color_text').value;
-      const btnText = document.getElementById('cfg_color_btn_text').value;
+    const primary = document.getElementById('cfg_color').value;
+    const secondary = document.getElementById('cfg_color_sec').value;
+    const text = document.getElementById('cfg_color_text').value;
+    const btnText = document.getElementById('cfg_color_btn_text').value;
+    const bgGlobal = document.getElementById('cfg_color_bg').value; // NOVO
 
-      const card = document.getElementById('live-preview-card');
-      const title = document.getElementById('preview-title');
-      const desc = document.getElementById('preview-text');
-      const btn = document.getElementById('preview-btn');
+    const card = document.getElementById('live-preview-card');
+    const title = document.getElementById('preview-title');
+    const desc = document.getElementById('preview-text');
+    const btn = document.getElementById('preview-btn');
 
-      if (card) { card.style.backgroundColor = secondary; card.style.borderColor = primary; }
-      if (title) title.style.color = primary;
-      if (desc) desc.style.color = text;
-      if (btn) { btn.style.backgroundColor = primary; btn.style.color = btnText; }
+    // Adiciona a cor de fundo geral ao wrapper pai do card de preview (opcional para dar contraste)
+    if (card) { 
+        card.style.backgroundColor = secondary; 
+        card.style.borderColor = primary; 
+        card.parentElement.style.backgroundColor = bgGlobal; // Mostra o fundo geral por trás do card
+    }
+    if (title) title.style.color = primary;
+    if (desc) desc.style.color = text;
+    if (btn) { btn.style.backgroundColor = primary; btn.style.color = btnText; }
   }
 
-  function aplicarTema(primaria, secundaria, texto, textoBotao) {
-      document.getElementById('cfg_color').value = primaria;
-      document.getElementById('cfg_color_sec').value = secundaria;
-      document.getElementById('cfg_color_text').value = texto;
-      document.getElementById('cfg_color_btn_text').value = textoBotao;
-      atualizarPreviewCores();
+  function aplicarTema(primaria, secundaria, texto, textoBotao, fundo) {
+    document.getElementById('cfg_color').value = primaria;
+    document.getElementById('cfg_color_sec').value = secundaria;
+    document.getElementById('cfg_color_text').value = texto;
+    document.getElementById('cfg_color_btn_text').value = textoBotao;
+    document.getElementById('cfg_color_bg').value = fundo; // NOVO
+    atualizarPreviewCores();
   }
 
   function closeModal(id) { const modal = document.getElementById(id); if(modal) modal.style.display = 'none'; }

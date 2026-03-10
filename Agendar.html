@@ -1,22 +1,20 @@
-<!--DOJO MANAGER - PORTAL DO ALUNO -->
-<!--Página de Agendamento - Interface moderna e responsiva para agendamento de aulas pelos alunos.-->
-
 <!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
   <base target="_top">
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
+  
   <meta name="theme-color" content="<?= primaryColor ?>">
 
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="icon" href="<?= logoUrl ?>" type="image/x-icon">
 
   <style>
-    /* Injeção das variáveis do backend */
+    /* --- INJEÇÃO DE VARIÁVEIS DO BACKEND (WHITE-LABEL) --- */
+    /* Estas variáveis sobrescrevem o :root base para refletir a marca da academia atual */
     :root {
       --primary-color: <?=primaryColor ?> !important;
       --secondary-color: <?=secondaryColor ?> !important;
@@ -28,130 +26,85 @@
   <?!= include('Style'); ?>
 
   <style>
-    /* --- ESTILOS DE FUNDO DINÂMICO --- */
+    /* --- ESTILOS EXCLUSIVOS DESTE MÓDULO (SCOPED CSS) --- */
+    
+    /* Fundo transparente para permitir a visualização da imagem de fundo (bg-layer) */
+    body { background-color: transparent !important; }
+
+    /* Imagem de Fundo (Branding da Academia) */
     .bg-layer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url('<?= bgUrl ?>');
-      background-size: cover;
-      background-position: center;
-      z-index: -2;
+      position: fixed;               /* Fica fixo durante o scroll */
+      top: 0; left: 0; width: 100%; height: 100%; /* Cobre toda a tela */
+      background-image: url('<?= bgUrl ?>');      /* URL injetada via backend */
+      background-size: cover;        /* Preenche a tela mantendo proporção */
+      background-position: center;   /* Centraliza o foco da imagem */
+      z-index: -2;                   /* Fica na camada mais profunda */
     }
 
+    /* Película de escurecimento para garantir a leitura do texto sobre a imagem */
     .overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.85);
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.85); /* 85% de preto (bem escuro para destaque do form) */
       z-index: -1;
     }
 
-    /* --- DESIGN SYSTEM (LANDING PAGE) --- */
-    body {
-      color: var(--text-color, #fff);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      margin: 0;
-      font-family: 'Roboto', sans-serif;
-      background: transparent;
-    }
-
+    /* Container principal do formulário de agendamento */
     .agendar-container {
       width: 100%;
-      max-width: 500px;
-      margin: 0 auto;
+      max-width: 500px;              /* Um pouco mais largo que o login para acomodar o mapa */
+      margin: 0 auto;                /* Centraliza na tela do PC */
       padding: 20px;
       box-sizing: border-box;
-      flex-grow: 1;
-      display: flex;
+      display: flex;                 /* Flexbox para empilhar elementos */
       flex-direction: column;
       position: relative;
-      z-index: 1;
+      z-index: 1;                    /* Fica acima da overlay */
+      min-height: 100vh;             /* Garante que ocupe a tela toda */
     }
 
-    /* Cabeçalho */
+    /* Cabeçalho de Navegação (Voltar + Título) */
     .header-nav {
-      display: flex;
+      display: flex;                 /* Alinha botão e título na mesma linha */
       align-items: center;
       margin-bottom: 20px;
       padding-bottom: 15px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Linha sutil de separação */
     }
 
+    /* Título da página */
     .header-title {
-      flex: 1;
-      text-align: center;
+      flex: 1;                       /* Ocupa o espaço restante */
+      text-align: center;            /* Centraliza o texto */
       font-size: 1.4rem;
       font-weight: 700;
-      color: var(--primary-color);
-      margin-right: 32px;
+      color: var(--primary-color);   /* Usa a cor da academia */
+      margin-right: 32px;            /* Compensa o botão de voltar para centralizar perfeitamente */
     }
 
+    /* Texto de introdução/instrução */
     .intro-text {
       text-align: center;
       color: var(--text-color);
-      opacity: 0.8;
+      opacity: 0.8;                  /* Leve transparência para hierarquia visual */
       margin-bottom: 25px;
       font-size: 1rem;
-      line-height: 1.5;
+      line-height: 1.5;              /* Melhora a leitura em blocos de texto */
     }
 
-    /* Inputs */
-    .input-group {
-      margin-bottom: 20px;
-    }
-
-    .input-label {
-      display: block;
-      margin-bottom: 8px;
-      color: var(--text-color);
-      opacity: 0.7;
-      font-size: 0.85rem;
-      font-weight: 500;
-      text-transform: uppercase;
-    }
-
-    .custom-input {
-      width: 100%;
-      padding: 16px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(0, 0, 0, 0.4);
-      color: var(--text-color);
-      font-size: 1.1rem;
-      box-sizing: border-box;
-      transition: all 0.3s;
-    }
-
-    .custom-input:focus {
-      border-color: var(--primary-color);
-      outline: none;
-      background: rgba(0, 0, 0, 0.6);
-    }
-
-    .custom-input option {
-      background-color: var(--secondary-color);
-      color: var(--text-color);
-    }
-
-    /* Card de Detalhes */
+    /* Área de Detalhes da Academia (Escondida por padrão, aparece ao selecionar) */
     #details-area {
-      display: none;
-      background: var(--secondary-color);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
+      display: none;                 /* Oculto até a seleção via JS */
+      background: var(--secondary-color); /* Fundo do card */
+      border: 1px solid rgba(255, 255, 255, 0.1); /* Borda de vidro */
+      border-radius: 12px;           /* Arredondamento padrão */
       padding: 20px;
       margin-top: 10px;
-      animation: slideUp 0.4s ease-out;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.4s ease-out; /* Animação suave ao aparecer */
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Sombra pesada de elevação */
     }
 
+    /* Nome da Academia no Card de Detalhes */
     .academy-name {
       margin-top: 0;
       color: var(--primary-color);
@@ -159,56 +112,60 @@
       margin-bottom: 15px;
     }
 
+    /* Linha de informação (Ícone + Texto) */
     .detail-row {
       display: flex;
-      gap: 12px;
+      gap: 12px;                     /* Espaço entre ícone e texto */
       margin-bottom: 12px;
-      align-items: flex-start;
+      align-items: flex-start;       /* Alinha no topo caso o texto quebre linha */
     }
 
+    /* Ícone de detalhe (Localização, Relógio) */
     .d-icon {
       color: var(--primary-color);
       opacity: 0.8;
       font-size: 20px;
-      margin-top: 2px;
+      margin-top: 2px;               /* Ajuste fino de alinhamento vertical */
     }
 
+    /* Texto do detalhe */
     .d-text {
       color: var(--text-color);
       opacity: 0.9;
       font-size: 0.95rem;
       line-height: 1.4;
-      flex: 1;
+      flex: 1;                       /* Ocupa o restante do espaço */
     }
 
-    /* Mapa Responsivo */
+    /* Container do Mapa (Google Maps Iframe) */
     .map-embed {
       width: 100%;
-      height: 180px;
-      background: #000;
+      height: 180px;                 /* Altura fixa para não quebrar layout mobile */
+      background: #000;              /* Fundo escuro enquanto carrega */
       border-radius: 8px;
       margin: 15px 0;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      overflow: hidden;
+      overflow: hidden;              /* Esconde bordas quadradas do iframe interno */
     }
 
+    /* Força o iframe injetado pelo usuário a respeitar o container */
     .map-embed iframe {
       width: 100% !important;
       height: 100% !important;
       border: 0;
     }
 
-    /* Botão CTA do WhatsApp (Mantido em verde para conversão) */
+    /* BOTÃO WHATSAPP EXCLUSIVO: Quebra o design system propositalmente 
+       para focar em conversão de leads usando a cor de confiança do WhatsApp */
     .btn-whatsapp {
-      background-color: #25D366;
-      color: #ffffff;
-      /* Fixo branco por ser verde escuro */
+      background-color: var(--whatsapp-color, #25D366); /* Variável global com fallback */
+      color: #ffffff;                /* Sempre branco, independente da marca */
       width: 100%;
       margin-top: 10px;
       font-size: 1.1rem;
       padding: 16px;
       border: none;
-      border-radius: 50px;
+      border-radius: 50px;           /* Pílula para destacar de botões normais */
       cursor: pointer;
       font-weight: bold;
       display: flex;
@@ -220,31 +177,18 @@
       box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2);
     }
 
-    .btn-whatsapp:hover {
-      background-color: #1ebe57;
-      transform: translateY(-2px);
-    }
+    .btn-whatsapp:hover { background-color: var(--whatsapp-hover, #1ebe57); transform: translateY(-2px); }
+    .btn-whatsapp:active { transform: scale(0.98); }
 
-    .btn-whatsapp:active {
-      transform: scale(0.98);
-    }
-
+    /* Animação para entrada do Card de Detalhes */
     @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 
 <body>
-
   <div class="bg-layer"></div>
   <div class="overlay"></div>
 
@@ -261,19 +205,19 @@
       Informe seu nome e escolha a unidade para iniciar seu treino gratuito.
     </p>
 
-    <div class="input-group">
-      <label class="input-label">Como gostaria de ser chamado?</label>
-      <input type="text" id="user-name" class="custom-input" placeholder="Seu nome ou apelido">
+    <div class="form-field">
+      <label>Como gostaria de ser chamado?</label>
+      <input type="text" id="user-name" class="input-field" placeholder="Seu nome ou apelido">
     </div>
 
-    <div class="input-group">
-      <label class="input-label">Onde deseja treinar?</label>
+    <div class="form-field">
+      <label>Onde deseja treinar?</label>
 
       <div id="loading-locais" style="text-align:center; color:var(--text-color); opacity: 0.7; padding: 10px;">
-        <span class="material-icons" style="animation: spin 1s infinite linear; color: var(--primary-color);">refresh</span><br>Carregando unidades...
+        <span class="material-icons spinner" style="display:inline-block; width:auto; height:auto; border:none; color: var(--primary-color);">refresh</span><br>Carregando unidades...
       </div>
 
-      <select id="location-select" class="custom-input" style="display:none" onchange="selecionarLocal()">
+      <select id="location-select" class="input-field" style="display:none" onchange="selecionarLocal()">
         <option value="" disabled selected>Toque para selecionar...</option>
       </select>
     </div>
@@ -285,6 +229,7 @@
         <span class="material-icons d-icon">place</span>
         <span id="sel-end" class="d-text">Endereço...</span>
       </div>
+      
       <div class="detail-row">
         <span class="material-icons d-icon">schedule</span>
         <span id="sel-hora" class="d-text">Horários...</span>
@@ -300,46 +245,77 @@
   </div>
 
   <script>
-    var locaisCache = [];
-    var localSelecionado = null;
+    /**
+     * ============================================================================
+     * CONTROLLER JAVASCRIPT: Lógica de Negócio e Integração com Backend
+     * ============================================================================
+     */
 
+    // Variáveis Globais de Estado
+    var locaisCache = [];      // Armazena a lista de locais para não consultar o servidor duas vezes
+    var localSelecionado = null; // Guarda o objeto da academia escolhida no select
+
+    /**
+     * Evento de Inicialização: Disparado quando a tela termina de carregar
+     */
     window.onload = function() {
+      console.log("🛠️ [QA/Debug] Módulo Agendamento inicializado. Solicitando locais ao backend...");
+      
+      // Chamada assíncrona para o Apps Script (Codigo.gs)
       google.script.run
-        .withSuccessHandler(popularLista)
-        .withFailureHandler(err => {
-           document.getElementById('loading-locais').innerHTML = "<span style='color:#cf6679'>Erro ao carregar locais.</span>";
+        .withSuccessHandler(popularLista) // Se der certo, chama popularLista
+        .withFailureHandler(err => {      // Se a conexão cair ou houver erro
+          console.error("❌ [QA/Debug] Falha ao buscar locais no Apps Script:", err);
+          document.getElementById('loading-locais').innerHTML = "<span style='color:#cf6679'>Erro ao carregar locais de treino. Tente recarregar a página.</span>";
         })
         .getLocaisTreino();
     };
 
+    /**
+     * Processa o Array de locais vindo da planilha e preenche o elemento <select>
+     * @param {Array} locais - Array de objetos retornados do backend
+     */
     function popularLista(locais) {
-      locaisCache = locais;
+      console.log("✅ [QA/Debug] Locais recebidos do backend:", locais.length, "unidades.");
+      
+      locaisCache = locais; // Salva em memória cache
       var select = document.getElementById('location-select');
       
+      // Troca a UI de carregamento pelo formulário real
       document.getElementById('loading-locais').style.display = 'none';
       select.style.display = 'block';
 
+      // Tratamento de segurança: Se a tabela estiver vazia
       if(!locais || locais.length === 0) {
+         console.warn("⚠️ [QA/Debug] O retorno veio vazio. Verifique a aba 'Locais_de_treino' no banco de dados.");
          var opt = document.createElement('option');
-         opt.text = "Nenhuma academia disponível";
+         opt.text = "Nenhuma academia disponível no momento";
          select.add(opt);
-         select.disabled = true;
+         select.disabled = true; // Bloqueia o formulário
          return;
       }
 
+      // Itera o array montando as <option> do select
       locais.forEach(function(l) {
          var opt = document.createElement('option');
-         opt.value = l.nome;
-         opt.text = l.nome + (l.cidade ? " (" + l.cidade + ")" : "");
+         opt.value = l.nome; // Usamos o nome como chave primária de busca na memória
+         opt.text = l.nome + (l.cidade ? " (" + l.cidade + ")" : ""); // UX: Mostra a cidade ao lado do nome
          select.add(opt);
       });
     }
 
+    /**
+     * Acionado no onchange do <select>. Renderiza os dados do local escolhido.
+     */
     function selecionarLocal() {
       var nome = document.getElementById('location-select').value;
+      console.log("📍 [QA/Debug] Usuário selecionou a unidade:", nome);
+
+      // Busca no cache da memória o objeto completo
       localSelecionado = locaisCache.find(function(l) { return l.nome === nome; });
 
       if (localSelecionado) {
+        // Preenche o DOM com os dados
         document.getElementById('sel-nome').textContent = localSelecionado.nome;
         document.getElementById('sel-end').textContent = localSelecionado.endereco || "Endereço sob consulta";
         document.getElementById('sel-hora').textContent = (localSelecionado.dias || "") + " " + (localSelecionado.horarios || "");
@@ -348,57 +324,85 @@
         mapBox.innerHTML = '';
         mapBox.style.display = 'none';
 
+        // LÓGICA DO MAPA: O dono da academia cola um iframe do Google Maps. Precisamos higienizar.
         if (localSelecionado.iframeHtml && localSelecionado.iframeHtml.includes('<iframe')) {
             try {
+                // Regex para forçar width e height 100%, garantindo que o mapa fique responsivo
                 var cleanHtml = localSelecionado.iframeHtml
                     .replace(/width\s*=\s*["']?[^"']*["']?/gi, 'width="100%"')
                     .replace(/height\s*=\s*["']?[^"']*["']?/gi, 'height="100%"')
-                    .replace(/""/g, '"');
+                    .replace(/""/g, '"'); // Corrige aspas duplicadas vindas do CSV/Planilha
+                
                 mapBox.innerHTML = cleanHtml;
                 mapBox.style.display = 'block';
-            } catch(e) {}
+                console.log("🗺️ [QA/Debug] Iframe do mapa renderizado com sucesso.");
+            } catch(e) {
+                console.error("❌ [QA/Debug] Erro ao processar o iframe do mapa:", e);
+            }
+        } else {
+            console.log("ℹ️ [QA/Debug] Academia não possui iframe de mapa configurado.");
         }
 
+        // Mostra o card
         document.getElementById('details-area').style.display = 'block';
         
+        // UX: Rola a tela suavemente para mostrar o botão do WhatsApp
         setTimeout(function() {
             document.getElementById('btn-finalizar').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 150);
       }
     }
 
+    /**
+     * Valida os dados e abre a API do WhatsApp para fechar o agendamento
+     */
     function enviarWhatsApp() {
       var nomeUser = document.getElementById('user-name').value.trim();
       
+      // Validação de Frontend Básica
       if (!nomeUser) {
-        alert("Por favor, digite seu nome.");
+        console.warn("⚠️ [QA/Debug] Tentativa de envio sem nome bloqueada.");
+        alert("Por favor, informe seu nome para continuarmos.");
         document.getElementById('user-name').focus();
         return;
       }
 
+      // Validação de telefone da Academia
       if (localSelecionado && localSelecionado.contato) {
+        // HIGIENIZAÇÃO: Remove tudo que não for número (ex: parênteses, traços, espaços)
         var num = localSelecionado.contato.replace(/\D/g, '');
+        console.log("📞 [QA/Debug] Número higienizado para a API do WhatsApp:", num);
+
         if (num.length >= 10) {
+           // Insere o DDI do Brasil (55) se o dono da academia não tiver colocado na planilha
            if (num.substring(0,2) !== '55') num = '55' + num;
            
+           // Montagem da mensagem formatada (usando * para negrito no WA)
            var msg = "Olá! Me chamo *" + nomeUser + "*. Gostaria de agendar uma aula experimental na *" + localSelecionado.nome + "*.";
            
+           console.log("🚀 [QA/Debug] Abrindo URL do WhatsApp Web/App...");
+           // Codifica a URL (evita quebra de links por espaços)
            var url = "https://wa.me/" + num + "?text=" + encodeURIComponent(msg);
-           window.open(url, '_blank');
+           window.open(url, '_blank'); // Abre em nova aba
         } else {
-           alert("Erro: Número de WhatsApp da academia inválido.");
+           console.error("❌ [QA/Debug] Número inválido detectado:", num);
+           alert("Erro no sistema: O número de WhatsApp da academia parece estar incompleto no banco de dados.");
         }
       } else {
-        alert("Esta unidade não possui contato cadastrado.");
+        console.error("❌ [QA/Debug] Academia selecionada não possui contato.");
+        alert("Desculpe, esta unidade não possui um telefone de contato cadastrado para agendamento automático.");
       }
     }
 
+    /**
+     * Roteamento SPA: Volta para a tela de Login
+     */
     function voltarLogin() {
+      console.log("🔄 [QA/Debug] Retornando para a tela de Login...");
       google.script.run
         .withSuccessHandler(function(url) { window.top.location.href = url + "?page=login"; })
         .getScriptUrl();
     }
   </script>
 </body>
-
 </html>

@@ -31,12 +31,13 @@ const SCRIPT_URL = ScriptApp.getService().getUrl();
 
 // IDs de arquivos no Google Drive para assets padrão (Logo e Fundo)
 const DEFAULT_ASSETS = {
-  BACKGROUND_ID: "Inclua o link do seu google drive",
-  ICON_ID: "Inclua o link do seu google drive",
-  PRIMARY_COLOR: "#FFFFFF", // Cor Padrão (Dourado)
+  BACKGROUND_ID: "1JfeThTR7oe4w7fhg7XFk0ImdIRDOR1KF",
+  ICON_ID: "1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv",
+  PRIMARY_COLOR: "#FFFFFF",
   SECONDARY_COLOR: "#1e1e1e",
   TEXT_COLOR: "#ffffff",
-  BTN_TEXT_COLOR: "#000000"
+  BTN_TEXT_COLOR: "#000000",
+  BG_COLOR: "#121212" // <-- NOVO: 5ª Cor Padrão (Fundo Geral)
 };
 
 
@@ -100,54 +101,35 @@ function salvarFinanceiroSeguro(nomeAba, dadosObjeto, linha = null) {
 // 🏗️ MÓDULO FINANCEIRO: AUTO-SETUP E RELATÓRIOS (Adicionar ao final do Código.gs)
 // ============================================================================
 
-/**
- * AUTO-SETUP: Cria tabelas financeiras e de Configuração se não existirem
- */
 function verificarCriarAbasFinanceiras() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  
-  // Define a estrutura de todas as abas que o sistema precisa para funcionar sozinho
+
   const estrutura = [
-    { 
-      nome: "Fin_Transacoes", 
-      colunas: ["ID_Transacao", "Data_Registro", "Tipo", "Categoria", "Descricao", "Valor", "Forma_Pagto", "Responsavel", "Login_Aluno", "Academia_Ref", "Status", "Comprovante_Url"] 
-    },
-    { 
-      nome: "Fin_Pacotes", 
-      colunas: ["Nome_Pacote", "Valor_Padrao", "Duracao_Dias", "Academias_Permitidas", "Status_Pacote", "Descricao"] 
-    },
-    { 
-      nome: "Fin_Assinaturas", 
-      colunas: ["Login_Aluno", "Pacote_Atual", "Data_Inicio", "Data_Fim", "Status_Assinatura", "ID_Ultima_Transacao"] 
-    },
-    { 
-      // NOVA ESTRUTURA SAAS COMPLETA (Incluindo as novas cores de texto)
-      nome: "Config_App", 
-      colunas: ["Logo_URL", "Fundo_URL", "Cor_Primaria", "Cor_Secundaria", "Cor_Texto", "Cor_Texto_Botao"] 
-    } 
+    { nome: "Fin_Transacoes", colunas: ["ID_Transacao", "Data_Registro", "Tipo", "Categoria", "Descricao", "Valor", "Forma_Pagto", "Responsavel", "Login_Aluno", "Academia_Ref", "Status", "Comprovante_Url"] },
+    { nome: "Fin_Pacotes", colunas: ["Nome_Pacote", "Valor_Padrao", "Duracao_Dias", "Academias_Permitidas", "Status_Pacote", "Descricao"] },
+    { nome: "Fin_Assinaturas", colunas: ["Login_Aluno", "Pacote_Atual", "Data_Inicio", "Data_Fim", "Status_Assinatura", "ID_Ultima_Transacao"] },
+    {
+      nome: "Config_App",
+      // <-- NOVO: "Cor_Fundo" adicionado no final do array de colunas
+      colunas: ["Logo_URL", "Fundo_URL", "Cor_Primaria", "Cor_Secundaria", "Cor_Texto", "Cor_Texto_Botao", "Cor_Fundo"]
+    }
   ];
 
   estrutura.forEach(aba => {
     let sheet = ss.getSheetByName(aba.nome);
     if (!sheet) {
-      // Cria a aba se não existir
       sheet = ss.insertSheet(aba.nome);
-      // Adiciona o cabeçalho
       sheet.appendRow(aba.colunas);
-      // Formata o cabeçalho (Fundo escuro, letra branca, negrito)
       sheet.getRange(1, 1, 1, aba.colunas.length).setFontWeight("bold").setBackground("#2c3e50").setFontColor("#ffffff");
-      // Congela a primeira linha
       sheet.setFrozenRows(1);
-      
-      // Se for a aba de configuração, já injeta a Linha 2 com os padrões do sistema
-      if(aba.nome === "Config_App") {
-         // Valores padrão: Logo (Vazio), Fundo (Vazio), Primária (Dourado), Secundária (Cinza Escuro), Texto (Branco), Texto Botão (Preto)
-         sheet.appendRow(["", "", "#FFD700", "#1e1e1e", "#ffffff", "#000000"]);
+
+      if (aba.nome === "Config_App") {
+        // <-- NOVO: 7º item adicionado para respeitar a nova coluna
+        sheet.appendRow(["", "", "#FFD700", "#1e1e1e", "#ffffff", "#000000", "#121212"]);
       }
     }
   });
 }
-
 /**
  * RELATÓRIO ADMIN/INSTRUTOR (COM FILTROS E PERMISSÕES)
  */
@@ -603,10 +585,6 @@ function parseDataSegura(input) {
 // 3. ROTEADOR (Gerenciamento de Navegação)
 // ============================================================================
 
-/**
- * Ponto de entrada HTTP (GET).
- * Decide qual arquivo HTML servir baseado no parâmetro '?page=...'.
- */
 function doGet(e) {
   verificarCriarAbasFinanceiras();
   const page = e.parameter.page || 'login';
@@ -627,20 +605,27 @@ function doGet(e) {
   try {
     const template = HtmlService.createTemplateFromFile(htmlFile);
 
+    // 🛡️ BLINDAGEM DE VARIÁVEIS (Valores Default Seguros)
     template.scriptUrl = SCRIPT_URL;
-    template.bgUrl = ""; template.logoUrl = ""; template.primaryColor = "#FFD700";
+    template.bgUrl = ""; template.logoUrl = "";
+    template.primaryColor = "#FFD700";
+    template.secondaryColor = "#1e1e1e";
+    template.textColor = "#ffffff";
+    template.btnTextColor = "#000000";
+    template.bgColor = "#121212"; // <-- NOVO: Blindagem da 5ª cor
 
     try {
       const config = getAppConfig();
       if (config) {
-        template.bgUrl = getDriveImageUrl(config.bgId) || "";
-        template.logoUrl = getDriveImageUrl(config.iconId) || "";
-        template.primaryColor = config.primaryColor || "#FFD700";
-        template.secondaryColor = config.secondaryColor || "#1e1e1e";
-        template.textColor = config.textColor || "#ffffff";
-        template.btnTextColor = config.btnTextColor || "#000000";
+        template.bgUrl = getDriveImageUrl(config.bgId) || template.bgUrl;
+        template.logoUrl = getDriveImageUrl(config.iconId) || template.logoUrl;
+        template.primaryColor = config.primaryColor || template.primaryColor;
+        template.secondaryColor = config.secondaryColor || template.secondaryColor;
+        template.textColor = config.textColor || template.textColor;
+        template.btnTextColor = config.btnTextColor || template.btnTextColor;
+        template.bgColor = config.bgColor || template.bgColor; // <-- NOVO: Injeção da 5ª cor dinâmica
       }
-    } catch (e) { }
+    } catch (e) { console.warn("Erro no tema", e); }
 
     return template.evaluate()
       .setTitle("DojoManager - Portal do Aluno")
@@ -1117,31 +1102,33 @@ function salvarProgramaTecnico(form) {
   } catch (e) { return "❌ Erro: " + e.message; }
 }
 
-// --- CONFIGURAÇÃO E SUPORTE ---
 function getAppConfig() {
   const configBase = {
     bgId: DEFAULT_ASSETS.BACKGROUND_ID,
     iconId: DEFAULT_ASSETS.ICON_ID,
     primaryColor: DEFAULT_ASSETS.PRIMARY_COLOR,
     secondaryColor: DEFAULT_ASSETS.SECONDARY_COLOR,
-    textColor: DEFAULT_ASSETS.TEXT_COLOR,      // NOVO: Cor da fonte geral
-    btnTextColor: DEFAULT_ASSETS.BTN_TEXT_COLOR // Cor secundária padrão
+    textColor: DEFAULT_ASSETS.TEXT_COLOR,
+    btnTextColor: DEFAULT_ASSETS.BTN_TEXT_COLOR,
+    bgColor: DEFAULT_ASSETS.BG_COLOR // <-- NOVO
   };
 
   try {
     const configData = lerTabelaDinamica("Config_App");
-    
+
     if (configData && configData.length > 0) {
-      const configRow = configData[0]; 
-      
+      const configRow = configData[0];
+
       if (configRow.logo_url) configBase.iconId = padronizarLinkDrive(configRow.logo_url);
       if (configRow.fundo_url) configBase.bgId = padronizarLinkDrive(configRow.fundo_url);
       if (configRow.cor_primaria) configBase.primaryColor = configRow.cor_primaria;
       if (configRow.cor_secundaria) configBase.secondaryColor = configRow.cor_secundaria;
       if (configRow.cor_texto) configBase.textColor = configRow.cor_texto;
       if (configRow.cor_texto_botao) configBase.btnTextColor = configRow.cor_texto_botao;
+      // <-- NOVO: Lendo a Cor_Fundo do banco de dados
+      if (configRow.cor_fundo) configBase.bgColor = configRow.cor_fundo;
     }
-    
+
     return configBase;
   } catch (e) {
     return configBase;
@@ -1153,9 +1140,9 @@ function salvarConfig(form) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = ss.getSheetByName("Config_App");
 
-    if (!sheet) { 
-        verificarCriarAbasFinanceiras(); 
-        sheet = ss.getSheetByName("Config_App"); 
+    if (!sheet) {
+      verificarCriarAbasFinanceiras();
+      sheet = ss.getSheetByName("Config_App");
     }
 
     const configsToSave = {
@@ -1164,15 +1151,16 @@ function salvarConfig(form) {
       "Cor_Primaria": form.cfg_color || "#FFD700",
       "Cor_Secundaria": form.cfg_color_sec || "#1e1e1e",
       "Cor_Texto": form.cfg_color_text || "#ffffff",
-      "Cor_Texto_Botao": form.cfg_color_btn_text || "#000000"
+      "Cor_Texto_Botao": form.cfg_color_btn_text || "#000000",
+      "Cor_Fundo": form.cfg_color_bg || "#121212" // <-- NOVO: Salva a 5ª cor
     };
 
     if (sheet.getLastRow() < 2) {
-       sheet.appendRow(["", "", "#FFD700", "#1e1e1e", "#ffffff", "#000000"]);
+      sheet.appendRow(["", "", "#FFD700", "#1e1e1e", "#ffffff", "#000000", "#121212"]);
     }
 
     salvarDadosSeguro("Config_App", configsToSave, 2);
-    
+
     return "✅ Tema atualizado com sucesso!";
   } catch (e) {
     return "❌ Erro ao salvar configuração: " + e.message;
