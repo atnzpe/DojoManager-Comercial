@@ -574,6 +574,10 @@
           sistema pelos da sua academia.</p>
 
         <div class="form-grid">
+          <div class="form-full">
+            <label class="adm-label" style="color:var(--dynamic-text);"><span class="material-icons" style="font-size:14px; vertical-align:middle">business</span> Nome Oficial da Academia/Federação (Aparece na aba do navegador)</label>
+            <input type="text" name="cfg_nome_acad" id="cfg_nome_acad" class="adm-input" placeholder="Ex: Confederação Pernambucana de Sambo" style="border-left: 4px solid var(--dynamic-prim);">
+          </div>
           <div>
             <label class="adm-label" style="color:#25D366;"><span class="material-icons" style="font-size:14px; vertical-align:middle">storefront</span> Link da Loja (WhatsApp)</label>
             <input type="text" name="cfg_link_loja" id="cfg_link_loja" class="adm-input" placeholder="https://wa.me/5581900000000">
@@ -1025,6 +1029,9 @@
       document.getElementById('cfg_link_insta').value = cfg.linkInstagram || '';
       document.getElementById('cfg_link_yt').value = cfg.linkYouTube || '';
       document.getElementById('cfg_link_cad').value = cfg.linkCadastro || '';
+
+      // INÍCIO: NOVA LINHA DO NOME
+      document.getElementById('cfg_nome_acad').value = cfg.nomeAcademia || '';
 
       atualizarPreviewCores();
     }).getAppConfig(); 

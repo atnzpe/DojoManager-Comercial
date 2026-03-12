@@ -114,8 +114,8 @@ function verificarCriarAbasFinanceiras() {
     { nome: "Fin_Assinaturas", colunas: ["Login_Aluno", "Pacote_Atual", "Data_Inicio", "Data_Fim", "Status_Assinatura", "ID_Ultima_Transacao"] },
     {
       nome: "Config_App",
-      // As 11 colunas de configuração
-      colunas: ["Logo_URL", "Fundo_URL", "Cor_Primaria", "Cor_Secundaria", "Cor_Texto", "Cor_Texto_Botao", "Cor_Fundo", "Link_Loja", "Link_Instagram", "Link_YouTube", "Link_Cadastro"]
+      // As 12 colunas de configuração agora (Nome_Academia no final)
+      colunas: ["Logo_URL", "Fundo_URL", "Cor_Primaria", "Cor_Secundaria", "Cor_Texto", "Cor_Texto_Botao", "Cor_Fundo", "Link_Loja", "Link_Instagram", "Link_YouTube", "Link_Cadastro", "Nome_Academia"]
     }
   ];
 
@@ -128,11 +128,14 @@ function verificarCriarAbasFinanceiras() {
       sheet.setFrozenRows(1);
 
       if (aba.nome === "Config_App") {
-        sheet.appendRow(["", "", "#FFD700", "#1e1e1e", "#ffffff", "#000000", "#121212", "", "", "", ""]);
+        // 12 espaços vazios iniciais
+        sheet.appendRow(["", "", "#FFD700", "#1e1e1e", "#ffffff", "#000000", "#121212", "", "", "", "", "DojoManager SaaS"]);
       }
     }
   });
 }
+
+
 /**
  * RELATÓRIO ADMIN/INSTRUTOR (COM FILTROS E PERMISSÕES)
  */
@@ -608,7 +611,6 @@ function doGet(e) {
   try {
     const template = HtmlService.createTemplateFromFile(htmlFile);
 
-    // 🛡️ BLINDAGEM DE VARIÁVEIS DE TEMA
     template.scriptUrl = SCRIPT_URL;
     template.bgUrl = ""; template.logoUrl = "";
     template.primaryColor = "#FFD700";
@@ -617,11 +619,12 @@ function doGet(e) {
     template.btnTextColor = "#000000";
     template.bgColor = "#121212";
 
-    // 🛡️ BLINDAGEM DE LINKS
     template.linkLoja = "https://wa.me/5581997629232";
     template.linkInstagram = "https://www.instagram.com/";
     template.linkYouTube = "https://www.youtube.com/";
     template.linkCadastro = "https://forms.gle/3vXp86VCmuLzHrk46";
+
+    let tituloNavegador = "DojoManager SaaS"; // Fallback do Titulo
 
     try {
       const config = getAppConfig();
@@ -634,16 +637,18 @@ function doGet(e) {
         template.btnTextColor = config.btnTextColor || template.btnTextColor;
         template.bgColor = config.bgColor || template.bgColor;
 
-        // <-- INJETANDO OS LINKS NO HTML
         template.linkLoja = config.linkLoja || template.linkLoja;
         template.linkInstagram = config.linkInstagram || template.linkInstagram;
         template.linkYouTube = config.linkYouTube || template.linkYouTube;
         template.linkCadastro = config.linkCadastro || template.linkCadastro;
+
+        tituloNavegador = config.nomeAcademia || tituloNavegador; // Puxa o nome
       }
     } catch (e) { console.warn("Erro ao carregar configurações", e); }
 
     return template.evaluate()
-      .setTitle("DojoManager - Portal do Aluno")
+      // <-- INJETANDO O NOME DA ACADEMIA NA ABA DO NAVEGADOR
+      .setTitle(tituloNavegador + " | Portal do Aluno")
       .addMetaTag('viewport', 'width=device-width, initial-scale=1')
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 
@@ -1126,11 +1131,11 @@ function getAppConfig() {
     textColor: DEFAULT_ASSETS.TEXT_COLOR,
     btnTextColor: DEFAULT_ASSETS.BTN_TEXT_COLOR,
     bgColor: DEFAULT_ASSETS.BG_COLOR,
-    // <-- FALLBACKS PADRÕES CASO O USUÁRIO DEIXE VAZIO
-    linkLoja: "https://wa.me/5581997629232",
-    linkInstagram: "https://www.instagram.com/",
-    linkYouTube: "https://www.youtube.com/",
-    linkCadastro: "https://forms.gle/3vXp86VCmuLzHrk46"
+    linkLoja: DEFAULT_ASSETS.LINK_LOJA,
+    linkInstagram: DEFAULT_ASSETS.LINK_INSTA,
+    linkYouTube: DEFAULT_ASSETS.LINK_YT,
+    linkCadastro: DEFAULT_ASSETS.LINK_CAD,
+    nomeAcademia: "DojoManager SaaS" // <-- FALLBACK PADRÃO
   };
 
   try {
@@ -1147,11 +1152,13 @@ function getAppConfig() {
       if (configRow.cor_texto_botao) configBase.btnTextColor = configRow.cor_texto_botao;
       if (configRow.cor_fundo) configBase.bgColor = configRow.cor_fundo;
 
-      // <-- LENDO OS LINKS DO BANCO
       if (configRow.link_loja) configBase.linkLoja = configRow.link_loja;
       if (configRow.link_instagram) configBase.linkInstagram = configRow.link_instagram;
       if (configRow.link_youtube) configBase.linkYouTube = configRow.link_youtube;
       if (configRow.link_cadastro) configBase.linkCadastro = configRow.link_cadastro;
+
+      // <-- LENDO O NOME DA ACADEMIA DO BANCO
+      if (configRow.nome_academia) configBase.nomeAcademia = configRow.nome_academia;
     }
 
     return configBase;
@@ -1178,20 +1185,20 @@ function salvarConfig(form) {
       "Cor_Texto": form.cfg_color_text || "#ffffff",
       "Cor_Texto_Botao": form.cfg_color_btn_text || "#000000",
       "Cor_Fundo": form.cfg_color_bg || "#121212",
-      // <-- PREPARANDO OS DADOS VINDOS DO FORMULÁRIO DO ADMIN
       "Link_Loja": form.cfg_link_loja || "",
       "Link_Instagram": form.cfg_link_insta || "",
       "Link_YouTube": form.cfg_link_yt || "",
-      "Link_Cadastro": form.cfg_link_cad || ""
+      "Link_Cadastro": form.cfg_link_cad || "",
+      "Nome_Academia": form.cfg_nome_acad || "DojoManager SaaS" // <-- SALVANDO O NOVO NOME
     };
 
     if (sheet.getLastRow() < 2) {
-      sheet.appendRow(["", "", "#FFD700", "#1e1e1e", "#ffffff", "#000000", "#121212", "", "", "", ""]);
+      sheet.appendRow(["", "", "#FFD700", "#1e1e1e", "#ffffff", "#000000", "#121212", "", "", "", "", "DojoManager SaaS"]);
     }
 
     salvarDadosSeguro("Config_App", configsToSave, 2);
 
-    return "✅ Configurações e Links atualizados com sucesso!";
+    return "✅ Configurações atualizadas com sucesso!";
   } catch (e) {
     return "❌ Erro ao salvar configuração: " + e.message;
   }
