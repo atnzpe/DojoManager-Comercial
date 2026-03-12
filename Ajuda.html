@@ -3,191 +3,206 @@
 
 <head>
   <base target="_top">
-  
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  
+  <title>Manual do App | DojoManager</title>
+
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 
   <style>
-    /* --- INJEÇÃO DE VARIÁVEIS GLOBAIS DO BACKEND (WHITE-LABEL) --- */
-    /* Sobrescreve as cores padrão do sistema pelas cores da Academia (lidas da planilha) */
+    /* ============================================================================
+       INJEÇÃO FORÇADA DAS 5 CORES DO BANCO DE DADOS (WHITE-LABEL)
+       ============================================================================ */
     :root {
-      --primary-color: <?=primaryColor ?> !important;   /* Cor Destaque / Identidade */
-      --secondary-color: <?=secondaryColor ?> !important; /* Cor de Fundo de Cards */
-      --text-color: <?=textColor ?> !important;         /* Cor das Fontes */
-      --btn-text-color: <?=btnTextColor ?> !important;  /* Cor do texto em botões ativos */
+      --dynamic-bg: <?=bgColor ? bgColor: '#121212'?> !important;
+      --dynamic-prim: <?=primaryColor ? primaryColor: '#FFD700'?> !important;
+      --dynamic-sec: <?=secondaryColor ? secondaryColor: '#1e1e1e'?> !important;
+      --dynamic-text: <?=textColor ? textColor: '#ffffff'?> !important;
+      --dynamic-btn-text: <?=btnTextColor ? btnTextColor: '#000000'?> !important;
     }
-  </style>
 
-  <?!= include('Style'); ?>
+    /* --- ESTILOS GERAIS --- */
+    body {
+      background-color: transparent !important;
+      /* Libera para a imagem de fundo aparecer */
+      color: var(--dynamic-text);
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding-bottom: 80px;
+    }
 
-  <style>
-    /* --- ESTILOS EXCLUSIVOS DESTE MÓDULO (SCOPED CSS) --- */
-    
-    /* Remove a cor de fundo do body global para permitir ver a imagem de fundo */
-    body { background-color: transparent !important; }
-
-    /* BG-LAYER: Imagem de fundo institucional da academia */
+    /* IMAGEM DE FUNDO E PELÍCULA ESCURA */
     .bg-layer {
-      position: fixed;               /* Fixa no fundo da tela (não rola com o texto) */
-      top: 0; left: 0; width: 100%; height: 100%; /* Cobre viewport total */
-      background-image: url('<?= bgUrl ?>'); /* Traz a imagem da planilha */
-      background-size: cover;        /* Redimensiona sem distorcer a proporção */
-      background-position: center;   /* Foco no centro da foto */
-      background-repeat: no-repeat;  /* Evita textura repetida */
-      z-index: -2;                   /* Camada mais funda possível */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('<?= typeof bgUrl !== "undefined" ? bgUrl : "" ?>');
+      background-color: var(--dynamic-bg);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      z-index: -2;
     }
 
-    /* OVERLAY: Camada de escurecimento sobre a imagem para garantir leitura do texto */
     .overlay {
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background-color: rgba(0, 0, 0, 0.80); /* 80% de opacidade preta (bem escuro) */
-      z-index: -1;                   /* Fica entre a foto e o conteúdo */
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      /* Escurece para destacar o texto */
+      z-index: -1;
     }
 
-    /* CONTAINER PRINCIPAL: Centraliza o conteúdo da página */
     .ajuda-container {
-      width: 100%;                   /* Responsivo */
-      max-width: 600px;              /* Limite para não esticar muito no PC */
-      margin: 0 auto;                /* Centraliza na tela */
-      padding: 20px;                 /* Respiro interno */
-      box-sizing: border-box;        /* Garante que o padding não fure o limite de 600px */
-      position: relative;            /* Necessário para o z-index funcionar */
-      z-index: 1;                    /* Coloca o conteúdo acima do fundo */
-      padding-bottom: 60px;          /* Espaço extra no final da rolagem */
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
     }
 
-    /* HEADER FIXO: O título "Manual do App" que fica grudado no topo */
+    /* HEADER */
     .ajuda-header {
-      display: flex;                 /* Alinha o botão de voltar e os textos lado a lado */
-      align-items: center;           /* Centraliza verticalmente */
-      margin-bottom: 25px;           /* Afasta do primeiro item de ajuda */
-      padding-bottom: 15px;          /* Respiro interno inferior */
-      border-bottom: 2px solid var(--primary-color); /* Linha divisória da cor da academia */
-      position: sticky;              /* CSS moderno: gruda o elemento no topo ao rolar */
-      top: 0;                        /* Define onde ele "gruda" (no pixel 0) */
-      z-index: 10;                   /* Mantém o header sempre acima do texto rolado */
-      background-color: var(--secondary-color); /* Usa o fundo do card para não ficar transparente */
-      padding: 15px;                 /* Respiro geral do header */
-      border-radius: 0 0 12px 12px;  /* Arredonda apenas as pontas de baixo */
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* Sombra para dar noção de profundidade */
+      display: flex;
+      align-items: center;
+      margin-bottom: 25px;
+      border-bottom: 2px solid var(--dynamic-prim);
+      /* Borda da Marca */
+      padding-bottom: 15px;
+      background-color: var(--dynamic-sec);
+      /* Fundo do Card */
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 15px;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
     }
 
-    /* BOTÃO VOLTAR NO HEADER */
     .btn-back {
-      background: none; border: none; /* Tira estilo nativo de botão */
-      color: var(--text-color);       /* Herda cor da fonte */
-      cursor: pointer;                /* Cursor de mãozinha */
-      padding: 0; margin-right: 15px; /* Afasta do título */
-      transition: 0.2s;               /* Suaviza hover */
+      background: none;
+      border: none;
+      color: var(--dynamic-prim);
+      /* Cor da Marca */
+      cursor: pointer;
+      padding: 0;
+      margin-right: 15px;
+      transition: 0.2s;
     }
 
-    /* Efeito ao passar o mouse no botão voltar */
     .btn-back:hover {
-      color: var(--primary-color);    /* Fica da cor da marca */
-      transform: translateX(-3px);    /* Move 3px para a esquerda (efeito visual de "voltar") */
+      transform: translateX(-3px);
     }
 
-    /* TÍTULO DA PÁGINA */
     .ajuda-title {
-      font-size: 1.5rem;             /* Tamanho grande */
-      font-weight: 900;              /* Negrito extra pesado (fonte Roboto 900 importada) */
-      color: var(--primary-color);   /* Cor da marca */
-      margin: 0;                     /* Remove margens nativas do h1 */
-      text-transform: uppercase;     /* Tudo em maiúsculo */
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--dynamic-prim);
+      /* Cor da Marca */
+      margin: 0;
     }
 
-    /* TÍTULO DE CAPÍTULO (Ex: 1. Primeiros Passos) */
-    .chapter-title {
-      color: var(--text-color);      
-      opacity: 0.5;                  /* Apagado para servir de organizador, não de conteúdo principal */
-      font-size: 0.8rem;             /* Letra miúda */
-      text-transform: uppercase;     /* Maiúsculo */
-      letter-spacing: 1px;           /* Espaça as letras para ficar elegante */
-      margin: 30px 0 10px 5px;       /* Afasta do bloco anterior */
-      font-weight: 900;              /* Negrito */
-    }
-
-    /* --- COMPONENTE: ACORDEÃO (Botão que expande) --- */
+    /* ACORDEÃO (TÓPICOS) */
     .accordion {
-      background-color: var(--secondary-color); /* Fundo padrão de card */
-      color: var(--text-color);      /* Cor da fonte do cliente */
-      cursor: pointer;               /* Clicável */
-      padding: 18px 20px;            /* Área de toque generosa (Mobile) */
-      width: 100%;                   /* Largura total */
-      text-align: left;              /* Alinha texto à esquerda */
-      border: 1px solid var(--primary-color); /* Borda da cor da academia */
-      outline: none;                 /* Remove borda feia de acessibilidade padrão */
-      transition: 0.3s;              /* Suavidade ao abrir/fechar */
-      font-size: 1rem;               /* Tamanho base de leitura */
-      font-weight: bold;             /* Destaque */
-      display: flex;                 /* Flexbox para alinhar texto e setinha */
-      justify-content: space-between;/* Separa o texto da seta ao máximo */
-      align-items: center;           /* Alinha no meio verticalmente */
-      border-radius: 12px;           /* Arredonda o card */
-      margin-bottom: 8px;            /* Espaço entre um botão e outro */
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); /* Sombra de elevação */
+      background-color: var(--dynamic-sec);
+      color: var(--dynamic-text);
+      cursor: pointer;
+      padding: 18px;
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--dynamic-prim);
+      outline: none;
+      transition: 0.4s;
+      font-size: 1rem;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
 
-    /* ESTADO ATIVO OU HOVER DO ACORDEÃO */
-    .active, .accordion:hover {
-      background-color: rgba(0, 0, 0, 0.4); /* Escurece um pouco ao clicar */
-      filter: brightness(1.1);       /* Aumenta o brilho da cor da borda */
+    .active,
+    .accordion:hover {
+      background-color: rgba(0, 0, 0, 0.4);
+      color: var(--dynamic-prim);
     }
 
-    /* --- COMPONENTE: PAINEL DE TEXTO OCULTO --- */
     .panel {
-      padding: 0 20px;               /* Zero padding vertical inicialmente para esconder perfeitamente */
-      background-color: rgba(0, 0, 0, 0.3); /* Fundo sutilmente translúcido */
-      max-height: 0;                 /* A "mágica" CSS: altura zero esconde o elemento */
-      overflow: hidden;              /* Corta qualquer conteúdo que tente vazar da altura zero */
-      transition: max-height 0.3s ease-out; /* Anima a altura de 0 para o tamanho real do texto */
-      border-left: 2px solid var(--primary-color); /* Tracinho colorido na esquerda para design */
-      border-radius: 0 0 12px 12px;  /* Arredonda só em baixo para colar no botão */
-      margin-bottom: 15px;           /* Afasta do próximo bloco */
-      margin-top: -10px;             /* "Engole" a margem do botão de cima para parecer uma peça só */
+      padding: 0 18px;
+      background-color: rgba(0, 0, 0, 0.3);
+      /* Fundo com transparência */
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      border-left: 2px solid var(--dynamic-prim);
+      border-radius: 0 0 4px 4px;
+      margin-bottom: 15px;
+      margin-top: -10px;
     }
 
-    /* Tipografia dentro do painel escondido */
-    .panel p, .panel li {
-      color: var(--text-color);
-      opacity: 0.85;                 /* Texto secundário */
-      line-height: 1.6;              /* Espaço entre linhas para facilitar leitura */
+    .panel p,
+    .panel li {
+      color: var(--dynamic-text);
+      opacity: 0.85;
+      line-height: 1.6;
       font-size: 0.95rem;
       margin-bottom: 10px;
       margin-top: 15px;
     }
 
-    /* Listas dentro do painel */
-    .panel ul, .panel ol {
-      padding-left: 20px;            /* Recuo padrão para listas HTML */
+    .panel ul,
+    .panel ol {
+      padding-left: 20px;
       margin-top: 5px;
     }
 
-    /* Ícone ao lado do título da pergunta */
     .icon-topic {
       margin-right: 10px;
-      vertical-align: middle;        /* Alinha com o texto */
-      color: var(--primary-color);   /* Fica da cor da marca */
+      vertical-align: middle;
+      color: var(--dynamic-prim);
       font-size: 24px;
     }
 
-    /* Setinha (Chevron) na direita do botão */
     .chevron {
-      transition: transform 0.3s;    /* A animação de girar demora 0.3s */
-      color: var(--primary-color);
+      transition: transform 0.3s;
+      color: var(--dynamic-prim);
     }
 
-    /* Quando o botão recebe a classe .active via JS, gira a setinha de cabeça para baixo */
-    .active .chevron { transform: rotate(180deg); }
+    .active .chevron {
+      transform: rotate(180deg);
+    }
 
-    /* Destaques em negrito dentro das respostas */
+    /* DESTAQUES NO TEXTO */
     strong {
-      color: var(--text-color);
-      font-weight: 900;
-      opacity: 1;                    /* Tira a transparência do parágrafo pai */
+      color: var(--dynamic-text);
+      font-weight: 600;
+      opacity: 1;
+    }
+
+    .highlight {
+      background-color: var(--dynamic-prim);
+      color: var(--dynamic-btn-text);
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 0.7rem;
+      vertical-align: middle;
+    }
+
+    .chapter-title {
+      color: var(--dynamic-text);
+      opacity: 0.6;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 25px 0 10px 5px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -204,7 +219,7 @@
       </button>
       <div>
         <h1 class="ajuda-title">Manual do App</h1>
-        <span style="font-size:0.8rem; color:var(--text-color); opacity:0.6;">Versão 4.0 - White-Label</span>
+        <span style="font-size:0.8rem; color:var(--dynamic-text); opacity:0.6;">Versão 3.5 - Atualização Chamada V6</span>
       </div>
     </div>
 
@@ -217,10 +232,12 @@
     <div class="panel">
       <p>Para entrar no sistema, use seus dados cadastrados:</p>
       <ul>
-        <li><strong>Usuário:</strong> Seu Login oficial. O sistema aceita letras maiúsculas ou minúsculas.</li>
+        <li><strong>Usuário:</strong> Seu Login oficial (Ex: <em>Atanazio</em>). O sistema aceita letras maiúsculas ou
+          minúsculas.</li>
         <li><strong>Senha:</strong> Sua senha pessoal.</li>
       </ul>
-      <p>Caso tenha esquecido, clique no link <strong>"Esqueci a senha"</strong> na tela inicial para iniciar a recuperação.</p>
+      <p>Caso tenha esquecido, clique no link <strong>"Esqueci a senha"</strong> na tela inicial para iniciar a
+        recuperação.</p>
     </div>
 
     <button class="accordion">
@@ -230,9 +247,10 @@
     <div class="panel">
       <p>Se você ainda não tem acesso:</p>
       <ol>
-        <li>Na tela de login, clique no botão <strong>"Agendar Aula Experimental"</strong> ou procure a secretaria.</li>
-        <li>Preencha todos os dados (Nome, Academia de preferência, etc).</li>
-        <li>Aguarde a validação da administração para liberar seu acesso oficial como aluno.</li>
+        <li>Na tela de login, clique no link dourado <strong>"Cadastre-se"</strong>.</li>
+        <li>Você será levado ao formulário oficial da Federação.</li>
+        <li>Preencha todos os dados (Nome, CPF, Academia, etc).</li>
+        <li>Aguarde a validação do seu Mestre ou Admin para liberar seu acesso.</li>
       </ol>
     </div>
 
@@ -243,10 +261,12 @@
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>Olhe para o topo do seu Painel Principal (Dashboard):</p>
+      <p>Agora ficou fácil! Ao abrir o App, olhe para o topo do Dashboard:</p>
       <ul>
-        <li>O widget <strong>"TREINOS ATIVOS"</strong> mostra automaticamente todas as aulas disponíveis para hoje.</li>
-        <li>Ele exibe tanto as aulas fixas quanto eventos externos (Seminários, Aulões).</li>
+        <li>O widget <strong>"TREINOS DE HOJE"</strong> mostra automaticamente todas as aulas disponíveis para o dia da
+          semana atual.</li>
+        <li>Ele exibe tanto as aulas fixas (grade da academia) quanto aulas extras criadas na hora.</li>
+        <li>Você pode clicar em <strong>"ROTA"</strong> para abrir o GPS direto para o local.</li>
       </ul>
     </div>
 
@@ -255,11 +275,13 @@
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>Existem duas formas de garantir seus pontos de assiduidade:</p>
-      <p><strong>1. Pelo Atalho Rápido:</strong><br>
-      Se o instrutor já abriu a aula, aparecerá um botão <strong>"CHECK-IN"</strong> ao lado da aula no Dashboard. Basta clicar!</p>
+      <p>Existem duas formas de garantir seus pontos no Ranking:</p>
+      <p><strong>1. Pelo Dashboard (Rápido):</strong><br>
+      Se o instrutor já abriu a aula, aparecerá um botão verde <strong>"CHECK-IN"</strong> no widget "Treinos de Hoje".
+        Basta clicar!</p>
       <p><strong>2. Pelo Menu "Check-in Aula":</strong><br>
-      Clique no card "Check-in Aula" e digite o <strong>PIN de 4 dígitos</strong> que o instrutor escrever no quadro ou mostrar na tela.</p>
+      Clique no card "Check-in Aula". Digite o <strong>PIN</strong> (código de 4 números) que o instrutor mostrar na tela.
+      </p>
     </div>
 
     <div class="chapter-title">3. Financeiro & Planos</div>
@@ -271,133 +293,166 @@
     <div class="panel">
       <p>Acesse o card <strong>"Financeiro"</strong> no Dashboard.</p>
       <ul>
-        <li>Você verá o nome do seu plano e a data de vencimento.</li>
+        <li>Você verá o nome do seu plano (ex: Mensalidade Padrão) e a data de vencimento.</li>
         <li><strong>Status Verde:</strong> Pagamento em dia. Check-in liberado.</li>
-        <li><strong>Status Vermelho:</strong> Plano vencido ou cancelado. Check-in bloqueado na porta do tatame.</li>
+        <li><strong>Status Vermelho:</strong> Plano vencido ou cancelado. Check-in bloqueado.</li>
       </ul>
+    </div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">whatsapp</span> Plano Vencido: O que fazer?</span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>Se sua mensalidade vencer (ou faltarem 5 dias para vencer), aparecerá um botão verde
+        <strong>"Regularizar / Renovar"</strong> na tela Financeira.</p>
+      <p>Clique nele para abrir uma conversa direta no <strong>WhatsApp</strong> com o responsável da sua academia para
+        enviar o comprovante do Pix.</p>
     </div>
 
     <div class="chapter-title">4. Para Instrutores (Gestão)</div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">add_location_alt</span> Criar Aula e Rota (GPS)</span>
+      <span><span class="material-icons icon-topic">add_location_alt</span> Criar Aula (Fixa ou Avulsa)</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>O sistema permite aulas em qualquer lugar:</p>
+      <p>O sistema agora permite aulas em qualquer lugar!</p>
       <ul>
         <li>Vá em <strong>"Lista de Presença"</strong> > <strong>"CRIAR NOVA AULA"</strong>.</li>
-        <li>No campo "Local", selecione sua academia OU escolha a opção <strong>"📍 Outro Local"</strong>.</li>
+        <li>No campo "Local", selecione sua academia OU escolha a opção
+          <strong>"📍 Outro Local / Evento Externo"</strong>.</li>
+        <li><strong>Importante:</strong> Verifique se a DATA está correta. Ela agora aparece na lista para facilitar a
+          conferência.</li>
         <li>Ao gerar o PIN, essa aula aparecerá imediatamente no App de todos os alunos.</li>
       </ul>
     </div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">person_add_alt</span> Adicionar Visitante na Chamada</span>
+      <span><span class="material-icons icon-topic">person_add_alt</span> Adicionar Manual / Visitante <span class="highlight">NOVO</span></span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>Se o aluno esqueceu o celular ou é uma aula experimental:</p>
+      <p>Se o aluno esqueceu o celular, está sem internet ou é um visitante:</p>
       <ol>
-        <li>Na tela de controle da aula (do Instrutor), clique no botão cinza <strong>"Manual"</strong>.</li>
-        <li>Digite o nome do aluno na busca. O sistema irá sugerir os nomes.</li>
-        <li>Se não for cadastrado, clique em <strong>"Adicionar [Nome] como Visitante"</strong> no final da lista.</li>
+        <li>Na tela do PIN (dentro da aula), clique no botão cinza <strong>"Manual"</strong> (ícone de bonequinho com
+          +).</li>
+        <li>Digite o nome do aluno na busca. O sistema irá sugerir nomes do banco de dados em tempo real.</li>
+        <li><strong>Aluno Cadastrado:</strong> Clique no nome dele. Ele entrará na lista já com presença confirmada.
+        </li>
+        <li><strong>Visitante / Aula Experimental:</strong> Se o nome não aparecer na lista, clique na opção azul
+          <strong>"Adicionar [Nome] como Visitante"</strong> no final da lista.</li>
       </ol>
-      <p><em>Isso garante que a estatística de ocupação da aula esteja 100% correta!</em></p>
+      <p><em>Isso garante que o treino nunca pare por problemas técnicos!</em></p>
     </div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">trending_up</span> Lançar Pagamentos</span>
+      <span><span class="material-icons icon-topic">trending_up</span> Lançar Entrada (Receita)</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>Para registrar pagamentos de alunos e não deixar eles bloqueados:</p>
+      <p>Para registrar pagamentos de alunos (Mensalidades, Cursos, Equipamentos):</p>
       <ol>
         <li>Vá em <strong>Financeiro</strong> > <strong>Novo Lançamento</strong>.</li>
-        <li>Selecione <strong>Receita</strong>.</li>
-        <li><strong>CRÍTICO:</strong> Selecione o <strong>ALUNO</strong> e o <strong>PACOTE</strong>. Isso renovará a data de vencimento dele automaticamente.</li>
+        <li>Selecione <strong>Receita</strong> e a Categoria (Ex: <strong>Mensalidade</strong>).</li>
+        <li><strong>CRÍTICO:</strong> Selecione o <strong>ALUNO</strong> e o <strong>PACOTE</strong> no menu. Isso
+          garante que o sistema renove o plano dele automaticamente.</li>
+        <li>Informe o Valor e a Forma de Pagamento.</li>
       </ol>
     </div>
 
-    <div class="chapter-title">5. Suporte</div>
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">trending_down</span> Lançar Saída (Despesa)</span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>Para registrar gastos da unidade (Contas, Aluguel, Manutenção):</p>
+      <ol>
+        <li>Vá em <strong>Financeiro</strong> > <strong>Novo Lançamento</strong>.</li>
+        <li>Selecione <strong>Despesa</strong>.</li>
+        <li><em>Note que os campos de "Aluno" desaparecerão.</em></li>
+        <li>Escolha a Categoria (Ex: <strong>Contas</strong> ou <strong>Aluguel</strong>).</li>
+        <li>Na descrição, detalhe o gasto (Ex: "Conta de Luz Fev/26").</li>
+        <li>Informe o Valor e Confirme. Isso abaterá do seu caixa.</li>
+      </ol>
+    </div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">filter_alt</span> Visualizar Caixa</span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p><strong>Instrutores:</strong> Veem apenas o caixa da sua própria unidade.</p>
+      <p><strong>Mestres/Admins:</strong> Podem usar o filtro no topo da tela para ver "Todas as Academias" ou
+        selecionar uma unidade específica para auditoria.</p>
+    </div>
+
+    <div class="chapter-title">5. Performance e Suporte</div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">emoji_events</span> Entendendo o Ranking</span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>Acompanhe sua assiduidade e pontuação:</p>
+      <ul>
+        <li><strong>Filtro "Minha Academia":</strong> Mostra sua posição apenas entre os alunos da sua unidade.</li>
+        <li><strong>Filtro "Geral":</strong> Compara sua pontuação com toda a rede FBKMK.</li>
+        <li><strong>Critério de Desempate:</strong> Se dois alunos têm a mesma quantidade de aulas, eles dividem a mesma
+          posição.</li>
+      </ul>
+    </div>
 
     <button class="accordion">
       <span><span class="material-icons icon-topic">help_outline</span> Dúvidas Frequentes</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p><strong>Esqueci de dar presença, e agora?</strong><br>
-      O sistema é travado por data. Peça ao seu Instrutor para usar o lançamento "Manual" na próxima aula.</p>
-      <p><strong>Encontrei um erro na plataforma!</strong><br>
-      Use o botão de suporte (Ícone de Headset) na tela inicial do Dashboard para relatar bugs diretamente à administração.</p>
+      <p><strong>Esqueci de dar presença na hora, e agora?</strong><br>
+      O sistema é Dinâmico (tempo real). Se esquecer, peça ao seu Instrutor para usar o botão "Manual" na próxima aula ou falar com a administração.
+      </p>
+      <p><strong>Meu nome está duplicado no Ranking?</strong><br>
+      O sistema novo corrige letras maiúsculas automaticamente. Se o problema persistir, use o botão de suporte (Headphone) para relatar.
+      </p>
     </div>
 
   </div>
 
   <script>
-    /**
-     * ============================================================================
-     * CONTROLLER JAVASCRIPT: Lógica de Interação da Interface (UI)
-     * ============================================================================
-     */
-
-    // Log de inicialização para o time de QA rastrear a execução no console (F12)
-    console.log("📚 [QA/Debug] Módulo de Ajuda (FAQ) inicializado com sucesso.");
-
-    // LÓGICA DO ACORDEÃO (Expansão de Abas)
-    // 1. Busca todos os botões que possuem a classe 'accordion'
+    // Lógica do Acordeão (Expande/Recolhe Tópicos)
     var acc = document.getElementsByClassName("accordion");
-    
-    // 2. Cria um laço (loop) para adicionar o evento de clique em cada um deles
     for (var i = 0; i < acc.length; i++) {
       acc[i].addEventListener("click", function() {
-        
-        // [ESTAGIÁRIO] 'this' refere-se ao elemento específico que foi clicado.
-        // Adiciona ou remove a classe "active", que gira a setinha via CSS.
         this.classList.toggle("active");
-        
-        // Pega o próximo elemento no HTML após o botão (que é a <div> com a class="panel")
         var panel = this.nextElementSibling;
-        
-        // Lógica de altura condicional:
         if (panel.style.maxHeight) {
-          // Se já tem altura definida (está aberto), zera a altura para esconder (fechar)
           panel.style.maxHeight = null;
-          console.log("🖱️ [QA/Debug] Aba fechada.");
         } else {
-          // Se está fechado, pega a altura total do texto interno (scrollHeight) e seta como limite.
-          // Isso força a transição CSS (animação) a ocorrer de 0px até o tamanho exato do texto.
+          // Ajusta altura automaticamente conforme o conteúdo
           panel.style.maxHeight = panel.scrollHeight + "px";
-          
-          // Log útil para rastrear o que os usuários estão lendo na aba de ajuda
-          console.log("🖱️ [QA/Debug] Aba aberta: ", this.innerText.replace('expand_more', '').trim());
         } 
       });
     }
 
-    /**
-     * NAVEGAÇÃO SPA (Single Page Application no contexto do Apps Script)
-     * Volta para a tela principal do aluno.
-     */
+    // Função de Voltar para o Dashboard
     function voltarAoDash() {
-       console.log("🔄 [QA/Debug] Iniciando retorno para o Dashboard...");
-       
-       // UX: Troca o ícone de voltar por um spinner giratório para mostrar carregamento
        const btn = document.querySelector('.btn-back');
-       btn.innerHTML = `<span class="material-icons spinner" style="display:block; border-color:transparent; border-top-color:var(--text-color);">sync</span>`;
+       btn.innerHTML = `<span class="material-icons" style="animation: spin 1s linear infinite;">sync</span>`;
        
-       // Chama a função do Backend (Codigo.gs) para pegar a URL base e anexar o parâmetro ?page=dashboard
        google.script.run
-         .withSuccessHandler(function(url) { 
-             console.log("✅ [QA/Debug] URL recebida, redirecionando para:", url);
-             window.top.location.href = url + "?page=dashboard"; 
-         })
-         .withFailureHandler(function(err) {
-             console.error("❌ [QA/Debug] Falha de roteamento:", err);
-         })
+         .withSuccessHandler(function(url) { window.top.location.href = url + "?page=dashboard"; })
          .getScriptUrl();
     }
   </script>
 
+  <style>
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+
 </body>
+
 </html>

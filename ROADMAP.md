@@ -11,7 +11,12 @@ Acompanhe a evolução do nosso sistema.
 - [x] CRUD Administrativo completo (Alunos, Turmas, Locais).
 
 ## 🧹 Fase 1.5: Auditoria e White-Label (Prioridade Atual)
-- [  ] Ajustar CSS para que todos as telas tenha o memso estilo CSS com cores personalizadas atraves do arqui Adm.html
+- [  ] Implmentar a personalizaçõa de imagens de logo , background e 5 Cores personalizadas
+- [  ] Ajustar CSS para que todos as telas tenha o memso estilo CSS com cores personalizadas
+- [  ] Remover o HArdcode que controla o nivel de graduação. Permitir que o usuario cadastre o ID da graduação(que sera a ordem para validar quem vem primeiro), a cor da gradução (azul, vermelha, amarela, etc), modalidade a qual a graduação pertence (karate, muay thay, etc)
+- [  ] Gestão de Turmas.
+- [  ] Gestão de cadastro de MOdalidades, associados ao locais de treino para que as pessoas possa escolher Local de trino, modalide e instrutor
+- [  ] Permitir o INstrutor, Mestre o Adm acompanahr o desenvolvimento do Aluno, quantas alulas ja ssitiu, quanto tempo de inscrição o aluno tem. Para que assim o INstrutor, Mestre ou Adm possa avaliar se o aluno ou graduado possa fazer um exame.
 - [  ] Validar todos os arquivos que fazem parte do projeto independente do que o arquivo representa. Devemos fazer um pente finissimo em todos so arquivos 
 - [ ] Validar se a planilha Mestra funciona.
 - [ ] Validar se ao fazer a cópia da planilha, para venda, se o SaaS continua a funcionar.
@@ -27,10 +32,12 @@ Acompanhe a evolução do nosso sistema.
 - [ ] Separação de Turmas por Nível e Idade (Infantil, Iniciante, Avançado).
 - [ ] Check-in Antecipado (Agendamento de grade de aulas).
 
+
 ## 🔮 Fase 3: Automação e CRM (Próximos Passos)
 - [ ] Cobrança Automática Inteligente: Disparo de mensagens via WhatsApp (API) para mensalidades atrasadas.
 - [ ] Alertas Automáticos de Aniversário.
 - [ ] Relatórios Avançados (Gráficos de evasão, horários de pico).
+- [ ] Hsitorico do Aluno (quanto tempo inscrito na turma, aulas que ja assitiu, conteudo que ja visulizou)
 
 ## 🌐 Projetos Especiais
 - [ ] Adaptação do sistema base para a **Confederação Pernambucana de Sambo**.

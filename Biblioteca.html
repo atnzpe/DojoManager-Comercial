@@ -1,8 +1,5 @@
-<!-- DOJO MANAGER - PORTAL DO ALUNO -->
-<!--Página de Biblioteca - Interface moderna e responsiva para visualização de livros e materiais de estudo. -->
-
 <style>
-  /* --- ESTILOS BIBLIOTECA --- */
+  /* --- ESTILOS BIBLIOTECA (WHITE-LABEL INTEGRADO) --- */
   .library-view {
     display: none;
     animation: fadeIn 0.3s ease-in-out;
@@ -19,33 +16,39 @@
   }
 
   .book-card {
-    background-color: #1e1e1e;
-    border: 1px solid #333;
-    border-radius: 8px;
+    /* Fundo Card e Borda Principal */
+    background-color: var(--dynamic-sec) !important;
+    border: 2px solid var(--dynamic-prim) !important;
+    border-radius: 12px;
     overflow: hidden;
-    transition: transform 0.2s, border-color 0.2s;
+    transition: transform 0.2s, filter 0.2s, box-shadow 0.2s;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     text-decoration: none;
     height: 100%;
+    /* Sombra igual à dos cards do Dashboard */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5) !important;
   }
 
   .book-card:hover {
     transform: translateY(-5px);
-    border-color: #FFD700;
+    filter: brightness(1.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8) !important;
   }
 
   .book-cover {
     height: 180px;
     width: 100%;
     object-fit: cover;
-    background-color: #2a2a2a;
-    border-bottom: 1px solid #333;
+    /* Fundo da imagem caso ela falhe/seja transparente */
+    background-color: rgba(0, 0, 0, 0.3);
+    border-bottom: 2px solid var(--dynamic-prim);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #555;
+    color: var(--dynamic-text);
+    opacity: 0.8;
   }
 
   .book-info {
@@ -56,37 +59,67 @@
   }
 
   .book-title {
-    color: #fff;
+    color: var(--dynamic-text);
     font-size: 0.95rem;
-    font-weight: bold;
+    font-weight: 900;
     margin-bottom: 5px;
     line-height: 1.3;
   }
 
   .book-desc {
-    color: #888;
+    color: var(--dynamic-text);
+    opacity: 0.7;
     font-size: 0.8rem;
     margin-bottom: 10px;
     flex-grow: 1;
   }
 
   .book-action {
-    color: #FFD700;
+    color: var(--dynamic-prim);
     font-size: 0.8rem;
-    font-weight: bold;
+    font-weight: 900;
     display: flex;
     align-items: center;
     gap: 5px;
+    text-transform: uppercase;
   }
 
-  .spinner {
+  /* Ajuste no Spinner e Loading text */
+  .lib-spinner {
     border: 4px solid rgba(255, 255, 255, 0.1);
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    border-left-color: #FFD700;
+    border-left-color: var(--dynamic-prim);
     animation: spin 1s linear infinite;
     margin: 0 auto;
+  }
+
+  /* Cabeçalho de Navegação (Voltar) */
+  .profile-header-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+
+  .btn-back-lib {
+    background: transparent;
+    border: 1px solid var(--dynamic-text);
+    color: var(--dynamic-text);
+    opacity: 0.6;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+  }
+
+  .btn-back-lib:hover {
+    opacity: 1;
+    border-color: var(--dynamic-prim);
+    color: var(--dynamic-prim);
   }
 
   @keyframes spin {
@@ -98,30 +131,41 @@
       transform: rotate(360deg);
     }
   }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>
 
 <div id="biblioteca-screen" class="library-view">
   <div class="profile-header-nav">
-    <button class="btn-back" onclick="fecharBiblioteca()">
-      <span class="material-icons" style="font-size: 32px;">arrow_back</span>
+    <button class="btn-back-lib" onclick="fecharBiblioteca()">
+      <span class="material-icons" style="font-size: 28px;">arrow_back</span>
     </button>
-    <h2 style="margin:0; font-size:1.8rem;">Biblioteca</h2>
+    <h2 style="margin:0; font-size:1.8rem; font-weight:900; color:var(--dynamic-text)">Biblioteca</h2>
   </div>
 
   <div id="loading-lib" style="text-align: center; margin-top: 50px;">
-    <div class="spinner"></div>
-    <p style="color: #888;">Carregando acervo...</p>
+    <div class="lib-spinner"></div>
+    <p style="color: var(--dynamic-text); opacity: 0.6; font-weight: bold; margin-top: 15px;">Carregando acervo...</p>
   </div>
 
   <div id="library-container" class="library-grid"></div>
 </div>
 
 <script>
-  console.log("✅ [SAFE MODE] Biblioteca.html carregado e blindado (Cache: 24h)!");
+  console.log("✅ [SAFE MODE] Biblioteca.html carregado e blindado (White-Label Integrado)!");
 
   function abrirBiblioteca() {
     try {
-        // Gestão de visibilidade segura
         const dashGrid = document.getElementById('dashboard-grid');
         const dashHeader = document.querySelector('.dashboard-header');
         const libScreen = document.getElementById('biblioteca-screen');
@@ -136,21 +180,18 @@
         if (container) container.innerHTML = '';
         if (loading) loading.style.display = 'block';
 
-        // --- CACHE ENGINE IMPLEMENTADA ---
         if (typeof CacheSystem !== 'undefined') {
             const cached = CacheSystem.get('biblioteca_list');
             if (cached) {
                 console.log("⚡ [CACHE] Biblioteca carregada da memória.");
                 renderizarBiblioteca(cached);
-                return; // Interrompe para não chamar o servidor
+                return; 
             }
         }
 
-        // Chamada segura ao backend
         if (typeof google !== 'undefined' && google.script) {
             google.script.run
               .withSuccessHandler(function(livros) {
-                  // Salva no Cache por 1440 minutos (24 horas)
                   if (typeof CacheSystem !== 'undefined') {
                       CacheSystem.set('biblioteca_list', livros, 1440);
                   }
@@ -175,7 +216,7 @@
         if (!container) return;
 
         if (!livros || livros.length === 0) {
-            container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#666;">A biblioteca está sendo organizada. Volte em breve.</p>';
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:var(--dynamic-text); opacity:0.6; font-weight:bold;">A biblioteca está sendo organizada. Volte em breve.</p>';
             return;
         }
 
@@ -185,10 +226,8 @@
             item.href = livro.link || '#';
             item.target = '_blank';
 
-            // Blindagem de imagem
             let htmlImagem = '';
             if (livro.capa) {
-                // Adiciona tratamento de erro na imagem
                 htmlImagem = '<img src="' + livro.capa + '" class="book-cover" onerror="this.onerror=null;this.parentNode.innerHTML=\'<div class=\\\'book-cover\\\'><span class=\\\'material-icons\\\' style=\\\'font-size: 64px;\\\'>menu_book</span></div>\'">';
             } else {
                 htmlImagem = 
@@ -197,7 +236,6 @@
                     '</div>';
             }
 
-            // Sanitização básica
             const titulo = livro.titulo || "Sem Título";
             const desc = livro.descricao || "";
 
@@ -223,7 +261,11 @@
         const loading = document.getElementById('loading-lib');
         if (loading) loading.style.display = 'none';
         console.error("Erro crítico na biblioteca:", e);
-        alert("Erro: " + e.message);
+        
+        const container = document.getElementById('library-container');
+        if(container) {
+          container.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:var(--error-color, #ff5252); font-weight:bold;">Erro ao carregar livros: ${e.message}</p>`;
+        }
     } catch (err) {
         console.error("Erro ao tratar falha:", err);
     }

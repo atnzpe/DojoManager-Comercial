@@ -1,21 +1,17 @@
-<!-- DOJO MANAGER - PORTAL DO ALUNO -->
-<!--Página de Cursos e Eventos - Interface moderna e responsiva para visualização de cursos e eventos relacionados à academia. -->
-
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 <style>
-  /* Injeta as cores para garantir que o CSS interno as reconheça caso o arquivo seja carregado solto */
+  /* ============================================================================
+     INJEÇÃO DE CORES COM FALLBACK SEGURO PARA VISITANTES
+     ============================================================================ */
   :root {
-    --primary-color: <?=primaryColor ?> !important;
-    --secondary-color: <?=secondaryColor ?> !important;
-    --text-color: <?=textColor ?> !important;
-    --btn-text-color: <?=btnTextColor ?> !important;
+    --dynamic-bg: <?=typeof bgColor !=='undefined'&& bgColor ? bgColor: '#121212'?> !important;
+    --dynamic-prim: <?=typeof primaryColor !=='undefined'&& primaryColor ? primaryColor: '#FFD700'?> !important;
+    --dynamic-sec: <?=typeof secondaryColor !=='undefined'&& secondaryColor ? secondaryColor: '#1e1e1e'?> !important;
+    --dynamic-text: <?=typeof textColor !=='undefined'&& textColor ? textColor: '#ffffff'?> !important;
+    --dynamic-btn-text: <?=typeof btnTextColor !=='undefined'&& btnTextColor ? btnTextColor: '#000000'?> !important;
   }
-</style>
 
-
-
-<style>
   /* --- ESTILOS GERAIS DA TELA DE CURSOS --- */
   .cursos-view {
     display: none;
@@ -26,9 +22,16 @@
     margin: 0 auto;
     width: 100%;
     box-sizing: border-box;
-    /* Evita que o fundo do Dashboard transborde e prejudique a leitura, 
-       mas ainda permite que a imagem de fundo principal (body) apareça */
+    /* Fundo transparente para herdar background global. Fallback na raiz (body) evita tela branca */
     background: transparent;
+  }
+
+  /* Se a tela for aberta isoladamente, força o fundo no body aqui */
+  body {
+    background-color: var(--dynamic-bg);
+    color: var(--dynamic-text);
+    margin: 0;
+    font-family: "Roboto", sans-serif;
   }
 
   /* HEADER DE NAVEGAÇÃO */
@@ -40,22 +43,27 @@
     padding: 0 20px;
   }
 
-  .btn-back {
-    background: none;
-    border: none;
-    color: var(--text-color, #fff);
+  .btn-back-cursos {
+    background: transparent;
+    border: 1px solid var(--dynamic-text);
+    color: var(--dynamic-text);
+    opacity: 0.6;
+    border-radius: 8px;
+    padding: 5px 10px;
     cursor: pointer;
-    padding: 0;
-    display: block;
-    transition: transform 0.2s;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
   }
 
-  .btn-back:hover {
-    transform: scale(1.1);
-    color: var(--primary-color);
+  .btn-back-cursos:hover {
+    opacity: 1;
+    border-color: var(--dynamic-prim);
+    color: var(--dynamic-prim);
+    transform: translateX(-3px);
   }
 
-  /* FILTROS */
+  /* FILTROS (Chips) */
   .filter-container {
     display: flex;
     gap: 10px;
@@ -67,7 +75,7 @@
 
   .filter-chip {
     background: rgba(0, 0, 0, 0.4);
-    color: var(--text-color);
+    color: var(--dynamic-text);
     opacity: 0.7;
     padding: 8px 16px;
     border-radius: 20px;
@@ -75,21 +83,22 @@
     cursor: pointer;
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s;
-    font-weight: 500;
+    font-weight: bold;
   }
 
   .filter-chip:hover {
     background: rgba(0, 0, 0, 0.6);
     opacity: 1;
-    border-color: var(--text-color);
+    border-color: var(--dynamic-prim);
   }
 
   .filter-chip.active {
-    background: var(--primary-color);
-    color: var(--btn-text-color, #000);
-    border-color: var(--primary-color);
-    font-weight: bold;
+    background: var(--dynamic-prim) !important;
+    color: var(--dynamic-btn-text) !important;
+    border-color: var(--dynamic-prim) !important;
+    font-weight: 900;
     opacity: 1;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
   }
 
   /* GRID DE CURSOS */
@@ -101,29 +110,29 @@
   }
 
   .course-card {
-    background: var(--secondary-color, #1e1e1e);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: var(--dynamic-sec) !important;
+    border: 2px solid var(--dynamic-prim) !important;
     border-radius: 12px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s, border-color 0.2s;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s, filter 0.2s, box-shadow 0.2s;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5) !important;
   }
 
   .course-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--primary-color);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    transform: translateY(-5px);
+    filter: brightness(1.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8) !important;
   }
 
-  /* IMAGEM COM ZOOM */
+  /* IMAGEM DO EVENTO COM ZOOM */
   .course-img {
     width: 100%;
     height: 160px;
     object-fit: cover;
-    background: #000;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.5);
+    border-bottom: 2px solid var(--dynamic-prim);
     cursor: zoom-in;
     transition: opacity 0.2s;
   }
@@ -145,7 +154,7 @@
     padding: 4px 8px;
     border-radius: 4px;
     font-size: 11px;
-    font-weight: bold;
+    font-weight: 900;
     margin-bottom: 10px;
     text-transform: uppercase;
     align-self: flex-start;
@@ -171,77 +180,85 @@
 
   .course-title {
     font-size: 1.1rem;
-    font-weight: bold;
-    color: var(--text-color, #fff);
+    font-weight: 900;
+    color: var(--dynamic-text);
     margin-bottom: 8px;
     line-height: 1.3;
   }
 
   .course-meta {
     font-size: 0.85rem;
-    color: var(--text-color);
+    color: var(--dynamic-text);
     opacity: 0.7;
     margin-bottom: 5px;
     display: flex;
     align-items: center;
     gap: 6px;
+    font-weight: bold;
   }
 
   /* DESCRIÇÃO COM SCROLL */
   .course-desc {
     font-size: 0.9rem;
-    color: var(--text-color);
+    color: var(--dynamic-text);
     opacity: 0.8;
     margin: 10px 0 15px 0;
     line-height: 1.5;
     flex: 1;
-    max-height: 150px;
+    max-height: 120px;
     overflow-y: auto;
     display: block;
     padding-right: 5px;
   }
 
   .course-desc::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  .course-desc::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
+    width: 6px;
   }
 
   .course-desc::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
+    background: var(--dynamic-prim);
+    border-radius: 10px;
   }
 
   /* BOTÃO INSCRIÇÃO */
   .btn-inscricao {
     width: 100%;
     padding: 12px;
-    border-radius: 6px;
+    border-radius: 8px;
     border: none;
-    font-weight: bold;
+    font-weight: 900;
     cursor: pointer;
     text-transform: uppercase;
     font-size: 13px;
     transition: background 0.2s, filter 0.2s;
     margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
   }
 
   .btn-inscricao.primary {
-    background: var(--primary-color, #ffd700);
-    color: var(--btn-text-color, #000);
+    background: var(--dynamic-prim) !important;
+    color: var(--dynamic-btn-text) !important;
   }
 
   .btn-inscricao.primary:hover {
-    filter: brightness(1.1);
+    filter: brightness(1.15);
+    transform: translateY(-2px);
   }
 
   .btn-inscricao.disabled {
-    background: rgba(0, 0, 0, 0.5);
-    color: #666;
+    background: rgba(0, 0, 0, 0.5) !important;
+    color: var(--dynamic-text) !important;
+    opacity: 0.5;
     cursor: not-allowed;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-inscricao.disabled:hover {
+    transform: none;
+    filter: none;
   }
 
   .spinner-cursos {
@@ -249,7 +266,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    border-left-color: var(--primary-color);
+    border-left-color: var(--dynamic-prim);
     animation: spin 1s linear infinite;
     margin: 0 auto;
   }
@@ -258,12 +275,12 @@
   #lightbox-modal {
     display: none;
     position: fixed;
-    z-index: 10000;
+    z-index: 100000;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.9);
+    background-color: rgba(0, 0, 0, 0.95);
     justify-content: center;
     align-items: center;
     flex-direction: column;
@@ -274,26 +291,29 @@
   #lightbox-img {
     max-width: 90%;
     max-height: 80vh;
-    border: 2px solid var(--primary-color);
+    border: 3px solid var(--dynamic-prim);
     border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
   }
 
   .lightbox-close {
     margin-top: 20px;
-    color: var(--text-color, #fff);
-    font-size: 1.2rem;
+    color: var(--dynamic-text);
+    font-size: 1.1rem;
+    font-weight: 900;
     cursor: pointer;
-    background: var(--secondary-color, #333);
-    padding: 10px 20px;
+    background: transparent;
+    padding: 10px 25px;
     border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid var(--dynamic-text);
     transition: 0.2s;
+    text-transform: uppercase;
   }
 
   .lightbox-close:hover {
-    background: var(--primary-color);
-    color: var(--btn-text-color);
+    background: var(--dynamic-prim);
+    color: var(--dynamic-btn-text);
+    border-color: var(--dynamic-prim);
   }
 
   @keyframes spin {
@@ -320,10 +340,10 @@
 <div id="cursos-screen" class="cursos-view">
 
   <div class="profile-header-nav" id="cursos-header-nav">
-    <button id="btn-back-cursos" class="btn-back" onclick="fecharCursos()">
-       <span class="material-icons" style="font-size: 32px">arrow_back</span>
+    <button id="btn-back-cursos-btn" class="btn-back-cursos" onclick="fecharCursos()">
+       <span class="material-icons" style="font-size: 28px;">arrow_back</span>
     </button>
-    <h2 style="margin: 0; font-size: 1.8rem; color: var(--text-color, #fff);">Cursos e Eventos</h2>
+    <h2 style="margin: 0; font-size: 1.8rem; font-weight: 900; color: var(--dynamic-text);">Cursos e Eventos</h2>
   </div>
 
   <div class="filter-container">
@@ -334,24 +354,24 @@
 
   <div id="loading-cursos" style="text-align: center; margin-top: 50px">
     <div class="spinner-cursos"></div>
-    <p style="color: var(--text-color); opacity: 0.7; margin-top: 10px">Carregando agenda...</p>
+    <p style="color: var(--dynamic-text); opacity: 0.7; font-weight:bold; margin-top: 15px">Carregando agenda...</p>
   </div>
 
   <div id="cursos-grid" class="courses-grid"></div>
 
   <div id="empty-msg"
-    style="text-align: center; color: var(--text-color); opacity: 0.5; display: none; margin-top: 30px">
+    style="text-align: center; color: var(--dynamic-text); opacity: 0.5; display: none; margin-top: 30px; font-weight:bold;">
     Nenhum evento encontrado nesta categoria.
   </div>
 </div>
 
 <div id="lightbox-modal" onclick="fecharLightbox()">
   <img id="lightbox-img" src="" onclick="event.stopPropagation()">
-  <button class="lightbox-close" onclick="fecharLightbox()">Fechar</button>
+  <button class="lightbox-close" onclick="fecharLightbox()">FECHAR IMAGEM</button>
 </div>
 
 <script>
-  console.log("✅ [SAFE MODE] Cursos.html atualizado: White-Label Integrado");
+  console.log("✅ [SAFE MODE] Cursos.html carregado (White-Label com Fallback)");
 
   var todosCursos = [];
   var isUsuarioLogado = false;
@@ -377,8 +397,8 @@
         const dashHeader = document.querySelector(".dashboard-header");
         const cursosScreen = document.getElementById("cursos-screen");
         
-        const btnBack = document.getElementById('btn-back-cursos');
-        if (btnBack) btnBack.style.display = 'block';
+        const btnBack = document.getElementById('btn-back-cursos-btn');
+        if (btnBack) btnBack.style.display = 'flex';
 
         if (dashGrid) dashGrid.style.display = "none";
         if (dashHeader) dashHeader.style.display = "none";
@@ -392,6 +412,7 @@
         if (grid) grid.innerHTML = "";
         if (msg) msg.style.display = "none";
 
+        // Cache Engine
         if (typeof CacheSystem !== 'undefined') {
             const cached = CacheSystem.get('cursos_list');
             if (cached) {
@@ -411,7 +432,7 @@
                 .withFailureHandler(function(err) {
                     if (loading) loading.style.display = "none";
                     console.error("Erro crítico:", err);
-                    alert("Erro crítico: " + err.message);
+                    alert("Erro ao buscar cursos: " + err.message);
                 })
                 .getCursosList();
         } else {
@@ -475,20 +496,22 @@
 
             var isAberto = statusLower.indexOf("abertas") !== -1;
             var btnClass = isAberto && curso.linkInscricao ? "btn-inscricao primary" : "btn-inscricao disabled";
-            var btnText = "Inscreva-se";
-            if (statusLower.indexOf("breve") !== -1) btnText = "Aguarde";
-            if (statusLower.indexOf("encerrad") !== -1) btnText = "Encerrado";
+            var btnText = "GARANTIR VAGA";
+            var btnIcon = "how_to_reg";
+            
+            if (statusLower.indexOf("breve") !== -1) { btnText = "AGUARDE"; btnIcon = "hourglass_empty"; }
+            if (statusLower.indexOf("encerrad") !== -1) { btnText = "ENCERRADO"; btnIcon = "block"; }
 
-            var btnHtml = '<button class="' + btnClass + '">' + btnText + '</button>';
-            // Alterado para um Placeholder genérico
-            var imgUrl = curso.imagem || "https://via.placeholder.com/400x200/1e1e1e/333?text=Imagem+Indisponivel";
+            var btnHtml = `<button class="${btnClass}"><span class="material-icons" style="font-size:18px">${btnIcon}</span> ${btnText}</button>`;
+            
+            var imgUrl = curso.imagem || "https://via.placeholder.com/400x200/222/555?text=Imagem+Indisponivel";
 
             var metaDataHtml = '';
-            if (curso.data) metaDataHtml += '<div class="course-meta"><span class="material-icons" style="font-size:16px">calendar_today</span> ' + curso.data + '</div>';
-            if (curso.vagas) metaDataHtml += '<div class="course-meta"><span class="material-icons" style="font-size:16px">group</span> Vagas: ' + curso.vagas + '</div>';
+            if (curso.data) metaDataHtml += '<div class="course-meta"><span class="material-icons" style="font-size:16px; color:var(--dynamic-prim);">event</span> ' + curso.data + '</div>';
+            if (curso.vagas) metaDataHtml += '<div class="course-meta"><span class="material-icons" style="font-size:16px; color:var(--dynamic-prim);">groups</span> Vagas: ' + curso.vagas + '</div>';
 
             card.innerHTML = 
-                '<img src="' + imgUrl + '" class="course-img" onclick="abrirLightbox(\'' + imgUrl + '\')" onerror="this.src=\'https://via.placeholder.com/400x200/1e1e1e/333?text=Imagem+Indisponivel\'">' +
+                '<img src="' + imgUrl + '" class="course-img" onclick="abrirLightbox(\'' + imgUrl + '\')" onerror="this.src=\'https://via.placeholder.com/400x200/222/555?text=Imagem+Indisponivel\'">' +
                 '<div class="course-content">' +
                     '<span class="status-badge ' + badgeClass + '">' + (curso.status || "Indefinido") + '</span>' +
                     '<div class="course-title">' + (curso.nome || "Curso sem nome") + '</div>' +
@@ -526,7 +549,7 @@
         } else {
             if (typeof google !== 'undefined' && google.script) {
                  google.script.run.withSuccessHandler(function(url){
-                      window.top.location.href = url + "?page=login";
+                     window.top.location.href = url + "?page=login";
                  }).getScriptUrl();
             }
         }
@@ -535,9 +558,10 @@
     }
   }
 
+  // Fallback caso o script seja aberto diretamente (Sem o Dashboard pai)
   document.addEventListener("DOMContentLoaded", function() {
       if (!document.getElementById('dashboard-grid')) {
-          console.log("🚀 [AUTO-START] Modo Visitante.");
+          console.log("🚀 [AUTO-START] Modo Visitante. Iniciando Módulo Cursos.");
           abrirCursos();
       }
   });

@@ -1,71 +1,167 @@
-<!-- DOJO MANAGER - PORTAL DO ALUNO -->
-<!--Página de Certificados - Interface moderna e responsiva para visualização e download de certificados de cursos concluídos. -->
-
 <style>
+  /* --- ESTILOS CERTIFICADOS (WHITE-LABEL) --- */
   .cert-view {
     padding: 20px;
     display: none;
-    animation: fadeIn 0.3s;
+    animation: fadeIn 0.3s ease-in-out;
+    padding-bottom: 40px;
   }
 
+  /* --- Cabeçalho --- */
+  .cert-header-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+
+  .btn-back-cert {
+    background: transparent;
+    border: 1px solid var(--dynamic-text);
+    color: var(--dynamic-text);
+    opacity: 0.6;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+  }
+
+  .btn-back-cert:hover {
+    opacity: 1;
+    border-color: var(--dynamic-prim);
+    color: var(--dynamic-prim);
+  }
+
+  /* --- Busca --- */
   .cert-input-group {
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
+    max-width: 600px;
   }
 
-  .cert-card {
-    background: #fff;
-    color: #333;
+  .cert-input {
+    flex: 1;
+    padding: 14px;
+    /* Fundo translúcido para combinar com a imagem do Dashboard */
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--dynamic-text) !important;
     border-radius: 8px;
+    font-size: 14px;
+    transition: 0.3s;
+  }
+
+  .cert-input:focus {
+    border-color: var(--dynamic-prim);
+    outline: none;
+  }
+
+  .btn-search-cert {
+    background-color: var(--dynamic-prim) !important;
+    color: var(--dynamic-btn-text) !important;
+    border: none;
+    padding: 0 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 900;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-search-cert:hover {
+    filter: brightness(1.15);
+    transform: translateY(-2px);
+  }
+
+  /* --- Cards de Certificados --- */
+  .cert-card {
+    background-color: var(--dynamic-sec) !important;
+    border: 2px solid var(--dynamic-prim) !important;
+    border-radius: 12px;
     padding: 20px;
     margin-bottom: 15px;
-    border-left: 5px solid #FFD700;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5) !important;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: transform 0.2s, filter 0.2s;
+    max-width: 600px;
+  }
+
+  .cert-card:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.1);
   }
 
   .cert-info h3 {
     margin: 0 0 5px 0;
     font-size: 1.1rem;
+    color: var(--dynamic-text);
+    font-weight: 900;
   }
 
   .cert-info p {
     margin: 0;
-    font-size: 0.9rem;
-    color: #666;
+    font-size: 0.85rem;
+    color: var(--dynamic-text);
+    opacity: 0.7;
   }
 
   .btn-down {
-    background: #1e1e1e;
-    color: #FFD700;
+    background-color: var(--dynamic-prim) !important;
+    color: var(--dynamic-btn-text) !important;
     border: none;
-    padding: 12px 20px;
+    padding: 10px 20px;
     border-radius: 50px;
-    font-weight: bold;
+    font-weight: 900;
     cursor: pointer;
     text-decoration: none;
     display: flex;
     align-items: center;
     gap: 5px;
+    transition: 0.2s;
+    font-size: 0.85rem;
+  }
+
+  .btn-down:hover {
+    filter: brightness(1.15);
+    transform: scale(1.05);
+  }
+
+  /* --- Spinner Personalizado --- */
+  .cert-spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border-left-color: var(--dynamic-prim);
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
   }
 </style>
 
 <div id="certificados-screen" class="cert-view">
-  <div class="profile-header-nav">
-    <button class="btn-back" onclick="fecharCertificados()"><span class="material-icons">arrow_back</span></button>
-    <h2 style="margin:0; font-size:1.8rem; color:#fff">Meus Certificados</h2>
+  <div class="cert-header-nav">
+    <button class="btn-back-cert" onclick="fecharCertificados()">
+      <span class="material-icons" style="font-size: 28px;">arrow_back</span>
+    </button>
+    <h2 style="margin:0; font-size:1.8rem; font-weight:900; color:var(--dynamic-text)">Meus Certificados</h2>
   </div>
 
   <div class="cert-input-group">
-    <input type="text" id="cert-cpf" class="input-field" placeholder="Digite seu CPF (apenas números)" style="background:#2c2c2c; color:#fff; border:1px solid #444;">
-    <button class="primary-button" onclick="buscarCertificados()" style="width:auto; padding:0 20px;"><span class="material-icons">search</span></button>
+    <input type="text" id="cert-cpf" class="cert-input" placeholder="Digite seu CPF (apenas números)">
+    <button class="btn-search-cert" onclick="buscarCertificados()">
+      <span class="material-icons">search</span>
+    </button>
   </div>
 
   <div id="lista-certificados">
-    <p style="color:#888; text-align:center;">Digite seu CPF acima para buscar.</p>
+    <p style="color:var(--dynamic-text); opacity:0.6; text-align:center; font-weight:bold;">Digite seu CPF acima para buscar.</p>
   </div>
 </div>
 
@@ -75,39 +171,57 @@
     document.querySelector('.dashboard-header').style.display = 'none';
     document.getElementById('certificados-screen').style.display = 'block';
     
-    // Tenta preencher automaticamente
-    const user = JSON.parse(localStorage.getItem('userSession') || '{}');
-    if(user.LOGIN) { 
-        document.getElementById('cert-cpf').value = user.LOGIN; // Supondo que LOGIN seja CPF ou similar
-        buscarCertificados(); 
+    // Tenta preencher automaticamente o CPF baseado no Login da Sessão
+    try {
+        const user = JSON.parse(localStorage.getItem('userSession') || '{}');
+        if(user.LOGIN) { 
+            document.getElementById('cert-cpf').value = user.LOGIN; 
+            buscarCertificados(); 
+        }
+    } catch(e) {
+        console.error("Erro ao recuperar sessão:", e);
     }
   }
 
   function buscarCertificados() {
-    const cpf = document.getElementById('cert-cpf').value;
+    const cpf = document.getElementById('cert-cpf').value.trim();
     const div = document.getElementById('lista-certificados');
-    div.innerHTML = '<div class="spinner"></div>';
+    
+    if(!cpf) {
+        div.innerHTML = "<p style='color:#ff5252; text-align:center; font-weight:bold;'>Por favor, digite o CPF.</p>";
+        return;
+    }
 
-    google.script.run.withSuccessHandler(lista => {
+    // Injeta o spinner blindado com CSS Vars
+    div.innerHTML = '<div style="text-align:center; padding:30px;"><div class="cert-spinner"></div><p style="color:var(--dynamic-text); opacity:0.7; margin-top:15px; font-weight:bold;">Buscando...</p></div>';
+
+    google.script.run
+      .withSuccessHandler(lista => {
         div.innerHTML = "";
-        if(lista.length === 0) {
-            div.innerHTML = "<p style='color:#cf6679; text-align:center'>Nenhum certificado encontrado para este documento.</p>";
+        
+        if(!lista || lista.length === 0) {
+            div.innerHTML = "<p style='color:#ff5252; text-align:center; font-weight:bold;'>Nenhum certificado encontrado para este documento.</p>";
             return;
         }
+        
         lista.forEach(c => {
             div.innerHTML += `
                 <div class="cert-card">
                     <div class="cert-info">
-                        <h3>${c.curso}</h3>
-                        <p>Emitido em: ${c.data}</p>
+                        <h3>${c.curso || 'Certificado Oficial'}</h3>
+                        <p>Emitido em: ${c.data || '--/--/----'}</p>
                     </div>
                     <a href="${c.link}" target="_blank" class="btn-down">
-                        <span class="material-icons">download</span> PDF
+                        <span class="material-icons" style="font-size:18px;">download</span> PDF
                     </a>
                 </div>
             `;
         });
-    }).buscarCertificadosUsuario(cpf);
+      })
+      .withFailureHandler(err => {
+          div.innerHTML = `<p style='color:#ff5252; text-align:center; font-weight:bold;'>Erro ao buscar certificados: ${err.message}</p>`;
+      })
+      .buscarCertificadosUsuario(cpf);
   }
 
   function fecharCertificados() {
