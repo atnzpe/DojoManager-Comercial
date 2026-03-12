@@ -1,7 +1,15 @@
-<!-- DOJO MANAGER - PORTAL DO ALUNO -->
-<!--Página de Videoteca - Interface moderna e responsiva para visualização de vídeos e aulas gravadas. -->
-
 <style>
+  /* ============================================================================
+     INJEÇÃO DE CORES COM FALLBACK SEGURO
+     ============================================================================ */
+  :root {
+    --dynamic-bg: <?=typeof bgColor !=='undefined'&& bgColor ? bgColor: '#121212'?> !important;
+    --dynamic-prim: <?=typeof primaryColor !=='undefined'&& primaryColor ? primaryColor: '#FFD700'?> !important;
+    --dynamic-sec: <?=typeof secondaryColor !=='undefined'&& secondaryColor ? secondaryColor: '#1e1e1e'?> !important;
+    --dynamic-text: <?=typeof textColor !=='undefined'&& textColor ? textColor: '#ffffff'?> !important;
+    --dynamic-btn-text: <?=typeof btnTextColor !=='undefined'&& btnTextColor ? btnTextColor: '#000000'?> !important;
+  }
+
   /* --- 1. RESET E SCROLLBAR --- */
   ::-webkit-scrollbar {
     width: 6px;
@@ -9,16 +17,12 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #121212;
+    background: var(--dynamic-bg);
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #444;
+    background: var(--dynamic-prim);
     border-radius: 3px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #666;
   }
 
   /* --- 2. ESTRUTURA GERAL --- */
@@ -27,6 +31,37 @@
     animation: fadeIn 0.3s;
     padding-top: 20px;
     padding-bottom: 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  /* CABEÇALHO PADRÃO */
+  .profile-header-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 0 20px;
+  }
+
+  .btn-back-vid {
+    background: transparent;
+    border: 1px solid var(--dynamic-text);
+    color: var(--dynamic-text);
+    opacity: 0.6;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+  }
+
+  .btn-back-vid:hover {
+    opacity: 1;
+    border-color: var(--dynamic-prim);
+    color: var(--dynamic-prim);
+    transform: translateX(-3px);
   }
 
   /* --- 3. ABAS --- */
@@ -34,42 +69,46 @@
     display: flex;
     gap: 20px;
     margin-bottom: 25px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0 20px;
   }
 
   .v-tab {
     padding: 12px 20px;
     cursor: pointer;
-    color: #888;
-    font-weight: 500;
+    color: var(--dynamic-text);
+    opacity: 0.5;
+    font-weight: 900;
     font-size: 1rem;
     border-bottom: 3px solid transparent;
     transition: all 0.3s;
     display: flex;
     align-items: center;
     gap: 8px;
+    text-transform: uppercase;
   }
 
   .v-tab:hover {
-    color: #ccc;
+    opacity: 0.8;
   }
 
   .v-tab.active {
-    color: #fff;
-    border-bottom-color: #FFD700;
+    color: var(--dynamic-prim);
+    border-bottom-color: var(--dynamic-prim);
+    opacity: 1;
   }
 
-  /* --- 4. GRID --- */
+  /* --- 4. GRID DE CARTÕES DE FAIXA --- */
   .rank-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 20px;
+    padding: 0 20px;
   }
 
   .rank-card {
-    background: #1e1e1e;
-    border: 1px solid #333;
+    background-color: var(--dynamic-sec) !important;
+    border: 2px solid var(--dynamic-prim) !important;
     border-radius: 12px;
     padding: 25px 20px;
     display: flex;
@@ -77,15 +116,17 @@
     align-items: center;
     text-align: center;
     cursor: pointer;
-    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s, filter 0.2s, box-shadow 0.2s;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
   }
 
   .rank-card:hover {
-    transform: translateY(-4px);
-    border-color: #FFD700;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transform: translateY(-5px);
+    filter: brightness(1.15);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
   }
 
+  /* Cores das Faixas (Mantidas semanticamente fixas) */
   .rank-icon {
     width: 60px;
     height: 60px;
@@ -93,34 +134,17 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
+    font-weight: 900;
     font-size: 1.2rem;
     margin-bottom: 15px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
     text-transform: uppercase;
+    border: 2px solid rgba(255, 255, 255, 0.2);
   }
 
-  .rank-title {
-    font-weight: bold;
-    color: #fff;
-    font-size: 1.1rem;
-    margin-bottom: 5px;
-  }
-
-  .rank-subtitle {
-    font-size: 0.85rem;
-    color: #888;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    justify-content: center;
-  }
-
-  /* Cores das Faixas */
   .bg-branca {
-    background: #fff;
+    background: #ffffff;
     color: #000;
-    border: 1px solid #999;
   }
 
   .bg-amarela {
@@ -149,9 +173,33 @@
   }
 
   .bg-preta {
-    background: #000;
+    background: #000000;
     color: #fff;
-    border: 1px solid #555;
+    border: 2px solid #555;
+  }
+
+  .bg-vermelha {
+    background: #E53935;
+    color: #fff;
+  }
+
+  .rank-title {
+    font-weight: 900;
+    color: var(--dynamic-text);
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+  }
+
+  .rank-subtitle {
+    font-size: 0.85rem;
+    color: var(--dynamic-text);
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+    font-weight: bold;
   }
 
   /* --- 5. PLAYER OVERLAY --- */
@@ -162,12 +210,13 @@
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.95);
-    z-index: 3000;
+    z-index: 100000;
     display: none;
     align-items: center;
     justify-content: center;
     padding: 20px;
     box-sizing: border-box;
+    backdrop-filter: blur(8px);
   }
 
   .player-box {
@@ -175,13 +224,13 @@
     max-width: 900px;
     height: auto;
     max-height: 90vh;
-    background: #121212;
+    background-color: var(--dynamic-sec);
     border-radius: 12px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-    border: 1px solid #333;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.9);
+    border: 2px solid var(--dynamic-prim);
     position: relative;
   }
 
@@ -195,7 +244,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #666;
   }
 
   .video-frame iframe {
@@ -204,15 +252,14 @@
     border: none;
   }
 
-  /* Estilo para Vídeo Indisponível (Em Breve) */
   .video-unavailable {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: #666;
-    background: #1a1a1a;
+    color: var(--dynamic-text);
+    background: #111;
     text-align: center;
     padding: 20px;
   }
@@ -221,25 +268,26 @@
     font-size: 48px;
     margin-bottom: 10px;
     opacity: 0.5;
-    color: #FFD700;
+    color: var(--dynamic-prim);
   }
 
   .unavailable-title {
     font-size: 1.2rem;
-    font-weight: bold;
-    color: #ccc;
+    font-weight: 900;
+    color: var(--dynamic-text);
     margin-bottom: 5px;
   }
 
   .unavailable-desc {
     font-size: 0.9rem;
-    color: #888;
+    color: var(--dynamic-text);
+    opacity: 0.6;
   }
 
   .player-controls {
-    padding: 10px 20px;
-    background: #1a1a1a;
-    border-bottom: 1px solid #333;
+    padding: 15px 20px;
+    background: rgba(0, 0, 0, 0.4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -247,70 +295,76 @@
   }
 
   .player-info {
-    padding: 15px 20px;
-    background: #121212;
-    color: #ccc;
+    padding: 20px;
+    background-color: var(--dynamic-sec);
+    color: var(--dynamic-text);
     flex-grow: 1;
     overflow-y: auto;
     min-height: 100px;
   }
 
   .p-title {
-    color: #FFD700;
-    font-size: 1.2rem;
-    font-weight: bold;
+    color: var(--dynamic-prim);
+    font-size: 1.3rem;
+    font-weight: 900;
     margin-bottom: 8px;
+    text-transform: uppercase;
   }
 
   .p-desc {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     line-height: 1.5;
     white-space: pre-line;
+    opacity: 0.8;
   }
 
   .ctrl-btn {
-    background: #333;
-    color: #fff;
-    border: 1px solid #444;
+    background: transparent;
+    color: var(--dynamic-text);
+    border: 2px solid var(--dynamic-text);
     padding: 8px 16px;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 6px;
-    font-weight: bold;
+    font-weight: 900;
     font-size: 0.85rem;
-    transition: all 0.2s;
+    transition: 0.2s;
+    text-transform: uppercase;
   }
 
   .ctrl-btn:hover:not(:disabled) {
-    background: #555;
-    border-color: #666;
+    background: var(--dynamic-prim);
+    border-color: var(--dynamic-prim);
+    color: var(--dynamic-btn-text);
   }
 
   .ctrl-btn:disabled {
-    opacity: 0.4;
+    opacity: 0.3;
     cursor: not-allowed;
   }
 
   .close-btn {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 15px;
+    right: 20px;
     color: #fff;
     cursor: pointer;
-    font-size: 28px;
-    z-index: 3001;
+    font-size: 32px;
+    z-index: 100001;
     background: rgba(0, 0, 0, 0.6);
     border-radius: 50%;
-    padding: 4px;
+    padding: 5px;
+    transition: 0.2s;
   }
 
   .close-btn:hover {
-    background: rgba(255, 82, 82, 0.9);
+    background: #ff5252;
+    transform: scale(1.1);
   }
 
-  /* --- 6. MODAL CONFIRM & SUCCESS --- */
+  /* --- 6. MODAIS DE CONFIRMAÇÃO --- */
   #confirm-modal,
   #completion-screen {
     position: fixed;
@@ -318,35 +372,39 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    z-index: 3100;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 110000;
     display: none;
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(5px);
   }
 
-  .modal-box {
-    background: #262626;
+  .modal-box-vid {
+    background-color: var(--dynamic-sec);
     padding: 30px;
     border-radius: 16px;
     max-width: 400px;
     width: 90%;
     text-align: center;
-    border: 1px solid #444;
+    border: 2px solid var(--dynamic-prim);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
   }
 
   .modal-title {
     font-size: 1.5rem;
-    color: #fff;
+    color: var(--dynamic-prim);
     margin-bottom: 10px;
-    font-weight: bold;
+    font-weight: 900;
+    text-transform: uppercase;
   }
 
   .modal-desc {
-    color: #aaa;
+    color: var(--dynamic-text);
+    opacity: 0.8;
     margin-bottom: 25px;
     font-size: 1rem;
+    font-weight: bold;
   }
 
   .modal-actions {
@@ -357,37 +415,42 @@
 
   .btn-confirm-yes {
     background: transparent;
-    border: none;
-    color: #81d4fa;
+    border: 1px solid var(--dynamic-text);
+    color: var(--dynamic-text);
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 900;
     font-size: 1rem;
-    padding: 10px 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    transition: 0.2s;
   }
 
   .btn-confirm-yes:hover {
-    background: rgba(129, 212, 250, 0.1);
-    border-radius: 8px;
+    background: #ff5252;
+    color: #fff;
+    border-color: #ff5252;
   }
 
   .btn-confirm-no {
-    background: #333;
+    background: var(--dynamic-prim);
     border: none;
-    color: #fff;
+    color: var(--dynamic-btn-text);
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 900;
     font-size: 1rem;
-    padding: 10px 25px;
+    padding: 12px 25px;
     border-radius: 8px;
+    transition: 0.2s;
   }
 
   .btn-confirm-no:hover {
-    background: #444;
+    filter: brightness(1.15);
+    transform: translateY(-2px);
   }
 
   #completion-screen {
     flex-direction: column;
-    z-index: 3200;
+    z-index: 120000;
     animation: zoomIn 0.4s;
   }
 
@@ -395,50 +458,55 @@
     font-size: 80px;
     color: #4CAF50;
     margin-bottom: 20px;
+    text-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
   }
 
   .success-title {
-    font-size: 24px;
-    font-weight: bold;
-    color: #fff;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--dynamic-prim);
     margin-bottom: 10px;
     text-align: center;
+    text-transform: uppercase;
   }
 
   .success-msg {
     font-size: 16px;
-    color: #ccc;
+    color: var(--dynamic-text);
+    opacity: 0.8;
     margin-bottom: 30px;
     text-align: center;
+    font-weight: bold;
   }
 
   .btn-back-success {
-    background-color: #1e1e1e;
-    color: #81d4fa;
-    border: 1px solid #333;
-    padding: 12px 24px;
+    background-color: transparent;
+    color: var(--dynamic-prim);
+    border: 2px solid var(--dynamic-prim);
+    padding: 14px 28px;
     border-radius: 50px;
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 900;
     font-size: 15px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     gap: 8px;
+    text-transform: uppercase;
   }
 
   .btn-back-success:hover {
-    background-color: #333;
-    border-color: #81d4fa;
+    background-color: var(--dynamic-prim);
+    color: var(--dynamic-btn-text);
     transform: scale(1.05);
   }
 
-  .spinner {
+  .spinner-vid {
     border: 4px solid rgba(255, 255, 255, 0.1);
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    border-left-color: #FFD700;
+    border-left-color: var(--dynamic-prim);
     animation: spin 1s linear infinite;
     margin: 0 auto;
   }
@@ -464,28 +532,40 @@
       opacity: 1;
     }
   }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>
 
 <div id="videoteca-screen" class="video-view">
   <div class="profile-header-nav">
-    <button class="btn-back" onclick="fecharVideoteca()">
-      <span class="material-icons" style="font-size: 32px;">arrow_back</span>
+    <button class="btn-back-vid" onclick="fecharVideoteca()">
+      <span class="material-icons" style="font-size: 28px;">arrow_back</span>
     </button>
-    <h2 style="margin:0; font-size:1.8rem;">Central de Treinamento</h2>
+    <h2 style="margin:0; font-size:1.8rem; font-weight:900; color:var(--dynamic-text);">Central de Treinamento</h2>
   </div>
 
   <div class="v-tabs">
-    <div class="v-tab active" onclick="mudarAba('treino')">
+    <div class="v-tab active" onclick="mudarAba('treino', this)">
       <span class="material-icons">ondemand_video</span> Treino por Faixa
     </div>
-    <div class="v-tab" onclick="mudarAba('exame')">
+    <div class="v-tab" onclick="mudarAba('exame', this)">
       <span class="material-icons">task_alt</span> Simular Exame
     </div>
   </div>
 
   <div id="loading-vid" style="text-align:center; margin-top:50px;">
-    <div class="spinner"></div>
-    <p style="color:#888; margin-top:10px;">Carregando conteúdo blindado...</p>
+    <div class="spinner-vid"></div>
+    <p style="color:var(--dynamic-text); opacity:0.6; font-weight:bold; margin-top:15px;">Carregando videoteca...</p>
   </div>
 
   <div id="videos-grid" class="rank-grid"></div>
@@ -499,7 +579,7 @@
       <button class="ctrl-btn" id="btn-prev" onclick="mudarVideo(-1)">
           <span class="material-icons">skip_previous</span> Anterior
        </button>
-      <span id="vid-counter" style="color:#888; font-size:0.9rem;">-- / --</span>
+      <span id="vid-counter" style="color:var(--dynamic-text); font-weight:bold; font-size:0.9rem;">-- / --</span>
       <button class="ctrl-btn" id="btn-next" onclick="mudarVideo(1)">
           Próximo <span class="material-icons">skip_next</span>
        </button>
@@ -512,12 +592,12 @@
 </div>
 
 <div id="confirm-modal">
-  <div class="modal-box">
+  <div class="modal-box-vid">
     <div class="modal-title">Confirmar Saída</div>
-    <div class="modal-desc">Você tem certeza que deseja encerrar este treino?</div>
+    <div class="modal-desc">Deseja realmente encerrar a reprodução do treino?</div>
     <div class="modal-actions">
-      <button class="btn-confirm-yes" onclick="confirmarSaida()">Sim, encerrar</button>
-      <button class="btn-confirm-no" onclick="cancelarSaida()">Não, continuar</button>
+      <button class="btn-confirm-yes" onclick="confirmarSaida()">ENCERRAR</button>
+      <button class="btn-confirm-no" onclick="cancelarSaida()">CONTINUAR</button>
     </div>
   </div>
 </div>
@@ -525,29 +605,23 @@
 <div id="completion-screen">
   <span class="material-icons success-icon">check_circle</span>
   <div class="success-title" id="msg-parabens">Parabéns!</div>
-  <div class="success-msg">Playlist de treino concluída com sucesso.</div>
+  <div class="success-msg">Treino concluído com sucesso.</div>
   <button class="btn-back-success" onclick="finalizarTreino()">
-    <span class="material-icons">arrow_back</span> Voltar para a Videoteca
+    <span class="material-icons">arrow_back</span> Voltar para Videoteca
   </button>
 </div>
 
 <script>
-  console.log("✅ [SAFE MODE] Videoteca.html (Blindada v4.0 Final) carregada!");
+  console.log("✅ [SAFE MODE] Videoteca.html (White-Label) carregada!");
 
-  // --- VARIAVEIS GLOBAIS BLINDADAS ---
-  // Inicialização segura para evitar undefined
   var acervo = {};
   var faixasPermitidas = [];
   var playlistAtual = [];
   var indiceAtual = 0;
   var modoAtual = 'treino';
 
-  /**
-   * Abre a tela da videoteca e gerencia o carregamento (Cache ou Backend)
-   */
   function abrirVideoteca() {
     try {
-        // Gestão de visibilidade segura
         const dashGrid = document.getElementById('dashboard-grid');
         const dashHeader = document.querySelector('.dashboard-header');
         const videoScreen = document.getElementById('videoteca-screen');
@@ -556,22 +630,17 @@
         if (dashHeader) dashHeader.style.display = 'none';
         if (videoScreen) videoScreen.style.display = 'block';
         
-        // --- CACHE ENGINE IMPLEMENTADA ---
-        // Chave única por usuário para garantir que, se ele subir de faixa, o cache invalide ou seja diferente
-        // Utiliza currentUser global se disponível, senão fallback seguro
         const userLogin = (typeof currentUser !== 'undefined' && currentUser.LOGIN) ? currentUser.LOGIN : 'anon';
         const userGrad = (typeof currentUser !== 'undefined' && currentUser.graduacao) ? currentUser.graduacao : 'branca';
         var cacheKey = 'videoteca_' + userLogin + '_' + userGrad;
         
-        // Tenta carregar do Cache primeiro
         if (typeof CacheSystem !== 'undefined') {
             var cached = CacheSystem.get(cacheKey);
             if (cached) {
-                console.log("⚡ [CACHE] Videoteca carregada da memória.");
                 acervo = cached.acervo || {};
                 faixasPermitidas = cached.faixasPermitidas || [];
                 renderizarGrid();
-                return; // Interrompe para não chamar o servidor
+                return; 
             }
         }
 
@@ -581,22 +650,15 @@
         if (loadingVid) loadingVid.style.display = 'block';
         if (videosGrid) videosGrid.innerHTML = '';
 
-        // Chamada segura ao backend
         if (typeof google !== 'undefined' && google.script) {
             google.script.run
               .withSuccessHandler(function(dados) {
                  if (loadingVid) loadingVid.style.display = 'none';
-                 
                  if (!dados || !dados.acervo) {
-                     console.error("Dados de videoteca vazios ou inválidos recebidos.");
                      alert("Erro: Dados de videoteca vazios.");
                      return;
                  }
-                 
-                 // Salva no Cache por 60 minutos (3600 min na verdade, pois a engine espera min)
-                 if (typeof CacheSystem !== 'undefined') {
-                     CacheSystem.set(cacheKey, dados, 60); 
-                 }
+                 if (typeof CacheSystem !== 'undefined') CacheSystem.set(cacheKey, dados, 60); 
 
                  acervo = dados.acervo || {};
                  faixasPermitidas = dados.faixasPermitidas || [];
@@ -604,104 +666,72 @@
               })
               .withFailureHandler(function(err) {
                  if (loadingVid) loadingVid.style.display = 'none';
-                 console.error("Erro de conexão Videoteca:", err);
                  alert("Erro de conexão: " + err.message);
               })
               .listarVideoteca(typeof currentUser !== 'undefined' ? currentUser : {});
-        } else {
-            console.error("Ambiente Google Script não detectado.");
         }
     } catch (e) {
-        console.error("Erro crítico em abrirVideoteca:", e);
+        console.error(e);
     }
   }
 
-  /**
-   * Alterna entre abas de Treino e Exame
-   */
-  function mudarAba(modo) {
-    try {
-        modoAtual = modo;
-        var tabs = document.querySelectorAll('.v-tab');
-        for(var i=0; i<tabs.length; i++) tabs[i].classList.remove('active');
-        if(event && event.currentTarget) event.currentTarget.classList.add('active');
-        renderizarGrid();
-    } catch (e) {
-        console.error("Erro em mudarAba:", e);
-    }
+  function mudarAba(modo, el) {
+    modoAtual = modo;
+    var tabs = document.querySelectorAll('.v-tab');
+    tabs.forEach(t => t.classList.remove('active'));
+    if(el) el.classList.add('active');
+    renderizarGrid();
   }
 
-  /**
-   * Renderiza a grade de faixas disponíveis
-   */
   function renderizarGrid() {
-    try {
-        var grid = document.getElementById('videos-grid');
-        if (!grid) return;
-        
-        grid.innerHTML = '';
+    var grid = document.getElementById('videos-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
 
-        if (!faixasPermitidas || faixasPermitidas.length === 0) {
-            grid.innerHTML = '<p style="color:#666; grid-column:1/-1; text-align:center">Nenhuma faixa disponível para seu nível atual.</p>';
-            return;
-        }
-
-        for(var i = 0; i < faixasPermitidas.length; i++) {
-            var faixa = faixasPermitidas[i];
-            var listaVideos = acervo[faixa] || [];
-            var qtdTotal = listaVideos.length; 
-            
-            var card = document.createElement('div');
-            card.className = 'rank-card';
-            // Tratamento seguro para split
-            var corClasse = 'bg-' + (faixa ? faixa.split(' ')[0].toLowerCase() : 'branca');
-            
-            var textoBotao = (modoAtual === 'treino') ? (qtdTotal + " Vídeos") : "Iniciar Simulação";
-            var iconBotao = (modoAtual === 'treino') ? "play_circle_outline" : "emergency_recording";
-
-            var html = '<div class="rank-icon ' + corClasse + '">' + (faixa ? faixa.substring(0,2) : '??') + '</div>';
-            html += '<div class="rank-title">Faixa ' + faixa + '</div>';
-            html += '<div class="rank-subtitle"><span class="material-icons" style="font-size:16px">' + iconBotao + '</span> ' + textoBotao + '</div>';
-
-            card.innerHTML = html;
-            // Closure para capturar a variável faixa corretamente no loop
-            (function(f) { 
-                card.onclick = function() { preparingPlaylistSeguro(f); }; 
-            })(faixa);
-            
-            grid.appendChild(card);
-        }
-    } catch (e) {
-        console.error("Erro em renderizarGrid:", e);
+    if (!faixasPermitidas || faixasPermitidas.length === 0) {
+        grid.innerHTML = '<p style="color:var(--dynamic-text); opacity:0.5; grid-column:1/-1; text-align:center; font-weight:bold; padding:20px; border:1px dashed rgba(255,255,255,0.2); border-radius:8px;">Nenhuma faixa disponível para o seu nível atual.</p>';
+        return;
     }
+
+    faixasPermitidas.forEach(function(faixa) {
+        var listaVideos = acervo[faixa] || [];
+        var qtdTotal = listaVideos.length; 
+        
+        var card = document.createElement('div');
+        card.className = 'rank-card';
+        var primeiraPalavra = faixa ? faixa.split(' ')[0].toLowerCase() : 'branca';
+        var corClasse = 'bg-' + primeiraPalavra;
+        
+        var textoBotao = (modoAtual === 'treino') ? (qtdTotal + " Vídeos") : "Iniciar Simulação";
+        var iconBotao = (modoAtual === 'treino') ? "play_circle_outline" : "emergency_recording";
+
+        var html = '<div class="rank-icon ' + corClasse + '">' + (faixa ? primeiraPalavra.substring(0,2) : '??') + '</div>';
+        html += '<div class="rank-title">Faixa ' + faixa + '</div>';
+        html += '<div class="rank-subtitle"><span class="material-icons" style="font-size:16px; color:var(--dynamic-prim);">' + iconBotao + '</span> ' + textoBotao + '</div>';
+
+        card.innerHTML = html;
+        card.onclick = function() { preparingPlaylistSeguro(faixa); }; 
+        grid.appendChild(card);
+    });
   }
 
-  /**
-   * Prepara a playlist com base na seleção e modo (Treino vs Exame)
-   * Nome alterado para evitar conflitos e indicar blindagem
-   */
   function preparingPlaylistSeguro(faixaAlvo) {
-    try {
-        playlistAtual = [];
-        if (modoAtual === 'treino') {
-            if (acervo[faixaAlvo]) playlistAtual = acervo[faixaAlvo];
-        } else {
-            // Modo Exame: Pega todas as faixas acumuladas até a alvo
-            for (var i = 0; i < faixasPermitidas.length; i++) {
-                var f = faixasPermitidas[i];
-                if (acervo[f]) playlistAtual = playlistAtual.concat(acervo[f]);
-                if (f === faixaAlvo) break;
-            }
+    playlistAtual = [];
+    if (modoAtual === 'treino') {
+        if (acervo[faixaAlvo]) playlistAtual = acervo[faixaAlvo];
+    } else {
+        for (var i = 0; i < faixasPermitidas.length; i++) {
+            var f = faixasPermitidas[i];
+            if (acervo[f]) playlistAtual = playlistAtual.concat(acervo[f]);
+            if (f === faixaAlvo) break;
         }
+    }
 
-        if (playlistAtual.length > 0) {
-            indiceAtual = 0;
-            abrirPlayer();
-        } else {
-            alert("Nenhum conteúdo encontrado nesta seleção.");
-        }
-    } catch (e) {
-        console.error("Erro em preparingPlaylistSeguro:", e);
+    if (playlistAtual.length > 0) {
+        indiceAtual = 0;
+        abrirPlayer();
+    } else {
+        alert("Nenhum vídeo registrado para esta seleção.");
     }
   }
 
@@ -711,125 +741,72 @@
     carregarVideoNoPlayer();
   }
 
-  function solicitarSaida() { 
-      const modal = document.getElementById('confirm-modal');
-      if (modal) modal.style.display = 'flex'; 
-  }
-  
-  function cancelarSaida() { 
-      const modal = document.getElementById('confirm-modal');
-      if (modal) modal.style.display = 'none'; 
-  }
+  function solicitarSaida() { document.getElementById('confirm-modal').style.display = 'flex'; }
+  function cancelarSaida() { document.getElementById('confirm-modal').style.display = 'none'; }
   
   function confirmarSaida() {
-    const modal = document.getElementById('confirm-modal');
-    const overlay = document.getElementById('player-overlay');
-    const container = document.getElementById('player-container-inner');
-    
-    if (modal) modal.style.display = 'none';
-    if (overlay) overlay.style.display = 'none';
-    if (container) container.innerHTML = ""; // Limpa iframe para parar som
+    document.getElementById('confirm-modal').style.display = 'none';
+    document.getElementById('player-overlay').style.display = 'none';
+    document.getElementById('player-container-inner').innerHTML = ""; 
   }
 
   function mostrarConclusao() {
-    const overlay = document.getElementById('player-overlay');
-    const container = document.getElementById('player-container-inner');
-    const completion = document.getElementById('completion-screen');
-    const msgPara = document.getElementById('msg-parabens');
+    document.getElementById('player-overlay').style.display = 'none';
+    document.getElementById('player-container-inner').innerHTML = "";
     
-    if (overlay) overlay.style.display = 'none';
-    if (container) container.innerHTML = "";
-    
-    var nome = "Aluno";
-    if(typeof currentUser !== 'undefined') {
-       nome = currentUser.nomeCompleto || currentUser['Nome Completo'] || currentUser.LOGIN || "Aluno";
-    }
-    
-    if (msgPara) msgPara.textContent = "Parabéns, " + nome + "!";
-    if (completion) completion.style.display = 'flex';
+    var nome = (typeof currentUser !== 'undefined') ? (currentUser.nomeCompleto || currentUser.LOGIN || "Aluno") : "Atleta";
+    document.getElementById('msg-parabens').textContent = "Parabéns, " + nome.split(' ')[0] + "!";
+    document.getElementById('completion-screen').style.display = 'flex';
   }
 
-  function finalizarTreino() {
-    const completion = document.getElementById('completion-screen');
-    if (completion) completion.style.display = 'none';
-  }
+  function finalizarTreino() { document.getElementById('completion-screen').style.display = 'none'; }
 
   function carregarVideoNoPlayer() {
-    try {
-        if (!playlistAtual || playlistAtual.length === 0 || indiceAtual < 0 || indiceAtual >= playlistAtual.length) {
-            console.error("Índice ou playlist inválidos.");
-            return;
-        }
+    if (!playlistAtual || playlistAtual.length === 0) return;
 
-        var video = playlistAtual[indiceAtual];
-        var container = document.getElementById('player-container-inner');
-        
-        if (!container) return;
-        
-        // Verifica se tem ID válido (>5 chars) e se não é o placeholder
-        var temVideo = video.youtubeId && video.youtubeId.length > 5 && video.youtubeId !== "YOUTUBE_ID_AQUI";
+    var video = playlistAtual[indiceAtual];
+    var container = document.getElementById('player-container-inner');
+    
+    var temVideo = video.youtubeId && video.youtubeId.length > 5 && video.youtubeId !== "YOUTUBE_ID_AQUI";
 
-        if (!temVideo) {
-           // VISUAL "EM BREVE" / INDISPONÍVEL
-           container.innerHTML = `
-              <div class="video-unavailable">
-                 <span class="material-icons">videocam_off</span>
-                 <div class="unavailable-title">Conteúdo não disponível</div>
-                 <div class="unavailable-desc">Este vídeo será adicionado em breve à plataforma.</div>
-              </div>
-           `;
-        } else {
-           // VISUAL PLAYER (YouTube)
-           var urlEmbed = "https://www.youtube.com/embed/" + video.youtubeId + "?autoplay=1&rel=0&modestbranding=1";
-           container.innerHTML = `<iframe id="yt-player" src="${urlEmbed}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%"></iframe>`;
-        }
-        
-        // Proteção XSS nos textos
-        var titleEl = document.getElementById('vid-title');
-        var descEl = document.getElementById('vid-desc');
-        var counterEl = document.getElementById('vid-counter');
-        
-        if (titleEl) titleEl.textContent = video.titulo || "Sem Título";
-        if (descEl) descEl.innerText = video.descricao || "Descrição indisponível.";
-        if (counterEl) counterEl.textContent = (indiceAtual + 1) + " / " + playlistAtual.length;
-        
-        var btnPrev = document.getElementById('btn-prev');
-        if (btnPrev) btnPrev.disabled = (indiceAtual === 0);
-        
-        var btnNext = document.getElementById('btn-next');
-        if (btnNext) {
-            // Remove listeners antigos para evitar duplicação (embora reatribuição onclick resolva)
-            btnNext.onclick = null;
-            
-            if (indiceAtual === playlistAtual.length - 1) {
-                btnNext.innerHTML = 'Concluir <span class="material-icons">check</span>';
-                btnNext.onclick = mostrarConclusao;
-            } else {
-                btnNext.innerHTML = 'Próximo <span class="material-icons">skip_next</span>';
-                btnNext.onclick = function() { mudarVideo(1); };
-            }
-        }
-    } catch (e) {
-        console.error("Erro em carregarVideoNoPlayer:", e);
+    if (!temVideo) {
+        container.innerHTML = `
+           <div class="video-unavailable">
+              <span class="material-icons">videocam_off</span>
+              <div class="unavailable-title">Conteúdo não disponível</div>
+              <div class="unavailable-desc">O vídeo oficial desta técnica será adicionado em breve.</div>
+           </div>`;
+    } else {
+        var urlEmbed = "https://www.youtube.com/embed/" + video.youtubeId + "?autoplay=1&rel=0&modestbranding=1";
+        container.innerHTML = `<iframe id="yt-player" src="${urlEmbed}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%"></iframe>`;
+    }
+    
+    document.getElementById('vid-title').textContent = video.titulo || "Sem Título";
+    document.getElementById('vid-desc').innerText = video.descricao || "Sem descrição informada.";
+    document.getElementById('vid-counter').textContent = (indiceAtual + 1) + " de " + playlistAtual.length;
+    
+    document.getElementById('btn-prev').disabled = (indiceAtual === 0);
+    
+    var btnNext = document.getElementById('btn-next');
+    btnNext.onclick = null;
+    if (indiceAtual === playlistAtual.length - 1) {
+        btnNext.innerHTML = 'CONCLUIR <span class="material-icons">task_alt</span>';
+        btnNext.style.background = "var(--dynamic-prim)";
+        btnNext.style.color = "var(--dynamic-btn-text)";
+        btnNext.onclick = mostrarConclusao;
+    } else {
+        btnNext.innerHTML = 'PRÓXIMO <span class="material-icons">skip_next</span>';
+        btnNext.style.background = "transparent";
+        btnNext.style.color = "var(--dynamic-text)";
+        btnNext.onclick = function() { mudarVideo(1); };
     }
   }
 
-  function mudarVideo(delta) {
-    indiceAtual += delta;
-    carregarVideoNoPlayer();
-  }
+  function mudarVideo(delta) { indiceAtual += delta; carregarVideoNoPlayer(); }
 
   function fecharVideoteca() {
-    try {
-        const videoScreen = document.getElementById('videoteca-screen');
-        const dashHeader = document.querySelector('.dashboard-header');
-        const dashGrid = document.getElementById('dashboard-grid');
-        
-        if (videoScreen) videoScreen.style.display = 'none';
-        if (dashHeader) dashHeader.style.display = 'flex';
-        if (dashGrid) dashGrid.style.display = 'grid';
-    } catch (e) {
-        console.error("Erro em fecharVideoteca:", e);
-    }
+    document.getElementById('videoteca-screen').style.display = 'none';
+    document.querySelector('.dashboard-header').style.display = 'flex';
+    document.getElementById('dashboard-grid').style.display = 'grid';
   }
 </script>

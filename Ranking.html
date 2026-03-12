@@ -1,199 +1,229 @@
-<!-- DOJO MANAGER - PORTAL DO ALUNO -->
-<!--Página de Ranking - Interface moderna e responsiva para visualização do ranking de alunos. -->
-
 <style>
-  /* --- ESTILOS DO RANKING (FINAL - V2 EMPATE) --- */
-  /* Define o container principal da tela de ranking. Inicialmente oculto. */
+  /* ============================================================================
+     INJEÇÃO DE CORES COM FALLBACK SEGURO
+     ============================================================================ */
+  :root {
+    --dynamic-bg: <?=typeof bgColor !=='undefined'&& bgColor ? bgColor: '#121212'?> !important;
+    --dynamic-prim: <?=typeof primaryColor !=='undefined'&& primaryColor ? primaryColor: '#FFD700'?> !important;
+    --dynamic-sec: <?=typeof secondaryColor !=='undefined'&& secondaryColor ? secondaryColor: '#1e1e1e'?> !important;
+    --dynamic-text: <?=typeof textColor !=='undefined'&& textColor ? textColor: '#ffffff'?> !important;
+    --dynamic-btn-text: <?=typeof btnTextColor !=='undefined'&& btnTextColor ? btnTextColor: '#000000'?> !important;
+  }
+
+  /* --- ESTILOS DO RANKING --- */
   .ranking-view {
     padding: 20px;
     display: none;
-    /* Controlado via JS para mostrar/ocultar */
     animation: fadeIn 0.3s;
-    /* Efeito suave de entrada */
     padding-bottom: 120px;
-    /* Espaço extra no final para o botão flutuante não cobrir conteúdo */
+    max-width: 800px;
+    margin: 0 auto;
   }
 
-  /* Filtros: Container para os botões de seleção de escopo (Local vs Geral) */
+  /* CABEÇALHO E NAVEGAÇÃO */
+  .profile-header-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+
+  .btn-back-rank {
+    background: transparent;
+    border: 1px solid var(--dynamic-text);
+    color: var(--dynamic-text);
+    opacity: 0.6;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+  }
+
+  .btn-back-rank:hover {
+    opacity: 1;
+    border-color: var(--dynamic-prim);
+    color: var(--dynamic-prim);
+    transform: translateX(-3px);
+  }
+
+  /* FILTROS (LOCAL VS GERAL) */
   .scope-filter {
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
   }
 
-  /* Estilo base dos botões de filtro */
   .scope-btn {
-    background: #1e1e1e;
-    color: #888;
-    border: 1px solid #333;
-    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--dynamic-text);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 20px;
     border-radius: 20px;
     cursor: pointer;
     font-size: 0.85rem;
     font-weight: bold;
     transition: all 0.3s;
+    opacity: 0.7;
   }
 
-  /* Estilo do botão de filtro ativo (selecionado) */
   .scope-btn.active {
-    background: #FFD700;
-    /* Dourado */
-    color: #000;
-    border-color: #FFD700;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-    /* Brilho */
+    background: var(--dynamic-prim);
+    color: var(--dynamic-btn-text);
+    border-color: var(--dynamic-prim);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    opacity: 1;
+    font-weight: 900;
   }
 
-  /* Lista Agrupada: Container para os cards de ranking */
+  /* LISTA AGRUPADA (RANKING CARDS) */
   .ranking-list {
     max-width: 600px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    /* Espaçamento entre cards */
+    gap: 20px;
   }
 
-  /* Card do Grupo (Posição): Representa um grupo de alunos com a mesma pontuação */
   .rank-group {
-    background: #1e1e1e;
+    background-color: var(--dynamic-sec);
     border-radius: 12px;
-    border: 1px solid #333;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     overflow: hidden;
     position: relative;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
   }
 
-  /* Cores da Borda Lateral baseada no Rank (1º, 2º, 3º e Comum) */
+  /* CORES DOS METAIS DO PÓDIO (FIXAS - NÃO HERDAM O WHITE-LABEL PARA MANTER A SEMÂNTICA) */
   .group-1 {
     border-left: 5px solid #FFD700;
-    /* Ouro */
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
   }
 
   .group-2 {
     border-left: 5px solid #C0C0C0;
-    /* Prata */
+    box-shadow: 0 4px 15px rgba(192, 192, 192, 0.1);
   }
 
   .group-3 {
     border-left: 5px solid #CD7F32;
-    /* Bronze */
+    box-shadow: 0 4px 15px rgba(205, 127, 50, 0.1);
   }
 
   .group-common {
-    border-left: 5px solid #444;
-    /* Cinza escuro para 4º lugar em diante */
+    border-left: 5px solid rgba(255, 255, 255, 0.2);
   }
 
-  /* Cabeçalho do Card (Posição e Pontuação) */
+  .txt-1 {
+    color: #FFD700 !important;
+  }
+
+  .txt-2 {
+    color: #C0C0C0 !important;
+  }
+
+  .txt-3 {
+    color: #CD7F32 !important;
+  }
+
+  /* CABEÇALHO DO CARD */
   .rank-header {
-    background: #252525;
-    padding: 8px 15px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 12px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .rank-pos-badge {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 900;
-    color: #fff;
+    color: var(--dynamic-text);
   }
 
   .rank-score-badge {
-    background: #333;
-    padding: 4px 10px;
-    border-radius: 10px;
-    font-size: 0.8rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
     font-weight: bold;
-    color: #FFD700;
+    color: var(--dynamic-text);
   }
 
-  /* Lista de Alunos dentro do Card: Container para as linhas de alunos empatados */
+  /* LINHAS DE ALUNOS NO CARD */
   .rank-rows-container {
     display: flex;
     flex-direction: column;
   }
 
-  /* Linha individual de um aluno no ranking */
   .rank-row {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 15px;
-    border-bottom: 1px solid #2a2a2a;
+    gap: 15px;
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   .rank-row:last-child {
     border-bottom: none;
-    /* Remove borda do último item para limpeza visual */
   }
 
   .rank-avatar {
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #444;
+    border: 2px solid var(--dynamic-prim);
+    background: #000;
   }
 
   .rank-info {
     flex: 1;
-    /* Ocupa o espaço restante */
   }
 
   .rank-name {
-    font-weight: bold;
-    color: #fff;
-    font-size: 0.95rem;
+    font-weight: 900;
+    color: var(--dynamic-text);
+    font-size: 1rem;
   }
 
   .rank-details {
-    font-size: 0.75rem;
-    color: #888;
+    font-size: 0.8rem;
+    color: var(--dynamic-text);
+    opacity: 0.6;
+    margin-top: 3px;
   }
 
-  /* Cor dos Textos de Posição (Ouro, Prata, Bronze) */
-  .txt-1 {
-    color: #FFD700;
-  }
-
-  .txt-2 {
-    color: #C0C0C0;
-  }
-
-  .txt-3 {
-    color: #CD7F32;
-  }
-
-  /* BOTÃO FLUTUANTE (FAB) para gerar o card de pódio */
+  /* BOTÃO FLUTUANTE (GERAR PÓDIO) */
   .fab-rank {
     position: fixed;
     bottom: 30px;
-    left: 20px;
-    background: #FFD700;
-    color: #000;
+    left: 25px;
+    /* Lado Esquerdo */
+    background: var(--dynamic-prim) !important;
+    color: var(--dynamic-btn-text) !important;
     border: none;
     border-radius: 50px;
-    padding: 12px 24px;
-    font-weight: bold;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    padding: 15px 25px;
+    font-weight: 900;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     cursor: pointer;
-    z-index: 9995;
-    transition: transform 0.2s;
+    z-index: 99999;
+    transition: transform 0.2s, filter 0.2s;
   }
 
-  .fab-rank:active {
-    transform: scale(0.95);
-    /* Efeito de clique */
+  .fab-rank:hover {
+    filter: brightness(1.15);
+    transform: scale(1.05);
   }
 
-  /* MODAL PODIUM: Overlay escuro que cobre a tela */
+  /* --- MODAL PODIUM (CARD INSTAGRAM/IMPRESSÃO) --- */
   #podium-modal {
     position: fixed;
     top: 0;
@@ -201,58 +231,56 @@
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.95);
-    z-index: 10000;
+    z-index: 100000;
     display: none;
-    /* Inicialmente oculto */
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px);
   }
 
-  /* Card visual do Pódio (Gerado para print/download) */
   .podium-card {
     width: 90%;
-    max-width: 360px;
-    background: linear-gradient(145deg, #121212, #1e1e1e);
-    border: 2px solid #FFD700;
+    max-width: 380px;
+    background-color: var(--dynamic-sec);
+    border: 3px solid var(--dynamic-prim);
     border-radius: 20px;
-    padding: 20px;
+    padding: 25px 20px;
     text-align: center;
-    box-shadow: 0 0 50px rgba(255, 215, 0, 0.1);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.6);
   }
 
   .podium-header {
-    margin-bottom: 20px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 10px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 15px;
   }
 
   .podium-title {
-    color: #FFD700;
-    font-size: 1.5rem;
+    color: var(--dynamic-prim);
+    font-size: 1.8rem;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     margin: 0;
   }
 
   .podium-subtitle {
-    color: #aaa;
-    font-size: 0.8rem;
-    margin-top: 5px;
-    font-weight: 500;
+    color: var(--dynamic-text);
+    opacity: 0.8;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    font-weight: bold;
   }
 
-  /* Grid Pódio: Layout flex para alinhar os 3 vencedores */
+  /* Grid Pódio 3 Lugares */
   .podium-grid {
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    /* Alinha pela base (pés dos pódios) */
     gap: 8px;
     margin-bottom: 20px;
-    height: 180px;
+    height: 190px;
   }
 
   .podium-item {
@@ -260,67 +288,65 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-    width: 30%;
+    width: 32%;
     height: 100%;
     position: relative;
   }
 
   .podium-avatar {
-    width: 50px;
-    height: 50px;
+    width: 55px;
+    height: 55px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #FFD700;
+    border: 3px solid #000;
     margin-bottom: -15px;
-    /* Sobrepõe levemente a barra do pódio */
     z-index: 5;
-    background: #000;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    background: #111;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
   }
 
+  /* As barras do pódio mantêm as cores dos metais */
   .podium-place {
     width: 100%;
     border-radius: 8px 8px 0 0;
     display: flex;
     justify-content: center;
     align-items: flex-end;
-    padding-bottom: 5px;
+    padding-bottom: 8px;
     font-weight: 900;
-    color: rgba(0, 0, 0, 0.6);
-    font-size: 1.5rem;
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 1.6rem;
   }
 
-  /* Alturas e Cores das Barras do Pódio */
   .place-1 {
-    height: 100px;
+    height: 110px;
     background: linear-gradient(to bottom, #FFD700, #B8860B);
     order: 2;
     z-index: 2;
+    border-color: #FFD700;
   }
 
-  /* Centro */
   .place-2 {
-    height: 75px;
+    height: 80px;
     background: linear-gradient(to bottom, #C0C0C0, #757575);
     order: 1;
-    opacity: 0.9;
+    opacity: 0.95;
+    border-color: #C0C0C0;
   }
 
-  /* Esquerda */
   .place-3 {
-    height: 55px;
+    height: 60px;
     background: linear-gradient(to bottom, #CD7F32, #8B4513);
     order: 3;
-    opacity: 0.9;
+    opacity: 0.95;
+    border-color: #CD7F32;
   }
 
-  /* Direita */
-
   .podium-name {
-    font-size: 0.75rem;
-    color: #fff;
-    margin-top: 10px;
-    font-weight: bold;
+    font-size: 0.8rem;
+    color: var(--dynamic-text);
+    margin-top: 15px;
+    font-weight: 900;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -328,64 +354,76 @@
   }
 
   .podium-count {
-    font-size: 0.7rem;
-    color: #FFD700;
-    margin-top: 2px;
+    font-size: 0.75rem;
+    color: var(--dynamic-prim);
+    margin-top: 3px;
+    font-weight: bold;
   }
 
   .podium-footer {
-    font-size: 0.6rem;
-    color: #555;
-    margin-top: 15px;
-    border-top: 1px solid #333;
-    padding-top: 8px;
+    font-size: 0.65rem;
+    color: var(--dynamic-text);
+    opacity: 0.5;
+    margin-top: 25px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 10px;
     text-transform: uppercase;
     letter-spacing: 1px;
   }
 
+  /* BOTÕES DO MODAL PÓDIO */
   .modal-actions {
     display: flex;
-    gap: 10px;
-    margin-top: 20px;
+    gap: 15px;
+    margin-top: 25px;
     width: 90%;
-    max-width: 360px;
+    max-width: 380px;
   }
 
   .btn-action-podium {
     flex: 1;
-    background: #333;
-    color: #fff;
-    border: none;
-    padding: 12px;
+    background: transparent;
+    border: 2px solid var(--dynamic-text);
+    color: var(--dynamic-text);
+    padding: 14px;
     border-radius: 50px;
-    font-weight: bold;
+    font-weight: 900;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 5px;
-    font-size: 0.85rem;
+    gap: 8px;
+    font-size: 0.9rem;
+    transition: 0.2s;
+  }
+
+  .btn-action-podium:hover {
+    background: rgba(255, 255, 255, 0.1);
   }
 
   .btn-gold {
-    background: #FFD700;
-    color: #000;
+    background: var(--dynamic-prim);
+    border-color: var(--dynamic-prim);
+    color: var(--dynamic-btn-text);
   }
 
-  /* Ajustes para Impressão (Só imprime o card do pódio) */
+  .btn-gold:hover {
+    filter: brightness(1.15);
+    background: var(--dynamic-prim);
+  }
+
+  /* MODO IMPRESSÃO PDF */
   @media print {
     body * {
       visibility: hidden;
     }
 
-    /* Esconde tudo */
     #podium-modal,
     #card-to-print,
     #card-to-print * {
       visibility: visible;
     }
 
-    /* Mostra só o modal */
     #podium-modal {
       position: absolute;
       left: 0;
@@ -401,27 +439,59 @@
     }
 
     .podium-title,
-    .rank-pos,
-    .podium-subtitle {
+    .podium-subtitle,
+    .podium-name,
+    .podium-count {
       color: #000 !important;
     }
 
     .modal-actions {
       display: none;
     }
+  }
 
-    /* Esconde botões na impressão */
+  .spinner-rank {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border-left-color: var(--dynamic-prim);
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 </style>
 
 <div id="ranking-screen" class="ranking-view">
   <div class="profile-header-nav">
-    <button class="btn-back" onclick="fecharRanking()"><span class="material-icons">arrow_back</span></button>
-    <h2>Ranking</h2>
+    <button class="btn-back-rank" onclick="fecharRanking()">
+      <span class="material-icons" style="font-size: 28px;">arrow_back</span>
+    </button>
+    <h2 style="margin:0; font-size:1.8rem; font-weight:900; color:var(--dynamic-text)">Ranking Mensal</h2>
   </div>
 
-  <div style="text-align:center; margin-bottom:15px;">
-    <div style="font-size:1rem; color:#FFD700; font-weight:bold;" id="rank-mes-ano">...</div>
+  <div style="text-align:center; margin-bottom:20px;">
+    <div style="font-size:1.1rem; color:var(--dynamic-prim); font-weight:900; text-transform:uppercase;"
+      id="rank-mes-ano">...</div>
   </div>
 
   <div class="scope-filter">
@@ -430,7 +500,7 @@
   </div>
 
   <div id="ranking-container" class="ranking-list">
-    <div class="spinner"></div>
+    <div class="spinner-rank" style="margin: 30px auto;"></div>
   </div>
 
   <button id="btn-gerar-card" class="fab-rank" style="display:none;" onclick="gerarCardPodium()">
@@ -445,45 +515,34 @@
       <div class="podium-subtitle" id="podium-subtitle">...</div>
     </div>
     <div class="podium-grid" id="podium-content"></div>
-    <div class="podium-footer" id="podium-footer">Federação Leão do Norte</div>
+    <div class="podium-footer" id="podium-footer">DojoManager System</div>
   </div>
   <div class="modal-actions">
     <button class="btn-action-podium" onclick="fecharPodium()">FECHAR</button>
-    <button class="btn-action-podium btn-gold" onclick="window.print()"><span class="material-icons">print</span> SALVAR</button>
+    <button class="btn-action-podium btn-gold" onclick="window.print()"><span class="material-icons">print</span> SALVAR PDF</button>
   </div>
 </div>
 
 <script>
-  // --- VARIÁVEIS GLOBAIS DE ESTADO ---
+  console.log("✅ [SAFE MODE] Ranking.html carregado (White-Label Integrado)");
+
   let listaCompletaRanking = [];
   let listaExibidaRanking = [];
   let userRanking = {};
   let escopoAtual = 'local';
 
-  // --- LOGGER FRONTEND (BLINDAGEM) ---
-  function logFront(acao, msg, dados = null) {
-    const timestamp = new Date().toLocaleTimeString();
-    const style = "color: #FFD700; font-weight: bold; background: #333; padding: 2px 5px; border-radius: 3px;";
-    console.log(`%c[RANKING - ${timestamp}] ${acao}:`, style, msg);
-    if (dados) console.dir(dados);
-  }
-
   function tratarErroImagem(img, nome) {
-      // Silencioso visualmente, mas logado no console para debug
-      console.warn(`[IMG] Falha ao carregar foto de: ${nome}. Usando avatar gerado.`);
       img.onerror = null; 
       img.src = 'https://ui-avatars.com/api/?background=random&color=fff&name=' + encodeURIComponent(nome);
   }
 
   function abrirRanking() {
-    logFront("INIT", "Abrindo tela de Ranking...");
-    
     try {
       userRanking = JSON.parse(localStorage.getItem('userSession') || '{}');
-      if (!userRanking.academia) throw new Error("Sessão de usuário sem academia definida.");
+      if (!userRanking.academia) throw new Error("Sessão inválida.");
     } catch (e) {
-      console.error("Erro crítico de sessão:", e);
-      alert("Erro de sessão. Faça login novamente.");
+      console.error(e);
+      alert("Erro de sessão. Retorne ao painel e tente novamente.");
       return;
     }
 
@@ -495,12 +554,11 @@
     const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
     document.getElementById('rank-mes-ano').textContent = `${meses[hoje.getMonth()]} de ${hoje.getFullYear()}`;
 
-    // Validação de Permissões
+    // Validação de Permissões para mostrar o Botão de Gerar Pódio (Instrutor/Admin)
     const nivel = String(userRanking.nivel || "").toLowerCase();
     const grad = String(userRanking.graduacao || "").toLowerCase();
     const isInstrutor = userRanking.isInstrutor || nivel.includes('admin') || grad.includes('mestre');
     
-    logFront("PERMISSÃO", `Usuário: ${userRanking.LOGIN}, Nível: ${nivel}, É Instrutor? ${isInstrutor}`);
     document.getElementById('btn-gerar-card').style.display = isInstrutor ? 'flex' : 'none';
 
     listaCompletaRanking = []; 
@@ -508,65 +566,55 @@
   }
 
   function mudarEscopoRanking(tipo) {
-    logFront("FILTRO", `Alterando escopo para: ${tipo.toUpperCase()}`);
     escopoAtual = tipo;
     document.getElementById('btn-scope-local').className = (tipo === 'local') ? 'scope-btn active' : 'scope-btn';
     document.getElementById('btn-scope-geral').className = (tipo === 'geral') ? 'scope-btn active' : 'scope-btn';
     
     if(listaCompletaRanking.length > 0) {
-        logFront("CACHE", "Usando dados já carregados na memória.");
         filtrarERenderizar();
     } else {
         const hoje = new Date();
-        logFront("BACKEND", `Solicitando dados ao servidor para Mês: ${hoje.getMonth() + 1}, Ano: ${hoje.getFullYear()}`);
         buscarDadosBackend(hoje.getMonth() + 1, hoje.getFullYear());
     }
   }
 
   function buscarDadosBackend(mes, ano) {
     const div = document.getElementById('ranking-container');
-    div.innerHTML = '<div class="spinner" style="margin: 20px auto;"></div>';
+    div.innerHTML = '<div class="spinner-rank" style="margin: 30px auto;"></div>';
     
-    google.script.run
-      .withSuccessHandler(lista => {
-          logFront("SUCESSO", "Dados recebidos do servidor:", lista);
-          if (!Array.isArray(lista)) {
-             console.error("Formato inválido recebido:", lista);
-             div.innerHTML = '<p style="color:red; text-align:center">Erro: Formato de dados inválido.</p>';
-             return;
-          }
-          listaCompletaRanking = lista;
-          filtrarERenderizar();
-      })
-      .withFailureHandler(err => {
-          console.error("FALHA CRÍTICA BACKEND:", err);
-          div.innerHTML = `<p style="color:red; text-align:center">Erro de conexão: ${err.message}</p>`;
-      })
-      .getRankingPresenca(mes, ano);
+    if (typeof google !== 'undefined' && google.script) {
+        google.script.run
+          .withSuccessHandler(lista => {
+              if (!Array.isArray(lista)) {
+                 div.innerHTML = '<p style="color:#ff5252; text-align:center; font-weight:bold;">Erro: Dados corrompidos.</p>';
+                 return;
+              }
+              listaCompletaRanking = lista;
+              filtrarERenderizar();
+          })
+          .withFailureHandler(err => {
+              div.innerHTML = `<p style="color:#ff5252; text-align:center; font-weight:bold;">Erro de Servidor: ${err.message}</p>`;
+          })
+          .getRankingPresenca(mes, ano);
+    }
   }
 
   function filtrarERenderizar() {
     const div = document.getElementById('ranking-container');
     div.innerHTML = "";
     
-    // 1. Filtrar Escopo
     if (escopoAtual === 'local') {
         const minhaAcad = String(userRanking.academia).trim().toUpperCase();
-        logFront("RENDER", `Filtrando por academia: ${minhaAcad}`);
         listaExibidaRanking = listaCompletaRanking.filter(r => String(r.academia).trim().toUpperCase() === minhaAcad);
     } else {
-        logFront("RENDER", "Exibindo Ranking Geral");
         listaExibidaRanking = listaCompletaRanking; 
     }
 
-    logFront("RENDER", `Itens a exibir: ${listaExibidaRanking.length}`);
-
     if(listaExibidaRanking.length === 0) {
-        div.innerHTML = `<div style="text-align:center; padding:30px; color:#666;"><span class="material-icons" style="font-size:40px; opacity:0.5">event_busy</span><p>Nenhuma presença registrada neste filtro.</p></div>`;
+        div.innerHTML = `<div style="text-align:center; padding:40px; color:var(--dynamic-text); opacity:0.5;"><span class="material-icons" style="font-size:48px; margin-bottom:10px;">event_busy</span><p style="font-weight:bold; margin:0;">Nenhuma presença confirmada ainda.</p></div>`;
         return;
     }
 
-    // 2. Agrupar por Pontuação (Lógica de Empate "Dense Rank")
     const grupos = new Map();
     listaExibidaRanking.forEach(aluno => {
         const score = aluno.count;
@@ -574,10 +622,8 @@
         grupos.get(score).push(aluno);
     });
 
-    // 3. Ordenar Scores (Do maior para o menor)
     const scoresOrdenados = Array.from(grupos.keys()).sort((a, b) => b - a);
 
-    // 4. Renderizar Grupos
     scoresOrdenados.forEach((score, index) => {
         const rankPos = index + 1;
         const alunosEmpatados = grupos.get(score);
@@ -595,10 +641,10 @@
         const headerHtml = `
             <div class="rank-header">
                 <div class="rank-pos-badge ${textClass}">
-                    <span class="material-icons" style="font-size:16px; vertical-align:middle; margin-right:5px;">${icon}</span>
+                    <span class="material-icons" style="font-size:18px; vertical-align:middle; margin-right:5px;">${icon}</span>
                     ${rankPos}º Lugar
                 </div>
-                <div class="rank-score-badge">${score} Aulas</div>
+                <div class="rank-score-badge">${score} Aula(s)</div>
             </div>
         `;
 
@@ -606,7 +652,7 @@
         alunosEmpatados.forEach(aluno => {
             rowsHtml += `
                 <div class="rank-row">
-                    <img src="${aluno.foto}" class="rank-avatar" onerror="tratarErroImagem(this, '${aluno.login}')">
+                    <img src="${aluno.foto}" class="rank-avatar" style="border-color: ${rankPos===1 ? '#FFD700' : (rankPos===2 ? '#C0C0C0' : (rankPos===3 ? '#CD7F32' : 'var(--dynamic-prim)'))}" onerror="tratarErroImagem(this, '${aluno.login}')">
                     <div class="rank-info">
                         <div class="rank-name">${aluno.nome}</div>
                         <div class="rank-details">${aluno.academia}</div>
@@ -622,10 +668,8 @@
   }
 
   function gerarCardPodium() {
-    if(listaExibidaRanking.length === 0) { alert("Sem dados para gerar card."); return; }
-    logFront("PODIO", "Gerando visual do pódio...");
+    if(listaExibidaRanking.length === 0) { alert("Sem dados suficientes para formar o pódio."); return; }
     
-    // Recalcula agrupamento
     const grupos = new Map();
     listaExibidaRanking.forEach(aluno => {
         if (!grupos.has(aluno.count)) grupos.set(aluno.count, []);
@@ -666,14 +710,13 @@
         }
     });
 
-    const nomeContexto = (escopoAtual === 'local') ? userRanking.academia : "Geral";
-    document.getElementById('podium-subtitle').textContent = nomeContexto + " - " + document.getElementById('rank-mes-ano').textContent;
-    const agora = new Date();
-    document.getElementById('podium-footer').innerHTML = `Gerado em: ${agora.toLocaleDateString()} às ${agora.toLocaleTimeString()}`;
+    const nomeContexto = (escopoAtual === 'local') ? userRanking.academia : "Ranking Geral";
+    document.getElementById('podium-subtitle').textContent = nomeContexto + " | " + document.getElementById('rank-mes-ano').textContent;
     document.getElementById('podium-modal').style.display = 'flex';
   }
 
   function fecharPodium() { document.getElementById('podium-modal').style.display = 'none'; }
+  
   function fecharRanking() { 
       document.getElementById('ranking-screen').style.display = 'none'; 
       document.querySelector('.dashboard-header').style.display = 'flex'; 

@@ -1,38 +1,86 @@
-<!-- DOJO MANAGER - PORTAL DO ALUNO -->
-<!--Página de Programa Técnico - Interface moderna e responsiva para visualização de programas técnicos e seus respectivos PDFs. -->
-
 <style>
-  /* Estilos Específicos do Programa Técnico */
+  /* ============================================================================
+     INJEÇÃO DE CORES COM FALLBACK SEGURO
+     ============================================================================ */
+  :root {
+    --dynamic-bg: <?=typeof bgColor !=='undefined'&& bgColor ? bgColor: '#121212'?> !important;
+    --dynamic-prim: <?=typeof primaryColor !=='undefined'&& primaryColor ? primaryColor: '#FFD700'?> !important;
+    --dynamic-sec: <?=typeof secondaryColor !=='undefined'&& secondaryColor ? secondaryColor: '#1e1e1e'?> !important;
+    --dynamic-text: <?=typeof textColor !=='undefined'&& textColor ? textColor: '#ffffff'?> !important;
+    --dynamic-btn-text: <?=typeof btnTextColor !=='undefined'&& btnTextColor ? btnTextColor: '#000000'?> !important;
+  }
+
+  /* --- ESTILOS GERAIS DO PROGRAMA TÉCNICO --- */
   .program-view {
     display: none;
     animation: fadeIn 0.3s ease-in-out;
     padding-top: 20px;
+    padding-bottom: 40px;
+    max-width: 800px;
+    margin: 0 auto;
   }
 
+  /* CABEÇALHO */
+  .profile-header-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 0 20px;
+  }
+
+  .btn-back-prog {
+    background: transparent;
+    border: 1px solid var(--dynamic-text);
+    color: var(--dynamic-text);
+    opacity: 0.6;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+  }
+
+  .btn-back-prog:hover {
+    opacity: 1;
+    border-color: var(--dynamic-prim);
+    color: var(--dynamic-prim);
+    transform: translateX(-3px);
+  }
+
+  /* LISTA DE PDFs */
   .program-list {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    max-width: 700px;
-    margin: 0 auto;
+    padding: 0 20px;
   }
 
   .pdf-card {
-    background-color: #1e1e1e;
-    border: 1px solid #333;
-    border-radius: 8px;
+    background-color: var(--dynamic-sec) !important;
+    border: 2px solid var(--dynamic-prim) !important;
+    border-radius: 12px;
     padding: 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     transition: all 0.2s;
     text-decoration: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
   }
 
   .pdf-card.enabled:hover {
-    background-color: #2a2a2a;
     transform: translateX(5px);
-    border-color: #FFD700;
+    filter: brightness(1.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  }
+
+  .pdf-card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none;
   }
 
   .pdf-info {
@@ -41,42 +89,37 @@
     gap: 15px;
   }
 
+  /* ÍCONE DE GRADUAÇÃO (CORES FIXAS DO SISTEMA DE FAIXAS) */
   .faixa-icon {
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
+    font-weight: 900;
     color: #000;
-    font-size: 0.8rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    font-size: 0.85rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
   }
 
-  .pdf-title {
-    color: #fff;
-    font-size: 1.1rem;
-    font-weight: 500;
-    margin: 0;
-  }
-
-  .pdf-status {
-    font-size: 0.8rem;
-    color: #888;
-  }
-
+  /* Cores Fixas (Não herdam do White-label pois representam a cor literal da faixa) */
   .bg-branca {
-    background-color: #fff;
-    border: 1px solid #ccc;
+    background-color: #ffffff;
+    color: #000;
   }
 
   .bg-amarela {
     background-color: #FFD700;
+    color: #000;
   }
 
   .bg-laranja {
     background-color: #FF8C00;
+    color: #000;
   }
 
   .bg-verde {
@@ -95,23 +138,49 @@
   }
 
   .bg-preta {
-    background-color: #000;
+    background-color: #000000;
     color: #fff;
-    border: 1px solid #555;
+    border: 2px solid #555;
   }
 
-  .pdf-card.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background-color: #151515;
+  .bg-vermelha {
+    background-color: #E53935;
+    color: #fff;
   }
 
-  .spinner {
+  /* TEXTOS DO CARD */
+  .pdf-title {
+    color: var(--dynamic-text);
+    font-size: 1.1rem;
+    font-weight: 900;
+    margin: 0 0 5px 0;
+  }
+
+  .pdf-status {
+    font-size: 0.85rem;
+    color: var(--dynamic-text);
+    opacity: 0.7;
+    font-weight: bold;
+  }
+
+  .pdf-icon-action {
+    color: var(--dynamic-prim);
+    font-size: 28px;
+    transition: 0.2s;
+  }
+
+  .pdf-card.disabled .pdf-icon-action {
+    color: var(--dynamic-text);
+    opacity: 0.4;
+  }
+
+  /* LOADER */
+  .spinner-prog {
     border: 4px solid rgba(255, 255, 255, 0.1);
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    border-left-color: #FFD700;
+    border-left-color: var(--dynamic-prim);
     animation: spin 1s linear infinite;
     margin: 0 auto;
   }
@@ -125,30 +194,41 @@
       transform: rotate(360deg);
     }
   }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>
 
 <div id="programa-screen" class="program-view">
   <div class="profile-header-nav">
-    <button class="btn-back" onclick="fecharPrograma()">
-      <span class="material-icons" style="font-size: 32px;">arrow_back</span>
+    <button class="btn-back-prog" onclick="fecharPrograma()">
+      <span class="material-icons" style="font-size: 28px;">arrow_back</span>
     </button>
-    <h2 style="margin:0; font-size:1.8rem;">Programa Técnico</h2>
+    <h2 style="margin:0; font-size:1.8rem; font-weight:900; color:var(--dynamic-text);">Programa Técnico</h2>
   </div>
 
   <div id="loading-program" style="text-align: center; margin-top: 50px;">
-    <div class="spinner"></div>
-    <p style="color: #888;">Buscando arquivos...</p>
+    <div class="spinner-prog"></div>
+    <p style="color: var(--dynamic-text); opacity: 0.6; font-weight:bold; margin-top: 15px;">Buscando arquivos...</p>
   </div>
 
   <div id="lista-pdfs" class="program-list"></div>
 </div>
 
 <script>
-  console.log("✅ [SAFE MODE] Programa.html carregado e blindado (Cache: 6h)!");
+  console.log("✅ [SAFE MODE] Programa.html carregado (White-Label Integrado - Cache: 6h)!");
 
   function abrirPrograma(user) {
     try {
-        // Gestão de visibilidade segura
         const dashGrid = document.getElementById('dashboard-grid');
         const dashHeader = document.querySelector('.dashboard-header');
         const progScreen = document.getElementById('programa-screen');
@@ -163,8 +243,7 @@
         if (lista) lista.innerHTML = '';
         if (loading) loading.style.display = 'block';
 
-        // --- CACHE ENGINE IMPLEMENTADA ---
-        // Chave única por nível do usuário
+        // --- CACHE ENGINE ---
         const userGrad = (user && user.graduacao) ? user.graduacao : 'branca';
         const cacheKey = 'programa_' + userGrad;
 
@@ -173,15 +252,14 @@
             if (cached) {
                 console.log("⚡ [CACHE] Programa Técnico carregado da memória.");
                 renderizarProgramas(cached);
-                return; // Interrompe para não chamar o servidor
+                return; 
             }
         }
 
-        // Chamada segura ao backend
+        // Chamada ao Backend
         if (typeof google !== 'undefined' && google.script) {
             google.script.run
               .withSuccessHandler(function(programas) {
-                  // Salva no Cache por 360 minutos (6 horas)
                   if (typeof CacheSystem !== 'undefined') {
                       CacheSystem.set(cacheKey, programas, 360);
                   }
@@ -206,14 +284,17 @@
         if (!lista) return;
 
         if (!programas || programas.length === 0) {
-            lista.innerHTML = '<p style="text-align:center; color:#666;">Nenhum programa disponível para sua graduação.</p>';
+            lista.innerHTML = '<p style="text-align:center; color:var(--dynamic-text); opacity:0.5; font-weight:bold; padding:20px; border:1px dashed rgba(255,255,255,0.2); border-radius:8px;">Nenhum programa disponível para sua graduação.</p>';
             return;
         }
 
         programas.forEach(p => {
-            const item = document.createElement('a'); // É um link
+            const item = document.createElement('a'); 
             const faixaStr = p.faixa || "Branca";
-            const classeCor = 'bg-' + faixaStr.split(' ')[0].toLowerCase(); // Pega a primeira palavra (Azul de Azul Escuro)
+            
+            // Lógica de Cores da Faixa: pega a primeira palavra para mapear o CSS
+            const primeiraPalavra = faixaStr.split(' ')[0].toLowerCase();
+            const classeCor = 'bg-' + primeiraPalavra; 
             
             if (p.disponivel) {
                 item.className = 'pdf-card enabled';
@@ -224,20 +305,22 @@
                 item.removeAttribute('href');
             }
 
+            const iconMaterial = p.disponivel ? 'picture_as_pdf' : 'lock';
+
             item.innerHTML = `
                 <div class="pdf-info">
                     <div class="faixa-icon ${classeCor}">
-                       ${faixaStr.substring(0, 2).toUpperCase()}
+                        ${primeiraPalavra.substring(0, 2).toUpperCase()}
                     </div>
                     <div>
                         <h3 class="pdf-title">Faixa ${faixaStr}</h3>
                         <div class="pdf-status">
-                            ${p.disponivel ? 'Toque para abrir PDF' : 'Arquivo indisponível'}
+                            ${p.disponivel ? 'Toque para abrir PDF' : 'Arquivo Bloqueado / Indisponível'}
                         </div>
                     </div>
                 </div>
-                <span class="material-icons" style="color: ${p.disponivel ? '#fff' : '#444'}">
-                    ${p.disponivel ? 'picture_as_pdf' : 'lock'}
+                <span class="material-icons pdf-icon-action">
+                    ${iconMaterial}
                 </span>
             `;
             lista.appendChild(item);
@@ -252,7 +335,8 @@
         const loading = document.getElementById('loading-program');
         if (loading) loading.style.display = 'none';
         console.error("Erro crítico no programa:", e);
-        alert("Erro ao carregar programas: " + e.message);
+        const lista = document.getElementById('lista-pdfs');
+        if(lista) lista.innerHTML = `<p style="color:#ff5252; text-align:center; font-weight:bold;">Falha ao carregar programas: ${e.message}</p>`;
     } catch (err) {
         console.error("Erro ao tratar falha:", err);
     }

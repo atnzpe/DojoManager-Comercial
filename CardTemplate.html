@@ -1,137 +1,148 @@
-<!-- DOJO MANAGER - PORTAL DO ALUNO--> 
-<!-- Template de Carteirinha de Aluno - Frente e Verso -->
-
 <!DOCTYPE html>
 <html>
 
 <head>
   <style>
+    /* ============================================================================
+       CONFIGURAÇÕES DE IMPRESSÃO (A4) E RESET
+       ============================================================================ */
     @page {
       margin: 0;
-      size: A4;
-      /* O Google imprime em A4, vamos posicionar a carteira no topo */
+      size: A4 portrait;
     }
 
     body {
       margin: 0;
-      padding: 0;
+      padding: 20mm;
+      /* Afasta da borda da folha A4 */
       font-family: 'Helvetica', 'Arial', sans-serif;
       -webkit-print-color-adjust: exact;
+      background-color: #ffffff;
+      /* Fundo sempre branco para impressão */
     }
 
-    /* Container da Frente */
+    /* --- Container do Cartão (Medidas Oficiais ISO 7810 - CR80) --- */
     .card {
       position: relative;
       width: 85.6mm;
-      /* Largura padrão Cartão de Crédito */
       height: 53.98mm;
-      /* Altura padrão */
       background-size: cover;
+      background-position: center;
       background-repeat: no-repeat;
       page-break-inside: avoid;
-      margin-bottom: 5mm;
-      /* Espaço entre frente e verso */
-      border: 1px solid #ddd;
-      /* Borda fina para corte */
+      margin-bottom: 10mm;
+      border: 1px dashed #cccccc;
+      /* Guia de corte suave */
+      border-radius: 3mm;
+      /* Borda levemente arredondada como um cartão real */
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
-    /* Estilos de Texto Comuns */
+    /* --- Tipografia Padrão --- */
     .field {
       position: absolute;
       color: #000080;
-      /* Azul Escuro do seu template */
-      font-size: 9pt;
-      line-height: 1.1;
+      /* Azul Marinho (Contraste alto) */
+      font-size: 8pt;
+      line-height: 1.2;
+      text-transform: uppercase;
+      font-weight: bold;
     }
 
     .label {
-      font-weight: bold;
-      font-size: 7pt;
+      font-weight: normal;
+      font-size: 6pt;
       display: block;
-      margin-bottom: 1px;
-      color: #000080;
+      margin-bottom: 2px;
+      color: #555555;
+      /* Rótulo mais discreto */
     }
 
     /* --- POSICIONAMENTO FRENTE --- */
-    /* Ajuste esses valores 'top' e 'left' se precisar alinhar milimetricamente com sua imagem */
-
     .photo-box {
       position: absolute;
-      top: 21mm;
-      /* Baseado no seu template */
-      left: 4mm;
-      width: 23mm;
-      height: 28mm;
+      top: 18mm;
+      left: 5mm;
+      width: 22mm;
+      height: 29mm;
       object-fit: cover;
-      border: 1px solid #ccc;
-      background: #eee;
+      border: 1.5px solid #000080;
+      /* Borda da foto */
+      background: #ffffff;
+      border-radius: 2px;
     }
 
     .frente-nome {
-      top: 21mm;
-      left: 30mm;
+      top: 18mm;
+      left: 32mm;
       width: 50mm;
     }
 
     .frente-grad {
-      top: 30mm;
-      left: 30mm;
+      top: 28mm;
+      left: 32mm;
       width: 50mm;
     }
 
     .frente-acad {
-      top: 39mm;
-      left: 30mm;
+      top: 38mm;
+      left: 32mm;
       width: 50mm;
     }
 
     /* --- POSICIONAMENTO VERSO --- */
     .verso-cpf {
-      top: 12mm;
-      left: 5mm;
+      top: 10mm;
+      left: 6mm;
     }
 
     .verso-filiacao {
-      top: 19mm;
-      left: 5mm;
+      top: 18mm;
+      left: 6mm;
       width: 60mm;
-      font-size: 8pt;
     }
 
     .verso-nasc-box {
-      top: 35mm;
-      left: 5mm;
+      top: 32mm;
+      left: 6mm;
     }
 
     .verso-validade-box {
-      top: 35mm;
+      top: 32mm;
       left: 45mm;
     }
 
     .verso-validade-val {
       font-weight: bold;
       color: #d32f2f;
-      /* Vermelho para validade */
-      font-size: 10pt;
+      /* Validade em vermelho para destaque */
+      font-size: 9pt;
+      background: rgba(255, 255, 255, 0.8);
+      /* Fundo branco leve para leitura */
+      padding: 1px 4px;
+      border-radius: 2px;
     }
 
     .disclaimer {
       position: absolute;
-      top: 5mm;
+      top: 4mm;
       width: 100%;
       text-align: center;
-      font-size: 6pt;
-      color: #d32f2f;
-      font-style: italic;
+      font-size: 5pt;
+      color: #555555;
+      font-style: normal;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    /* Rodapé Verso */
     .rodape-verso {
       position: absolute;
-      bottom: 3mm;
-      left: 5mm;
-      font-size: 6pt;
-      color: #555;
+      bottom: 4mm;
+      left: 6mm;
+      font-size: 5.5pt;
+      color: #333333;
+      line-height: 1.3;
     }
   </style>
 </head>
@@ -139,44 +150,51 @@
 <body>
 
   <div class="card" style="background-image: url('<?= bgFrente ?>');">
-    <img src="<?= fotoUrl ?>" class="photo-box" onerror="this.src='https://ui-avatars.com/api/?name=User'">
+    <img src="<?= fotoUrl ?>" class="photo-box" onerror="this.src='https://ui-avatars.com/api/?background=random&color=fff&name=<?= encodeURIComponent(nome) ?>'">
+
     <div class="field frente-nome">
-      <span class="label">Nome:</span>
+      <span class="label">NOME COMPLETO</span>
       <?= nome ?>
     </div>
+
     <div class="field frente-grad">
-      <span class="label">Graduação:</span>
+      <span class="label">GRADUAÇÃO ATUAL</span>
       <?= graduacao ?>
     </div>
+
     <div class="field frente-acad">
-      <span class="label">Academia Vinculada:</span>
+      <span class="label">ACADEMIA / UNIDADE</span>
       <?= academia ?>
     </div>
   </div>
 
   <div class="card" style="background-image: url('<?= bgVerso ?>');">
-    <div class="disclaimer">Este documento não substitui o documento oficial com foto</div>
+    <div class="disclaimer">Documento de identificação interno desportivo</div>
+
     <div class="field verso-cpf">
-      <span class="label">CPF:</span>
+      <span class="label">REGISTRO (CPF)</span>
       <?= cpf ?>
     </div>
+
     <div class="field verso-filiacao">
-      <span class="label">Filiação:</span>
+      <span class="label">FILIAÇÃO (PAI / MÃE)</span>
       <?= filiacao ?>
     </div>
+
     <div class="field verso-nasc-box">
-      <span class="label">Data de Nascimento:</span>
+      <span class="label">DATA DE NASCIMENTO</span>
       <?= nascimento ?>
     </div>
+
     <div class="field verso-validade-box">
-      <span class="label">Validade:</span>
+      <span class="label">VALIDADE OFICIAL</span>
       <span class="verso-validade-val"><?= validade ?></span>
     </div>
+
     <div class="rodape-verso">
-      Academia:
-      <?= academia ?><br>
-      Emissão:
-      <?= emissao ?>
+      <b>Data de Emissão:</b>
+      <?= emissao ?><br>
+      <b>Sistema:</b> DojoManager SaaS
     </div>
   </div>
 

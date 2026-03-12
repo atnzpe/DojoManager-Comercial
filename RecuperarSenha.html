@@ -1,55 +1,77 @@
-<!-- DOJO MANAGER - PORTAL DO ALUNO -->
-<!--Página de Redefinir Senha - Interface moderna e responsiva para redefinição de senha com validação e feedback visual. -->
-
 <!DOCTYPE html>
 <html>
 
 <head>
   <base target="_top">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+
   <style>
+    /* ============================================================================
+       INJEÇÃO DE CORES COM FALLBACK SEGURO
+       ============================================================================ */
+    :root {
+      --dynamic-bg: <?=typeof bgColor !=='undefined'&& bgColor ? bgColor: '#121212'?> !important;
+      --dynamic-prim: <?=typeof primaryColor !=='undefined'&& primaryColor ? primaryColor: '#FFD700'?> !important;
+      --dynamic-sec: <?=typeof secondaryColor !=='undefined'&& secondaryColor ? secondaryColor: '#1e1e1e'?> !important;
+      --dynamic-text: <?=typeof textColor !=='undefined'&& textColor ? textColor: '#ffffff'?> !important;
+      --dynamic-btn-text: <?=typeof btnTextColor !=='undefined'&& btnTextColor ? btnTextColor: '#000000'?> !important;
+    }
+
     body {
       margin: 0;
       padding: 0;
-      background-color: #121212;
+      background-color: var(--dynamic-bg);
+      /* Caso você passe uma URL de fundo para essa página pelo backend */
+      background-image: url('<?= typeof bgUrl !== "undefined" ? bgUrl : "" ?>');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
       font-family: 'Roboto', sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      color: #fff;
+      color: var(--dynamic-text);
+    }
+
+    /* Película escura caso tenha imagem de fundo */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: -1;
     }
 
     .rec-card {
-      background-color: #1e1e1e;
+      background-color: var(--dynamic-sec);
       padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      width: 90%;
       max-width: 360px;
       text-align: center;
-      border: 1px solid #333;
-    }
-
-    .rec-logo {
-      width: 100px;
-      margin-bottom: 20px;
-      border-radius: 50%;
-      box-shadow: 0 0 15px #FFD700;
+      border: 2px solid var(--dynamic-prim);
+      box-sizing: border-box;
+      animation: fadeIn 0.4s ease-out;
     }
 
     h2 {
       margin-bottom: 10px;
-      color: #FFD700;
+      color: var(--dynamic-prim);
       font-size: 18px;
+      font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
 
     p {
-      font-size: 12px;
-      color: #aaa;
+      font-size: 13px;
+      color: var(--dynamic-text);
+      opacity: 0.7;
       margin-bottom: 25px;
       line-height: 1.4;
     }
@@ -62,84 +84,104 @@
     .input-group label {
       display: block;
       margin-bottom: 5px;
-      color: #aaa;
-      font-size: 12px;
+      color: var(--dynamic-text);
+      opacity: 0.8;
+      font-size: 11px;
+      font-weight: bold;
     }
 
     .input-field {
       width: 100%;
-      padding: 12px;
-      border-radius: 6px;
-      border: 1px solid #333;
-      background-color: #2c2c2c;
-      color: #fff;
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background-color: rgba(0, 0, 0, 0.4);
+      color: var(--dynamic-text);
       font-size: 14px;
       box-sizing: border-box;
       transition: 0.3s;
     }
 
     .input-field:focus {
-      border-color: #FFD700;
+      border-color: var(--dynamic-prim);
       outline: none;
-      background-color: #333;
+      background-color: rgba(0, 0, 0, 0.6);
+      box-shadow: 0 0 5px var(--dynamic-prim);
     }
 
     .btn-action {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       border: none;
-      border-radius: 6px;
-      background-color: #FFD700;
-      color: #000;
-      font-weight: bold;
+      border-radius: 8px;
+      background-color: var(--dynamic-prim);
+      color: var(--dynamic-btn-text);
+      font-weight: 900;
       font-size: 14px;
       cursor: pointer;
-      transition: 0.3s;
-      margin-top: 10px;
+      transition: 0.2s;
+      margin-top: 15px;
+      text-transform: uppercase;
     }
 
     .btn-action:hover {
-      background-color: #ffea00;
-      transform: scale(1.02);
+      filter: brightness(1.15);
+      transform: translateY(-2px);
     }
 
     .btn-back {
       background: transparent;
-      color: #888;
-      border: 1px solid #333;
+      color: var(--dynamic-text);
+      border: 1px solid rgba(255, 255, 255, 0.3);
       margin-top: 10px;
     }
 
     .btn-back:hover {
-      background: #333;
-      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--dynamic-text);
+      color: var(--dynamic-text);
     }
 
     .alert-box {
       margin-top: 15px;
-      padding: 10px;
+      padding: 12px;
       border-radius: 6px;
       font-size: 12px;
+      font-weight: bold;
       display: none;
     }
 
     .alert-error {
-      background: #ffebee;
-      color: #c62828;
-      border: 1px solid #ef9a9a;
+      background: rgba(244, 67, 54, 0.1);
+      color: #ff5252;
+      border: 1px solid #ff5252;
     }
 
     .alert-success {
-      background: #e8f5e9;
-      color: #2e7d32;
-      border: 1px solid #a5d6a7;
+      background: rgba(76, 175, 80, 0.1);
+      color: #4caf50;
+      border: 1px solid #4caf50;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
 
 <body>
+  <div class="overlay"></div>
+
   <div class="rec-card">
-    <span style="font-size:40px; color:#FFD700;">🔒</span>
+    <span style="font-size:48px; color:var(--dynamic-prim); display:block; margin-bottom:10px;">🔒</span>
 
     <h2>Redefinir Senha</h2>
     <p>Para sua segurança, é necessário confirmar sua <b>senha atual</b> para definir uma nova.</p>
@@ -158,7 +200,7 @@
 
       <div class="input-group">
         <label>NOVA SENHA</label>
-        <input type="password" id="senha_nova" class="input-field" placeholder="Nova senha segura" required>
+        <input type="password" id="senha_nova" class="input-field" placeholder="Digite uma senha forte" required>
       </div>
 
       <div class="input-group">
@@ -167,42 +209,42 @@
       </div>
 
       <button type="submit" class="btn-action" id="btn-submit">SALVAR NOVA SENHA</button>
-      <button type="button" class="btn-action btn-back" onclick="voltarLogin()">VOLTAR</button>
+      <button type="button" class="btn-action btn-back" onclick="voltarLogin()">VOLTAR AO LOGIN</button>
     </form>
 
     <div id="feedback" class="alert-box"></div>
 
-    <div style="margin-top:20px; border-top:1px solid #333; padding-top:15px;">
-      <p style="margin:0; font-size:11px; color:#666">
-        <span style="color:#FFD700">⚠️ Não sabe a senha antiga?</span><br>
-          Por segurança, solicite o reset diretamente ao seu Instrutor ou Administrador.
+    <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+      <p style="margin:0; font-size:11px; color:var(--dynamic-text); opacity:0.6;">
+        <span style="color:var(--dynamic-prim); font-weight:bold;">⚠️ Esqueceu a senha antiga?</span><br>
+          Por segurança, o reset forçado só pode ser feito diretamente na secretaria da sua Unidade.
       </p>
     </div>
   </div>
 
   <script>
+    console.log("✅ [SAFE MODE] RecuperarSenha.html carregado (White-Label)");
+
     function handleReset(e) {
         e.preventDefault();
         const btn = document.getElementById('btn-submit');
         const feedback = document.getElementById('feedback');
         
-        const cpf = document.getElementById('cpf').value;
+        const cpf = document.getElementById('cpf').value.trim();
         const antiga = document.getElementById('senha_antiga').value;
         const nova = document.getElementById('senha_nova').value;
         const confirma = document.getElementById('senha_confirma').value;
 
-        // Validação Frontend
         if(nova !== confirma) {
-           mostrarErro("A nova senha e a confirmação não coincidem.");
-           return;
+            mostrarErro("A nova senha e a confirmação não coincidem.");
+            return;
         }
         if(nova.length < 4) {
-           mostrarErro("A nova senha deve ter pelo menos 4 caracteres.");
-           return;
+            mostrarErro("A nova senha deve ter no mínimo 4 caracteres.");
+            return;
         }
 
-        // Envio
-        btn.innerText = "VERIFICANDO...";
+        btn.innerText = "VERIFICANDO DADOS...";
         btn.disabled = true;
         feedback.style.display = 'none';
 
@@ -210,18 +252,17 @@
 
         google.script.run
           .withSuccessHandler(res => {
-             feedback.className = "alert-box alert-success";
-             feedback.innerText = res;
-             feedback.style.display = "block";
-             btn.innerText = "SUCESSO!";
-             
-             // Redireciona para login após 2s
-             setTimeout(() => { voltarLogin(); }, 2000);
+              feedback.className = "alert-box alert-success";
+              feedback.innerText = res;
+              feedback.style.display = "block";
+              btn.innerText = "SUCESSO!";
+              
+              setTimeout(() => { voltarLogin(); }, 2000);
           })
           .withFailureHandler(err => {
-             btn.innerText = "SALVAR NOVA SENHA";
-             btn.disabled = false;
-             mostrarErro(err.message);
+              btn.innerText = "SALVAR NOVA SENHA";
+              btn.disabled = false;
+              mostrarErro(err.message);
           })
           .trocarSenhaUsuario(form);
       }
@@ -235,7 +276,7 @@
 
       function voltarLogin() {
         google.script.run.withSuccessHandler(url => {
-           window.top.location.href = url + "?page=login";
+            window.top.location.href = url + "?page=login";
         }).getScriptUrl();
       }
   </script>

@@ -1,5 +1,3 @@
-Esse é o roadmpa atulizado
-
 # 🗺️ Roadmap de Desenvolvimento - DojoManager
 
 Acompanhe a evolução do nosso sistema.
@@ -11,33 +9,36 @@ Acompanhe a evolução do nosso sistema.
 - [x] CRUD Administrativo completo (Alunos, Turmas, Locais).
 
 ## 🧹 Fase 1.5: Auditoria e White-Label (Prioridade Atual)
-- [  ] Implmentar a personalizaçõa de imagens de logo , background e 5 Cores personalizadas
-- [  ] Ajustar CSS para que todos as telas tenha o memso estilo CSS com cores personalizadas
-- [  ] Remover o HArdcode que controla o nivel de graduação. Permitir que o usuario cadastre o ID da graduação(que sera a ordem para validar quem vem primeiro), a cor da gradução (azul, vermelha, amarela, etc), modalidade a qual a graduação pertence (karate, muay thay, etc)
-- [  ] Gestão de Turmas.
-- [  ] Gestão de cadastro de MOdalidades, associados ao locais de treino para que as pessoas possa escolher Local de trino, modalide e instrutor
-- [  ] Permitir o INstrutor, Mestre o Adm acompanahr o desenvolvimento do Aluno, quantas alulas ja ssitiu, quanto tempo de inscrição o aluno tem. Para que assim o INstrutor, Mestre ou Adm possa avaliar se o aluno ou graduado possa fazer um exame.
-- [  ] Validar todos os arquivos que fazem parte do projeto independente do que o arquivo representa. Devemos fazer um pente finissimo em todos so arquivos 
+- [x] Implementar a personalização de imagens de logo, background e 5 cores personalizadas.
+- [x] Ajustar CSS para que todas as telas tenham o mesmo estilo CSS com cores personalizadas (White-Label Integrado).
+- [ ] Remover Hardcode do botão loja. Deixar o usuário escolher o link que deseja incluir. Deve ser ajustado através do painel Admin.
+- [ ] Remover Hardcode do link financeiro (despesas, receitas, planos, etc). Deixar o usuário escolher o link. Deve ser ajustado através do painel Admin.
+- [ ] Remover Hardcode da tela de mídias sociais (YouTube/Instagram) para que o usuário possa incluir redes e links através do painel Admin.
+- [ ] Remover o Hardcode que controla o nível de graduação. Permitir cadastro de ID (ordem), cor e modalidade (Karate, Muay Thai, etc).
+- [ ] Gestão de Turmas.
+- [ ] Gestão de cadastro de Modalidades, associados aos locais de treino (Local + Modalidade + Instrutor).
+- [ ] Permitir o Instrutor, Mestre ou Admin acompanhar o desenvolvimento do Aluno (aulas assistidas, tempo de inscrição) para avaliar elegibilidade para exames.
+- [ ] Validar todos os arquivos do projeto (Pente fino em todos os arquivos).
 - [ ] Validar se a planilha Mestra funciona.
-- [ ] Validar se ao fazer a cópia da planilha, para venda, se o SaaS continua a funcionar.
+- [ ] Remover todo o hardcode. Tudo deve ser gerenciado pelo painel Admin.
 - [ ] **Código.js:** Alterar `.setTitle("FBKMK - Leão do Norte")` para buscar o nome da academia dinamicamente.
-- [ ] **Ajuda.html:** Reescrever o manual com texto neutro de suporte técnico (remover menções a "Krav Maga", "Atanazio" e "FBKMK").
-- [ ] **Social.html:** Transformar botões de Youtube e Instagram (atualmente hardcoded para a Federação Leão do Norte) em links gerenciáveis/dinâmicos.
-- [ ] **CardTemplate.html:** Recriar a carteirinha usando apenas HTML e CSS puro, substituindo as imagens estáticas para que a logo e as cores da academia do cliente apareçam dinamicamente.
-
-
+- [ ] **Ajuda.html:** Reescrever o manual com texto neutro de suporte técnico (remover menções específicas).
+- [ ] **Social.html:** Transformar botões de Youtube e Instagram em links gerenciáveis/dinâmicos.
+- [ ] **CardTemplate.html:** Recriar a carteirinha usando apenas HTML e CSS puro, para que a logo e as cores do cliente apareçam dinamicamente.
 
 ## 🚧 Fase 2: Gestão Financeira e Turmas (Em Andamento)
 - [x] Dashboard Financeiro (Inadimplência, Faturamento).
 - [ ] Separação de Turmas por Nível e Idade (Infantil, Iniciante, Avançado).
 - [ ] Check-in Antecipado (Agendamento de grade de aulas).
 
-
 ## 🔮 Fase 3: Automação e CRM (Próximos Passos)
-- [ ] Cobrança Automática Inteligente: Disparo de mensagens via WhatsApp (API) para mensalidades atrasadas.
+- [ ] Cobrança Automática Inteligente: Disparo de mensagens via WhatsApp (API) para atrasados.
 - [ ] Alertas Automáticos de Aniversário.
 - [ ] Relatórios Avançados (Gráficos de evasão, horários de pico).
-- [ ] Hsitorico do Aluno (quanto tempo inscrito na turma, aulas que ja assitiu, conteudo que ja visulizou)
+- [ ] Histórico do Aluno (tempo na turma, aulas assistidas, conteúdo visualizado).
+- [ ] Aluno Multimodalidade (Filtrar vídeos e programas técnicos baseados nas modalidades que o aluno pratica).
+- [ ] Modularizar a tela de Dashboard (Botões essenciais, permissões de visualização por card).
+- [ ] Validar se ao fazer a cópia da planilha (para venda), o SaaS continua a funcionar de forma autônoma.
 
 ## 🌐 Projetos Especiais
 - [ ] Adaptação do sistema base para a **Confederação Pernambucana de Sambo**.
