@@ -37,9 +37,13 @@ const DEFAULT_ASSETS = {
   SECONDARY_COLOR: "#1e1e1e",
   TEXT_COLOR: "#ffffff",
   BTN_TEXT_COLOR: "#000000",
-  BG_COLOR: "#121212" // <-- NOVO: 5ª Cor Padrão (Fundo Geral)
+  BG_COLOR: "#121212",
+  // <-- NOVOS LINKS PADRÕES DO SISTEMA (FALLBACK)
+  LINK_LOJA: "https://wa.me/5581997629232",
+  LINK_INSTA: "https://www.instagram.com/fbkmklnoficial/",
+  LINK_YT: "https://www.youtube.com/@KMLNDEFENSE",
+  LINK_CAD: "https://forms.gle/3vXp86VCmuLzHrk46"
 };
-
 
 
 // ============================================================================
@@ -110,8 +114,8 @@ function verificarCriarAbasFinanceiras() {
     { nome: "Fin_Assinaturas", colunas: ["Login_Aluno", "Pacote_Atual", "Data_Inicio", "Data_Fim", "Status_Assinatura", "ID_Ultima_Transacao"] },
     {
       nome: "Config_App",
-      // <-- NOVO: "Cor_Fundo" adicionado no final do array de colunas
-      colunas: ["Logo_URL", "Fundo_URL", "Cor_Primaria", "Cor_Secundaria", "Cor_Texto", "Cor_Texto_Botao", "Cor_Fundo"]
+      // As 11 colunas de configuração
+      colunas: ["Logo_URL", "Fundo_URL", "Cor_Primaria", "Cor_Secundaria", "Cor_Texto", "Cor_Texto_Botao", "Cor_Fundo", "Link_Loja", "Link_Instagram", "Link_YouTube", "Link_Cadastro"]
     }
   ];
 
@@ -124,8 +128,7 @@ function verificarCriarAbasFinanceiras() {
       sheet.setFrozenRows(1);
 
       if (aba.nome === "Config_App") {
-        // <-- NOVO: 7º item adicionado para respeitar a nova coluna
-        sheet.appendRow(["", "", "#FFD700", "#1e1e1e", "#ffffff", "#000000", "#121212"]);
+        sheet.appendRow(["", "", "#FFD700", "#1e1e1e", "#ffffff", "#000000", "#121212", "", "", "", ""]);
       }
     }
   });
@@ -605,14 +608,20 @@ function doGet(e) {
   try {
     const template = HtmlService.createTemplateFromFile(htmlFile);
 
-    // 🛡️ BLINDAGEM DE VARIÁVEIS (Valores Default Seguros)
+    // 🛡️ BLINDAGEM DE VARIÁVEIS DE TEMA
     template.scriptUrl = SCRIPT_URL;
     template.bgUrl = ""; template.logoUrl = "";
     template.primaryColor = "#FFD700";
     template.secondaryColor = "#1e1e1e";
     template.textColor = "#ffffff";
     template.btnTextColor = "#000000";
-    template.bgColor = "#121212"; // <-- NOVO: Blindagem da 5ª cor
+    template.bgColor = "#121212";
+
+    // 🛡️ BLINDAGEM DE LINKS
+    template.linkLoja = "https://wa.me/5581997629232";
+    template.linkInstagram = "https://www.instagram.com/";
+    template.linkYouTube = "https://www.youtube.com/";
+    template.linkCadastro = "https://forms.gle/3vXp86VCmuLzHrk46";
 
     try {
       const config = getAppConfig();
@@ -623,9 +632,15 @@ function doGet(e) {
         template.secondaryColor = config.secondaryColor || template.secondaryColor;
         template.textColor = config.textColor || template.textColor;
         template.btnTextColor = config.btnTextColor || template.btnTextColor;
-        template.bgColor = config.bgColor || template.bgColor; // <-- NOVO: Injeção da 5ª cor dinâmica
+        template.bgColor = config.bgColor || template.bgColor;
+
+        // <-- INJETANDO OS LINKS NO HTML
+        template.linkLoja = config.linkLoja || template.linkLoja;
+        template.linkInstagram = config.linkInstagram || template.linkInstagram;
+        template.linkYouTube = config.linkYouTube || template.linkYouTube;
+        template.linkCadastro = config.linkCadastro || template.linkCadastro;
       }
-    } catch (e) { console.warn("Erro no tema", e); }
+    } catch (e) { console.warn("Erro ao carregar configurações", e); }
 
     return template.evaluate()
       .setTitle("DojoManager - Portal do Aluno")
@@ -1110,7 +1125,12 @@ function getAppConfig() {
     secondaryColor: DEFAULT_ASSETS.SECONDARY_COLOR,
     textColor: DEFAULT_ASSETS.TEXT_COLOR,
     btnTextColor: DEFAULT_ASSETS.BTN_TEXT_COLOR,
-    bgColor: DEFAULT_ASSETS.BG_COLOR // <-- NOVO
+    bgColor: DEFAULT_ASSETS.BG_COLOR,
+    // <-- FALLBACKS PADRÕES CASO O USUÁRIO DEIXE VAZIO
+    linkLoja: "https://wa.me/5581997629232",
+    linkInstagram: "https://www.instagram.com/",
+    linkYouTube: "https://www.youtube.com/",
+    linkCadastro: "https://forms.gle/3vXp86VCmuLzHrk46"
   };
 
   try {
@@ -1125,8 +1145,13 @@ function getAppConfig() {
       if (configRow.cor_secundaria) configBase.secondaryColor = configRow.cor_secundaria;
       if (configRow.cor_texto) configBase.textColor = configRow.cor_texto;
       if (configRow.cor_texto_botao) configBase.btnTextColor = configRow.cor_texto_botao;
-      // <-- NOVO: Lendo a Cor_Fundo do banco de dados
       if (configRow.cor_fundo) configBase.bgColor = configRow.cor_fundo;
+
+      // <-- LENDO OS LINKS DO BANCO
+      if (configRow.link_loja) configBase.linkLoja = configRow.link_loja;
+      if (configRow.link_instagram) configBase.linkInstagram = configRow.link_instagram;
+      if (configRow.link_youtube) configBase.linkYouTube = configRow.link_youtube;
+      if (configRow.link_cadastro) configBase.linkCadastro = configRow.link_cadastro;
     }
 
     return configBase;
@@ -1152,16 +1177,21 @@ function salvarConfig(form) {
       "Cor_Secundaria": form.cfg_color_sec || "#1e1e1e",
       "Cor_Texto": form.cfg_color_text || "#ffffff",
       "Cor_Texto_Botao": form.cfg_color_btn_text || "#000000",
-      "Cor_Fundo": form.cfg_color_bg || "#121212" // <-- NOVO: Salva a 5ª cor
+      "Cor_Fundo": form.cfg_color_bg || "#121212",
+      // <-- PREPARANDO OS DADOS VINDOS DO FORMULÁRIO DO ADMIN
+      "Link_Loja": form.cfg_link_loja || "",
+      "Link_Instagram": form.cfg_link_insta || "",
+      "Link_YouTube": form.cfg_link_yt || "",
+      "Link_Cadastro": form.cfg_link_cad || ""
     };
 
     if (sheet.getLastRow() < 2) {
-      sheet.appendRow(["", "", "#FFD700", "#1e1e1e", "#ffffff", "#000000", "#121212"]);
+      sheet.appendRow(["", "", "#FFD700", "#1e1e1e", "#ffffff", "#000000", "#121212", "", "", "", ""]);
     }
 
     salvarDadosSeguro("Config_App", configsToSave, 2);
 
-    return "✅ Tema atualizado com sucesso!";
+    return "✅ Configurações e Links atualizados com sucesso!";
   } catch (e) {
     return "❌ Erro ao salvar configuração: " + e.message;
   }

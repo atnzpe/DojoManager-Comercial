@@ -1,8 +1,10 @@
 <style>
   /* --- ADMIN STYLES (SCOPED - AMBIENTE DE TRABALHO CLEAN E ESTÁVEL) --- */
   .admin-view-container {
-    background-color: #f8f9fa; /* Fundo claro fixo para contraste administrativo */
-    color: #333;               /* Texto escuro fixo para leitura em tabelas */
+    background-color: #f8f9fa;
+    /* Fundo claro fixo para contraste administrativo */
+    color: #333;
+    /* Texto escuro fixo para leitura em tabelas */
     font-family: 'Roboto', sans-serif;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
@@ -16,7 +18,8 @@
 
   /* NAVEGAÇÃO SUPERIOR DO ADMIN */
   .adm-nav {
-    background: #1e1e1e; /* Fundo escuro fixo para a barra de menu */
+    background: #1e1e1e;
+    /* Fundo escuro fixo para a barra de menu */
     display: flex;
     overflow-x: auto;
     border-bottom: 1px solid #333;
@@ -156,9 +159,20 @@
     text-transform: uppercase;
   }
 
-  .bg-green { background: #e8f5e9; color: #2e7d32; }
-  .bg-red { background: #ffebee; color: #c62828; }
-  .bg-blue { background: #e3f2fd; color: #1565c0; }
+  .bg-green {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .bg-red {
+    background: #ffebee;
+    color: #c62828;
+  }
+
+  .bg-blue {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
 
   /* BOTÕES ADMIN */
   .adm-btn {
@@ -178,22 +192,34 @@
     transition: 0.2s;
   }
 
-  .adm-btn:hover { background-color: #F5C500; }
-  .adm-btn:disabled { background-color: #ccc; cursor: not-allowed; }
-  
+  .adm-btn:hover {
+    background-color: #F5C500;
+  }
+
+  .adm-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+
   .adm-btn-outline {
     background-color: transparent;
     color: #333;
     border: 1px solid #333;
   }
-  .adm-btn-outline:hover { background-color: #f1f1f1; }
+
+  .adm-btn-outline:hover {
+    background-color: #f1f1f1;
+  }
 
   /* MODAIS ADMIN (Edições) */
   .adm-modal {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.6); /* Escurecimento leve para foco */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    /* Escurecimento leve para foco */
     display: none;
     justify-content: center;
     align-items: center;
@@ -203,7 +229,8 @@
   }
 
   .adm-modal-box {
-    background: #fff; /* Fundo limpo para trabalho */
+    background: #fff;
+    /* Fundo limpo para trabalho */
     padding: 25px;
     border-radius: 8px;
     width: 500px;
@@ -214,12 +241,19 @@
     color: #333;
   }
 
-  .adm-modal-box.large { width: 800px; }
+  .adm-modal-box.large {
+    width: 800px;
+  }
 
   .form-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
   }
-  .form-full { grid-column: span 2; }
+
+  .form-full {
+    grid-column: span 2;
+  }
 
   .adm-label {
     font-size: 11px;
@@ -253,23 +287,55 @@
   }
 
   /* HELPERS DE ANIMAÇÃO E SCROLL */
-  .spin { animation: spin 1s linear infinite; }
-  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  .spin {
+    animation: spin 1s linear infinite;
+  }
 
-  .adm-modal-box::-webkit-scrollbar { width: 8px; }
-  .adm-modal-box::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .adm-modal-box::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .adm-modal-box::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+  }
 </style>
 
 <div class="admin-view-container">
   <div class="adm-nav">
-    <div class="adm-nav-item active" onclick="navAdmin('alunos')"><span class="material-icons">people</span> Alunos</div>
+    <div class="adm-nav-item active" onclick="navAdmin('alunos')"><span class="material-icons">people</span> Alunos
+    </div>
     <div class="adm-nav-item" onclick="navAdmin('videos')"><span class="material-icons">movie</span> Vídeos</div>
     <div class="adm-nav-item" onclick="navAdmin('locais')"><span class="material-icons">place</span> Locais</div>
     <div class="adm-nav-item" onclick="navAdmin('cursos')"><span class="material-icons">school</span> Eventos</div>
-    <div class="adm-nav-item" onclick="navAdmin('biblioteca')"><span class="material-icons">menu_book</span> Biblioteca</div>
-    <div class="adm-nav-item" onclick="navAdmin('programas')"><span class="material-icons">description</span> Programas</div>
-    <div class="adm-nav-item" onclick="navAdmin('certificados')"><span class="material-icons">workspace_premium</span> Certificados</div>
+    <div class="adm-nav-item" onclick="navAdmin('biblioteca')"><span class="material-icons">menu_book</span> Biblioteca
+    </div>
+    <div class="adm-nav-item" onclick="navAdmin('programas')"><span class="material-icons">description</span> Programas
+    </div>
+    <div class="adm-nav-item" onclick="navAdmin('certificados')"><span class="material-icons">workspace_premium</span>
+      Certificados</div>
     <div class="adm-nav-item" onclick="navAdmin('config')"><span class="material-icons">settings</span> Config</div>
 
     <div class="adm-nav-item" style="margin-left: auto; border-left: 1px solid #333;" onclick="fecharAdmin()">
@@ -285,7 +351,7 @@
       </div>
     </div>
     <div class="adm-toolbar">
-        <input type="text" id="search-alunos" class="adm-input" placeholder="🔍 Filtrar por nome ou login..." onkeyup="filtrarAlunos()">
+      <input type="text" id="search-alunos" class="adm-input" placeholder="🔍 Filtrar por nome ou login..." onkeyup="filtrarAlunos()">
     </div>
     <div style="overflow-x:auto;">
       <table class="adm-table">
@@ -307,7 +373,8 @@
     <div class="adm-h3">Videoteca
       <button class="adm-btn" onclick="openModalVideo()"><span class="material-icons" style="font-size:16px;">add</span> Novo Vídeo</button>
     </div>
-    <div class="adm-toolbar"><input type="text" id="search-videos" class="adm-input" placeholder="🔍 Filtrar vídeos..." onkeyup="filtrarVideos()"></div>
+    <div class="adm-toolbar"><input type="text" id="search-videos" class="adm-input" placeholder="🔍 Filtrar vídeos..." onkeyup="filtrarVideos()">
+    </div>
     <div style="overflow-x:auto;">
       <table class="adm-table">
         <thead>
@@ -327,7 +394,8 @@
     <div class="adm-h3">Academias
       <button class="adm-btn" onclick="openModalLocal()"><span class="material-icons" style="font-size:16px;">add</span> Nova Academia</button>
     </div>
-    <div class="adm-toolbar"><input type="text" id="search-locais" class="adm-input" placeholder="🔍 Filtrar locais..." onkeyup="filtrarLocais()"></div>
+    <div class="adm-toolbar"><input type="text" id="search-locais" class="adm-input" placeholder="🔍 Filtrar locais..." onkeyup="filtrarLocais()">
+    </div>
     <div style="overflow-x:auto;">
       <table class="adm-table">
         <thead>
@@ -347,7 +415,8 @@
     <div class="adm-h3">Eventos e Seminários
       <button class="adm-btn" onclick="abrirModalCurso()"><span class="material-icons" style="font-size:16px;">add</span> Novo Evento</button>
     </div>
-    <div class="adm-toolbar"><input type="text" id="search-cursos" class="adm-input" placeholder="🔍 Filtrar cursos..." onkeyup="filtrarCursos()"></div>
+    <div class="adm-toolbar"><input type="text" id="search-cursos" class="adm-input" placeholder="🔍 Filtrar cursos..." onkeyup="filtrarCursos()">
+    </div>
     <div style="overflow-x:auto;">
       <table class="adm-table">
         <thead>
@@ -379,7 +448,9 @@
           </tr>
         </thead>
         <tbody id="lista-lib-body">
-          <tr><td colspan="4" style="text-align:center">Carregando...</td></tr>
+          <tr>
+            <td colspan="4" style="text-align:center">Carregando...</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -400,7 +471,9 @@
           </tr>
         </thead>
         <tbody id="lista-prog-body">
-          <tr><td colspan="4" style="text-align:center">Carregando...</td></tr>
+          <tr>
+            <td colspan="4" style="text-align:center">Carregando...</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -425,7 +498,9 @@
           </tr>
         </thead>
         <tbody id="lista-cert-body">
-          <tr><td colspan="4" style="text-align:center">Carregando...</td></tr>
+          <tr>
+            <td colspan="4" style="text-align:center">Carregando...</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -450,7 +525,8 @@
 
       <div style="margin-bottom: 25px;">
         <label class="adm-label" style="font-size: 14px; color: #333;">🎨 Temas Rápidos</label>
-        <p style="font-size: 12px; color: #666; margin-top: 0;">Aplique paletas pré-configuradas para o App do Aluno.</p>
+        <p style="font-size: 12px; color: #666; margin-top: 0;">Aplique paletas pré-configuradas para o App do Aluno.
+        </p>
 
         <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
           <button type="button" class="theme-preset" onclick="aplicarTema('#FFD700', '#1e1e1e', '#ffffff', '#000000', '#121212')" style="background: linear-gradient(135deg, #1e1e1e 50%, #FFD700 50%); border-color: #FFD700;">Dourado</button>
@@ -459,69 +535,101 @@
           <button type="button" class="theme-preset" onclick="aplicarTema('#00E676', '#1E272E', '#ffffff', '#000000', '#111518')" style="background: linear-gradient(135deg, #1E272E 50%, #00E676 50%); border-color: #00E676;">Zen Verde</button>
         </div>
 
-        <div style="display: flex; flex-wrap: wrap; gap: 20px; background: #eee; padding: 25px; border-radius: 12px; border: 1px solid #ccc; margin-top: 20px;">
-          
+        <div
+          style="display: flex; flex-wrap: wrap; gap: 20px; background: #eee; padding: 25px; border-radius: 12px; border: 1px solid #ccc; margin-top: 20px;">
+
           <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 5px;">
             <label class="adm-label">Cores Customizadas</label>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap:10px;">
-              <div><span style="font-size:11px; color:#555">Fundo Geral</span><input type="color" name="cfg_color_bg" id="cfg_color_bg" class="adm-input" oninput="atualizarPreviewCores()"></div>
-              <div><span style="font-size:11px; color:#555">Primária (Cor)</span><input type="color" name="cfg_color" id="cfg_color" class="adm-input" oninput="atualizarPreviewCores()"></div>
-              <div><span style="font-size:11px; color:#555">Secundária (Card)</span><input type="color" name="cfg_color_sec" id="cfg_color_sec" class="adm-input" oninput="atualizarPreviewCores()"></div>
-              <div><span style="font-size:11px; color:#555">Texto Fonte</span><input type="color" name="cfg_color_text" id="cfg_color_text" class="adm-input" oninput="atualizarPreviewCores()"></div>
-              <div><span style="font-size:11px; color:#555">Texto Botão</span><input type="color" name="cfg_color_btn_text" id="cfg_color_btn_text" class="adm-input" oninput="atualizarPreviewCores()"></div>
+              <div><span style="font-size:11px; color:#555">Fundo Geral</span><input type="color" name="cfg_color_bg" id="cfg_color_bg" class="adm-input" oninput="atualizarPreviewCores()">
+              </div>
+              <div><span style="font-size:11px; color:#555">Primária (Cor)</span><input type="color" name="cfg_color" id="cfg_color" class="adm-input" oninput="atualizarPreviewCores()">
+              </div>
+              <div><span style="font-size:11px; color:#555">Secundária (Card)</span><input type="color" name="cfg_color_sec" id="cfg_color_sec" class="adm-input" oninput="atualizarPreviewCores()">
+              </div>
+              <div><span style="font-size:11px; color:#555">Texto Fonte</span><input type="color" name="cfg_color_text" id="cfg_color_text" class="adm-input" oninput="atualizarPreviewCores()">
+              </div>
+              <div><span style="font-size:11px; color:#555">Texto Botão</span><input type="color" name="cfg_color_btn_text" id="cfg_color_btn_text" class="adm-input" oninput="atualizarPreviewCores()">
+              </div>
             </div>
           </div>
 
-          <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #ddd; border-radius: 12px; padding: 20px; border: 1px dashed #aaa;">
+          <div
+            style="flex: 1; min-width: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #ddd; border-radius: 12px; padding: 20px; border: 1px dashed #aaa;">
             <label class="adm-label" style="text-align: center; margin-top: 0; margin-bottom: 15px; color:#666;">Preview em Tempo Real</label>
-            <div id="live-preview-card" style="width: 100%; max-width: 280px; padding: 20px; border-radius: 12px; border: 2px solid #FFD700; background-color: #1e1e1e; text-align: center; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+            <div id="live-preview-card"
+              style="width: 100%; max-width: 280px; padding: 20px; border-radius: 12px; border: 2px solid #FFD700; background-color: #1e1e1e; text-align: center; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
               <h3 id="preview-title" style="margin-top: 0; color: #FFD700; font-weight:900;">App Preview</h3>
-              <p id="preview-text" style="font-size: 0.85rem; color: #ffffff; margin-bottom: 20px;">Verifique a leitura das cores neste card antes de salvar.</p>
+              <p id="preview-text" style="font-size: 0.85rem; color: #ffffff; margin-bottom: 20px;">Verifique a leitura
+                das cores neste card antes de salvar.</p>
               <button id="preview-btn" type="button" style="width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 900; text-transform: uppercase; background-color: #FFD700; color: #000000; transition: 0.3s;">TESTE DE BOTÃO</button>
             </div>
           </div>
         </div>
 
-        <button type="submit" class="adm-btn" style="margin-top:25px; background:#4caf50; color:white; width: 100%; padding: 18px; font-size: 14px; box-shadow:0 5px 15px rgba(76,175,80,0.4);">
+        <hr style="border:0; border-top:1px solid #ccc; margin:30px 0;">
+
+        <div class="adm-h3">Links e Integrações (Módulo Aluno)</div>
+        <p style="font-size: 12px; color: #666; margin-top: -15px; margin-bottom:20px;">Substitua os links padrão do
+          sistema pelos da sua academia.</p>
+
+        <div class="form-grid">
+          <div>
+            <label class="adm-label" style="color:#25D366;"><span class="material-icons" style="font-size:14px; vertical-align:middle">storefront</span> Link da Loja (WhatsApp)</label>
+            <input type="text" name="cfg_link_loja" id="cfg_link_loja" class="adm-input" placeholder="https://wa.me/5581900000000">
+          </div>
+          <div>
+            <label class="adm-label" style="color:#bc1888;"><span class="material-icons" style="font-size:14px; vertical-align:middle">camera_alt</span> Link do Instagram</label>
+            <input type="text" name="cfg_link_insta" id="cfg_link_insta" class="adm-input" placeholder="https://instagram.com/sua_academia">
+          </div>
+          <div>
+            <label class="adm-label" style="color:#FF0000;"><span class="material-icons" style="font-size:14px; vertical-align:middle">smart_display</span> Link do Canal no YouTube</label>
+            <input type="text" name="cfg_link_yt" id="cfg_link_yt" class="adm-input" placeholder="https://youtube.com/@seu_canal">
+          </div>
+          <div>
+            <label class="adm-label" style="color:#2196f3;"><span class="material-icons" style="font-size:14px; vertical-align:middle">person_add</span> Link Formulário de Cadastro</label>
+            <input type="text" name="cfg_link_cad" id="cfg_link_cad" class="adm-input" placeholder="https://forms.gle/... (Link do Google Forms)">
+          </div>
+        </div>
+        <button type="submit" class="adm-btn" style="margin-top:35px; background:#4caf50; color:white; width: 100%; padding: 18px; font-size: 14px; box-shadow:0 5px 15px rgba(76,175,80,0.4);">
           <span class="material-icons" style="font-size:18px;">save</span> Salvar e Reiniciar App
         </button>
       </div>
     </form>
   </div>
-</div>
 
-<div id="adm-modal-edit" class="adm-modal">
-  <div class="adm-modal-box large">
-    <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0;">
-      <span>Ficha do Aluno</span>
-      <button onclick="closeModal('adm-modal-edit')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
-    </div>
-    <form id="form-edit-aluno" onsubmit="handleSalvarAluno(event)">
-      <input type="hidden" name="aluno_id" id="aluno_id">
-      <div class="form-grid">
-        <div>
-          <label class="adm-label">Nome Completo*</label><input type="text" id="aluno_nome" name="aluno_nome" class="adm-input" required>
-          <label class="adm-label">CPF</label><input type="text" id="aluno_cpf" name="aluno_cpf" class="adm-input">
-          <label class="adm-label">Data Nascimento</label><input type="date" id="aluno_nasc" name="aluno_nasc" class="adm-input">
-          <label class="adm-label">Telefone</label><input type="text" id="aluno_tel" name="aluno_tel" class="adm-input">
-          <label class="adm-label">Nome do Pai</label><input type="text" id="aluno_pai" name="aluno_pai" class="adm-input">
-          <label class="adm-label">Nome da Mãe</label><input type="text" id="aluno_mae" name="aluno_mae" class="adm-input">
-          <label class="adm-label">Academia Vinculada</label><select id="aluno_acad" name="aluno_acad" class="adm-input"><option value="" disabled selected>Carregando...</option></select>
-        </div>
-        <div>
-          <label class="adm-label">LOGIN (Usuário)*</label>
-          <input type="text" id="aluno_login" name="aluno_login" class="adm-input" required style="border-left: 4px solid #FFD700;">
-          <label class="adm-label">Senha*</label><input type="text" id="aluno_senha" name="aluno_senha" class="adm-input" required>
-          <label class="adm-label">E-mail</label><input type="email" id="aluno_email" name="aluno_email" class="adm-input">
-          <label class="adm-label">Graduação Atual</label><select id="aluno_grad" name="aluno_grad" class="adm-input"><option value="" disabled selected>Carregando...</option></select>
-          <label class="adm-label">Status do Acesso</label>
-          <select id="aluno_status" name="aluno_status" class="adm-input">
+  <div id="adm-modal-edit" class="adm-modal">
+    <div class="adm-modal-box large">
+      <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0;">
+        <span>Ficha do Aluno</span>
+        <button onclick="closeModal('adm-modal-edit')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+      </div>
+      <form id="form-edit-aluno" onsubmit="handleSalvarAluno(event)">
+        <input type="hidden" name="aluno_id" id="aluno_id">
+        <div class="form-grid">
+          <div>
+            <label class="adm-label">Nome Completo*</label><input type="text" id="aluno_nome" name="aluno_nome" class="adm-input" required>
+            <label class="adm-label">CPF</label><input type="text" id="aluno_cpf" name="aluno_cpf" class="adm-input">
+            <label class="adm-label">Data Nascimento</label><input type="date" id="aluno_nasc" name="aluno_nasc" class="adm-input">
+            <label class="adm-label">Telefone</label><input type="text" id="aluno_tel" name="aluno_tel" class="adm-input">
+            <label class="adm-label">Nome do Pai</label><input type="text" id="aluno_pai" name="aluno_pai" class="adm-input">
+            <label class="adm-label">Nome da Mãe</label><input type="text" id="aluno_mae" name="aluno_mae" class="adm-input">
+            <label class="adm-label">Academia Vinculada</label><select id="aluno_acad" name="aluno_acad" class="adm-input"><option value="" disabled selected>Carregando...</option></select>
+          </div>
+          <div>
+            <label class="adm-label">LOGIN (Usuário)*</label>
+            <input type="text" id="aluno_login" name="aluno_login" class="adm-input" required style="border-left: 4px solid #FFD700;">
+            <label class="adm-label">Senha*</label><input type="text" id="aluno_senha" name="aluno_senha" class="adm-input" required>
+            <label class="adm-label">E-mail</label><input type="email" id="aluno_email" name="aluno_email" class="adm-input">
+            <label class="adm-label">Graduação Atual</label><select id="aluno_grad" name="aluno_grad" class="adm-input"><option value="" disabled selected>Carregando...</option></select>
+            <label class="adm-label">Status do Acesso</label>
+            <select id="aluno_status" name="aluno_status" class="adm-input">
             <option value="Ativo" style="color:#4caf50; font-weight:bold;">Ativo</option>
             <option value="Inativo" style="color:#f44336; font-weight:bold;">Inativo</option>
             <option value="Bloqueado" style="color:#2196f3; font-weight:bold;">Bloqueado</option>
           </select>
-          <label class="adm-label">Nível de Permissão</label>
-          <select id="aluno_nivel" name="aluno_nivel" class="adm-input">
+            <label class="adm-label">Nível de Permissão</label>
+            <select id="aluno_nivel" name="aluno_nivel" class="adm-input">
             <option value="Aluno">Aluno (Padrão)</option>
             <option value="Instrutor N1">Instrutor N1</option>
             <option value="Instrutor N2">Instrutor N2</option>
@@ -529,41 +637,137 @@
             <option value="Professor">Professor</option>
             <option value="Mestre">Mestre</option>
           </select>
-          <label class="adm-label">Data Próx. Exame</label><input type="date" id="aluno_exame" name="aluno_exame" class="adm-input">
-        </div>
-        <div class="form-full"><label class="adm-label">Endereço Completo</label><input type="text" id="aluno_end" name="aluno_end" class="adm-input"></div>
-        <div class="form-full">
-          <div style="display: flex; gap: 15px;">
-            <div style="flex:1"><label class="adm-label">Data Últ. Carteirinha</label><input type="date" id="aluno_data_cart" name="aluno_data_cart" class="adm-input"></div>
-            <div style="flex:1">
-              <label class="adm-label">Próxima Graduação</label><select id="aluno_prox_grad" name="aluno_prox_grad" class="adm-input"><option value="">Selecione...</option></select>
+            <label class="adm-label">Data Próx. Exame</label><input type="date" id="aluno_exame" name="aluno_exame" class="adm-input">
+          </div>
+          <div class="form-full"><label class="adm-label">Endereço Completo</label><input type="text" id="aluno_end" name="aluno_end" class="adm-input">
+          </div>
+          <div class="form-full">
+            <div style="display: flex; gap: 15px;">
+              <div style="flex:1"><label class="adm-label">Data Últ. Carteirinha</label><input type="date" id="aluno_data_cart" name="aluno_data_cart" class="adm-input">
+              </div>
+              <div style="flex:1">
+                <label class="adm-label">Próxima Graduação</label><select id="aluno_prox_grad" name="aluno_prox_grad" class="adm-input"><option value="">Selecione...</option></select>
+              </div>
             </div>
           </div>
+          <div class="form-full"><label class="adm-label">Link Foto (URL do Drive)</label><input type="text" id="aluno_foto" name="aluno_foto" class="adm-input" placeholder="https://...">
+          </div>
         </div>
-        <div class="form-full"><label class="adm-label">Link Foto (URL do Drive)</label><input type="text" id="aluno_foto" name="aluno_foto" class="adm-input" placeholder="https://..."></div>
-      </div>
-      <div style="display:flex; justify-content:flex-end; gap:15px; margin-top:25px; padding-top:20px; border-top:1px solid #ccc;">
-        <button type="button" onclick="closeModal('adm-modal-edit')" class="adm-btn adm-btn-outline">Cancelar</button>
-        <button type="submit" class="adm-btn">Salvar Alterações</button>
-      </div>
-    </form>
+        <div
+          style="display:flex; justify-content:flex-end; gap:15px; margin-top:25px; padding-top:20px; border-top:1px solid #ccc;">
+          <button type="button" onclick="closeModal('adm-modal-edit')" class="adm-btn adm-btn-outline">Cancelar</button>
+          <button type="submit" class="adm-btn">Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
-<div id="adm-modal-local" class="adm-modal"><div class="adm-modal-box"><h3 style="margin-top:0;">Academia / Local</h3><form id="form-locais" onsubmit="enviarLocal(event)"><input type="hidden" name="loc_id" id="loc_id"><input type="hidden" name="editor_login" id="loc_editor_login"><label class="adm-label">Nome do Local*</label><input type="text" name="loc_nome" id="loc_nome" class="adm-input" required><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label class="adm-label">Responsável</label><input type="text" name="loc_resp" id="loc_resp" class="adm-input"></div><div><label class="adm-label">Status</label><select name="loc_status" id="loc_status" class="adm-input"><option value="Ativo">✅ Ativo</option><option value="Inativo">❌ Inativo</option></select></div></div><label class="adm-label">Cidade/Estado</label><input type="text" name="loc_cidade" id="loc_cidade" class="adm-input"><label class="adm-label">Endereço</label><input type="text" name="loc_end" id="loc_end" class="adm-input"><label class="adm-label">Contato</label><input type="text" name="loc_contato" id="loc_contato" class="adm-input"><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label class="adm-label">Dias</label><input type="text" name="loc_dias" id="loc_dias" class="adm-input"></div><div><label class="adm-label">Horários</label><input type="text" name="loc_horas" id="loc_horas" class="adm-input"></div></div><label class="adm-label">Link Maps</label><input type="text" name="loc_maps" id="loc_maps" class="adm-input"><label class="adm-label">HTML Iframe</label><input type="text" name="loc_iframe" id="loc_iframe" class="adm-input"><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button type="button" onclick="closeModal('adm-modal-local')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button></div></form></div></div>
+  <div id="adm-modal-local" class="adm-modal">
+    <div class="adm-modal-box">
+      <h3 style="margin-top:0;">Academia / Local</h3>
+      <form id="form-locais" onsubmit="enviarLocal(event)">
+        <input type="hidden" name="loc_id" id="loc_id"><input type="hidden" name="editor_login" id="loc_editor_login"><label class="adm-label">Nome do Local*</label><input type="text" name="loc_nome" id="loc_nome" class="adm-input" required>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div><label class="adm-label">Responsável</label><input type="text" name="loc_resp" id="loc_resp" class="adm-input">
+          </div>
+          <div>
+            <label class="adm-label">Status</label><select name="loc_status" id="loc_status" class="adm-input"><option value="Ativo">✅ Ativo</option><option value="Inativo">❌ Inativo</option></select>
+          </div>
+        </div>
+        <label class="adm-label">Cidade/Estado</label><input type="text" name="loc_cidade" id="loc_cidade" class="adm-input"><label class="adm-label">Endereço</label><input type="text" name="loc_end" id="loc_end" class="adm-input"><label class="adm-label">Contato</label><input type="text" name="loc_contato" id="loc_contato" class="adm-input">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div><label class="adm-label">Dias</label><input type="text" name="loc_dias" id="loc_dias" class="adm-input">
+          </div>
+          <div><label class="adm-label">Horários</label><input type="text" name="loc_horas" id="loc_horas" class="adm-input">
+          </div>
+        </div>
+        <label class="adm-label">Link Maps</label><input type="text" name="loc_maps" id="loc_maps" class="adm-input"><label class="adm-label">HTML Iframe</label><input type="text" name="loc_iframe" id="loc_iframe" class="adm-input">
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" onclick="closeModal('adm-modal-local')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-<div id="adm-modal-video" class="adm-modal"><div class="adm-modal-box"><h3 style="margin-top:0;">Vídeo</h3><form onsubmit="handleAdmForm(event, 'salvarVideo')"><input type="hidden" name="vid_id" id="vid_id"><label class="adm-label">Faixa</label><select name="vid_faixa" id="vid_faixa" class="adm-input"><option>Branca</option><option>Amarela</option><option>Laranja</option><option>Verde</option><option>Azul</option><option>Verde Escuro</option><option>Azul Escuro</option><option>Marrom</option><option>Preta e Branca</option><option>PRETA</option></select><label class="adm-label">Título</label><input type="text" name="vid_titulo" id="vid_titulo" class="adm-input" required><label class="adm-label">Link YouTube</label><input type="text" name="vid_link" id="vid_link" class="adm-input" required><label class="adm-label">Status</label><select name="vid_status" id="vid_status" class="adm-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select><label class="adm-label">Descrição</label><textarea name="vid_desc" id="vid_desc" class="adm-input"></textarea><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button type="button" onclick="closeModal('adm-modal-video')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button></div></form></div></div>
+  <div id="adm-modal-video" class="adm-modal">
+    <div class="adm-modal-box">
+      <h3 style="margin-top:0;">Vídeo</h3>
+      <form onsubmit="handleAdmForm(event, 'salvarVideo')">
+        <input type="hidden" name="vid_id" id="vid_id"><label class="adm-label">Faixa</label><select name="vid_faixa" id="vid_faixa" class="adm-input"><option>Branca</option><option>Amarela</option><option>Laranja</option><option>Verde</option><option>Azul</option><option>Verde Escuro</option><option>Azul Escuro</option><option>Marrom</option><option>Preta e Branca</option><option>PRETA</option></select><label class="adm-label">Título</label><input type="text" name="vid_titulo" id="vid_titulo" class="adm-input" required><label class="adm-label">Link YouTube</label><input type="text" name="vid_link" id="vid_link" class="adm-input" required><label class="adm-label">Status</label><select name="vid_status" id="vid_status" class="adm-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select><label class="adm-label">Descrição</label><textarea name="vid_desc" id="vid_desc" class="adm-input"></textarea>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" onclick="closeModal('adm-modal-video')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-<div id="adm-modal-curso" class="adm-modal"><div class="adm-modal-box"><h3 style="margin-top:0;" id="titulo-modal-curso">Curso</h3><form onsubmit="handleAdmForm(event, 'salvarCurso')"><input type="hidden" name="curso_id" id="curso_id"><input type="hidden" name="editor_login" id="editor_curso_login"><label class="adm-label">Nome do Curso*</label><input type="text" name="curso_nome" id="curso_nome" class="adm-input" required><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label class="adm-label">Data</label><input type="text" name="curso_data" id="curso_data" class="adm-input" placeholder="00/00/0000"></div><div><label class="adm-label">Vagas</label><input type="text" name="curso_vagas" id="curso_vagas" class="adm-input"></div></div><label class="adm-label">Descrição</label><textarea name="curso_desc" id="curso_desc" class="adm-input" rows="3"></textarea><label class="adm-label">Link Imagem (Drive/URL)</label><input type="text" name="curso_img" id="curso_img" class="adm-input"><label class="adm-label">Link Inscrição</label><input type="text" name="curso_link" id="curso_link" class="adm-input"><label class="adm-label">Status</label><select name="curso_status" id="curso_status" class="adm-input"><option value="Abertas">Inscrições Abertas</option><option value="Em Breve">Em Breve</option><option value="Encerradas">Encerradas</option></select><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button type="button" onclick="closeModal('adm-modal-curso')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button></div></form></div></div>
+  <div id="adm-modal-curso" class="adm-modal">
+    <div class="adm-modal-box">
+      <h3 style="margin-top:0;" id="titulo-modal-curso">Curso</h3>
+      <form onsubmit="handleAdmForm(event, 'salvarCurso')">
+        <input type="hidden" name="curso_id" id="curso_id"><input type="hidden" name="editor_login" id="editor_curso_login"><label class="adm-label">Nome do Curso*</label><input type="text" name="curso_nome" id="curso_nome" class="adm-input" required>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div><label class="adm-label">Data</label><input type="text" name="curso_data" id="curso_data" class="adm-input" placeholder="00/00/0000">
+          </div>
+          <div><label class="adm-label">Vagas</label><input type="text" name="curso_vagas" id="curso_vagas" class="adm-input">
+          </div>
+        </div>
+        <label class="adm-label">Descrição</label><textarea name="curso_desc" id="curso_desc" class="adm-input" rows="3"></textarea><label class="adm-label">Link Imagem (Drive/URL)</label><input type="text" name="curso_img" id="curso_img" class="adm-input"><label class="adm-label">Link Inscrição</label><input type="text" name="curso_link" id="curso_link" class="adm-input"><label class="adm-label">Status</label><select name="curso_status" id="curso_status" class="adm-input"><option value="Abertas">Inscrições Abertas</option><option value="Em Breve">Em Breve</option><option value="Encerradas">Encerradas</option></select>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" onclick="closeModal('adm-modal-curso')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-<div id="adm-modal-lib" class="adm-modal"><div class="adm-modal-box"><h3 style="margin-top:0;">Livro da Biblioteca</h3><form onsubmit="handleAdmForm(event, 'salvarLivroBiblioteca')"><input type="hidden" name="lib_id" id="lib_id"><label class="adm-label">Título do Livro</label><input type="text" name="lib_titulo" id="lib_titulo" class="adm-input" required><label class="adm-label">Descrição</label><textarea name="lib_desc" id="lib_desc" class="adm-input"></textarea><label class="adm-label">Link do Arquivo (PDF Drive)</label><input type="text" name="lib_link" id="lib_link" class="adm-input" required><label class="adm-label">Link da Capa (Imagem)</label><input type="text" name="lib_capa" id="lib_capa" class="adm-input"><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button type="button" onclick="closeModal('adm-modal-lib')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button></div></form></div></div>
+  <div id="adm-modal-lib" class="adm-modal">
+    <div class="adm-modal-box">
+      <h3 style="margin-top:0;">Livro da Biblioteca</h3>
+      <form onsubmit="handleAdmForm(event, 'salvarLivroBiblioteca')">
+        <input type="hidden" name="lib_id" id="lib_id"><label class="adm-label">Título do Livro</label><input type="text" name="lib_titulo" id="lib_titulo" class="adm-input" required><label class="adm-label">Descrição</label><textarea name="lib_desc" id="lib_desc" class="adm-input"></textarea><label class="adm-label">Link do Arquivo (PDF Drive)</label><input type="text" name="lib_link" id="lib_link" class="adm-input" required><label class="adm-label">Link da Capa (Imagem)</label><input type="text" name="lib_capa" id="lib_capa" class="adm-input">
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" onclick="closeModal('adm-modal-lib')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-<div id="adm-modal-prog" class="adm-modal"><div class="adm-modal-box"><h3 style="margin-top:0;">Programa Técnico</h3><form onsubmit="handleAdmForm(event, 'salvarProgramaTecnico')"><input type="hidden" name="prog_id" id="prog_id"><label class="adm-label">Faixa</label><select name="prog_faixa" id="prog_faixa" class="adm-input"><option>Branca</option><option>Amarela</option><option>Laranja</option><option>Verde</option><option>Azul</option><option>Verde Escuro</option><option>Azul Escuro</option><option>Marrom</option><option>Preta e Branca</option><option>Preta</option></select><label class="adm-label">Link do Arquivo (PDF Drive)</label><input type="text" name="prog_link" id="prog_link" class="adm-input"><label class="adm-label">Descrição</label><input type="text" name="prog_desc" id="prog_desc" class="adm-input"><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button type="button" onclick="closeModal('adm-modal-prog')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button></div></form></div></div>
+  <div id="adm-modal-prog" class="adm-modal">
+    <div class="adm-modal-box">
+      <h3 style="margin-top:0;">Programa Técnico</h3>
+      <form onsubmit="handleAdmForm(event, 'salvarProgramaTecnico')">
+        <input type="hidden" name="prog_id" id="prog_id"><label class="adm-label">Faixa</label><select name="prog_faixa" id="prog_faixa" class="adm-input"><option>Branca</option><option>Amarela</option><option>Laranja</option><option>Verde</option><option>Azul</option><option>Verde Escuro</option><option>Azul Escuro</option><option>Marrom</option><option>Preta e Branca</option><option>Preta</option></select><label class="adm-label">Link do Arquivo (PDF Drive)</label><input type="text" name="prog_link" id="prog_link" class="adm-input"><label class="adm-label">Descrição</label><input type="text" name="prog_desc" id="prog_desc" class="adm-input">
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" onclick="closeModal('adm-modal-prog')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-<div id="adm-modal-cert" class="adm-modal"><div class="adm-modal-box"><h3 style="margin-top:0;">Certificado</h3><form onsubmit="handleAdmForm(event, 'salvarCertificado')"><input type="hidden" name="cert_id" id="cert_id"><label class="adm-label">CPF ou Login do Aluno*</label><input type="text" name="cert_cpf" id="cert_cpf" class="adm-input" required placeholder="Digite o CPF/Login exato"><label class="adm-label">Nome do Curso*</label><input type="text" name="cert_curso" id="cert_curso" class="adm-input" required list="lista-cursos-sugestao"><datalist id="lista-cursos-sugestao"><option value="Monitor de Lâmina"><option value="Instrutor Nível 1"><option value="Seminário Defesa Pessoal"></datalist><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label class="adm-label">Data Emissão</label><input type="date" name="cert_data" id="cert_data" class="adm-input" required></div><div></div></div><label class="adm-label">Link do PDF (Google Drive)*</label><input type="text" name="cert_link" id="cert_link" class="adm-input" required placeholder="Cole o link do arquivo"><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button type="button" onclick="closeModal('adm-modal-cert')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button></div></form></div></div>
+  <div id="adm-modal-cert" class="adm-modal">
+    <div class="adm-modal-box">
+      <h3 style="margin-top:0;">Certificado</h3>
+      <form onsubmit="handleAdmForm(event, 'salvarCertificado')">
+        <input type="hidden" name="cert_id" id="cert_id"><label class="adm-label">CPF ou Login do Aluno*</label><input type="text" name="cert_cpf" id="cert_cpf" class="adm-input" required placeholder="Digite o CPF/Login exato"><label class="adm-label">Nome do Curso*</label><input type="text" name="cert_curso" id="cert_curso" class="adm-input" required list="lista-cursos-sugestao"><datalist
+          id="lista-cursos-sugestao">
+          <option value="Monitor de Lâmina">
+          <option value="Instrutor Nível 1">
+          <option value="Seminário Defesa Pessoal">
+        </datalist>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div><label class="adm-label">Data Emissão</label><input type="date" name="cert_data" id="cert_data" class="adm-input" required>
+          </div>
+          <div></div>
+        </div><label class="adm-label">Link do PDF (Google Drive)*</label><input type="text" name="cert_link" id="cert_link" class="adm-input" required placeholder="Cole o link do arquivo">
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" onclick="closeModal('adm-modal-cert')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-<script>
-  let cache = { alunos: [], videos: [], locais: [], cursos: [], lib: [], prog: [], certificados: [] };
+  <script>
+    let cache = { alunos: [], videos: [], locais: [], cursos: [], lib: [], prog: [], certificados: [] };
   const userSessionLocal = JSON.parse(localStorage.getItem('userSession') || '{}');
   const editorLogin = userSessionLocal.LOGIN || 'Admin';
 
@@ -815,6 +1019,13 @@
       document.getElementById('cfg_color_text').value = cfg.textColor || '#ffffff'; 
       document.getElementById('cfg_color_btn_text').value = cfg.btnTextColor || '#000000'; 
       document.getElementById('cfg_color_bg').value = cfg.bgColor || '#121212'; 
+      
+      // Lendo os novos links do backend
+      document.getElementById('cfg_link_loja').value = cfg.linkLoja || '';
+      document.getElementById('cfg_link_insta').value = cfg.linkInstagram || '';
+      document.getElementById('cfg_link_yt').value = cfg.linkYouTube || '';
+      document.getElementById('cfg_link_cad').value = cfg.linkCadastro || '';
+
       atualizarPreviewCores();
     }).getAppConfig(); 
   }
@@ -852,4 +1063,4 @@
 
   function closeModal(id) { const modal = document.getElementById(id); if(modal) modal.style.display = 'none'; }
   function esc(t) { return t ? String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : ""; }
-</script>
+  </script>

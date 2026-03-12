@@ -31,7 +31,7 @@
       margin: 0;
       font-family: "Roboto", sans-serif;
       /* Remove o fundo fixo para permitir a imagem e usar a cor global como fallback */
-      background-color: var(--dynamic-bg) !important; 
+      background-color: var(--dynamic-bg) !important;
       background-image: none !important;
       color: var(--dynamic-text) !important;
     }
@@ -74,7 +74,8 @@
       padding: 20px;
       margin-bottom: 25px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
-      display: none; /* Inicia oculto até a API retornar aulas */
+      display: none;
+      /* Inicia oculto até a API retornar aulas */
       animation: slideDown 0.5s ease;
     }
 
@@ -214,17 +215,26 @@
        ============================================================================ */
     #loading-screen {
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: var(--dynamic-bg);
       z-index: 9999;
-      display: flex; justify-content: center; align-items: center; flex-direction: column;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
     }
 
     .spinner-main {
       border: 4px solid rgba(255, 255, 255, 0.1);
-      width: 40px; height: 40px; border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
       border-left-color: var(--dynamic-prim);
-      animation: spin 1s linear infinite; margin-bottom: 15px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 15px;
     }
 
     /* ============================================================================
@@ -234,17 +244,25 @@
       position: fixed !important;
       bottom: 25px !important;
       right: 25px !important;
-      width: 60px; height: 60px; border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
       background-color: var(--dynamic-prim) !important;
       color: var(--dynamic-btn-text) !important;
-      display: flex !important; /* Força exibir fora do fluxo */
-      justify-content: center; align-items: center;
+      display: flex !important;
+      /* Força exibir fora do fluxo */
+      justify-content: center;
+      align-items: center;
       box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
       cursor: pointer;
-      z-index: 99999 !important; /* Acima de tudo, exceto o próprio modal de ajuda */
+      z-index: 99999 !important;
+      /* Acima de tudo, exceto o próprio modal de ajuda */
       transition: transform 0.2s;
     }
-    #btn-ajuda-fab:hover { transform: scale(1.1); }
+
+    #btn-ajuda-fab:hover {
+      transform: scale(1.1);
+    }
 
     /* ============================================================================
        COMPONENTE: MODAL DE SUPORTE (O PROBLEMA ESTAVA AQUI)
@@ -252,31 +270,66 @@
        ============================================================================ */
     .modal-overlay-ajuda {
       /* Posição Fixa centraliza na tela e cobre o fundo */
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: rgba(0, 0, 0, 0.85);
       /* Justify/Align para centralizar a caixa branca */
-      justify-content: center; align-items: center;
-      z-index: 100000 !important; /* Maior Z-index do sistema */
+      justify-content: center;
+      align-items: center;
+      z-index: 100000 !important;
+      /* Maior Z-index do sistema */
     }
 
     .modal-box-ajuda {
       background-color: var(--dynamic-sec) !important;
       color: var(--dynamic-text) !important;
-      width: 90%; max-width: 400px;
-      padding: 25px; border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      padding: 25px;
+      border-radius: 12px;
       border: 2px solid var(--dynamic-prim) !important;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
       position: relative;
     }
 
-    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
   </style>
 </head>
 
 <body>
 
   <script>
+    // 🛡️ INJEÇÃO DINÂMICA DE LINKS VINDOS DO BACKEND PARA O JAVASCRIPT
+    const LINK_LOJA_APP = "<?= typeof linkLoja !== 'undefined' ? linkLoja : 'https://wa.me/5581997629232' ?>";
+    const LINK_CAD_APP = "<?= typeof linkCadastro !== 'undefined' ? linkCadastro : 'https://forms.gle/3vXp86VCmuLzHrk46' ?>";
+    
+    // NOVOS LINKS INJETADOS AQUI PARA AS REDES SOCIAIS
+    const LINK_YT_APP = "<?= typeof linkYouTube !== 'undefined' ? linkYouTube : 'https://www.youtube.com/' ?>";
+    const LINK_INSTA_APP = "<?= typeof linkInstagram !== 'undefined' ? linkInstagram : 'https://www.instagram.com/' ?>";
+
     window.onerror = function (m, s, l) {
       const banner = document.getElementById('error-banner');
       if(banner) { banner.style.display = 'block'; banner.innerText = `⚠️ Falha: ${m} (Linha ${l})`; }
@@ -289,14 +342,17 @@
   </div>
 
   <div class="container" id="main-content" style="display:none">
-    <div id="error-banner" style="display:none; background:var(--error-color); color:white; padding:10px; border-radius:8px; margin-bottom:15px; text-align:center; font-weight:bold;"></div>
+    <div id="error-banner"
+      style="display:none; background:var(--error-color); color:white; padding:10px; border-radius:8px; margin-bottom:15px; text-align:center; font-weight:bold;">
+    </div>
 
     <header class="dashboard-header">
       <div style="display:flex; gap:15px; align-items:center;">
         <img id="header-img" src="" class="header-logo" onerror="this.src='https://ui-avatars.com/api/?name=User&background=333&color=fff'" />
         <div>
           <h1 id="greeting" style="margin:0; font-size:1.4rem; font-weight:900;">Olá!</h1>
-          <p id="sub-greeting" style="margin:0; color:var(--text-color); opacity: 0.6; font-size:0.85rem">Central de Treinamento</p>
+          <p id="sub-greeting" style="margin:0; color:var(--text-color); opacity: 0.6; font-size:0.85rem">Central de
+            Treinamento</p>
         </div>
       </div>
       <button onclick="logout()" style="background:none; border:none; color:var(--text-color); opacity:0.6; cursor:pointer;" title="Sair">
@@ -330,7 +386,8 @@
     <?!= include('Ranking');?>
     <?!= include('ChamadaDinamica'); ?>
     <?!= include('Financeiro'); ?>
-  </div> <div id="admin-module-wrapper" style="display:none;">
+  </div>
+  <div id="admin-module-wrapper" style="display:none;">
     <?!= include('Adm'); ?>
   </div>
 
@@ -340,9 +397,11 @@
 
   <div id="modal-ajuda" class="modal-overlay-ajuda" style="display: none !important;">
     <div class="modal-box-ajuda">
-      <div style="display:flex; justify-content:space-between; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+      <div
+        style="display:flex; justify-content:space-between; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
         <h3 style="margin:0; font-weight:900; color:var(--primary-color);">
-          <span class="material-icons" style="vertical-align:bottom; color:var(--primary-color)">contact_support</span> Suporte
+          <span class="material-icons" style="vertical-align:bottom; color:var(--primary-color)">contact_support</span>
+          Suporte
         </h3>
         <button onclick="fecharModalAjuda()" style="background:none; border:none; cursor:pointer; color:var(--text-color); opacity:0.6;">
           <span class="material-icons">close</span>
@@ -464,14 +523,16 @@
       return list;
     }
 
-    // Roteador de Ações (Mapeamento de Funções)
+    // 🔗 ROTEADOR DE AÇÕES (Agora usando os Links Dinâmicos)
     function handleAction(action) {
       if (action === "chamada_instrutor") { if(typeof initChamadaDinamica === 'function') initChamadaDinamica('instrutor'); else alert("Carregando..."); return; }
       if (action === "chamada_aluno") { if(typeof initChamadaDinamica === 'function') initChamadaDinamica('aluno'); else alert("Carregando..."); return; }
       if (action === "view_admin") { abrirAdminView(); if (typeof carregarAlunos === 'function') carregarAlunos(); return; }
       if (action === "view_instrutor") { if(typeof abrirGestaoAlunos === 'function') abrirGestaoAlunos(); else alert("Erro: Módulo de Gestão."); return; }
-      if (action === "shop") { window.open("https://wa.me/5581997629232", "_blank"); return; }
-      if (action === "form_cadastro") { window.open("https://forms.gle/3vXp86VCmuLzHrk46", "_blank"); return; }
+      
+      // ROTAS DES-HARDCODIFICADAS
+      if (action === "shop") { window.open(LINK_LOJA_APP, "_blank"); return; }
+      if (action === "form_cadastro") { window.open(LINK_CAD_APP, "_blank"); return; }
 
       const map = { 
           "perfil": () => carregarDadosPerfil(currentUser), 
@@ -580,4 +641,5 @@
     }
   </script>
 </body>
+
 </html>
