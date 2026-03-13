@@ -109,12 +109,11 @@ function verificarCriarAbasFinanceiras() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
   const estrutura = [
-    { nome: "Fin_Transacoes", colunas: ["ID_Transacao", "Data_Registro", "Tipo", "Categoria", "Descricao", "Valor", "Forma_Pagto", "Responsavel", "Login_Aluno", "Academia_Ref", "Status", "Comprovante_Url"] },
+    { nome: "Fin_Transacoes", colunas: ["ID_Transacao", "Data_Registro", "Tipo", "Categoria", "Descricao", "Valor", "Forma_Pagto", "Responsavel", "Login_Aluno", "Academia_Ref", "Status", "Comprovante_Url", "Modalidade"] }, // <-- COLUNA NOVA AQUI
     { nome: "Fin_Pacotes", colunas: ["Nome_Pacote", "Valor_Padrao", "Duracao_Dias", "Academias_Permitidas", "Status_Pacote", "Descricao"] },
     { nome: "Fin_Assinaturas", colunas: ["Login_Aluno", "Pacote_Atual", "Data_Inicio", "Data_Fim", "Status_Assinatura", "ID_Ultima_Transacao"] },
     {
       nome: "Config_App",
-      // As 12 colunas de configuração agora (Nome_Academia no final)
       colunas: ["Logo_URL", "Fundo_URL", "Cor_Primaria", "Cor_Secundaria", "Cor_Texto", "Cor_Texto_Botao", "Cor_Fundo", "Link_Loja", "Link_Instagram", "Link_YouTube", "Link_Cadastro", "Nome_Academia"]
     }
   ];
@@ -126,9 +125,7 @@ function verificarCriarAbasFinanceiras() {
       sheet.appendRow(aba.colunas);
       sheet.getRange(1, 1, 1, aba.colunas.length).setFontWeight("bold").setBackground("#2c3e50").setFontColor("#ffffff");
       sheet.setFrozenRows(1);
-
       if (aba.nome === "Config_App") {
-        // 12 espaços vazios iniciais
         sheet.appendRow(["", "", "#FFD700", "#1e1e1e", "#ffffff", "#000000", "#121212", "", "", "", "", "DojoManager SaaS"]);
       }
     }
@@ -332,16 +329,15 @@ function registrarMovimentacao(dados) {
       "Responsavel": dados.responsavel,
       "Login_Aluno": dados.alunoLogin || "",
       "Academia_Ref": dados.academia || "Matriz",
-      "Status": "Concluido"
+      "Status": "Concluido",
+      "Modalidade": dados.modalidade || "Geral" // <-- INJETANDO A MODALIDADE NO CAIXA
     };
 
     salvarFinanceiroSeguro("Fin_Transacoes", novaTransacao);
 
-    // Se for Mensalidade, renova assinatura
     if (dados.tipo === "Receita" && (dados.categoria === "Mensalidade" || dados.categoria === "Pacote")) {
       processarRenovacaoAssinatura(dados.alunoLogin, dados.nomePacote);
     }
-
     return { success: true, msg: "Movimentação registrada com sucesso!" };
   } catch (e) {
     return { success: false, msg: "Erro financeiro: " + e.message };
@@ -738,7 +734,7 @@ function getDashboardData(loginUser) { return verificarCredenciais({ login: logi
 const HIERARQUIA_FAIXAS = ["Iniciante", "Branca", "Amarela", "Laranja", "Verde", "Azul", "Verde Escuro", "Azul Escuro", "Marrom", "Preta e Branca", "Preta"];
 
 /**
- * 🛡️ Lista vídeos da Videoteca com Lógica de ID Numérico e Multimodalidade.
+ * 🛡️ Lista vídeos da Videoteca com Lógica de ID Numérico e MULTIMODALIDADE.
  */
 function listarVideoteca(user) {
   try {
@@ -747,9 +743,7 @@ function listarVideoteca(user) {
     const headers = data[0].map(h => String(h).trim().toLowerCase());
 
     const col = {
-      faixa: headers.indexOf("faixa"),
-      titulo: headers.indexOf("titulo"),
-      link: headers.indexOf("youtube_link"),
+      faixa: headers.indexOf("faixa"), titulo: headers.indexOf("titulo"), link: headers.indexOf("youtube_link"),
       desc: headers.indexOf("descricao") !== -1 ? headers.indexOf("descricao") : headers.indexOf("descrição"),
       modalidade: headers.indexOf("modalidade")
     };
@@ -759,14 +753,13 @@ function listarVideoteca(user) {
 
     const mapaGrad = getMapaGraduacoes();
 
-    // 🚨 CORREÇÃO: Lendo as variáveis exatas que vêm do Auth.js e da Planilha
     const graduacaoAluno = user.graduacao || user.GRADUACAO_ATUAL || user["Graduação"] || "Iniciante";
     const modalidadeAluno = user.modalidade || user.Modalidade || "Geral";
 
-    const userGradStr = String(graduacaoAluno).trim().toLowerCase();
-    const userGradId = mapaGrad[userGradStr] ? mapaGrad[userGradStr].id : 0;
-    const userMod = String(modalidadeAluno).trim().toLowerCase();
+    const userGradId = mapaGrad[String(graduacaoAluno).trim().toLowerCase()]?.id || 0;
 
+    // Transforma "Krav Maga, Muay Thay" em Array: ['krav maga', 'muay thay']
+    const userMods = String(modalidadeAluno).toLowerCase().split(',').map(m => m.trim());
     const isGodMode = user.isAdmin || user.isMestre;
     const acervo = {};
     const faixasPermitidasSet = new Set();
@@ -780,11 +773,15 @@ function listarVideoteca(user) {
       if (!fxRaw || !tit) continue;
 
       const fxLower = fxRaw.toLowerCase();
-      const modLower = modRaw.toLowerCase();
+      const videoMods = modRaw.toLowerCase().split(',').map(m => m.trim()); // Array de mods do vídeo
 
-      const videoGradInfo = mapaGrad[fxLower] || { id: 999, modalidade: modRaw };
+      const videoGradInfo = mapaGrad[fxLower] || { id: 999 };
 
-      const isSameMod = isGodMode || modLower === "geral" || modLower === "" || modLower === userMod;
+      // 🚨 A MÁGICA AQUI: O Mestre NÃO ignora mais a modalidade.
+      // O vídeo tem que ser da modalidade dele ou 'Geral'
+      const isSameMod = videoMods.includes("geral") || videoMods.includes("") || videoMods.some(vm => userMods.includes(vm));
+
+      // O Mestre continua a ver TODAS as faixas (ignora o ID Numérico +1)
       const isAllowedLevel = isGodMode || videoGradInfo.id <= (userGradId + 1);
 
       if (isSameMod && isAllowedLevel) {
@@ -807,39 +804,37 @@ function listarVideoteca(user) {
     }
 
     const faixasPermitidas = Array.from(faixasPermitidasSet).sort((a, b) => {
-       const idA = mapaGrad[a.toLowerCase()] ? mapaGrad[a.toLowerCase()].id : 999;
-       const idB = mapaGrad[b.toLowerCase()] ? mapaGrad[b.toLowerCase()].id : 999;
-       return idA - idB;
+      const idA = mapaGrad[a.toLowerCase()] ? mapaGrad[a.toLowerCase()].id : 999;
+      const idB = mapaGrad[b.toLowerCase()] ? mapaGrad[b.toLowerCase()].id : 999;
+      return idA - idB;
     });
 
     return { faixasPermitidas: faixasPermitidas, acervo: acervo };
-
   } catch (e) { throw new Error("Erro Videoteca: " + e.message); }
 }
 
 /**
- * Lista PDFs do Programa Técnico (Com Lógica Numérica e Multimodalidade).
+ * Lista PDFs do Programa Técnico (Com Lógica Numérica e MULTIMODALIDADE).
  */
 function listarProgramasTecnicos(user) {
   try {
     const sheet = getSheet(NOME_ABA_PROGRAMAS);
     const data = sheet.getDataRange().getDisplayValues();
     const headers = data[0].map(h => String(h).trim().toLowerCase());
-    
-    const col = { 
-      faixa: headers.indexOf("faixa"), id: headers.indexOf("id_arquivo"), 
+
+    const col = {
+      faixa: headers.indexOf("faixa"), id: headers.indexOf("id_arquivo"),
       desc: headers.indexOf("descricao"), modalidade: headers.indexOf("modalidade")
     };
 
     const mapaGrad = getMapaGraduacoes();
-    
-    // 🚨 CORREÇÃO AQUI TAMBÉM
+
     const graduacaoAluno = user.graduacao || user.GRADUACAO_ATUAL || user["Graduação"] || "Iniciante";
     const modalidadeAluno = user.modalidade || user.Modalidade || "Geral";
 
     const userGradId = mapaGrad[String(graduacaoAluno).trim().toLowerCase()]?.id || 0;
-    const userMod = String(modalidadeAluno).trim().toLowerCase();
-    
+    const userMods = String(modalidadeAluno).toLowerCase().split(',').map(m => m.trim());
+
     const isGodMode = user.isAdmin || user.isMestre;
 
     const lista = [];
@@ -851,8 +846,12 @@ function listarProgramasTecnicos(user) {
       if (!fxRaw || !row[col.id]) continue;
 
       const pdfGradInfo = mapaGrad[fxRaw.toLowerCase()] || { id: 999 };
+      const pdfMods = modRaw.toLowerCase().split(',').map(m => m.trim());
 
-      const isSameMod = isGodMode || modRaw.toLowerCase() === "geral" || modRaw.toLowerCase() === "" || modRaw.toLowerCase() === userMod;
+      // 🚨 Igual aos vídeos: Mestre respeita a modalidade dele.
+      const isSameMod = pdfMods.includes("geral") || pdfMods.includes("") || pdfMods.some(vm => userMods.includes(vm));
+
+      // Mestre vê todas as faixas da modalidade dele
       const isAllowedLevel = isGodMode || pdfGradInfo.id <= (userGradId + 1);
 
       if (isSameMod && isAllowedLevel) {
@@ -863,6 +862,7 @@ function listarProgramasTecnicos(user) {
     return lista.reverse();
   } catch (e) { throw new Error("Erro PDF: " + e.message); }
 }
+
 
 /**
  * Lista livros da Biblioteca Digital (acesso livre).
@@ -892,36 +892,120 @@ function listarBiblioteca() {
 // ============================================================================
 
 /**
- * [ADMIN] Retorna lista completa de alunos (COM CONTAGEM DE AULAS E INÍCIO)
+ * 🥋 Busca todas as Modalidades únicas cadastradas na aba GRADUACAO (Coluna D)
+ */
+function getListaModalidades() {
+  try {
+    const sheet = getSheet("GRADUACAO"); // Tente também "Graduação" se falhar
+    const data = sheet.getDataRange().getDisplayValues();
+    if (data.length < 2) return ["Geral"];
+
+    const headers = data[0].map(h => String(h).trim().toLowerCase());
+    const colMod = headers.indexOf("modalidade");
+    if (colMod === -1) return ["Geral"];
+
+    const modsSet = new Set();
+    for (let i = 1; i < data.length; i++) {
+      const m = String(data[i][colMod]).trim();
+      if (m && m.toLowerCase() !== "geral") modsSet.add(m); // Exclui vazios e "Geral"
+    }
+    return Array.from(modsSet);
+  } catch (e) { return ["Geral"]; }
+}
+
+/**
+ * ⏱️ Calcula o tempo desde a data de cadastro do aluno
+ */
+function calcularTempoCadastro(dataStr) {
+  if (!dataStr) return "Recente";
+  let d = parseDataSegura(dataStr);
+  if (!d) return "Recente";
+
+  let diffMs = new Date() - d;
+  if (diffMs < 0) return "Recente";
+
+  let diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays < 30) return `${diffDays} dia(s)`;
+  let diffMonths = Math.floor(diffDays / 30);
+  if (diffMonths < 12) return `${diffMonths} mês(es)`;
+  let diffYears = Math.floor(diffMonths / 12);
+  let remainMonths = diffMonths % 12;
+  if (remainMonths === 0) return `${diffYears} ano(s)`;
+  return `${diffYears} ano(s) e ${remainMonths} mês(es)`;
+}
+
+// ============================================================================
+// 🧬 MÓDULO FISIOLÓGICO E CÁLCULO DE IDADE
+// ============================================================================
+
+/**
+ * Retorna a idade exata em: "X anos, Y meses, Z dias"
+ */
+function calcularIdadeExata(dataNascStr) {
+  if (!dataNascStr) return "N/A";
+  let nasc = parseDataSegura(dataNascStr);
+  if (!nasc) return "N/A";
+
+  let hoje = new Date();
+  let anos = hoje.getFullYear() - nasc.getFullYear();
+  let meses = hoje.getMonth() - nasc.getMonth();
+  let dias = hoje.getDate() - nasc.getDate();
+
+  if (dias < 0) {
+    meses--;
+    let ultimoDiaMesAnterior = new Date(hoje.getFullYear(), hoje.getMonth(), 0).getDate();
+    dias += ultimoDiaMesAnterior;
+  }
+  if (meses < 0) {
+    anos--;
+    meses += 12;
+  }
+  return `${anos}a, ${meses}m, ${dias}d`;
+}
+
+/**
+ * Retorna apenas o número inteiro de anos (Para o filtro do Super Relatório)
+ */
+function calcularIdadeApenasAnos(dataNascStr) {
+  if (!dataNascStr) return 0;
+  let nasc = parseDataSegura(dataNascStr);
+  if (!nasc) return 0;
+  let hoje = new Date();
+  let idade = hoje.getFullYear() - nasc.getFullYear();
+  let m = hoje.getMonth() - nasc.getMonth();
+  if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) idade--;
+  return idade;
+}
+
+/**
+ * [ADMIN] Retorna lista completa de alunos (AGORA COM DADOS FISIOLÓGICOS E IDADE)
  */
 function listarAlunosAdmin() {
   try {
     const sheetAlunos = getSheet("cadastro_de_alunos");
     const dataAlunos = sheetAlunos.getDataRange().getDisplayValues();
-    const h = dataAlunos[0].map(c => String(c).trim());
+    const h = dataAlunos[0].map(c => String(c).trim().toLowerCase());
 
     const col = {
-      nome: h.indexOf("Nome Completo"), nasc: h.indexOf("Data de Nascimento"), tel: h.indexOf("Telefone"),
-      cpf: h.indexOf("CPF"), pai: h.indexOf("Nome do Pai"), mae: h.indexOf("Nome da Mãe"),
-      end: h.indexOf("Endereço"), acad: h.indexOf("Academia Vinculada"), email: h.indexOf("E-mail"),
-      login: h.indexOf("LOGIN"), senha: h.indexOf("Senha"), grad: h.indexOf("GRADUACAO_ATUAL"),
-      foto: h.indexOf("Foto 3x4 (para a carteirinha)"), ultCarteira: h.indexOf("Data Ultima Carteirinha"),
-      status: h.indexOf("STATUS"), proxGrad: h.indexOf("PROX_GRADUACAO"), nivel: h.indexOf("Nível do Praticante"),
-      exame: h.indexOf("Data Próximo Exame"),
-      dataInicio: h.indexOf("Carimbo de data/hora"), // ⬅️ Pegando o Início
-      modalidade: h.indexOf("Modalidade")            // ⬅️ Pegando a Modalidade
+      nome: h.indexOf("nome completo"), nasc: h.indexOf("data de nascimento"), tel: h.indexOf("telefone"),
+      cpf: h.indexOf("cpf"), pai: h.indexOf("nome do pai"), mae: h.indexOf("nome da mãe"),
+      end: h.indexOf("endereço"), acad: h.indexOf("academia vinculada"), email: h.indexOf("e-mail") > -1 ? h.indexOf("e-mail") : h.indexOf("endereço de e-mail"),
+      login: h.indexOf("login"), senha: h.indexOf("senha"), grad: h.indexOf("graduacao_atual") > -1 ? h.indexOf("graduacao_atual") : h.indexOf("graduação_atual"),
+      foto: h.indexOf("foto 3x4 (para a carteirinha)"), ultCarteira: h.indexOf("data ultima carteirinha"),
+      status: h.indexOf("status"), proxGrad: h.indexOf("prox_graduacao") > -1 ? h.indexOf("prox_graduacao") : h.indexOf("próxima graduação"),
+      nivel: h.indexOf("nível do praticante") > -1 ? h.indexOf("nível do praticante") : h.indexOf("nivel do praticante"),
+      exame: h.indexOf("data próximo exame"), dataInicio: h.indexOf("carimbo de data/hora"), modalidade: h.indexOf("modalidade"),
+      peso: h.indexOf("peso"), altura: h.indexOf("altura") // <-- NOVAS COLUNAS
     };
 
     const safeGet = (row, idx) => (idx > -1 && row[idx]) ? row[idx] : "";
 
-    // 🧠 CONTAGEM DE AULAS HISTÓRICAS
     let contagemAulas = {};
     try {
       const sheetChamada = getSheet("Registro_Chamada");
       const dadosChamada = sheetChamada.getDataRange().getValues();
       const headChamada = dadosChamada[0].map(c => String(c).trim().toLowerCase());
       const colIds = headChamada.indexOf("lista_alunos_ids");
-
       if (colIds !== -1) {
         for (let i = 1; i < dadosChamada.length; i++) {
           const idsRaw = String(dadosChamada[i][colIds]).toLowerCase().split(",");
@@ -931,26 +1015,32 @@ function listarAlunosAdmin() {
           });
         }
       }
-    } catch (e) { console.warn("Não foi possível contar as aulas:", e); }
+    } catch (e) { }
 
-    // 🧠 CRUZAMENTO DOS DADOS PARA O FRONT
     return dataAlunos.slice(1).map((row, i) => {
       const loginAluno = safeGet(row, col.login).toLowerCase();
-      let inicioLimpo = safeGet(row, col.dataInicio);
-      if (inicioLimpo && inicioLimpo.includes(' ')) inicioLimpo = inicioLimpo.split(' ')[0]; // Pega só a data, tira a hora
+      let carimboRaw = safeGet(row, col.dataInicio);
+      let dataNascimento = safeGet(row, col.nasc);
 
       return {
         id: i + 2,
-        nome: safeGet(row, col.nome), nasc: safeGet(row, col.nasc), tel: safeGet(row, col.tel),
+        carimbo: carimboRaw,
+        tempoCadastrado: calcularTempoCadastro(carimboRaw), // Função que já criamos antes
+        nome: safeGet(row, col.nome), nasc: dataNascimento, tel: safeGet(row, col.tel),
         cpf: safeGet(row, col.cpf), pai: safeGet(row, col.pai), mae: safeGet(row, col.mae),
         endereco: safeGet(row, col.end), academia: safeGet(row, col.acad), email: safeGet(row, col.email),
         login: safeGet(row, col.login), senha: safeGet(row, col.senha), graduacao: safeGet(row, col.grad),
         foto: padronizarLinkDrive(safeGet(row, col.foto)), dataCarteira: safeGet(row, col.ultCarteira),
         status: safeGet(row, col.status) || "Ativo", proxGrad: safeGet(row, col.proxGrad),
         nivel: safeGet(row, col.nivel), proxExame: safeGet(row, col.exame),
-        dataInicio: inicioLimpo, // ⬅️ Envia para a Tabela
-        modalidade: safeGet(row, col.modalidade) || "---", // ⬅️ Envia para a Tabela
-        totalAulas: contagemAulas[loginAluno] || 0 // ⬅️ Envia o total de checkins históricos
+        dataInicio: carimboRaw.split(' ')[0],
+        modalidade: safeGet(row, col.modalidade) || "Geral",
+        totalAulas: contagemAulas[loginAluno] || 0,
+        // DADOS FISIOLÓGICOS E IDADE DINÂMICA
+        peso: safeGet(row, col.peso),
+        altura: safeGet(row, col.altura),
+        idadeExata: calcularIdadeExata(dataNascimento), // "35a, 4m, 10d"
+        idadeAnos: calcularIdadeApenasAnos(dataNascimento) // 35 (Para matemática)
       };
     });
   } catch (e) { return []; }
@@ -962,7 +1052,7 @@ function buscarAlunoPorLogin(login) {
 }
 
 /**
- * [ADMIN] Cria ou Atualiza um Aluno (COM PROCV NATIVO).
+ * [ADMIN] Cria ou Atualiza um Aluno (ACEITANDO FISIOLOGIA E MULTIMODALIDADE).
  */
 function salvarAluno(form) {
   try {
@@ -970,30 +1060,43 @@ function salvarAluno(form) {
     const mapaGrad = getMapaGraduacoes();
     const gradInfo = mapaGrad[faixaEscolhida.toLowerCase()] || { nivel: "Aluno", modalidade: "Geral" };
 
+    const modalidadeFinal = form.aluno_modalidade ? form.aluno_modalidade : gradInfo.modalidade;
+    const carimboData = form.aluno_carimbo || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
+
     const dados = {
-      "Nome Completo": form.aluno_nome, "Data de Nascimento": form.aluno_nasc, "Telefone": form.aluno_tel,
-      "CPF": form.aluno_cpf, "Nome do Pai": form.aluno_pai, "Nome da Mãe": form.aluno_mae,
-      "Endereço": form.aluno_end, "Academia Vinculada": form.aluno_acad, "E-mail": form.aluno_email,
-      "LOGIN": form.aluno_login, "Senha": form.aluno_senha,
-      "GRADUACAO_ATUAL": form.aluno_grad,
+      "Carimbo de data/hora": carimboData,
+      "Endereço de e-mail": form.aluno_email,
+      "Nome Completo": form.aluno_nome,
+      "Data de Nascimento": form.aluno_nasc,
+      "Telefone": form.aluno_tel,
+      "CPF": form.aluno_cpf,
+      "Nome do Pai": form.aluno_pai,
+      "Nome da Mãe": form.aluno_mae,
+      "Endereço": form.aluno_end,
+      "Academia Vinculada": form.aluno_acad,
+      "E-mail": form.aluno_email,
+      "LOGIN": form.aluno_login,
+      "Senha": form.aluno_senha,
+      "Graduação": form.aluno_grad,
       "Foto 3x4 (para a carteirinha)": padronizarLinkDrive(form.aluno_foto),
       "Data Ultima Carteirinha": form.aluno_data_cart,
-      "STATUS": form.aluno_status, "PROX_GRADUACAO": form.aluno_prox_grad, "Data Próximo Exame": form.aluno_exame,
-
-      // AUTO-PREENCHIMENTO INTELIGENTE
+      "STATUS": form.aluno_status,
+      "GRADUACAO_ATUAL": form.aluno_grad,
+      "PROX_GRADUACAO": form.aluno_prox_grad,
+      "Data Próximo Exame": form.aluno_exame,
       "Nível do Praticante": gradInfo.nivel,
-      "Modalidade": gradInfo.modalidade,
-      "NivelAdministrativo": gradInfo.nivel
+      "NivelAdministrativo": gradInfo.nivel,
+      "Modalidade": modalidadeFinal,
+      "Peso": form.aluno_peso, // <-- SALVANDO DADOS FISIOLÓGICOS
+      "Altura": form.aluno_altura // <-- SALVANDO DADOS FISIOLÓGICOS
     };
 
     const idLinha = parseInt(form.aluno_id);
 
     if (!isNaN(idLinha) && idLinha > 1) {
       salvarDadosSeguro("cadastro_de_alunos", dados, idLinha);
-      return "✅ Aluno atualizado e hierarquia sincronizada!";
+      return "✅ Ficha do Aluno atualizada com sucesso!";
     } else {
-      // Se for novo, adiciona o Carimbo de Data/Hora automaticamente
-      dados["Carimbo de data/hora"] = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
       salvarDadosSeguro("cadastro_de_alunos", dados);
       return "✅ Novo aluno cadastrado com sucesso!";
     }
@@ -1008,7 +1111,7 @@ function salvarAluno(form) {
 function getMapaGraduacoes() {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName("GRADUACAO") || ss.getSheetByName("Graduação") || ss.getSheetByName("Graduacao"); 
+    const sheet = ss.getSheetByName("GRADUACAO") || ss.getSheetByName("Graduação") || ss.getSheetByName("Graduacao");
     if (!sheet) return {};
 
     const data = sheet.getDataRange().getValues();
@@ -1024,7 +1127,7 @@ function getMapaGraduacoes() {
     const mapa = {};
     for (let i = 1; i < data.length; i++) {
       const nomeFaixa = String(data[i][colGrad]).trim().toLowerCase();
-      if(nomeFaixa) {
+      if (nomeFaixa) {
         mapa[nomeFaixa] = {
           nome: String(data[i][colGrad]).trim(),
           id: parseInt(data[i][colId]) || 0,
@@ -1158,7 +1261,8 @@ function salvarCertificado(form) {
     const dados = {
       "CPF": form.cert_cpf,
       "Curso": form.cert_curso,
-      "Data_Emissao": form.cert_data, // yyyy-mm-dd
+      "Modalidade": form.cert_mod, // INJETAR ESTA LINHA AQUI!
+      "Data_Emissao": form.cert_data,
       "Link_PDF": padronizarLinkDrive(form.cert_link)
     };
 
@@ -1340,7 +1444,7 @@ function salvarTicketSuporte(form) {
 }
 
 // ============================================================================
-// 6. AUTENTICAÇÃO E CHECAGENS (Login)
+// 6. AUTENTICAÇÃO E A BALA DE PRATA (COM DADOS FISIOLÓGICOS)
 // ============================================================================
 
 function verificarCredenciais(formObject) {
@@ -1349,8 +1453,23 @@ function verificarCredenciais(formObject) {
   try {
     const sheet = getSheet(NOME_ABA_ALUNOS);
     const data = sheet.getDataRange().getDisplayValues();
-    const headers = data[0].map(h => String(h).trim());
-    const col = { login: headers.indexOf("LOGIN"), senha: headers.indexOf("Senha"), nome: headers.indexOf("Nome Completo"), nivel: headers.indexOf("Nível do Praticante"), foto: headers.indexOf("Foto 3x4 (para a carteirinha)"), grad: headers.indexOf("GRADUACAO_ATUAL"), acad: headers.indexOf("Academia Vinculada"), exame: headers.indexOf("Data Próximo Exame"), status: headers.indexOf("STATUS") };
+    const headers = data[0].map(h => String(h).trim().toLowerCase());
+
+    const col = {
+      login: headers.indexOf("login"),
+      senha: headers.indexOf("senha"),
+      nome: headers.indexOf("nome completo"),
+      nivel: headers.indexOf("nível do praticante") !== -1 ? headers.indexOf("nível do praticante") : headers.indexOf("nivel do praticante"),
+      foto: headers.indexOf("foto 3x4 (para a carteirinha)"),
+      grad: headers.indexOf("graduacao_atual") !== -1 ? headers.indexOf("graduacao_atual") : headers.indexOf("graduação_atual"),
+      acad: headers.indexOf("academia vinculada"),
+      status: headers.indexOf("status"),
+      modalidade: headers.indexOf("modalidade"),
+      exame: headers.indexOf("data próximo exame"),
+      nasc: headers.indexOf("data de nascimento"), // Para calcular Idade
+      peso: headers.indexOf("peso"),               // <-- NOVA COLUNA LIDA
+      altura: headers.indexOf("altura")            // <-- NOVA COLUNA LIDA
+    };
 
     if (col.login === -1) throw new Error("Coluna LOGIN não encontrada.");
 
@@ -1361,15 +1480,36 @@ function verificarCredenciais(formObject) {
         if (statusUser !== "ativo") return { success: false, message: "Cadastro inativo." };
         if (!isCheckOnly) { if (String(formObject.senha).trim() !== String(row[col.senha]).trim()) return { success: false, message: "Senha incorreta." }; }
 
+        const mapaGrad = getMapaGraduacoes();
+        const gradStr = (col.grad > -1 && row[col.grad]) ? String(row[col.grad]).trim().toLowerCase() : "iniciante";
+        const gradInfo = mapaGrad[gradStr] || { id: 0, nivel: "ALUNO", modalidade: "Geral" };
+
+        const userModalidade = (col.modalidade > -1 && row[col.modalidade]) ? String(row[col.modalidade]).trim() : gradInfo.modalidade;
+        const nivelOficial = String((col.nivel > -1 && row[col.nivel]) ? row[col.nivel] : gradInfo.nivel).toUpperCase();
+
+        const isInstrutor = nivelOficial.includes("INSTRUTOR") || nivelOficial.includes("PROFESSOR") || nivelOficial.includes("MESTRE");
+        const isMestre = nivelOficial.includes("MESTRE");
+        const isAdmin = nivelOficial.includes("ADMIN") || nivelOficial.includes("MESTRE");
+
+        // Calcula a idade na hora do login se a data de nascimento existir
+        const dataNascimento = (col.nasc > -1) ? row[col.nasc] : "";
+        const idadeCalculada = calcularIdadeExata(dataNascimento);
+
         const userPayload = {
           LOGIN: loginInput,
           nomeCompleto: row[col.nome],
           graduacao: (col.grad > -1) ? row[col.grad] : "Iniciante",
-          nivel: (col.nivel > -1) ? row[col.nivel] : "Aluno",
+          nivel: (col.nivel > -1 && row[col.nivel]) ? row[col.nivel] : gradInfo.nivel,
           fotoUrl: padronizarLinkDrive(row[col.foto]),
           academia: (col.acad > -1) ? row[col.acad] : "---",
           proximoExame: (col.exame > -1) ? row[col.exame] : "A definir",
-          isInstrutor: checkInstrutor(row[col.grad])
+          modalidade: userModalidade,
+          peso: (col.peso > -1) ? row[col.peso] : "",     // <-- INJETADO NO PERFIL DO ALUNO
+          altura: (col.altura > -1) ? row[col.altura] : "", // <-- INJETADO NO PERFIL DO ALUNO
+          idadeExata: idadeCalculada,                     // <-- INJETADO NO PERFIL DO ALUNO
+          isInstrutor: isInstrutor,
+          isMestre: isMestre,
+          isAdmin: isAdmin
         };
 
         if (!isCheckOnly) registrarLogLogin(loginInput, "SUCESSO");
@@ -2064,4 +2204,59 @@ function gerarPDFCarteirinhaServer(login) {
   } catch (e) {
     return { success: false, msg: e.message };
   }
+}
+
+// ============================================================================
+// 🥋 NOVOS CRUDS ADMIN (GRADUAÇÕES E MULTIMODALIDADE)
+// ============================================================================
+
+function listarGraduacoesAdminCompleto() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName("GRADUACAO") || ss.getSheetByName("Graduação") || ss.getSheetByName("Graduacao");
+    if (!sheet) return [];
+
+    const data = sheet.getDataRange().getDisplayValues();
+    if (data.length < 2) return [];
+
+    const headers = data[0].map(h => String(h).trim().toLowerCase());
+    const colGrad = headers.indexOf("graduação") !== -1 ? headers.indexOf("graduação") : headers.indexOf("faixa / nivel");
+    const colObs = headers.indexOf("observação") !== -1 ? headers.indexOf("observação") : headers.indexOf("observacao");
+    const colId = headers.indexOf("id");
+    const colMod = headers.indexOf("modalidade");
+    const colNivel = headers.indexOf("nivel");
+
+    return data.slice(1).map((row, i) => ({
+      linha: i + 2,
+      graduacao: row[colGrad] || "",
+      observacao: colObs > -1 ? row[colObs] : "",
+      id_hierarquia: row[colId] || "0",
+      modalidade: colMod > -1 ? row[colMod] : "Geral",
+      nivel: colNivel > -1 ? row[colNivel] : "Aluno"
+    })).filter(g => g.graduacao !== "");
+  } catch (e) { return []; }
+}
+
+function salvarGraduacaoDefinitiva(form) {
+  try {
+    const dados = {
+      "Graduação": form.grad_nome,
+      "Observação": form.grad_obs,
+      "ID": form.grad_id,
+      "Modalidade": form.grad_mod,
+      "Nivel": form.grad_nivel
+    };
+    const idLinha = parseInt(form.linha_id);
+    salvarDadosSeguro("GRADUACAO", dados, isNaN(idLinha) ? null : idLinha);
+    return isNaN(idLinha) ? "✅ Nova graduação criada com sucesso!" : "✅ Graduação atualizada com sucesso!";
+  } catch (e) { return "❌ Erro ao salvar graduação: " + e.message; }
+}
+
+function excluirGraduacaoAdmin(linha) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName("GRADUACAO") || ss.getSheetByName("Graduação");
+    sheet.deleteRow(parseInt(linha));
+    return "✅ Graduação excluída!";
+  } catch (e) { return "❌ Erro: " + e.message; }
 }

@@ -20,11 +20,12 @@ Acompanhe a evolução do nosso sistema.
 - [x] **Social.html:** Transformar botões em links dinâmicos.
 - [x] **Código.js:** Alterar `.setTitle()` para buscar o nome da academia dinamicamente.
 - [x] **CardTemplate.html:** Recriar a carteirinha usando apenas HTML e CSS puro (Adeus imagens estáticas de fundo).
+- [x] **O CHEFÃO:** Remover Hardcode de graduação. Permitir cadastro de ID (ordem), cor e modalidade.
+- [x] Permitir o Instrutor/Mestre acompanhar o desenvolvimento do Aluno (aulas, tempo de tatame).
+- [x] Exibir no Perfil do Aluno e no CRUD de Alunos: Peso, Idade (anos, meses e dias), Modalidade, Altura. Criar o "Super Relatório" administrativo para competições e exames.
 - [ ] Validar a renderização das imagens (Base64) na carteirinha em PDF em diferentes dispositivos antes de implementar na Confederação Pernambucana de Sambo.
-- [ ] **O CHEFÃO:** Remover Hardcode de graduação. Permitir cadastro de ID (ordem), cor e modalidade (Karate, Muay Thai, etc).
 - [ ] Gestão de Turmas.
 - [ ] Gestão de cadastro de Modalidades, associados aos locais de treino.
-- [ ] Permitir o Instrutor/Mestre acompanhar o desenvolvimento do Aluno (aulas, tempo).
 - [ ] Validar todos os arquivos do projeto (Pente fino).
 - [ ] Validar se a planilha Mestra funciona perfeitamente para clonagem.
 - [ ] Criar alertas de limite de escalabilidade (Avisar QA/Dev quando o banco Sheets chegar a 50% da capacidade).
@@ -32,21 +33,24 @@ Acompanhe a evolução do nosso sistema.
 ## 🚧 Fase 2: Gestão Financeira e Turmas (Em Andamento)
 
 - [x] Dashboard Financeiro (Inadimplência, Faturamento).
+- [ ] **[🚀 QUICK WIN] Fluxo de Pagamento Híbrido: Exibir QR Code/Chave PIX da academia e botão dinâmico "Enviar Comprovante (WhatsApp)" no painel do aluno.**
 - [ ] Separação de Turmas por Nível e Idade (Infantil, Iniciante, Avançado).
 - [ ] Check-in Antecipado (Agendamento de grade de aulas).
 
 ## 🔮 Fase 3: Automação, CRM e Compliance (Próximos Passos)
 
+- [x] Aluno Multimodalidade (Filtrar vídeos e programas baseados nas modalidades cruzadas).
 - [ ] Cobrança Automática: Disparo de WhatsApp (API) para atrasados.
 - [ ] Alertas Automáticos de Aniversário.
 - [ ] Relatórios Avançados (Gráficos de evasão, horários de pico).
 - [ ] Histórico do Aluno (tempo na turma, aulas assistidas, conteúdo visualizado).
-- [ ] Aluno Multimodalidade (Filtrar vídeos e programas baseados nas modalidades).
 - [ ] Modularizar a tela de Dashboard (Escolher quem vê qual card).
 - [ ] **Compliance:** Controle de Anuidade (Bloqueio em caso de inadimplência).
 - [ ] **Compliance:** Trava de inatividade por falta de presença no Congresso Oficial.
 - [ ] **Compliance:** Controle de Assiduidade em Treinos de Instrutores.
 - [ ] Validar se ao fazer a cópia da planilha, o SaaS continua a funcionar de forma autônoma.
+- [ ] Criar uma apresentação do App.
+- [ ] Atualizar o manual (ajuda.html) a cada nova implementação.
 
 ## 🌐 Projetos Especiais
 
