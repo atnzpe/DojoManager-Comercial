@@ -3,11 +3,11 @@
      INJEÇÃO DE CORES COM FALLBACK SEGURO
      ============================================================================ */
   :root {
-    --dynamic-bg: <?= typeof bgColor !== 'undefined' && bgColor ? bgColor : '#121212' ?> !important;
-    --dynamic-prim: <?= typeof primaryColor !== 'undefined' && primaryColor ? primaryColor : '#FFD700' ?> !important;
-    --dynamic-sec: <?= typeof secondaryColor !== 'undefined' && secondaryColor ? secondaryColor : '#1e1e1e' ?> !important;
-    --dynamic-text: <?= typeof textColor !== 'undefined' && textColor ? textColor : '#ffffff' ?> !important;
-    --dynamic-btn-text: <?= typeof btnTextColor !== 'undefined' && btnTextColor ? btnTextColor : '#000000' ?> !important;
+    --dynamic-bg: <?=typeof bgColor !=='undefined'&& bgColor ? bgColor: '#121212'?> !important;
+    --dynamic-prim: <?=typeof primaryColor !=='undefined'&& primaryColor ? primaryColor: '#FFD700'?> !important;
+    --dynamic-sec: <?=typeof secondaryColor !=='undefined'&& secondaryColor ? secondaryColor: '#1e1e1e'?> !important;
+    --dynamic-text: <?=typeof textColor !=='undefined'&& textColor ? textColor: '#ffffff'?> !important;
+    --dynamic-btn-text: <?=typeof btnTextColor !=='undefined'&& btnTextColor ? btnTextColor: '#000000'?> !important;
   }
 
   /* --- ESTILOS GESTÃO DE ALUNOS (WHITE-LABEL) --- */
@@ -32,7 +32,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 25px;
-    border-bottom: 2px solid rgba(255,255,255,0.1);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 15px;
     flex-wrap: wrap;
     gap: 15px;
@@ -105,7 +105,10 @@
     padding: 5px;
   }
 
-  ::placeholder { color: #888 !important; opacity: 1; }
+  ::placeholder {
+    color: #888 !important;
+    opacity: 1;
+  }
 
   /* --- TABELA --- */
   .gestao-table {
@@ -132,7 +135,7 @@
     border-bottom: 1px solid #eee;
     font-size: 13px;
     vertical-align: middle;
-    color: #333; 
+    color: #333;
   }
 
   /* --- BADGES --- */
@@ -144,9 +147,23 @@
     text-transform: uppercase;
   }
 
-  .badge-ativo { background: #e8f5e9; color: #2e7d32; border: 1px solid #4caf50; }
-  .badge-inativo { background: #ffebee; color: #c62828; border: 1px solid #f44336; }
-  .badge-bloqueado { background: #e3f2fd; color: #1565c0; border: 1px solid #2196f3; }
+  .badge-ativo {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #4caf50;
+  }
+
+  .badge-inativo {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #f44336;
+  }
+
+  .badge-bloqueado {
+    background: #e3f2fd;
+    color: #1565c0;
+    border: 1px solid #2196f3;
+  }
 
   /* --- BOTÕES --- */
   .btn-yellow {
@@ -163,7 +180,7 @@
     font-size: 12px;
     text-transform: uppercase;
     transition: 0.2s;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   }
 
   .btn-yellow:hover {
@@ -174,7 +191,10 @@
   /* --- MODAL DE EDIÇÃO --- */
   .modal-overlay {
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.85);
     display: none;
     justify-content: center;
@@ -196,8 +216,14 @@
     color: #333;
   }
 
-  .modal-box::-webkit-scrollbar { width: 8px; }
-  .modal-box::-webkit-scrollbar-thumb { background: var(--dynamic-prim); border-radius: 10px; }
+  .modal-box::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .modal-box::-webkit-scrollbar-thumb {
+    background: var(--dynamic-prim);
+    border-radius: 10px;
+  }
 
   .form-grid {
     display: grid;
@@ -206,11 +232,18 @@
     margin-bottom: 15px;
   }
 
-  .form-full { grid-column: span 2; }
+  .form-full {
+    grid-column: span 2;
+  }
 
   @media (max-width: 700px) {
-    .form-grid { grid-template-columns: 1fr; }
-    .form-full { grid-column: span 1; }
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-full {
+      grid-column: span 1;
+    }
   }
 
   .form-label {
@@ -223,9 +256,31 @@
     text-transform: uppercase;
   }
 
-  .spin { animation: spin 1s linear infinite; }
-  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .spin {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>
 
 <div id="gestao-alunos-view" style="display:none;">
@@ -238,7 +293,7 @@
         </button>
         <h2 class="gestao-title">Gestão de Alunos</h2>
       </div>
-      
+
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <button class="btn-yellow" onclick="GestaoAlunosApp.inicializar()">
           <span class="material-icons">refresh</span> Atualizar
@@ -278,7 +333,8 @@
 
 <div id="modal-editar-aluno" class="modal-overlay">
   <div class="modal-box">
-    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid var(--dynamic-prim); padding-bottom:15px; margin-bottom:20px;">
+    <div
+      style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid var(--dynamic-prim); padding-bottom:15px; margin-bottom:20px;">
       <h3 style="margin:0; color:#333; font-weight:900; font-size:1.4rem;" id="titulo-modal-gestao">Editar Aluno</h3>
       <button onclick="GestaoAlunosApp.fecharModal()" style="background:none; border:none; cursor:pointer; font-size:24px; color:#ff5252; font-weight:bold;">✕</button>
     </div>
@@ -338,16 +394,9 @@
               </select>
             </div>
           </div>
+          <p style="font-size: 10px; color: #777; margin-top: 5px;">*O Nível de Acesso (Aluno/Instrutor) será atribuído
+            automaticamente com base na Graduação escolhida acima.</p>
 
-          <label class="form-label">NÍVEL DE PERMISSÃO</label>
-          <select id="ga-nivel" class="gestao-input">
-            <option value="Aluno">Aluno (Padrão)</option>
-            <option value="Instrutor N1">Instrutor N1</option>
-            <option value="Instrutor N2">Instrutor N2</option>
-            <option value="Instrutor N3">Instrutor N3</option>
-            <option value="Professor">Professor</option>
-            <option value="Mestre">Mestre</option>
-          </select>
         </div>
 
         <div class="form-full">
@@ -381,7 +430,8 @@
         </div>
       </div>
 
-      <div style="display:flex; justify-content:flex-end; gap:15px; border-top:1px solid #ccc; padding-top:20px; margin-top:10px;">
+      <div
+        style="display:flex; justify-content:flex-end; gap:15px; border-top:1px solid #ccc; padding-top:20px; margin-top:10px;">
         <button type="button" onclick="GestaoAlunosApp.fecharModal()" class="btn-yellow" style="background:transparent !important; color:#333 !important; border: 1px solid #333; box-shadow:none;">Cancelar</button>
         <button type="submit" class="btn-yellow" style="padding: 12px 25px;"><span class="material-icons" style="font-size:18px;">save</span> SALVAR DADOS</button>
       </div>
@@ -391,7 +441,7 @@
 
 <script>
   // ============================================================================
-  // NAMESPACE ISOLADO PARA EVITAR CONFLITOS DE VARIÁVEIS (ex: cacheGestaoAlunos)
+  // NAMESPACE ISOLADO PARA EVITAR CONFLITOS DE VARIÁVEIS 
   // ============================================================================
   const GestaoAlunosApp = {
       cacheLista: [],
@@ -448,11 +498,20 @@
                 </td>
                 <td>
                     <span style="font-size:12px; color:#333; font-weight:bold;">Academia: ${exibir(a.academia)}</span><br>
-                    <span style="font-size:11px; color:#666">Tel: ${exibir(a.tel)}</span>
+                    <span style="font-size:11px; color:#666">Tel: ${exibir(a.tel)}</span><br>
+                    <div style="margin-top:6px; padding-top:6px; border-top:1px dashed #ddd;">
+                      <span style="font-size:10px; color:#888; display:block;">
+                         <span class="material-icons" style="font-size:11px; vertical-align:middle;">calendar_today</span> Início: ${exibir(a.dataInicio)}
+                      </span>
+                      <span style="font-size:10px; color:#0056b3; display:block; margin-top:2px; font-weight:900;">
+                         <span class="material-icons" style="font-size:11px; vertical-align:middle;">fitness_center</span> Total de Aulas: ${a.totalAulas}
+                      </span>
+                    </div>
                 </td>
                 <td>
                     <span class="badge ${badgeClass}">${a.status}</span><br>
-                    <span style="font-size:11px; margin-top:5px; display:block; color:#555;">Faixa: <b>${exibir(a.graduacao)}</b></span>
+                    <span style="font-size:11px; margin-top:6px; display:block; color:#333;">Faixa: <b>${exibir(a.graduacao)}</b></span>
+                    <span class="badge" style="background:#eee; color:#333; margin-top:3px; display:inline-block; border: 1px solid #ccc;">🛡️ ${exibir(a.modalidade)}</span>
                 </td>
                 <td>
                     <button class="btn-yellow" style="padding:8px 12px;" onclick="GestaoAlunosApp.prepararEdicao(${a.id})">
@@ -512,13 +571,7 @@
           document.getElementById('ga-email').value = v(aluno.email);
           document.getElementById('ga-status').value = v(aluno.status);
           
-          const nivelVal = v(aluno.nivel);
-          const selNivel = document.getElementById('ga-nivel');
-          if ([...selNivel.options].some(o => o.value === nivelVal)) {
-              selNivel.value = nivelVal;
-          } else {
-              selNivel.value = "Aluno"; 
-          }
+          // O campo de Nível foi removido, então não precisamos mais preenchê-lo.
 
           document.getElementById('ga-end').value = v(aluno.endereco);
           document.getElementById('ga-exame').value = d(aluno.proxExame); 
@@ -583,7 +636,7 @@
               aluno_acad: document.getElementById('ga-acad').value,
               aluno_grad: document.getElementById('ga-grad').value,
               aluno_status: document.getElementById('ga-status').value,
-              aluno_nivel: document.getElementById('ga-nivel').value,
+              // ga-nivel foi removido.
               aluno_end: document.getElementById('ga-end').value,
               aluno_prox_grad: document.getElementById('ga-prox-grad').value, 
               aluno_exame: fd(document.getElementById('ga-exame').value), 

@@ -1,8 +1,8 @@
 <style>
   /* --- ADMIN STYLES (SCOPED - AMBIENTE DE TRABALHO CLEAN E ESTÁVEL) --- */
   .admin-view-container {
-    background-color: #f8f9fa; /* Fundo claro fixo para contraste administrativo */
-    color: #333;               /* Texto escuro fixo para leitura em tabelas */
+    background-color: #f8f9fa;
+    color: #333;
     font-family: 'Roboto', sans-serif;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
@@ -10,13 +10,11 @@
     min-height: 80vh;
     margin-top: 10px;
     position: relative;
-    /* Z-Index baixo garante que não vá cobrir botões globais como o de Ajuda */
     z-index: 10;
   }
 
-  /* NAVEGAÇÃO SUPERIOR DO ADMIN */
   .adm-nav {
-    background: #1e1e1e; /* Fundo escuro fixo para a barra de menu */
+    background: #1e1e1e;
     display: flex;
     overflow-x: auto;
     border-bottom: 1px solid #333;
@@ -51,7 +49,6 @@
     opacity: 1;
   }
 
-  /* CONTEÚDO DAS ABAS */
   .adm-tab-content {
     display: none;
     padding: 20px;
@@ -62,7 +59,6 @@
     display: block;
   }
 
-  /* Títulos Internos */
   .adm-h3 {
     margin: 0 0 25px 0;
     font-size: 20px;
@@ -81,10 +77,10 @@
     flex-wrap: wrap;
   }
 
-  /* INPUTS E FORMS: SEMPRE PRETO NO BRANCO PARA O ADMIN */
   .adm-input,
   select.adm-input,
   input[type="date"].adm-input,
+  input[type="number"].adm-input,
   textarea.adm-input {
     width: 100%;
     padding: 10px;
@@ -102,12 +98,6 @@
     outline: none;
   }
 
-  select.adm-input option {
-    color: #000000 !important;
-    background-color: #ffffff !important;
-    padding: 5px;
-  }
-
   ::placeholder {
     color: #999 !important;
     opacity: 1;
@@ -119,7 +109,6 @@
     cursor: pointer;
   }
 
-  /* TABELAS ADMIN */
   .adm-table {
     width: 100%;
     border-collapse: collapse;
@@ -147,20 +136,39 @@
     color: #333;
   }
 
-  /* BADGES DE STATUS */
   .adm-badge {
     padding: 4px 8px;
     border-radius: 4px;
     font-size: 10px;
     font-weight: bold;
     text-transform: uppercase;
+    display: inline-block;
   }
 
-  .bg-green { background: #e8f5e9; color: #2e7d32; }
-  .bg-red { background: #ffebee; color: #c62828; }
-  .bg-blue { background: #e3f2fd; color: #1565c0; }
+  .bg-green {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #4caf50;
+  }
 
-  /* BOTÕES ADMIN */
+  .bg-red {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #f44336;
+  }
+
+  .bg-blue {
+    background: #e3f2fd;
+    color: #1565c0;
+    border: 1px solid #2196f3;
+  }
+
+  .bg-dark {
+    background: #eee;
+    color: #333;
+    border: 1px solid #ccc;
+  }
+
   .adm-btn {
     padding: 8px 16px;
     background-color: #FFD700;
@@ -178,32 +186,37 @@
     transition: 0.2s;
   }
 
-  .adm-btn:hover { background-color: #F5C500; }
-  .adm-btn:disabled { background-color: #ccc; cursor: not-allowed; }
-  
+  .adm-btn:hover {
+    background-color: #F5C500;
+    transform: translateY(-2px);
+  }
+
   .adm-btn-outline {
     background-color: transparent;
     color: #333;
     border: 1px solid #333;
   }
-  .adm-btn-outline:hover { background-color: #f1f1f1; }
 
-  /* MODAIS ADMIN (Edições) */
+  .adm-btn-outline:hover {
+    background-color: #f1f1f1;
+  }
+
   .adm-modal {
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.6); /* Escurecimento leve para foco */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
     display: none;
     justify-content: center;
     align-items: center;
-    /* Z-Index 9999 para ficar ABAIXO do botão de ajuda (99999) */
     z-index: 9999;
     backdrop-filter: blur(2px);
   }
 
   .adm-modal-box {
-    background: #fff; /* Fundo limpo para trabalho */
+    background: #fff;
     padding: 25px;
     border-radius: 8px;
     width: 500px;
@@ -214,12 +227,19 @@
     color: #333;
   }
 
-  .adm-modal-box.large { width: 800px; }
+  .adm-modal-box.large {
+    width: 900px;
+  }
 
   .form-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
   }
-  .form-full { grid-column: span 2; }
+
+  .form-full {
+    grid-column: span 2;
+  }
 
   .adm-label {
     font-size: 11px;
@@ -230,7 +250,6 @@
     margin-top: 10px;
   }
 
-  /* BOTÕES DE TEMA RÁPIDO (ABA CONFIGURAÇÃO) */
   .theme-preset {
     padding: 15px;
     border-radius: 8px;
@@ -252,49 +271,119 @@
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
   }
 
-  /* HELPERS DE ANIMAÇÃO E SCROLL */
-  .spin { animation: spin 1s linear infinite; }
-  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  .spin {
+    animation: spin 1s linear infinite;
+  }
 
-  .adm-modal-box::-webkit-scrollbar { width: 8px; }
-  .adm-modal-box::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .adm-modal-box::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .adm-modal-box::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+  }
+
+  /* Estilo customizado para os checkboxes de modalidade */
+  .checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 10px;
+  }
+
+  .mod-check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #333;
+    background: #f4f4f4;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    transition: 0.2s;
+  }
+
+  .mod-check-label:hover {
+    background: #e0e0e0;
+  }
+
+  .mod-check-input {
+    width: 16px;
+    height: 16px;
+    accent-color: #FFD700;
+    cursor: pointer;
+  }
 </style>
 
 <div class="admin-view-container">
   <div class="adm-nav">
-    <div class="adm-nav-item active" onclick="navAdmin('alunos')"><span class="material-icons">people</span> Alunos</div>
+    <div class="adm-nav-item active" onclick="navAdmin('alunos')"><span class="material-icons">people</span> Alunos
+    </div>
+    <div class="adm-nav-item" onclick="navAdmin('graduacoes')"><span class="material-icons">military_tech</span>
+      Graduações</div>
     <div class="adm-nav-item" onclick="navAdmin('videos')"><span class="material-icons">movie</span> Vídeos</div>
     <div class="adm-nav-item" onclick="navAdmin('locais')"><span class="material-icons">place</span> Locais</div>
     <div class="adm-nav-item" onclick="navAdmin('cursos')"><span class="material-icons">school</span> Eventos</div>
-    <div class="adm-nav-item" onclick="navAdmin('biblioteca')"><span class="material-icons">menu_book</span> Biblioteca</div>
-    <div class="adm-nav-item" onclick="navAdmin('programas')"><span class="material-icons">description</span> Programas</div>
-    <div class="adm-nav-item" onclick="navAdmin('certificados')"><span class="material-icons">workspace_premium</span> Certificados</div>
-    <div class="adm-nav-item" onclick="navAdmin('config')"><span class="material-icons">settings</span> Config</div>
-
-    <div class="adm-nav-item" style="margin-left: auto; border-left: 1px solid #333;" onclick="fecharAdmin()">
-      <span class="material-icons" style="color: #ff5252;">close</span> Voltar
+    <div class="adm-nav-item" onclick="navAdmin('biblioteca')"><span class="material-icons">menu_book</span> Biblioteca
     </div>
+    <div class="adm-nav-item" onclick="navAdmin('programas')"><span class="material-icons">description</span> Programas
+    </div>
+    <div class="adm-nav-item" onclick="navAdmin('certificados')"><span class="material-icons">workspace_premium</span>
+      Certificados</div>
+    <div class="adm-nav-item" onclick="navAdmin('config')"><span class="material-icons">settings</span> Config</div>
+    <div class="adm-nav-item" style="margin-left: auto; border-left: 1px solid #333;" onclick="fecharAdmin()">
+      <span class="material-icons" style="color: #ff5252;">close</span> Voltar</div>
   </div>
 
   <div id="adm-tab-alunos" class="adm-tab-content active">
-    <div class="adm-h3">Gestão de Alunos
+    <div class="adm-h3">Gestão de Alunos (Módulo CRM)
       <div style="display:flex; gap:10px;">
+        <button class="adm-btn" style="background:#2196F3; color:white;" onclick="abrirSuperRelatorio()"><span class="material-icons" style="font-size:16px;">analytics</span> Super Relatório</button>
         <button class="adm-btn adm-btn-outline" onclick="carregarAlunos()"><span class="material-icons" style="font-size:16px;">refresh</span> Atualizar</button>
         <button class="adm-btn" onclick="abrirModalNovoAluno()"><span class="material-icons" style="font-size:16px;">person_add</span> Novo Aluno</button>
       </div>
     </div>
     <div class="adm-toolbar">
-        <input type="text" id="search-alunos" class="adm-input" placeholder="🔍 Filtrar por nome ou login..." onkeyup="filtrarAlunos()">
+      <input type="text" id="search-alunos" class="adm-input" placeholder="🔍 Filtrar por nome ou login..." onkeyup="filtrarAlunos()">
     </div>
     <div style="overflow-x:auto;">
       <table class="adm-table">
         <thead>
           <tr>
-            <th>Login</th>
-            <th>Nome Completo</th>
-            <th>Graduação / Academia</th>
-            <th>Status</th>
+            <th>Login / Info</th>
+            <th>Fisiologia / Stats</th>
+            <th>Graduação / Modalidade</th>
+            <th>Acesso</th>
             <th>Ação</th>
           </tr>
         </thead>
@@ -303,11 +392,46 @@
     </div>
   </div>
 
+  <div id="adm-tab-graduacoes" class="adm-tab-content">
+    <div class="adm-h3">Estrutura de Graduações e Modalidades
+      <div style="display:flex; gap:10px;">
+        <button class="adm-btn adm-btn-outline" onclick="carregarGraduacoes()"><span class="material-icons" style="font-size:16px;">refresh</span> Atualizar</button>
+        <button class="adm-btn" onclick="abrirModalGrad()"><span class="material-icons" style="font-size:16px;">add</span> Nova Graduação</button>
+      </div>
+    </div>
+    <p style="font-size: 12px; color: #666; margin-top: -15px; margin-bottom:20px;">
+      <b>Dica do Arquiteto:</b> O "ID" define a hierarquia (0 = Iniciante, 10 = Mestre). É ele que decide quais vídeos o
+      aluno pode ver!
+    </p>
+    <div class="adm-toolbar">
+      <input type="text" id="search-grad" class="adm-input" placeholder="🔍 Filtrar por Modalidade ou Faixa..." onkeyup="filtrarGraduacoes()">
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th>ID (Ordem)</th>
+            <th>Modalidade</th>
+            <th>Nome da Faixa / Nível</th>
+            <th>Nível de Sistema</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody id="lista-grad-body">
+          <tr>
+            <td colspan="5" style="text-align:center">Carregando dados estruturais...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <div id="adm-tab-videos" class="adm-tab-content">
     <div class="adm-h3">Videoteca
       <button class="adm-btn" onclick="openModalVideo()"><span class="material-icons" style="font-size:16px;">add</span> Novo Vídeo</button>
     </div>
-    <div class="adm-toolbar"><input type="text" id="search-videos" class="adm-input" placeholder="🔍 Filtrar vídeos..." onkeyup="filtrarVideos()"></div>
+    <div class="adm-toolbar"><input type="text" id="search-videos" class="adm-input" placeholder="🔍 Filtrar vídeos..." onkeyup="filtrarVideos()">
+    </div>
     <div style="overflow-x:auto;">
       <table class="adm-table">
         <thead>
@@ -327,7 +451,8 @@
     <div class="adm-h3">Academias
       <button class="adm-btn" onclick="openModalLocal()"><span class="material-icons" style="font-size:16px;">add</span> Nova Academia</button>
     </div>
-    <div class="adm-toolbar"><input type="text" id="search-locais" class="adm-input" placeholder="🔍 Filtrar locais..." onkeyup="filtrarLocais()"></div>
+    <div class="adm-toolbar"><input type="text" id="search-locais" class="adm-input" placeholder="🔍 Filtrar locais..." onkeyup="filtrarLocais()">
+    </div>
     <div style="overflow-x:auto;">
       <table class="adm-table">
         <thead>
@@ -347,7 +472,8 @@
     <div class="adm-h3">Eventos e Seminários
       <button class="adm-btn" onclick="abrirModalCurso()"><span class="material-icons" style="font-size:16px;">add</span> Novo Evento</button>
     </div>
-    <div class="adm-toolbar"><input type="text" id="search-cursos" class="adm-input" placeholder="🔍 Filtrar cursos..." onkeyup="filtrarCursos()"></div>
+    <div class="adm-toolbar"><input type="text" id="search-cursos" class="adm-input" placeholder="🔍 Filtrar cursos..." onkeyup="filtrarCursos()">
+    </div>
     <div style="overflow-x:auto;">
       <table class="adm-table">
         <thead>
@@ -378,9 +504,7 @@
             <th>Ação</th>
           </tr>
         </thead>
-        <tbody id="lista-lib-body">
-          <tr><td colspan="4" style="text-align:center">Carregando...</td></tr>
-        </tbody>
+        <tbody id="lista-lib-body"></tbody>
       </table>
     </div>
   </div>
@@ -399,9 +523,7 @@
             <th>Ação</th>
           </tr>
         </thead>
-        <tbody id="lista-prog-body">
-          <tr><td colspan="4" style="text-align:center">Carregando...</td></tr>
-        </tbody>
+        <tbody id="lista-prog-body"></tbody>
       </table>
     </div>
   </div>
@@ -412,37 +534,52 @@
     </div>
     <div class="adm-toolbar">
       <input type="text" id="search-cert" class="adm-input" placeholder="🔍 Filtrar por CPF ou Nome..." onkeyup="filtrarCertificados()">
-      <select id="filter-curso-cert" class="adm-input" onchange="filtrarCertificados()" style="max-width: 250px;"><option value="">Todos os Cursos</option></select>
+      <select id="filter-mod-cert" class="adm-input" onchange="filtrarCertificados()" style="max-width: 200px;"><option value="">Todas Modalidades</option></select>
+      <select id="filter-curso-cert" class="adm-input" onchange="filtrarCertificados()" style="max-width: 200px;"><option value="">Todos Cursos</option></select>
     </div>
     <div style="overflow-x:auto;">
       <table class="adm-table">
         <thead>
           <tr>
             <th>CPF / Aluno</th>
-            <th>Curso / Data</th>
+            <th>Curso / Modalidade</th>
             <th>Link</th>
             <th>Ação</th>
           </tr>
         </thead>
-        <tbody id="lista-cert-body">
-          <tr><td colspan="4" style="text-align:center">Carregando...</td></tr>
-        </tbody>
+        <tbody id="lista-cert-body"></tbody>
       </table>
     </div>
   </div>
 
   <div id="adm-tab-config" class="adm-tab-content">
-    <div class="adm-h3">Identidade Visual (White-Label)</div>
     <form onsubmit="handleAdmForm(event, 'salvarConfig')">
 
+      <div class="adm-h3">Identidade Visual (White-Label)</div>
       <div class="form-grid">
-        <div>
-          <label class="adm-label">ID da Logomarca (Google Drive)</label>
-          <input type="text" name="cfg_icon" id="cfg_icon" class="adm-input" placeholder="Cole o ID da imagem aqui...">
+        <div><label class="adm-label">ID da Logomarca (Drive)</label><input type="text" name="cfg_icon" id="cfg_icon" class="adm-input" placeholder="Cole o ID da imagem aqui...">
         </div>
-        <div>
-          <label class="adm-label">ID da Imagem de Fundo (Google Drive)</label>
-          <input type="text" name="cfg_bg" id="cfg_bg" class="adm-input" placeholder="Cole o ID da imagem aqui...">
+        <div><label class="adm-label">ID da Imagem de Fundo (Drive)</label><input type="text" name="cfg_bg" id="cfg_bg" class="adm-input" placeholder="Cole o ID da imagem aqui...">
+        </div>
+      </div>
+
+      <hr style="border:0; border-top:1px solid #ccc; margin:30px 0;">
+
+      <div class="adm-h3">Links e Integrações (Módulo Aluno)</div>
+      <p style="font-size: 12px; color: #666; margin-top: -15px; margin-bottom:20px;">Substitua os links padrão do
+        sistema pelos da sua academia.</p>
+
+      <div class="form-grid">
+        <div class="form-full">
+          <label class="adm-label" style="color:var(--dynamic-text);"><span class="material-icons" style="font-size:14px; vertical-align:middle">business</span> Nome Oficial da Academia (Aparece no navegador)</label><input type="text" name="cfg_nome_acad" id="cfg_nome_acad" class="adm-input" placeholder="Ex: Confederação Pernambucana de Sambo" style="border-left: 4px solid #FFD700;">
+        </div>
+        <div><label class="adm-label" style="color:#25D366;">Link da Loja (WhatsApp)</label><input type="text" name="cfg_link_loja" id="cfg_link_loja" class="adm-input">
+        </div>
+        <div><label class="adm-label" style="color:#bc1888;">Link do Instagram</label><input type="text" name="cfg_link_insta" id="cfg_link_insta" class="adm-input">
+        </div>
+        <div><label class="adm-label" style="color:#FF0000;">Link do YouTube</label><input type="text" name="cfg_link_yt" id="cfg_link_yt" class="adm-input">
+        </div>
+        <div><label class="adm-label" style="color:#2196f3;">Link Formulário Cadastro</label><input type="text" name="cfg_link_cad" id="cfg_link_cad" class="adm-input">
         </div>
       </div>
 
@@ -450,7 +587,8 @@
 
       <div style="margin-bottom: 25px;">
         <label class="adm-label" style="font-size: 14px; color: #333;">🎨 Temas Rápidos</label>
-        <p style="font-size: 12px; color: #666; margin-top: 0;">Aplique paletas pré-configuradas para o App do Aluno.</p>
+        <p style="font-size: 12px; color: #666; margin-top: 0;">Aplique paletas pré-configuradas para o App do Aluno.
+        </p>
 
         <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
           <button type="button" class="theme-preset" onclick="aplicarTema('#FFD700', '#1e1e1e', '#ffffff', '#000000', '#121212')" style="background: linear-gradient(135deg, #1e1e1e 50%, #FFD700 50%); border-color: #FFD700;">Dourado</button>
@@ -459,397 +597,840 @@
           <button type="button" class="theme-preset" onclick="aplicarTema('#00E676', '#1E272E', '#ffffff', '#000000', '#111518')" style="background: linear-gradient(135deg, #1E272E 50%, #00E676 50%); border-color: #00E676;">Zen Verde</button>
         </div>
 
-        <div style="display: flex; flex-wrap: wrap; gap: 20px; background: #eee; padding: 25px; border-radius: 12px; border: 1px solid #ccc; margin-top: 20px;">
-          
+        <div
+          style="display: flex; flex-wrap: wrap; gap: 20px; background: #eee; padding: 25px; border-radius: 12px; border: 1px solid #ccc; margin-top: 20px;">
           <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 5px;">
             <label class="adm-label">Cores Customizadas</label>
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap:10px;">
-              <div><span style="font-size:11px; color:#555">Fundo Geral</span><input type="color" name="cfg_color_bg" id="cfg_color_bg" class="adm-input" oninput="atualizarPreviewCores()"></div>
-              <div><span style="font-size:11px; color:#555">Primária (Cor)</span><input type="color" name="cfg_color" id="cfg_color" class="adm-input" oninput="atualizarPreviewCores()"></div>
-              <div><span style="font-size:11px; color:#555">Secundária (Card)</span><input type="color" name="cfg_color_sec" id="cfg_color_sec" class="adm-input" oninput="atualizarPreviewCores()"></div>
-              <div><span style="font-size:11px; color:#555">Texto Fonte</span><input type="color" name="cfg_color_text" id="cfg_color_text" class="adm-input" oninput="atualizarPreviewCores()"></div>
-              <div><span style="font-size:11px; color:#555">Texto Botão</span><input type="color" name="cfg_color_btn_text" id="cfg_color_btn_text" class="adm-input" oninput="atualizarPreviewCores()"></div>
+              <div><span style="font-size:11px; color:#555">Fundo</span><input type="color" name="cfg_color_bg" id="cfg_color_bg" class="adm-input" oninput="atualizarPreviewCores()">
+              </div>
+              <div><span style="font-size:11px; color:#555">Primária</span><input type="color" name="cfg_color" id="cfg_color" class="adm-input" oninput="atualizarPreviewCores()">
+              </div>
+              <div><span style="font-size:11px; color:#555">Secundária</span><input type="color" name="cfg_color_sec" id="cfg_color_sec" class="adm-input" oninput="atualizarPreviewCores()">
+              </div>
+              <div><span style="font-size:11px; color:#555">Txt Fonte</span><input type="color" name="cfg_color_text" id="cfg_color_text" class="adm-input" oninput="atualizarPreviewCores()">
+              </div>
+              <div><span style="font-size:11px; color:#555">Txt Botão</span><input type="color" name="cfg_color_btn_text" id="cfg_color_btn_text" class="adm-input" oninput="atualizarPreviewCores()">
+              </div>
             </div>
           </div>
-
-          <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #ddd; border-radius: 12px; padding: 20px; border: 1px dashed #aaa;">
+          <div
+            style="flex: 1; min-width: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: #ddd; border-radius: 12px; padding: 20px; border: 1px dashed #aaa;">
             <label class="adm-label" style="text-align: center; margin-top: 0; margin-bottom: 15px; color:#666;">Preview em Tempo Real</label>
-            <div id="live-preview-card" style="width: 100%; max-width: 280px; padding: 20px; border-radius: 12px; border: 2px solid #FFD700; background-color: #1e1e1e; text-align: center; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+            <div id="live-preview-card"
+              style="width: 100%; max-width: 280px; padding: 20px; border-radius: 12px; border: 2px solid #FFD700; background-color: #1e1e1e; text-align: center; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
               <h3 id="preview-title" style="margin-top: 0; color: #FFD700; font-weight:900;">App Preview</h3>
-              <p id="preview-text" style="font-size: 0.85rem; color: #ffffff; margin-bottom: 20px;">Verifique a leitura das cores neste card antes de salvar.</p>
               <button id="preview-btn" type="button" style="width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 900; text-transform: uppercase; background-color: #FFD700; color: #000000; transition: 0.3s;">TESTE DE BOTÃO</button>
             </div>
           </div>
         </div>
 
-        <button type="submit" class="adm-btn" style="margin-top:25px; background:#4caf50; color:white; width: 100%; padding: 18px; font-size: 14px; box-shadow:0 5px 15px rgba(76,175,80,0.4);">
-          <span class="material-icons" style="font-size:18px;">save</span> Salvar e Reiniciar App
-        </button>
+        <button type="submit" class="adm-btn" style="margin-top:35px; background:#4caf50; color:white; width: 100%; padding: 18px; font-size: 14px;"><span class="material-icons" style="font-size:18px;">save</span> Salvar e Reiniciar App</button>
       </div>
     </form>
   </div>
-</div>
 
-<div id="adm-modal-edit" class="adm-modal">
-  <div class="adm-modal-box large">
-    <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0;">
-      <span>Ficha do Aluno</span>
-      <button onclick="closeModal('adm-modal-edit')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
-    </div>
-    <form id="form-edit-aluno" onsubmit="handleSalvarAluno(event)">
-      <input type="hidden" name="aluno_id" id="aluno_id">
-      <div class="form-grid">
-        <div>
-          <label class="adm-label">Nome Completo*</label><input type="text" id="aluno_nome" name="aluno_nome" class="adm-input" required>
-          <label class="adm-label">CPF</label><input type="text" id="aluno_cpf" name="aluno_cpf" class="adm-input">
-          <label class="adm-label">Data Nascimento</label><input type="date" id="aluno_nasc" name="aluno_nasc" class="adm-input">
-          <label class="adm-label">Telefone</label><input type="text" id="aluno_tel" name="aluno_tel" class="adm-input">
-          <label class="adm-label">Nome do Pai</label><input type="text" id="aluno_pai" name="aluno_pai" class="adm-input">
-          <label class="adm-label">Nome da Mãe</label><input type="text" id="aluno_mae" name="aluno_mae" class="adm-input">
-          <label class="adm-label">Academia Vinculada</label><select id="aluno_acad" name="aluno_acad" class="adm-input"><option value="" disabled selected>Carregando...</option></select>
-        </div>
-        <div>
-          <label class="adm-label">LOGIN (Usuário)*</label>
-          <input type="text" id="aluno_login" name="aluno_login" class="adm-input" required style="border-left: 4px solid #FFD700;">
-          <label class="adm-label">Senha*</label><input type="text" id="aluno_senha" name="aluno_senha" class="adm-input" required>
-          <label class="adm-label">E-mail</label><input type="email" id="aluno_email" name="aluno_email" class="adm-input">
-          <label class="adm-label">Graduação Atual</label><select id="aluno_grad" name="aluno_grad" class="adm-input"><option value="" disabled selected>Carregando...</option></select>
-          <label class="adm-label">Status do Acesso</label>
-          <select id="aluno_status" name="aluno_status" class="adm-input">
-            <option value="Ativo" style="color:#4caf50; font-weight:bold;">Ativo</option>
-            <option value="Inativo" style="color:#f44336; font-weight:bold;">Inativo</option>
-            <option value="Bloqueado" style="color:#2196f3; font-weight:bold;">Bloqueado</option>
-          </select>
-          <label class="adm-label">Nível de Permissão</label>
-          <select id="aluno_nivel" name="aluno_nivel" class="adm-input">
-            <option value="Aluno">Aluno (Padrão)</option>
-            <option value="Instrutor N1">Instrutor N1</option>
-            <option value="Instrutor N2">Instrutor N2</option>
-            <option value="Instrutor N3">Instrutor N3</option>
-            <option value="Professor">Professor</option>
-            <option value="Mestre">Mestre</option>
-          </select>
-          <label class="adm-label">Data Próx. Exame</label><input type="date" id="aluno_exame" name="aluno_exame" class="adm-input">
-        </div>
-        <div class="form-full"><label class="adm-label">Endereço Completo</label><input type="text" id="aluno_end" name="aluno_end" class="adm-input"></div>
-        <div class="form-full">
-          <div style="display: flex; gap: 15px;">
-            <div style="flex:1"><label class="adm-label">Data Últ. Carteirinha</label><input type="date" id="aluno_data_cart" name="aluno_data_cart" class="adm-input"></div>
-            <div style="flex:1">
-              <label class="adm-label">Próxima Graduação</label><select id="aluno_prox_grad" name="aluno_prox_grad" class="adm-input"><option value="">Selecione...</option></select>
+
+  <div id="adm-modal-aluno" class="adm-modal">
+    <div class="adm-modal-box large">
+      <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
+        <span id="titulo-modal-aluno">Ficha do Aluno</span>
+        <button type="button" onclick="closeModal('adm-modal-aluno')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+      </div>
+
+      <form id="form-edit-aluno" onsubmit="handleAdmForm(event, 'salvarAluno')">
+        <input type="hidden" name="aluno_id" id="aluno_id">
+        <input type="hidden" name="aluno_carimbo" id="aluno_carimbo">
+
+        <div class="form-grid">
+          <div style="background:#f4f4f4; padding:15px; border-radius:8px; border:1px solid #ddd;">
+            <h4 style="margin:0 0 10px 0; color:#333; text-transform:uppercase;">Dados Pessoais</h4>
+            <label class="adm-label">Nome Completo*</label><input type="text" id="aluno_nome" name="aluno_nome" class="adm-input" required>
+            <label class="adm-label">CPF</label><input type="text" id="aluno_cpf" name="aluno_cpf" class="adm-input">
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div><label class="adm-label">Data Nascimento*</label><input type="date" id="aluno_nasc" name="aluno_nasc" class="adm-input" required>
+              </div>
+              <div><label class="adm-label">Telefone</label><input type="text" id="aluno_tel" name="aluno_tel" class="adm-input">
+              </div>
+            </div>
+
+            <div
+              style="display:grid; grid-template-columns:1fr 1fr; gap:10px; background:#e8f5e9; padding:10px; border-radius:6px; border:1px solid #c8e6c9; margin-top:10px;">
+              <div><label class="adm-label" style="margin-top:0;">Peso (kg)</label><input type="number" step="0.1" id="aluno_peso" name="aluno_peso" class="adm-input" placeholder="Ex: 75.5">
+              </div>
+              <div><label class="adm-label" style="margin-top:0;">Altura (m)</label><input type="number" step="0.01" id="aluno_altura" name="aluno_altura" class="adm-input" placeholder="Ex: 1.80">
+              </div>
+            </div>
+
+            <label class="adm-label">E-mail</label><input type="email" id="aluno_email" name="aluno_email" class="adm-input">
+            <label class="adm-label">Nome do Pai</label><input type="text" id="aluno_pai" name="aluno_pai" class="adm-input">
+            <label class="adm-label">Nome da Mãe</label><input type="text" id="aluno_mae" name="aluno_mae" class="adm-input">
+            <label class="adm-label">Endereço Completo</label><input type="text" id="aluno_end" name="aluno_end" class="adm-input">
+            <label class="adm-label">Link Foto 3x4 (Drive)</label><input type="text" id="aluno_foto" name="aluno_foto" class="adm-input" placeholder="https://...">
+          </div>
+
+          <div style="background:#f9f9f9; padding:15px; border-radius:8px; border:1px solid #ddd;">
+            <h4 style="margin:0 0 10px 0; color:#333; text-transform:uppercase;">Dados de Tatame</h4>
+            <div style="display:flex; gap:10px;">
+              <div style="flex:1;"><label class="adm-label">LOGIN (Usuário)*</label><input type="text" id="aluno_login" name="aluno_login" class="adm-input" required style="border-left:4px solid #FFD700; background:#fffdf5 !important;">
+              </div>
+              <div style="flex:1;"><label class="adm-label">Senha*</label><input type="text" id="aluno_senha" name="aluno_senha" class="adm-input" required>
+              </div>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <div style="flex:1;">
+                <label class="adm-label">Academia</label><select id="aluno_acad" name="aluno_acad" class="adm-input"></select>
+              </div>
+              <div style="flex:1;">
+                <label class="adm-label">Status Acesso</label><select id="aluno_status" name="aluno_status" class="adm-input" style="font-weight:bold;"><option value="Ativo" style="color:green;">Ativo</option><option value="Inativo" style="color:red;">Inativo</option><option value="Bloqueado" style="color:blue;">Bloqueado</option></select>
+              </div>
+            </div>
+
+            <hr style="border:0; border-top:1px dashed #ccc; margin:15px 0;">
+
+            <label class="adm-label" style="color:#1e90ff;">🏅 Modalidades Praticadas (Multi-seleção)</label>
+            <div id="container-modalidades-aluno" class="checkbox-grid">
+              <span style="font-size:11px; color:#888;">Carregando do banco...</span></div>
+
+            <label class="adm-label">Graduação / Faixa Principal (Atual)</label>
+            <select id="aluno_grad" name="aluno_grad" class="adm-input"><option value="" disabled selected>Carregando...</option></select>
+
+            <label class="adm-label">Próxima Graduação Alvo</label>
+            <select id="aluno_prox_grad" name="aluno_prox_grad" class="adm-input"><option value="">Nenhuma / Carregando...</option></select>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div><label class="adm-label">Data Próx. Exame</label><input type="date" id="aluno_exame" name="aluno_exame" class="adm-input">
+              </div>
+              <div><label class="adm-label">Venc. Carteirinha</label><input type="date" id="aluno_data_cart" name="aluno_data_cart" class="adm-input">
+              </div>
             </div>
           </div>
         </div>
-        <div class="form-full"><label class="adm-label">Link Foto (URL do Drive)</label><input type="text" id="aluno_foto" name="aluno_foto" class="adm-input" placeholder="https://..."></div>
-      </div>
-      <div style="display:flex; justify-content:flex-end; gap:15px; margin-top:25px; padding-top:20px; border-top:1px solid #ccc;">
-        <button type="button" onclick="closeModal('adm-modal-edit')" class="adm-btn adm-btn-outline">Cancelar</button>
-        <button type="submit" class="adm-btn">Salvar Alterações</button>
-      </div>
-    </form>
+
+        <div
+          style="display:flex; justify-content:flex-end; gap:15px; margin-top:25px; padding-top:15px; border-top:1px solid #ccc;">
+          <button type="button" onclick="closeModal('adm-modal-aluno')" class="adm-btn adm-btn-outline">Cancelar</button>
+          <button type="submit" class="adm-btn"><span class="material-icons" style="font-size:16px;">save</span> Salvar Ficha do Aluno</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
-<div id="adm-modal-local" class="adm-modal"><div class="adm-modal-box"><h3 style="margin-top:0;">Academia / Local</h3><form id="form-locais" onsubmit="enviarLocal(event)"><input type="hidden" name="loc_id" id="loc_id"><input type="hidden" name="editor_login" id="loc_editor_login"><label class="adm-label">Nome do Local*</label><input type="text" name="loc_nome" id="loc_nome" class="adm-input" required><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label class="adm-label">Responsável</label><input type="text" name="loc_resp" id="loc_resp" class="adm-input"></div><div><label class="adm-label">Status</label><select name="loc_status" id="loc_status" class="adm-input"><option value="Ativo">✅ Ativo</option><option value="Inativo">❌ Inativo</option></select></div></div><label class="adm-label">Cidade/Estado</label><input type="text" name="loc_cidade" id="loc_cidade" class="adm-input"><label class="adm-label">Endereço</label><input type="text" name="loc_end" id="loc_end" class="adm-input"><label class="adm-label">Contato</label><input type="text" name="loc_contato" id="loc_contato" class="adm-input"><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label class="adm-label">Dias</label><input type="text" name="loc_dias" id="loc_dias" class="adm-input"></div><div><label class="adm-label">Horários</label><input type="text" name="loc_horas" id="loc_horas" class="adm-input"></div></div><label class="adm-label">Link Maps</label><input type="text" name="loc_maps" id="loc_maps" class="adm-input"><label class="adm-label">HTML Iframe</label><input type="text" name="loc_iframe" id="loc_iframe" class="adm-input"><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button type="button" onclick="closeModal('adm-modal-local')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button></div></form></div></div>
+  <div id="adm-modal-relatorio" class="adm-modal">
+    <div class="adm-modal-box large">
+      <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
+        <span><span class="material-icons" style="color:#2196F3; vertical-align:middle;">analytics</span> Super
+        Relatório de Atletas</span>
+        <button type="button" onclick="closeModal('adm-modal-relatorio')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+      </div>
+      <p style="font-size: 12px; color: #666; margin-top: -15px; margin-bottom:20px;">
+        Filtre atletas por características fisiológicas, modalidade ou local de treino.
+      </p>
 
-<div id="adm-modal-video" class="adm-modal"><div class="adm-modal-box"><h3 style="margin-top:0;">Vídeo</h3><form onsubmit="handleAdmForm(event, 'salvarVideo')"><input type="hidden" name="vid_id" id="vid_id"><label class="adm-label">Faixa</label><select name="vid_faixa" id="vid_faixa" class="adm-input"><option>Branca</option><option>Amarela</option><option>Laranja</option><option>Verde</option><option>Azul</option><option>Verde Escuro</option><option>Azul Escuro</option><option>Marrom</option><option>Preta e Branca</option><option>PRETA</option></select><label class="adm-label">Título</label><input type="text" name="vid_titulo" id="vid_titulo" class="adm-input" required><label class="adm-label">Link YouTube</label><input type="text" name="vid_link" id="vid_link" class="adm-input" required><label class="adm-label">Status</label><select name="vid_status" id="vid_status" class="adm-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select><label class="adm-label">Descrição</label><textarea name="vid_desc" id="vid_desc" class="adm-input"></textarea><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button type="button" onclick="closeModal('adm-modal-video')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button></div></form></div></div>
+      <form id="form-super-relatorio" onsubmit="gerarSuperRelatorio(event)">
+        <div class="form-grid" style="background:#f4f4f4; padding:15px; border-radius:8px; border:1px solid #ddd;">
 
-<div id="adm-modal-curso" class="adm-modal"><div class="adm-modal-box"><h3 style="margin-top:0;" id="titulo-modal-curso">Curso</h3><form onsubmit="handleAdmForm(event, 'salvarCurso')"><input type="hidden" name="curso_id" id="curso_id"><input type="hidden" name="editor_login" id="editor_curso_login"><label class="adm-label">Nome do Curso*</label><input type="text" name="curso_nome" id="curso_nome" class="adm-input" required><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label class="adm-label">Data</label><input type="text" name="curso_data" id="curso_data" class="adm-input" placeholder="00/00/0000"></div><div><label class="adm-label">Vagas</label><input type="text" name="curso_vagas" id="curso_vagas" class="adm-input"></div></div><label class="adm-label">Descrição</label><textarea name="curso_desc" id="curso_desc" class="adm-input" rows="3"></textarea><label class="adm-label">Link Imagem (Drive/URL)</label><input type="text" name="curso_img" id="curso_img" class="adm-input"><label class="adm-label">Link Inscrição</label><input type="text" name="curso_link" id="curso_link" class="adm-input"><label class="adm-label">Status</label><select name="curso_status" id="curso_status" class="adm-input"><option value="Abertas">Inscrições Abertas</option><option value="Em Breve">Em Breve</option><option value="Encerradas">Encerradas</option></select><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button type="button" onclick="closeModal('adm-modal-curso')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button></div></form></div></div>
+          <div>
+            <label class="adm-label">Idade Min e Max (Anos)</label>
+            <div style="display:flex; gap:10px;">
+              <input type="number" id="rel_idade_min" class="adm-input" placeholder="Min" min="0">
+              <input type="number" id="rel_idade_max" class="adm-input" placeholder="Max" min="0">
+            </div>
+          </div>
 
-<div id="adm-modal-lib" class="adm-modal"><div class="adm-modal-box"><h3 style="margin-top:0;">Livro da Biblioteca</h3><form onsubmit="handleAdmForm(event, 'salvarLivroBiblioteca')"><input type="hidden" name="lib_id" id="lib_id"><label class="adm-label">Título do Livro</label><input type="text" name="lib_titulo" id="lib_titulo" class="adm-input" required><label class="adm-label">Descrição</label><textarea name="lib_desc" id="lib_desc" class="adm-input"></textarea><label class="adm-label">Link do Arquivo (PDF Drive)</label><input type="text" name="lib_link" id="lib_link" class="adm-input" required><label class="adm-label">Link da Capa (Imagem)</label><input type="text" name="lib_capa" id="lib_capa" class="adm-input"><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button type="button" onclick="closeModal('adm-modal-lib')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button></div></form></div></div>
+          <div>
+            <label class="adm-label">Peso Min e Max (Kg)</label>
+            <div style="display:flex; gap:10px;">
+              <input type="number" step="0.1" id="rel_peso_min" class="adm-input" placeholder="Min">
+              <input type="number" step="0.1" id="rel_peso_max" class="adm-input" placeholder="Max">
+            </div>
+          </div>
 
-<div id="adm-modal-prog" class="adm-modal"><div class="adm-modal-box"><h3 style="margin-top:0;">Programa Técnico</h3><form onsubmit="handleAdmForm(event, 'salvarProgramaTecnico')"><input type="hidden" name="prog_id" id="prog_id"><label class="adm-label">Faixa</label><select name="prog_faixa" id="prog_faixa" class="adm-input"><option>Branca</option><option>Amarela</option><option>Laranja</option><option>Verde</option><option>Azul</option><option>Verde Escuro</option><option>Azul Escuro</option><option>Marrom</option><option>Preta e Branca</option><option>Preta</option></select><label class="adm-label">Link do Arquivo (PDF Drive)</label><input type="text" name="prog_link" id="prog_link" class="adm-input"><label class="adm-label">Descrição</label><input type="text" name="prog_desc" id="prog_desc" class="adm-input"><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button type="button" onclick="closeModal('adm-modal-prog')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button></div></form></div></div>
+          <div>
+            <label class="adm-label">Modalidade</label><select id="rel_mod" class="adm-input"><option value="">Todas as Modalidades</option></select>
+          </div>
+          <div>
+            <label class="adm-label">Faixa / Graduação</label><select id="rel_grad" class="adm-input"><option value="">Todas as Graduações</option></select>
+          </div>
 
-<div id="adm-modal-cert" class="adm-modal"><div class="adm-modal-box"><h3 style="margin-top:0;">Certificado</h3><form onsubmit="handleAdmForm(event, 'salvarCertificado')"><input type="hidden" name="cert_id" id="cert_id"><label class="adm-label">CPF ou Login do Aluno*</label><input type="text" name="cert_cpf" id="cert_cpf" class="adm-input" required placeholder="Digite o CPF/Login exato"><label class="adm-label">Nome do Curso*</label><input type="text" name="cert_curso" id="cert_curso" class="adm-input" required list="lista-cursos-sugestao"><datalist id="lista-cursos-sugestao"><option value="Monitor de Lâmina"><option value="Instrutor Nível 1"><option value="Seminário Defesa Pessoal"></datalist><div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;"><div><label class="adm-label">Data Emissão</label><input type="date" name="cert_data" id="cert_data" class="adm-input" required></div><div></div></div><label class="adm-label">Link do PDF (Google Drive)*</label><input type="text" name="cert_link" id="cert_link" class="adm-input" required placeholder="Cole o link do arquivo"><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;"><button type="button" onclick="closeModal('adm-modal-cert')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button></div></form></div></div>
+          <div class="form-full">
+            <label class="adm-label">Academia / Local de Treino</label>
+            <select id="rel_acad" class="adm-input"><option value="">Todas as Academias</option></select>
+          </div>
 
-<script>
-  let cache = { alunos: [], videos: [], locais: [], cursos: [], lib: [], prog: [], certificados: [] };
-  const userSessionLocal = JSON.parse(localStorage.getItem('userSession') || '{}');
-  const editorLogin = userSessionLocal.LOGIN || 'Admin';
+        </div>
 
-  function navAdmin(tabName) {
-     try {
-       document.querySelectorAll('.adm-nav-item').forEach(el => el.classList.remove('active'));
-       document.querySelectorAll('.adm-tab-content').forEach(el => el.classList.remove('active'));
-       
-       const navItems = document.getElementsByClassName('adm-nav-item');
-       for(let item of navItems) { if(item.getAttribute('onclick').includes(tabName)) item.classList.add('active'); }
-       
-       const targetTab = document.getElementById('adm-tab-' + tabName);
-       if (targetTab) targetTab.classList.add('active');
-       
-       if(tabName === 'alunos') carregarAlunos();
-       if(tabName === 'videos') carregarVideos();
-       if(tabName === 'locais') carregarLocais();
-       if(tabName === 'cursos') carregarCursos();
-       if(tabName === 'biblioteca') carregarLib();
-       if(tabName === 'programas') carregarProg();
-       if(tabName === 'config') carregarConfig();
-       if(tabName === 'certificados') carregarCertificados();
-     } catch(e) { console.error("Erro navAdmin:", e); }
-  }
+        <div style="display:flex; justify-content:center; margin-top:20px;">
+          <button type="submit" class="adm-btn" style="background:#2196F3; color:white; width:100%; font-size:14px; padding:12px;">GERAR RESULTADOS</button>
+        </div>
+      </form>
 
-  // --- ALUNOS ---
-  function carregarAlunos() {
-      const el = document.getElementById('lista-alunos-body');
-      if(!el) return;
-      el.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 30px;"><span class="material-icons spin" style="font-size:40px; color:#333">sync</span></td></tr>';
-      google.script.run.withSuccessHandler(lista => {
-          cache.alunos = lista;
-          renderAlunos(lista);
-      }).listarAlunosAdmin();
-  }
+      <div id="resultado-relatorio"
+        style="margin-top:20px; max-height:400px; overflow-y:auto; border-top:1px solid #ccc; padding-top:20px; display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+          <h4 style="margin:0; color:#333;">Resultados:
+            <span id="qtd-resultados" style="color:var(--dynamic-prim);">0</span> atleta(s)</h4>
+          <button class="adm-btn" style="background:#ff5252; color:white; font-size:11px;" onclick="imprimirSuperRelatorio()"><span class="material-icons" style="font-size:14px;">picture_as_pdf</span> Imprimir / Salvar PDF</button>
+        </div>
+        <table class="adm-table" id="tabela-resultados-rel">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Idade Exata</th>
+              <th>Peso / Alt.</th>
+              <th>Faixa e Modalidade</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-resultados-rel"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-  function renderAlunos(lista) {
-      const tbody = document.getElementById('lista-alunos-body');
-      if(!tbody) return;
-      tbody.innerHTML = "";
-      lista.forEach(a => {
-          let statusClass = 'bg-green';
-          if(a.status === 'Inativo') statusClass = 'bg-red';
-          if(a.status === 'Bloqueado') statusClass = 'bg-blue';
+  <div id="adm-modal-grad" class="adm-modal">
+    <div class="adm-modal-box">
+      <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
+        <span id="titulo-modal-grad">Nova Graduação</span>
+        <button type="button" onclick="closeModal('adm-modal-grad')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+      </div>
+      <form onsubmit="handleAdmForm(event, 'salvarGraduacaoDefinitiva')">
+        <input type="hidden" name="linha_id" id="grad_linha_id">
+        <label class="adm-label">Modalidade (Selecione na lista ou digite nova)*</label>
+        <input type="text" name="grad_mod" id="grad_mod" class="adm-input" placeholder="Ex: Krav Maga, Jiu-Jitsu..." list="datalist-modalidades-grad" autocomplete="off" required>
+        <datalist id="datalist-modalidades-grad"></datalist>
+        <label class="adm-label">Nome da Faixa / Graduação / Nível*</label>
+        <input type="text" name="grad_nome" id="grad_nome" class="adm-input" placeholder="Ex: Roxa, Prajied Vermelho, Nível 3" required>
+        <div class="form-grid">
+          <div><label class="adm-label" style="color:var(--dynamic-prim);">ID Hierarquia Numérica*</label><input type="number" name="grad_id" id="grad_id" class="adm-input" required min="0" placeholder="0, 1, 2, 3...">
+          </div>
+          <div>
+            <label class="adm-label">Nível no Sistema</label><select name="grad_nivel" id="grad_nivel" class="adm-input"><option value="Aluno">Aluno (Padrão)</option><option value="INSTRUTOR NÍVEL 1">Instrutor (Base)</option><option value="Professor">Professor</option><option value="Mestre">Mestre (Acesso Total)</option><option value="Admin">Admin (Sistema)</option></select>
+          </div>
+        </div>
+        <label class="adm-label">Observações (Opcional)</label>
+        <input type="text" name="grad_obs" id="grad_obs" class="adm-input" placeholder="Informação interna">
+        <div
+          style="display:flex; justify-content:flex-end; gap:10px; margin-top:25px; border-top: 1px solid #ddd; padding-top: 15px;">
+          <button type="button" onclick="closeModal('adm-modal-grad')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar Estrutura</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-              <td style="color:#333; font-weight:bold;">${esc(a.login)}</td>
-              <td style="font-weight:bold;">${esc(a.nome)}</td>
-              <td>${esc(a.graduacao)}<br><small style="opacity:0.6">${esc(a.academia)}</small></td>
-              <td><span class="adm-badge ${statusClass}">${a.status}</span></td>
-              <td><button class="adm-btn" onclick="prepEditAluno(${a.id})"><span class="material-icons" style="font-size:14px">edit</span> Editar</button></td>
-          `;
-          tbody.appendChild(tr);
-      });
-  }
+  <div id="adm-modal-local" class="adm-modal">
+    <div class="adm-modal-box">
+      <h3 style="margin-top:0;">Academia / Local</h3>
+      <form id="form-locais" onsubmit="enviarLocal(event)">
+        <input type="hidden" name="loc_id" id="loc_id"><input type="hidden" name="editor_login" id="loc_editor_login">
+        <label class="adm-label">Nome do Local*</label><input type="text" name="loc_nome" id="loc_nome" class="adm-input" required>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div><label class="adm-label">Responsável</label><input type="text" name="loc_resp" id="loc_resp" class="adm-input">
+          </div>
+          <div>
+            <label class="adm-label">Status</label><select name="loc_status" id="loc_status" class="adm-input"><option value="Ativo">✅ Ativo</option><option value="Inativo">❌ Inativo</option></select>
+          </div>
+        </div>
+        <label class="adm-label">Cidade/Estado</label><input type="text" name="loc_cidade" id="loc_cidade" class="adm-input">
+        <label class="adm-label">Endereço</label><input type="text" name="loc_end" id="loc_end" class="adm-input">
+        <label class="adm-label">Contato</label><input type="text" name="loc_contato" id="loc_contato" class="adm-input">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div><label class="adm-label">Dias</label><input type="text" name="loc_dias" id="loc_dias" class="adm-input">
+          </div>
+          <div><label class="adm-label">Horários</label><input type="text" name="loc_horas" id="loc_horas" class="adm-input">
+          </div>
+        </div>
+        <label class="adm-label">Link Maps</label><input type="text" name="loc_maps" id="loc_maps" class="adm-input">
+        <label class="adm-label">HTML Iframe</label><input type="text" name="loc_iframe" id="loc_iframe" class="adm-input">
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" onclick="closeModal('adm-modal-local')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-  function filtrarAlunos() {
-      const termo = document.getElementById('search-alunos').value.toLowerCase();
-      const filtrados = cache.alunos.filter(a => 
-          String(a.nome).toLowerCase().includes(termo) || 
-          String(a.login).toLowerCase().includes(termo)
-      );
-      renderAlunos(filtrados);
-  }
+  <div id="adm-modal-video" class="adm-modal">
+    <div class="adm-modal-box">
+      <h3 style="margin-top:0;">Vídeo</h3>
+      <form onsubmit="handleAdmForm(event, 'salvarVideo')">
+        <input type="hidden" name="vid_id" id="vid_id">
+        <label class="adm-label">Vincular a qual Graduação/Modalidade?</label>
+        <select name="vid_faixa" id="vid_faixa" class="adm-input"><option value="" disabled selected>Carregando...</option></select>
+        <label class="adm-label">Título</label><input type="text" name="vid_titulo" id="vid_titulo" class="adm-input" required>
+        <label class="adm-label">Link YouTube</label><input type="text" name="vid_link" id="vid_link" class="adm-input" required>
+        <label class="adm-label">Status</label><select name="vid_status" id="vid_status" class="adm-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select>
+        <label class="adm-label">Descrição</label><textarea name="vid_desc" id="vid_desc" class="adm-input"></textarea>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" onclick="closeModal('adm-modal-video')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-  function abrirModalNovoAluno() {
-      const form = document.getElementById('form-edit-aluno');
-      if(form) form.reset();
-      document.getElementById('aluno_id').value = ""; 
-      popularSelectsAdm(); 
-      document.getElementById('adm-modal-edit').style.display = 'flex';
-  }
+  <div id="adm-modal-curso" class="adm-modal">
+    <div class="adm-modal-box">
+      <h3 style="margin-top:0;" id="titulo-modal-curso">Curso</h3>
+      <form onsubmit="handleAdmForm(event, 'salvarCurso')">
+        <input type="hidden" name="curso_id" id="curso_id"><input type="hidden" name="editor_login" id="editor_curso_login">
+        <label class="adm-label">Nome do Curso*</label><input type="text" name="curso_nome" id="curso_nome" class="adm-input" required>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div><label class="adm-label">Data</label><input type="date" name="curso_data" id="curso_data" class="adm-input">
+          </div>
+          <div><label class="adm-label">Vagas</label><input type="text" name="curso_vagas" id="curso_vagas" class="adm-input">
+          </div>
+        </div>
+        <label class="adm-label">Descrição</label><textarea name="curso_desc" id="curso_desc" class="adm-input" rows="3"></textarea>
+        <label class="adm-label">Link Imagem (Drive/URL)</label><input type="text" name="curso_img" id="curso_img" class="adm-input">
+        <label class="adm-label">Link Inscrição</label><input type="text" name="curso_link" id="curso_link" class="adm-input">
+        <label class="adm-label">Status</label><select name="curso_status" id="curso_status" class="adm-input"><option value="Abertas">Inscrições Abertas</option><option value="Em Breve">Em Breve</option><option value="Encerradas">Encerradas</option></select>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" onclick="closeModal('adm-modal-curso')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-  function prepEditAluno(id) {
-      const dados = cache.alunos.find(a => a.id === id);
-      if(!dados) { alert("Erro: Aluno não encontrado na memória."); return; }
+  <div id="adm-modal-lib" class="adm-modal">
+    <div class="adm-modal-box">
+      <h3 style="margin-top:0;">Livro da Biblioteca</h3>
+      <form onsubmit="handleAdmForm(event, 'salvarLivroBiblioteca')">
+        <input type="hidden" name="lib_id" id="lib_id">
+        <label class="adm-label">Título do Livro</label><input type="text" name="lib_titulo" id="lib_titulo" class="adm-input" required>
+        <label class="adm-label">Descrição</label><textarea name="lib_desc" id="lib_desc" class="adm-input"></textarea>
+        <label class="adm-label">Link do Arquivo (PDF Drive)</label><input type="text" name="lib_link" id="lib_link" class="adm-input" required>
+        <label class="adm-label">Link da Capa (Imagem)</label><input type="text" name="lib_capa" id="lib_capa" class="adm-input">
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" onclick="closeModal('adm-modal-lib')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-      popularSelectsAdm(dados.academia, dados.graduacao, dados.proxGrad);
-      const v = (val) => val || "";
-      const d = (val) => { if(!val) return ""; if(val.includes('/')) { const p = val.split('/'); if(p.length === 3) return `${p[2]}/${p[1]}/${p[0]}`; } return val; };
+  <div id="adm-modal-prog" class="adm-modal">
+    <div class="adm-modal-box">
+      <h3 style="margin-top:0;">Programa Técnico</h3>
+      <form onsubmit="handleAdmForm(event, 'salvarProgramaTecnico')">
+        <input type="hidden" name="prog_id" id="prog_id">
+        <label class="adm-label">Vincular a qual Graduação/Modalidade?</label>
+        <select name="prog_faixa" id="prog_faixa" class="adm-input"><option value="" disabled selected>Carregando...</option></select>
+        <label class="adm-label">Link do Arquivo (PDF Drive)</label><input type="text" name="prog_link" id="prog_link" class="adm-input">
+        <label class="adm-label">Descrição</label><input type="text" name="prog_desc" id="prog_desc" class="adm-input">
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" onclick="closeModal('adm-modal-prog')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-      document.getElementById('aluno_id').value = dados.id;
-      document.getElementById('aluno_nome').value = v(dados.nome);
-      document.getElementById('aluno_cpf').value = v(dados.cpf);
-      document.getElementById('aluno_nasc').value = d(dados.nasc);
-      document.getElementById('aluno_tel').value = v(dados.tel);
-      document.getElementById('aluno_pai').value = v(dados.pai);
-      document.getElementById('aluno_mae').value = v(dados.mae);
-      document.getElementById('aluno_end').value = v(dados.endereco);
-      document.getElementById('aluno_email').value = v(dados.email);
-      document.getElementById('aluno_login').value = v(dados.login);
-      document.getElementById('aluno_senha').value = v(dados.senha);
-      document.getElementById('aluno_status').value = v(dados.status) || "Ativo";
-      
-      const nivel = v(dados.nivel);
-      const selNivel = document.getElementById('aluno_nivel');
-      if([...selNivel.options].some(o => o.value === nivel)) { selNivel.value = nivel; } else { selNivel.value = "Aluno"; }
+  <div id="adm-modal-cert" class="adm-modal">
+    <div class="adm-modal-box">
+      <h3 style="margin-top:0;">Certificado</h3>
+      <form onsubmit="handleAdmForm(event, 'salvarCertificado')">
+        <input type="hidden" name="cert_id" id="cert_id">
+        <label class="adm-label">CPF ou Login do Aluno*</label><input type="text" name="cert_cpf" id="cert_cpf" class="adm-input" required placeholder="Digite o CPF/Login exato">
+        <label class="adm-label">Nome do Curso/Evento*</label><input type="text" name="cert_curso" id="cert_curso" class="adm-input" required>
+        <label class="adm-label">Modalidade de Referência</label>
+        <select name="cert_mod" id="cert_mod" class="adm-input"><option value="">Geral</option></select>
+        <label class="adm-label">Data Emissão</label><input type="date" name="cert_data" id="cert_data" class="adm-input" required>
+        <label class="adm-label">Link do PDF (Google Drive)*</label><input type="text" name="cert_link" id="cert_link" class="adm-input" required placeholder="Cole o link do arquivo">
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+          <button type="button" onclick="closeModal('adm-modal-cert')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-      document.getElementById('aluno_exame').value = d(dados.proxExame);
-      document.getElementById('aluno_data_cart').value = d(dados.dataCarteira);
-      document.getElementById('aluno_foto').value = v(dados.foto);
-      document.getElementById('adm-modal-edit').style.display = 'flex';
-  }
+  <script>
+    // VARIAVEL GLOBAL DO CACHE
+    let cache = { alunos: [], videos: [], locais: [], cursos: [], lib: [], prog: [], certificados: [], graduacoesObj: [], modalidadesGlobais: [] };
+    const userSessionLocal = JSON.parse(localStorage.getItem('userSession') || '{}');
+    const editorLogin = userSessionLocal.LOGIN || 'Admin';
 
-  function popularSelectsAdm(acadAtual, gradAtual, proxGradAtual) {
-      const selAcad = document.getElementById('aluno_acad');
-      if(selAcad) selAcad.innerHTML = '<option value="" disabled>Carregando...</option>';
-      google.script.run.withSuccessHandler(academias => {
-          if(selAcad) {
-             selAcad.innerHTML = '<option value="" disabled>Selecione...</option>';
-             academias.forEach(ac => {
-                 const opt = new Option(ac, ac);
-                 if(ac === acadAtual) opt.selected = true;
-                 selAcad.add(opt);
-             });
-          }
-      }).getListaAcademias();
-
-      const selGrad = document.getElementById('aluno_grad');
-      const selProx = document.getElementById('aluno_prox_grad');
-      if(selGrad) selGrad.innerHTML = '<option value="" disabled>Carregando...</option>';
-      if(selProx) selProx.innerHTML = '<option value="">Carregando...</option>';
-
-      google.script.run.withSuccessHandler(graduacoes => {
-          if(selGrad) selGrad.innerHTML = '<option value="" disabled>Selecione...</option>';
-          if(selProx) selProx.innerHTML = '<option value="">Selecione...</option>';
-          
-          graduacoes.forEach(gr => {
-              if(selGrad){
-                 const opt1 = new Option(gr, gr);
-                 if(gr === gradAtual) opt1.selected = true;
-                 selGrad.add(opt1);
-              }
-              if(selProx){
-                 const opt2 = new Option(gr, gr);
-                 if(gr === proxGradAtual) opt2.selected = true;
-                 selProx.add(opt2);
-              }
-          });
-      }).getListaGraduacoes();
-  }
-
-  function handleSalvarAluno(e) {
-      e.preventDefault();
-      const btn = e.target.querySelector('button[type="submit"]');
-      const original = btn.innerText;
-      btn.innerText = "SALVANDO..."; btn.disabled = true;
-
-      const fd = (val) => { if(!val) return ""; const p = val.split('-'); if(p.length === 3) return `${p[2]}/${p[1]}/${p[0]}`; return val; };
-
-      const formData = {
-          aluno_id: document.getElementById('aluno_id').value,
-          aluno_nome: document.getElementById('aluno_nome').value,
-          aluno_cpf: document.getElementById('aluno_cpf').value,
-          aluno_nasc: fd(document.getElementById('aluno_nasc').value),
-          aluno_tel: document.getElementById('aluno_tel').value,
-          aluno_pai: document.getElementById('aluno_pai').value,
-          aluno_mae: document.getElementById('aluno_mae').value,
-          aluno_login: document.getElementById('aluno_login').value,
-          aluno_senha: document.getElementById('aluno_senha').value,
-          aluno_email: document.getElementById('aluno_email').value,
-          aluno_acad: document.getElementById('aluno_acad').value,
-          aluno_grad: document.getElementById('aluno_grad').value,
-          aluno_status: document.getElementById('aluno_status').value,
-          aluno_nivel: document.getElementById('aluno_nivel').value,
-          aluno_end: document.getElementById('aluno_end').value,
-          aluno_prox_grad: document.getElementById('aluno_prox_grad').value,
-          aluno_exame: fd(document.getElementById('aluno_exame').value),
-          aluno_data_cart: fd(document.getElementById('aluno_data_cart').value),
-          aluno_foto: document.getElementById('aluno_foto').value,
-          editor_login: editorLogin
-      };
-
-      google.script.run.withSuccessHandler(res => {
-          alert(res); btn.disabled = false; btn.innerText = original;
-          if(res.includes('✅')) { closeModal('adm-modal-edit'); carregarAlunos(); }
-      }).withFailureHandler(err => {
-          alert("Erro: " + err.message); btn.disabled = false; btn.innerText = original;
-      }).salvarAluno(formData);
-  }
-
-  // --- FUNÇÕES GERAIS E INTEGRAÇÃO WHITE LABEL ---
-  function carregarLocais() { document.getElementById('lista-locais-body').innerHTML = '<tr><td colspan="4" style="text-align:center"><span class="material-icons spin">sync</span></td></tr>'; google.script.run.withSuccessHandler(lista => { cache.locais = lista; renderLocais(lista); }).listarLocaisAdmin(); }
-  function renderLocais(lista) { const tbody = document.getElementById('lista-locais-body'); tbody.innerHTML = ""; lista.forEach(l => { const tr = document.createElement('tr'); tr.innerHTML = `<td><b>${esc(l.nome)}</b><br><small>${esc(l.cidade)}</small></td><td>${esc(l.contato)}<br><small>Resp: ${esc(l.responsavel)}</small></td><td><span class="adm-badge ${l.status === 'Ativo' ? 'bg-green' : 'bg-red'}">${l.status}</span></td><td><button class="adm-btn" onclick='prepEditLocal(${JSON.stringify(l)})'>EDITAR</button></td>`; tbody.appendChild(tr); }); }
-  function openModalLocal() { document.getElementById('form-locais').reset(); document.getElementById('loc_id').value = ""; document.getElementById('loc_status').value = "Ativo"; document.getElementById('loc_editor_login').value = editorLogin; document.getElementById('adm-modal-local').style.display = 'flex'; }
-  function prepEditLocal(l) { openModalLocal(); document.getElementById('loc_id').value = l.id; document.getElementById('loc_nome').value = l.nome; document.getElementById('loc_resp').value = l.responsavel || ""; document.getElementById('loc_status').value = l.status || "Ativo"; document.getElementById('loc_cidade').value = l.cidade; document.getElementById('loc_end').value = l.endereco; document.getElementById('loc_contato').value = l.contato; document.getElementById('loc_dias').value = l.dias; document.getElementById('loc_horas').value = l.horarios; document.getElementById('loc_maps').value = l.maps; document.getElementById('loc_iframe').value = l.iframe; }
-  function enviarLocal(e) { e.preventDefault(); google.script.run.withSuccessHandler(res => { alert(res); closeModal('adm-modal-local'); carregarLocais(); }).salvarLocal(document.getElementById('form-locais')); }
-  
-  function carregarVideos() { document.getElementById('lista-videos-body').innerHTML = '<tr><td colspan="4" style="text-align:center"><span class="material-icons spin">sync</span></td></tr>'; google.script.run.withSuccessHandler(lista => { cache.videos = lista; renderVideos(lista); }).listarVideosAdmin(); }
-  function renderVideos(lista) { const tbody = document.getElementById('lista-videos-body'); tbody.innerHTML = ""; lista.forEach(v => { const tr = document.createElement('tr'); tr.innerHTML = `<td><b>${esc(v.titulo)}</b><br><small>${esc(v.faixa)}</small></td><td><a href="https://youtu.be/${v.link.includes('v=')?v.link.split('v=')[1]:v.link}" target="_blank">Ver</a></td><td><span class="adm-badge ${v.status === 'Ativo' ? 'bg-green' : 'bg-red'}">${v.status}</span></td><td><button class="adm-btn" onclick='prepEditVideo(${JSON.stringify(v)})'>EDITAR</button></td>`; tbody.appendChild(tr); }); }
-  function openModalVideo() { document.querySelector('#adm-modal-video form').reset(); document.getElementById('vid_id').value = ""; document.getElementById('adm-modal-video').style.display = 'flex'; }
-  function prepEditVideo(v) { openModalVideo(); document.getElementById('vid_id').value = v.id; document.getElementById('vid_titulo').value = v.titulo; document.getElementById('vid_link').value = v.link; document.getElementById('vid_faixa').value = v.faixa; document.getElementById('vid_status').value = v.status || "Ativo"; document.getElementById('vid_desc').value = v.desc || ""; }
-  
-  function carregarCursos() { document.getElementById('lista-cursos-body').innerHTML = '<tr><td colspan="5" style="text-align:center"><span class="material-icons spin">sync</span></td></tr>'; google.script.run.withSuccessHandler(lista => { cache.cursos = lista; renderCursos(lista); }).listarCursosAdmin(); }
-  function renderCursos(lista) { const tbody = document.getElementById('lista-cursos-body'); tbody.innerHTML = ""; lista.forEach(c => { let badge = 'bg-green'; if(c.status === 'Encerradas') badge = 'bg-red'; if(c.status === 'Em Breve') badge = 'bg-blue'; const tr = document.createElement('tr'); tr.innerHTML = `<td><img src="${c.imagem}" style="width:40px; height:40px; object-fit:cover; border-radius:4px" onerror="this.src='https://via.placeholder.com/40'"></td><td><b>${esc(c.nome)}</b></td><td>${esc(c.data)}<br><small>${esc(c.vagas)}</small></td><td><span class="adm-badge ${badge}">${c.status}</span></td><td><button class="adm-btn" onclick='prepEditCurso(${JSON.stringify(c)})'>EDITAR</button></td>`; tbody.appendChild(tr); }); }
-  function abrirModalCurso() { document.getElementById('adm-modal-curso').style.display = 'flex'; document.querySelector('#adm-modal-curso form').reset(); document.getElementById('curso_id').value = ""; document.getElementById('titulo-modal-curso').innerText = "Novo Curso"; document.getElementById('editor_curso_login').value = editorLogin; }
-  function prepEditCurso(c) { abrirModalCurso(); document.getElementById('titulo-modal-curso').innerText = "Editar Curso"; document.getElementById('curso_id').value = c.id; document.getElementById('curso_nome').value = c.nome; document.getElementById('curso_data').value = c.data; document.getElementById('curso_vagas').value = c.vagas; document.getElementById('curso_desc').value = c.descricao; document.getElementById('curso_img').value = c.imagem; document.getElementById('curso_link').value = c.linkInscricao || c.link; document.getElementById('curso_status').value = c.status; }
-  
-  function carregarLib() { document.getElementById('lista-lib-body').innerHTML = '<tr><td colspan="4" style="text-align:center"><span class="material-icons spin">sync</span></td></tr>'; google.script.run.withSuccessHandler(lista => { cache.lib = lista; renderLib(lista); }).listarBibliotecaAdmin(); }
-  function renderLib(lista) { const tbody = document.getElementById('lista-lib-body'); tbody.innerHTML = ""; lista.forEach(l => { const tr = document.createElement('tr'); tr.innerHTML = `<td><img src="${l.capa}" style="width:30px; border-radius:2px"></td><td><b>${esc(l.titulo)}</b></td><td><small>${esc(l.descricao).substring(0,50)}...</small></td><td><button class="adm-btn" onclick='prepEditLib(${JSON.stringify(l)})'>EDITAR</button></td>`; tbody.appendChild(tr); }); }
-  function abrirModalLib() { document.getElementById('adm-modal-lib').style.display='flex'; document.querySelector('#adm-modal-lib form').reset(); document.getElementById('lib_id').value=""; }
-  function prepEditLib(l) { abrirModalLib(); document.getElementById('lib_id').value=l.id; document.getElementById('lib_titulo').value=l.titulo; document.getElementById('lib_desc').value=l.descricao; document.getElementById('lib_link').value=l.link; document.getElementById('lib_capa').value=l.capa; }
-  
-  function carregarProg() { document.getElementById('lista-prog-body').innerHTML = '<tr><td colspan="4" style="text-align:center"><span class="material-icons spin">sync</span></td></tr>'; google.script.run.withSuccessHandler(lista => { cache.prog = lista; renderProg(lista); }).listarProgramasAdmin(); }
-  function renderProg(lista) { const tbody = document.getElementById('lista-prog-body'); tbody.innerHTML = ""; lista.forEach(p => { const tr = document.createElement('tr'); tr.innerHTML = `<td><b>${esc(p.faixa)}</b></td><td>${p.id_arquivo ? '<span class="adm-badge bg-green">Linkado</span>' : '<span class="adm-badge bg-red">Pendente</span>'}</td><td><small>${esc(p.descricao)}</small></td><td><button class="adm-btn" onclick='prepEditProg(${JSON.stringify(p)})'>EDITAR</button></td>`; tbody.appendChild(tr); }); }
-  function abrirModalProg() { document.getElementById('adm-modal-prog').style.display='flex'; document.querySelector('#adm-modal-prog form').reset(); document.getElementById('prog_id').value=""; }
-  function prepEditProg(p) { abrirModalProg(); document.getElementById('prog_id').value=p.id; document.getElementById('prog_faixa').value=p.faixa; document.getElementById('prog_link').value=p.link_original || ""; document.getElementById('prog_desc').value=p.descricao; }
-  
-  function carregarCertificados() { document.getElementById('lista-cert-body').innerHTML = '<tr><td colspan="4" style="text-align:center"><span class="material-icons spin">sync</span></td></tr>'; google.script.run.withSuccessHandler(lista => { cache.certificados = lista; renderCertificados(lista); const cursos = [...new Set(lista.map(c => c.curso))]; const sel = document.getElementById('filter-curso-cert'); sel.innerHTML = '<option value="">Todos os Cursos</option>'; cursos.forEach(c => sel.add(new Option(c, c))); }).listarCertificadosAdmin(); }
-  function renderCertificados(lista) { const tbody = document.getElementById('lista-cert-body'); tbody.innerHTML = ""; if(!lista || !lista.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Nenhum certificado.</td></tr>'; return; } lista.forEach(c => { const tr = document.createElement('tr'); tr.innerHTML = `<td><b>${esc(c.cpf)}</b></td><td>${esc(c.curso)}<br><small>${esc(c.data)}</small></td><td><a href="${c.link}" target="_blank" style="color:#007bff">Abrir PDF</a></td><td><button class="adm-btn" onclick='prepEditCert(${JSON.stringify(c)})'>EDITAR</button><button class="adm-btn" style="background:#f44336; margin-left:5px" onclick="excluirItem('excluirCertificado', ${c.id})">X</button></td>`; tbody.appendChild(tr); }); }
-  function filtrarCertificados() { const termo = document.getElementById('search-cert').value.toLowerCase(); const curso = document.getElementById('filter-curso-cert').value; const filtrados = cache.certificados.filter(c => { const matchTermo = c.cpf.toLowerCase().includes(termo) || c.curso.toLowerCase().includes(termo); const matchCurso = curso ? c.curso === curso : true; return matchTermo && matchCurso; }); renderCertificados(filtrados); }
-  function abrirModalCert() { document.getElementById('adm-modal-cert').style.display='flex'; document.querySelector('#adm-modal-cert form').reset(); document.getElementById('cert_id').value = ""; document.getElementById('cert_data').valueAsDate = new Date(); }
-  function prepEditCert(c) { abrirModalCert(); document.getElementById('cert_id').value = c.id; document.getElementById('cert_cpf').value = c.cpf; document.getElementById('cert_curso').value = c.curso; let d = c.data; if(d.includes('/')) { const p = d.split('/'); d = `${p[2]}-${p[1]}-${p[0]}`; } document.getElementById('cert_data').value = d; document.getElementById('cert_link').value = c.link; }
-  function excluirItem(func, id) { if(confirm("Excluir item?")) { google.script.run.withSuccessHandler(res => { alert(res); if(func.includes('Cert')) carregarCertificados(); if(func.includes('Lib')) carregarLib(); }).withFailureHandler(err=>alert(err))[func](id); } }
-
-  // --- WHITE LABEL E PREVIEW MANTIDOS DA SUA VERSÃO ---
-  function handleAdmForm(e, func) { 
-      e.preventDefault(); 
-      const btn = e.target.querySelector('button[type="submit"]'); 
-      const original = btn.innerHTML; 
-      btn.innerHTML = "<span class='material-icons spin'>sync</span> AGUARDE..."; btn.disabled = true; 
-      const formData = {}; 
-      new FormData(e.target).forEach((v, k) => formData[k] = v); 
-      
-      google.script.run.withSuccessHandler(res => { 
-          alert(res); btn.disabled = false; btn.innerHTML = original; 
-          if(res.includes('✅')) { 
-              if(func === 'salvarConfig') {
-                 google.script.run.withSuccessHandler(url => { window.top.location.href = url + "?page=dashboard"; }).getScriptUrl();
-                 return;
-              }
-              e.target.reset(); 
-              if(func==='salvarVideo') { closeModal('adm-modal-video'); carregarVideos(); } 
-              if(func==='salvarCurso') { closeModal('adm-modal-curso'); carregarCursos(); } 
-              if(func.includes('Lib')) { closeModal('adm-modal-lib'); carregarLib(); } 
-              if(func.includes('Prog')) { closeModal('adm-modal-prog'); carregarProg(); } 
-              if(func.includes('Cert')) { closeModal('adm-modal-cert'); carregarCertificados(); } 
-          } 
-      }).withFailureHandler(err => { alert("Erro: "+err.message); btn.disabled=false; btn.innerHTML=original; })[func](formData); 
-  }
-
-  function carregarConfig() { 
-    google.script.run.withSuccessHandler(cfg => { 
-      document.getElementById('cfg_icon').value = cfg.iconId || ''; 
-      document.getElementById('cfg_bg').value = cfg.bgId || ''; 
-      document.getElementById('cfg_color').value = cfg.primaryColor || '#FFD700'; 
-      document.getElementById('cfg_color_sec').value = cfg.secondaryColor || '#1e1e1e'; 
-      document.getElementById('cfg_color_text').value = cfg.textColor || '#ffffff'; 
-      document.getElementById('cfg_color_btn_text').value = cfg.btnTextColor || '#000000'; 
-      document.getElementById('cfg_color_bg').value = cfg.bgColor || '#121212'; 
-      atualizarPreviewCores();
-    }).getAppConfig(); 
-  }
-
-  function atualizarPreviewCores() {
-    const primary = document.getElementById('cfg_color').value;
-    const secondary = document.getElementById('cfg_color_sec').value;
-    const text = document.getElementById('cfg_color_text').value;
-    const btnText = document.getElementById('cfg_color_btn_text').value;
-    const bgGlobal = document.getElementById('cfg_color_bg').value; 
-
-    const card = document.getElementById('live-preview-card');
-    const title = document.getElementById('preview-title');
-    const desc = document.getElementById('preview-text');
-    const btn = document.getElementById('preview-btn');
-
-    if (card) { 
-        card.style.backgroundColor = secondary; 
-        card.style.borderColor = primary; 
-        card.parentElement.style.backgroundColor = bgGlobal; 
+    function navAdmin(tabName) {
+      try {
+        document.querySelectorAll('.adm-nav-item').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.adm-tab-content').forEach(el => el.classList.remove('active'));
+        const navItems = document.getElementsByClassName('adm-nav-item');
+        for(let item of navItems) { if(item.getAttribute('onclick').includes(tabName)) item.classList.add('active'); }
+        const targetTab = document.getElementById('adm-tab-' + tabName);
+        if (targetTab) targetTab.classList.add('active');
+        
+        if(tabName === 'alunos') carregarAlunos();
+        if(tabName === 'graduacoes') carregarGraduacoes(); 
+        if(tabName === 'videos') carregarVideos();
+        if(tabName === 'locais') carregarLocais();
+        if(tabName === 'cursos') carregarCursos();
+        if(tabName === 'biblioteca') carregarLib();
+        if(tabName === 'programas') carregarProg();
+        if(tabName === 'config') carregarConfig();
+        if(tabName === 'certificados') carregarCertificados();
+      } catch(e) { console.error("Erro navAdmin:", e); }
     }
-    if (title) title.style.color = primary;
-    if (desc) desc.style.color = text;
-    if (btn) { btn.style.backgroundColor = primary; btn.style.color = btnText; }
-  }
 
-  function aplicarTema(primaria, secundaria, texto, textoBotao, fundo) {
-    document.getElementById('cfg_color').value = primaria;
-    document.getElementById('cfg_color_sec').value = secundaria;
-    document.getElementById('cfg_color_text').value = texto;
-    document.getElementById('cfg_color_btn_text').value = textoBotao;
-    document.getElementById('cfg_color_bg').value = fundo; 
-    atualizarPreviewCores();
-  }
+    // ============================================================================
+    // 🧠 FUNÇÃO MESTRA DE FORMULÁRIOS
+    // ============================================================================
+    function handleAdmForm(e, func) { 
+        e.preventDefault(); 
+        const btn = e.target.querySelector('button[type="submit"]'); 
+        const original = btn.innerHTML; 
+        btn.innerHTML = "<span class='material-icons spin'>sync</span>..."; btn.disabled = true; 
+        
+        const formData = {}; 
+        for (let [k, v] of new FormData(e.target).entries()) {
+            if (formData[k]) formData[k] += ", " + v; 
+            else formData[k] = v;
+        }
+        
+        google.script.run.withSuccessHandler(res => { 
+            alert(res); btn.disabled = false; btn.innerHTML = original; 
+            if(res.includes('✅')) { 
+                if(func === 'salvarConfig') { google.script.run.withSuccessHandler(url => { window.top.location.href = url + "?page=dashboard"; }).getScriptUrl(); return; }
+                e.target.reset(); 
+                if(func==='salvarVideo') { closeModal('adm-modal-video'); carregarVideos(); } 
+                if(func==='salvarCurso') { closeModal('adm-modal-curso'); carregarCursos(); } 
+                if(func.includes('Lib')) { closeModal('adm-modal-lib'); carregarLib(); } 
+                if(func.includes('Prog')) { closeModal('adm-modal-prog'); carregarProg(); } 
+                if(func.includes('Cert')) { closeModal('adm-modal-cert'); carregarCertificados(); } 
+                if(func==='salvarGraduacaoDefinitiva') { closeModal('adm-modal-grad'); carregarGraduacoes(); cache.graduacoesObj = []; }
+                if(func==='salvarAluno') { closeModal('adm-modal-aluno'); carregarAlunos(); }
+                if(func==='salvarLocal') { closeModal('adm-modal-local'); carregarLocais(); }
+            } 
+        }).withFailureHandler(err => { alert("Erro: "+err.message); btn.disabled=false; btn.innerHTML=original; })[func](formData); 
+    }
 
-  function closeModal(id) { const modal = document.getElementById(id); if(modal) modal.style.display = 'none'; }
-  function esc(t) { return t ? String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : ""; }
-</script>
+    // ============================================================================
+    // 👥 ALUNOS & CRM
+    // ============================================================================
+    function carregarAlunos() {
+        const el = document.getElementById('lista-alunos-body');
+        if(!el) return;
+        el.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 30px;"><span class="material-icons spin" style="font-size:40px; color:#333">sync</span></td></tr>';
+        google.script.run.withSuccessHandler(lista => { cache.alunos = lista; renderAlunos(lista); }).listarAlunosAdmin();
+    }
+
+    function renderAlunos(lista) {
+        const tbody = document.getElementById('lista-alunos-body');
+        if(!tbody) return;
+        tbody.innerHTML = "";
+        lista.forEach(a => {
+            let statusClass = 'bg-green';
+            if(a.status === 'Inativo') statusClass = 'bg-red';
+            if(a.status === 'Bloqueado') statusClass = 'bg-blue';
+
+            const tr = document.createElement('tr');
+            const exibir = (valor) => valor && valor !== "" ? esc(valor) : '<span style="color:#aaa; font-style:italic;">--</span>';
+
+            tr.innerHTML = `
+                <td><b style="color:#333; font-size:13px;">${esc(a.login)}</b><br><span style="color:#888; font-size:10px">${esc(a.nome)}</span></td>
+                <td>
+                    <span style="font-size:11px; font-weight:bold; color:#0056b3;">Idade: ${exibir(a.idadeExata)}</span><br>
+                    <span style="font-size:10px; color:#888;">Peso: ${exibir(a.peso)}kg | Alt: ${exibir(a.altura)}m</span>
+                </td>
+                <td><span style="color:#333; font-weight:bold; font-size:12px;">${esc(a.graduacao)}</span><br><span class="adm-badge bg-dark" style="margin-top:2px;">🛡️ ${exibir(a.modalidade)}</span></td>
+                <td><span class="adm-badge ${statusClass}">${a.status}</span><br><span style="font-size:10px; color:#555;">${a.totalAulas} Aulas</span></td>
+                <td><button class="adm-btn" onclick="prepEditAluno(${a.id})"><span class="material-icons" style="font-size:14px">edit</span></button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function filtrarAlunos() {
+        const termo = document.getElementById('search-alunos').value.toLowerCase();
+        const filtrados = cache.alunos.filter(a => String(a.nome).toLowerCase().includes(termo) || String(a.login).toLowerCase().includes(termo));
+        renderAlunos(filtrados);
+    }
+
+    function popularModalidadesCheckbox(modAtuais = "") {
+        const container = document.getElementById('container-modalidades-aluno');
+        container.innerHTML = '<span class="material-icons spin" style="font-size:16px;">sync</span>';
+        google.script.run.withSuccessHandler(listaMods => {
+            container.innerHTML = "";
+            const modsDoAluno = modAtuais.split(',').map(m => m.trim().toLowerCase());
+            listaMods.forEach(mod => {
+                const isChecked = modsDoAluno.includes(mod.toLowerCase()) ? "checked" : "";
+                container.innerHTML += `<label class="mod-check-label"><input type="checkbox" name="aluno_modalidade" value="${mod}" ${isChecked} class="mod-check-input"> ${mod}</label>`;
+            });
+            if(listaMods.length === 0) container.innerHTML = '<span style="font-size:11px; color:#888;">Nenhuma modalidade na aba Graduação.</span>';
+        }).getListaModalidades();
+    }
+
+    function abrirModalNovoAluno() {
+        document.getElementById('adm-modal-aluno').style.display = 'flex';
+        document.getElementById('form-edit-aluno').reset();
+        document.getElementById('aluno_id').value = "";
+        document.getElementById('aluno_carimbo').value = "";
+        document.getElementById('titulo-modal-aluno').innerText = "Novo Aluno (CRM)";
+        
+        google.script.run.withSuccessHandler(academias => {
+            const selAcad = document.getElementById('aluno_acad');
+            selAcad.innerHTML = '<option value="" disabled selected>Selecione...</option>';
+            academias.forEach(ac => selAcad.add(new Option(ac, ac)));
+        }).getListaAcademias();
+
+        popularFaixasSelect('aluno_grad', '');
+        popularFaixasSelect('aluno_prox_grad', '');
+        popularModalidadesCheckbox("");
+    }
+
+    function prepEditAluno(id) {
+        const dados = cache.alunos.find(a => a.id === id);
+        if(!dados) return;
+
+        document.getElementById('titulo-modal-aluno').innerText = "Editando: " + dados.nome;
+        const v = (val) => val || "";
+        const d = (val) => { if(!val) return ""; if(val.includes('/')) { const p = val.split('/'); return `${p[2]}-${p[1]}-${p[0]}`; } return val; };
+
+        document.getElementById('aluno_id').value = dados.id;
+        document.getElementById('aluno_carimbo').value = v(dados.carimbo);
+        document.getElementById('aluno_nome').value = v(dados.nome);
+        document.getElementById('aluno_cpf').value = v(dados.cpf);
+        document.getElementById('aluno_nasc').value = d(dados.nasc);
+        document.getElementById('aluno_tel').value = v(dados.tel);
+        document.getElementById('aluno_email').value = v(dados.email);
+        document.getElementById('aluno_pai').value = v(dados.pai);
+        document.getElementById('aluno_mae').value = v(dados.mae);
+        document.getElementById('aluno_end').value = v(dados.endereco);
+        document.getElementById('aluno_login').value = v(dados.login);
+        document.getElementById('aluno_senha').value = v(dados.senha);
+        document.getElementById('aluno_status').value = v(dados.status) || "Ativo";
+        document.getElementById('aluno_exame').value = d(dados.proxExame);
+        document.getElementById('aluno_data_cart').value = d(dados.dataCarteira);
+        document.getElementById('aluno_foto').value = v(dados.foto);
+        document.getElementById('aluno_peso').value = v(dados.peso);
+        document.getElementById('aluno_altura').value = v(dados.altura);
+
+        google.script.run.withSuccessHandler(academias => {
+            const selAcad = document.getElementById('aluno_acad');
+            selAcad.innerHTML = '<option value="" disabled>Selecione...</option>';
+            academias.forEach(ac => { const opt = new Option(ac, ac); if(ac === dados.academia) opt.selected = true; selAcad.add(opt); });
+        }).getListaAcademias();
+
+        popularFaixasSelect('aluno_grad', dados.graduacao);
+        popularFaixasSelect('aluno_prox_grad', dados.proxGrad);
+        popularModalidadesCheckbox(dados.modalidade);
+
+        document.getElementById('adm-modal-aluno').style.display = 'flex';
+    }
+
+    // ============================================================================
+    // 📊 SUPER RELATÓRIO DE FISIOLOGIA COM NOVO FILTRO DE ACADEMIA
+    // ============================================================================
+    function abrirSuperRelatorio() {
+        document.getElementById('adm-modal-relatorio').style.display = 'flex';
+        document.getElementById('resultado-relatorio').style.display = 'none';
+        document.getElementById('form-super-relatorio').reset();
+        
+        google.script.run.withSuccessHandler(lista => {
+            const selMod = document.getElementById('rel_mod');
+            selMod.innerHTML = '<option value="">Todas as Modalidades</option>';
+            lista.forEach(m => selMod.add(new Option(m, m)));
+        }).getListaModalidades();
+
+        google.script.run.withSuccessHandler(gr => {
+            const selGrad = document.getElementById('rel_grad');
+            selGrad.innerHTML = '<option value="">Todas as Graduações</option>';
+            gr.forEach(g => selGrad.add(new Option(g.graduacao + (g.modalidade !== 'Geral' ? ` (${g.modalidade})` : ''), g.graduacao)));
+        }).listarGraduacoesAdminCompleto();
+
+        // NOVO: Puxa as Academias para o Relatório
+        google.script.run.withSuccessHandler(academias => {
+            const selAcad = document.getElementById('rel_acad');
+            selAcad.innerHTML = '<option value="">Todas as Academias</option>';
+            academias.forEach(ac => selAcad.add(new Option(ac, ac)));
+        }).getListaAcademias();
+    }
+
+    function gerarSuperRelatorio(e) {
+        e.preventDefault();
+        const iMin = parseInt(document.getElementById('rel_idade_min').value) || 0;
+        const iMax = parseInt(document.getElementById('rel_idade_max').value) || 999;
+        const pMin = parseFloat(document.getElementById('rel_peso_min').value) || 0;
+        const pMax = parseFloat(document.getElementById('rel_peso_max').value) || 999;
+        const mod = document.getElementById('rel_mod').value.toLowerCase();
+        const grad = document.getElementById('rel_grad').value.toLowerCase();
+        const acad = document.getElementById('rel_acad').value.toLowerCase(); // NOVO FILTRO LIDO
+
+        const filtrados = cache.alunos.filter(a => {
+            const idade = a.idadeAnos || 0;
+            const peso = parseFloat(a.peso) || 0;
+            const aMod = String(a.modalidade).toLowerCase();
+            const aGrad = String(a.graduacao).toLowerCase();
+            const aAcad = String(a.academia).toLowerCase(); // NOVA COMPARAÇÃO
+
+            const matchIdade = idade >= iMin && idade <= iMax;
+            const matchPeso = peso >= pMin && peso <= pMax;
+            const matchMod = mod === "" || aMod.includes(mod);
+            const matchGrad = grad === "" || aGrad.includes(grad);
+            const matchAcad = acad === "" || aAcad === acad; // Match exato do Select
+
+            return matchIdade && matchPeso && matchMod && matchGrad && matchAcad && String(a.status).toLowerCase() === 'ativo';
+        });
+
+        document.getElementById('resultado-relatorio').style.display = 'block';
+        document.getElementById('qtd-resultados').innerText = filtrados.length;
+        
+        const tbody = document.getElementById('tbody-resultados-rel');
+        tbody.innerHTML = "";
+        
+        if(filtrados.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nenhum atleta atende a estes critérios.</td></tr>';
+            return;
+        }
+
+        filtrados.forEach(a => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${esc(a.nome)}</b></td>
+                <td><span style="color:var(--dynamic-prim); font-weight:bold;">${esc(a.idadeExata)}</span></td>
+                <td>${esc(a.peso)} kg<br><small>${esc(a.altura)} m</small></td>
+                <td>${esc(a.graduacao)}<br><small>🛡️ ${esc(a.modalidade)}</small></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // GERA O PDF E MUDA O TÍTULO PARA O NOME DA ACADEMIA (SE FILTRADA)
+    function imprimirSuperRelatorio() {
+        const conteudo = document.getElementById('resultado-relatorio').cloneNode(true);
+        const btnImp = conteudo.querySelector('button');
+        if(btnImp) btnImp.remove();
+        
+        // Pega o nome da academia do Select de Filtro
+        const selAcad = document.getElementById('rel_acad');
+        let tituloAcademia = "";
+        
+        if (selAcad && selAcad.value !== "") {
+            // Se o usuário filtrou por uma academia específica, usa o nome exato dela
+            tituloAcademia = selAcad.options[selAcad.selectedIndex].text;
+        } else {
+            // Se não filtrou, tenta usar a academia padrão do usuário que está logado
+            const configStr = localStorage.getItem('userSession') || '{}';
+            try { tituloAcademia = JSON.parse(configStr).academia || "Todas as Academias"; }catch(e){ tituloAcademia = "Relatório Geral"; }
+        }
+
+        const janela = window.open('', '', 'width=900,height=600');
+        janela.document.write('<html><head><title>Super Relatório de Atletas</title>');
+        janela.document.write('<style>');
+        janela.document.write('body { font-family: Arial, sans-serif; padding: 20px; color: #333; }');
+        janela.document.write('h2 { color: #1e1e1e; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 5px;}');
+        janela.document.write('.subtitle { color: #666; font-size: 14px; margin-top: 0; margin-bottom: 20px; }');
+        janela.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
+        janela.document.write('th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 12px; }');
+        janela.document.write('th { background-color: #f4f4f4; color: #333; }');
+        janela.document.write('</style></head><body>');
+        janela.document.write('<h2>Relatório Oficial de Atletas</h2>');
+        janela.document.write('<div class="subtitle"><b>Local/Academia:</b> ' + tituloAcademia + ' &nbsp;|&nbsp; <b>Data:</b> ' + new Date().toLocaleDateString('pt-BR') + '</div>');
+        janela.document.write(conteudo.innerHTML);
+        janela.document.write('</body></html>');
+        janela.document.close();
+        
+        setTimeout(() => { janela.print(); }, 500);
+    }
+
+    // ============================================================================
+    // 🥋 GRADUAÇÕES & DATALISTS (SMART INPUTS)
+    // ============================================================================
+    function popularDatalistModalidades(id) {
+        const dl = document.getElementById(id);
+        if(!dl) return;
+        google.script.run.withSuccessHandler(lista => {
+            dl.innerHTML = '';
+            lista.forEach(m => { const opt = document.createElement('option'); opt.value = m; dl.appendChild(opt); });
+        }).getListaModalidades();
+    }
+
+    function carregarGraduacoes() {
+        const el = document.getElementById('lista-grad-body');
+        if(!el) return;
+        el.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 30px;"><span class="material-icons spin" style="font-size:40px; color:#333">sync</span></td></tr>';
+        google.script.run.withSuccessHandler(lista => { cache.graduacoesObj = lista; renderGraduacoes(lista); }).listarGraduacoesAdminCompleto();
+    }
+
+    function renderGraduacoes(lista) {
+        const tbody = document.getElementById('lista-grad-body');
+        if(!tbody) return;
+        tbody.innerHTML = "";
+        if(lista.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhuma graduação encontrada.</td></tr>'; return; }
+
+        lista.sort((a, b) => parseInt(a.id_hierarquia) - parseInt(b.id_hierarquia));
+        lista.forEach(g => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b style="font-size:16px; color:var(--dynamic-prim)">${g.id_hierarquia}</b></td>
+                <td><span class="adm-badge bg-dark">🛡️ ${esc(g.modalidade)}</span></td>
+                <td><b style="font-size:14px; text-transform:uppercase;">${esc(g.graduacao)}</b><br><small style="color:#777;">${esc(g.observacao)}</small></td>
+                <td><span class="adm-badge ${String(g.nivel).toLowerCase().includes('aluno') ? 'bg-blue' : 'bg-red'}">${esc(g.nivel)}</span></td>
+                <td><button class="adm-btn" style="padding: 6px 10px;" onclick='prepEditGrad(${JSON.stringify(g)})'><span class="material-icons" style="font-size:14px">edit</span></button><button class="adm-btn" style="background:#ff5252; padding: 6px 10px; margin-left:5px;" onclick='excluirGrad(${g.linha})'><span class="material-icons" style="font-size:14px">delete</span></button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function filtrarGraduacoes() {
+        const termo = document.getElementById('search-grad').value.toLowerCase();
+        const filtrados = cache.graduacoesObj.filter(g => String(g.modalidade).toLowerCase().includes(termo) || String(g.graduacao).toLowerCase().includes(termo));
+        renderGraduacoes(filtrados);
+    }
+
+    function abrirModalGrad() {
+        document.getElementById('adm-modal-grad').style.display = 'flex';
+        document.querySelector('#adm-modal-grad form').reset();
+        document.getElementById('grad_linha_id').value = "";
+        document.getElementById('titulo-modal-grad').innerText = "Nova Graduação";
+        popularDatalistModalidades('datalist-modalidades-grad');
+    }
+
+    function prepEditGrad(g) {
+        abrirModalGrad();
+        document.getElementById('titulo-modal-grad').innerText = "Editar Estrutura";
+        document.getElementById('grad_linha_id').value = g.linha;
+        document.getElementById('grad_mod').value = g.modalidade;
+        document.getElementById('grad_nome').value = g.graduacao;
+        document.getElementById('grad_id').value = g.id_hierarquia;
+        document.getElementById('grad_nivel').value = g.nivel;
+        document.getElementById('grad_obs').value = g.observacao;
+    }
+
+    function excluirGrad(linha) {
+        if(confirm("🚨 AVISO DE ARQUITETO 🚨\nExcluir esta graduação pode quebrar a hierarquia de alunos que a utilizam! Continuar?")) {
+            google.script.run.withSuccessHandler(res => { alert(res); carregarGraduacoes(); }).excluirGraduacaoAdmin(linha);
+        }
+    }
+
+    // ============================================================================
+    // 🎥 VIDEOS, PDFS DINÂMICOS E SELECTS
+    // ============================================================================
+    function popularFaixasSelect(selectId, faixaAtual) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        function preencher(lista) {
+            select.innerHTML = '<option value="" disabled>Selecione a Graduação/Modalidade...</option>';
+            lista.forEach(g => {
+                const nomeExibicao = g.graduacao + (g.modalidade !== 'Geral' ? ` (${g.modalidade})` : '');
+                const opt = new Option(nomeExibicao, g.graduacao);
+                if (g.graduacao === faixaAtual) opt.selected = true;
+                select.add(opt);
+            });
+        }
+        if (cache.graduacoesObj && cache.graduacoesObj.length > 0) preencher(cache.graduacoesObj);
+        else {
+            select.innerHTML = '<option value="" disabled>Carregando base...</option>';
+            google.script.run.withSuccessHandler(gr => { cache.graduacoesObj = gr; preencher(gr); }).listarGraduacoesAdminCompleto();
+        }
+    }
+
+    function popularSelectModalidadesPuras(selectId) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        google.script.run.withSuccessHandler(lista => {
+            select.innerHTML = '<option value="">Todas (Geral)</option>';
+            lista.forEach(m => select.add(new Option(m, m)));
+        }).getListaModalidades();
+    }
+
+    function carregarVideos() { document.getElementById('lista-videos-body').innerHTML = '<tr><td colspan="4" style="text-align:center"><span class="material-icons spin">sync</span></td></tr>'; google.script.run.withSuccessHandler(lista => { cache.videos = lista; renderVideos(lista); }).listarVideosAdmin(); }
+    function renderVideos(lista) { const tbody = document.getElementById('lista-videos-body'); tbody.innerHTML = ""; lista.forEach(v => { const tr = document.createElement('tr'); tr.innerHTML = `<td><b>${esc(v.titulo)}</b><br><small>${esc(v.faixa)}</small></td><td><a href="https://youtu.be/${v.link.includes('v=')?v.link.split('v=')[1]:v.link}" target="_blank">Ver</a></td><td><span class="adm-badge ${v.status === 'Ativo' ? 'bg-green' : 'bg-red'}">${v.status}</span></td><td><button class="adm-btn" onclick='prepEditVideo(${JSON.stringify(v)})'>EDITAR</button></td>`; tbody.appendChild(tr); }); }
+    function openModalVideo() { document.querySelector('#adm-modal-video form').reset(); document.getElementById('vid_id').value = ""; popularFaixasSelect('vid_faixa', ''); document.getElementById('adm-modal-video').style.display = 'flex'; }
+    function prepEditVideo(v) { openModalVideo(); document.getElementById('vid_id').value = v.id; document.getElementById('vid_titulo').value = v.titulo; document.getElementById('vid_link').value = v.link; popularFaixasSelect('vid_faixa', v.faixa); document.getElementById('vid_status').value = v.status || "Ativo"; document.getElementById('vid_desc').value = v.desc || ""; }
+
+    function carregarProg() { document.getElementById('lista-prog-body').innerHTML = '<tr><td colspan="4" style="text-align:center"><span class="material-icons spin">sync</span></td></tr>'; google.script.run.withSuccessHandler(lista => { cache.prog = lista; renderProg(lista); }).listarProgramasAdmin(); }
+    function renderProg(lista) { const tbody = document.getElementById('lista-prog-body'); tbody.innerHTML = ""; lista.forEach(p => { const tr = document.createElement('tr'); tr.innerHTML = `<td><b>${esc(p.faixa)}</b></td><td>${p.id_arquivo ? '<span class="adm-badge bg-green">Linkado</span>' : '<span class="adm-badge bg-red">Pendente</span>'}</td><td><small>${esc(p.descricao)}</small></td><td><button class="adm-btn" onclick='prepEditProg(${JSON.stringify(p)})'>EDITAR</button></td>`; tbody.appendChild(tr); }); }
+    function abrirModalProg() { document.getElementById('adm-modal-prog').style.display='flex'; document.querySelector('#adm-modal-prog form').reset(); document.getElementById('prog_id').value=""; popularFaixasSelect('prog_faixa', ''); }
+    function prepEditProg(p) { abrirModalProg(); document.getElementById('prog_id').value=p.id; popularFaixasSelect('prog_faixa', p.faixa); document.getElementById('prog_link').value=p.link_original || ""; document.getElementById('prog_desc').value=p.descricao; }
+
+    // ============================================================================
+    // RESTO DOS CRUDS (LOCAIS, CURSOS, BIBLIOTECA, CERTIFICADOS)
+    // ============================================================================
+    function carregarLocais() { document.getElementById('lista-locais-body').innerHTML = '<tr><td colspan="4" style="text-align:center"><span class="material-icons spin">sync</span></td></tr>'; google.script.run.withSuccessHandler(lista => { cache.locais = lista; renderLocais(lista); }).listarLocaisAdmin(); }
+    function renderLocais(lista) { const tbody = document.getElementById('lista-locais-body'); tbody.innerHTML = ""; lista.forEach(l => { const tr = document.createElement('tr'); tr.innerHTML = `<td><b>${esc(l.nome)}</b><br><small>${esc(l.cidade)}</small></td><td>${esc(l.contato)}<br><small>Resp: ${esc(l.responsavel)}</small></td><td><span class="adm-badge ${l.status === 'Ativo' ? 'bg-green' : 'bg-red'}">${l.status}</span></td><td><button class="adm-btn" onclick='prepEditLocal(${JSON.stringify(l)})'>EDITAR</button></td>`; tbody.appendChild(tr); }); }
+    function openModalLocal() { document.getElementById('form-locais').reset(); document.getElementById('loc_id').value = ""; document.getElementById('loc_status').value = "Ativo"; document.getElementById('loc_editor_login').value = editorLogin; document.getElementById('adm-modal-local').style.display = 'flex'; }
+    function prepEditLocal(l) { openModalLocal(); document.getElementById('loc_id').value = l.id; document.getElementById('loc_nome').value = l.nome; document.getElementById('loc_resp').value = l.responsavel || ""; document.getElementById('loc_status').value = l.status || "Ativo"; document.getElementById('loc_cidade').value = l.cidade; document.getElementById('loc_end').value = l.endereco; document.getElementById('loc_contato').value = l.contato; document.getElementById('loc_dias').value = l.dias; document.getElementById('loc_horas').value = l.horarios; document.getElementById('loc_maps').value = l.maps; document.getElementById('loc_iframe').value = l.iframe; }
+
+    function carregarCursos() { document.getElementById('lista-cursos-body').innerHTML = '<tr><td colspan="5" style="text-align:center"><span class="material-icons spin">sync</span></td></tr>'; google.script.run.withSuccessHandler(lista => { cache.cursos = lista; renderCursos(lista); }).listarCursosAdmin(); }
+    function renderCursos(lista) { const tbody = document.getElementById('lista-cursos-body'); tbody.innerHTML = ""; lista.forEach(c => { let badge = 'bg-green'; if(c.status === 'Encerradas') badge = 'bg-red'; if(c.status === 'Em Breve') badge = 'bg-blue'; const tr = document.createElement('tr'); tr.innerHTML = `<td><img src="${c.imagem}" style="width:40px; height:40px; object-fit:cover; border-radius:4px" onerror="this.src='https://via.placeholder.com/40'"></td><td><b>${esc(c.nome)}</b></td><td>${esc(c.data)}<br><small>${esc(c.vagas)}</small></td><td><span class="adm-badge ${badge}">${c.status}</span></td><td><button class="adm-btn" onclick='prepEditCurso(${JSON.stringify(c)})'>EDITAR</button></td>`; tbody.appendChild(tr); }); }
+    function abrirModalCurso() { document.getElementById('adm-modal-curso').style.display = 'flex'; document.querySelector('#adm-modal-curso form').reset(); document.getElementById('curso_id').value = ""; document.getElementById('titulo-modal-curso').innerText = "Novo Curso"; document.getElementById('editor_curso_login').value = editorLogin; }
+    function prepEditCurso(c) { abrirModalCurso(); document.getElementById('titulo-modal-curso').innerText = "Editar Curso"; document.getElementById('curso_id').value = c.id; document.getElementById('curso_nome').value = c.nome; document.getElementById('curso_data').value = c.data; document.getElementById('curso_vagas').value = c.vagas; document.getElementById('curso_desc').value = c.descricao; document.getElementById('curso_img').value = c.imagem; document.getElementById('curso_link').value = c.linkInscricao || c.link; document.getElementById('curso_status').value = c.status; }
+
+    function carregarLib() { document.getElementById('lista-lib-body').innerHTML = '<tr><td colspan="4" style="text-align:center"><span class="material-icons spin">sync</span></td></tr>'; google.script.run.withSuccessHandler(lista => { cache.lib = lista; renderLib(lista); }).listarBibliotecaAdmin(); }
+    function renderLib(lista) { const tbody = document.getElementById('lista-lib-body'); tbody.innerHTML = ""; lista.forEach(l => { const tr = document.createElement('tr'); tr.innerHTML = `<td><img src="${l.capa}" style="width:30px; border-radius:2px"></td><td><b>${esc(l.titulo)}</b></td><td><small>${esc(l.descricao).substring(0,50)}...</small></td><td><button class="adm-btn" onclick='prepEditLib(${JSON.stringify(l)})'>EDITAR</button></td>`; tbody.appendChild(tr); }); }
+    function abrirModalLib() { document.getElementById('adm-modal-lib').style.display='flex'; document.querySelector('#adm-modal-lib form').reset(); document.getElementById('lib_id').value=""; }
+    function prepEditLib(l) { abrirModalLib(); document.getElementById('lib_id').value=l.id; document.getElementById('lib_titulo').value=l.titulo; document.getElementById('lib_desc').value=l.descricao; document.getElementById('lib_link').value=l.link; document.getElementById('lib_capa').value=l.capa; }
+
+    function carregarCertificados() { 
+      document.getElementById('lista-cert-body').innerHTML = '<tr><td colspan="4" style="text-align:center"><span class="material-icons spin">sync</span></td></tr>'; 
+      popularSelectModalidadesPuras('filter-mod-cert');
+      popularSelectModalidadesPuras('cert_mod');
+      google.script.run.withSuccessHandler(lista => { 
+        cache.certificados = lista; 
+        renderCertificados(lista); 
+        const cursos = [...new Set(lista.map(c => c.curso))]; 
+        const sel = document.getElementById('filter-curso-cert'); 
+        sel.innerHTML = '<option value="">Todos os Cursos</option>'; 
+        cursos.forEach(c => sel.add(new Option(c, c))); 
+      }).listarCertificadosAdmin(); 
+    }
+    function renderCertificados(lista) { 
+      const tbody = document.getElementById('lista-cert-body'); 
+      tbody.innerHTML = ""; 
+      if(!lista || !lista.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Nenhum certificado.</td></tr>'; return; } 
+      lista.forEach(c => { 
+        const tr = document.createElement('tr'); 
+        tr.innerHTML = `<td><b style="font-size:13px">${esc(c.cpf)}</b></td><td>${esc(c.curso)}<br><span class="adm-badge bg-dark" style="margin-top:4px;">${esc(c.modalidade || 'Geral')}</span> <span style="font-size:10px; color:#888;">${esc(c.data)}</span></td><td><a href="${c.link}" target="_blank" style="color:#2196f3; font-weight:bold;">Abrir PDF</a></td><td><button class="adm-btn" onclick='prepEditCert(${JSON.stringify(c)})'>EDITAR</button><button class="adm-btn" style="background:#f44336; margin-left:5px" onclick="excluirItem('excluirCertificado', ${c.id})">X</button></td>`; 
+        tbody.appendChild(tr); 
+      }); 
+    }
+    function filtrarCertificados() { 
+      const termo = document.getElementById('search-cert').value.toLowerCase(); 
+      const curso = document.getElementById('filter-curso-cert').value; 
+      const mod = document.getElementById('filter-mod-cert').value;
+      const filtrados = cache.certificados.filter(c => { 
+        const matchTermo = c.cpf.toLowerCase().includes(termo) || c.curso.toLowerCase().includes(termo); 
+        const matchCurso = curso ? c.curso === curso : true; 
+        const matchMod = mod ? (c.modalidade || 'Geral') === mod : true;
+        return matchTermo && matchCurso && matchMod; 
+      }); 
+      renderCertificados(filtrados); 
+    }
+    function abrirModalCert() { document.getElementById('adm-modal-cert').style.display='flex'; document.querySelector('#adm-modal-cert form').reset(); document.getElementById('cert_id').value = ""; document.getElementById('cert_data').valueAsDate = new Date(); }
+    function prepEditCert(c) { abrirModalCert(); document.getElementById('cert_id').value = c.id; document.getElementById('cert_cpf').value = c.cpf; document.getElementById('cert_curso').value = c.curso; document.getElementById('cert_mod').value = c.modalidade || 'Geral'; let d = c.data; if(d && d.includes('/')) { const p = d.split('/'); d = `${p[2]}-${p[1]}-${p[0]}`; } document.getElementById('cert_data').value = d; document.getElementById('cert_link').value = c.link; }
+    function excluirItem(func, id) { if(confirm("Excluir item?")) { google.script.run.withSuccessHandler(res => { alert(res); if(func.includes('Cert')) carregarCertificados(); if(func.includes('Lib')) carregarLib(); }).withFailureHandler(err=>alert(err))[func](id); } }
+
+    function carregarConfig() { 
+      google.script.run.withSuccessHandler(cfg => { 
+        document.getElementById('cfg_icon').value = cfg.iconId || ''; 
+        document.getElementById('cfg_bg').value = cfg.bgId || ''; 
+        document.getElementById('cfg_color').value = cfg.primaryColor || '#FFD700'; 
+        document.getElementById('cfg_color_sec').value = cfg.secondaryColor || '#1e1e1e'; 
+        document.getElementById('cfg_color_text').value = cfg.textColor || '#ffffff'; 
+        document.getElementById('cfg_color_btn_text').value = cfg.btnTextColor || '#000000'; 
+        document.getElementById('cfg_color_bg').value = cfg.bgColor || '#121212'; 
+        document.getElementById('cfg_link_loja').value = cfg.linkLoja || '';
+        document.getElementById('cfg_link_insta').value = cfg.linkInstagram || '';
+        document.getElementById('cfg_link_yt').value = cfg.linkYouTube || '';
+        document.getElementById('cfg_link_cad').value = cfg.linkCadastro || '';
+        document.getElementById('cfg_nome_acad').value = cfg.nomeAcademia || '';
+        atualizarPreviewCores();
+      }).getAppConfig(); 
+    }
+
+    function atualizarPreviewCores() {
+      const primary = document.getElementById('cfg_color').value;
+      const secondary = document.getElementById('cfg_color_sec').value;
+      const text = document.getElementById('cfg_color_text').value;
+      const btnText = document.getElementById('cfg_color_btn_text').value;
+      const bgGlobal = document.getElementById('cfg_color_bg').value; 
+      const card = document.getElementById('live-preview-card');
+      const title = document.getElementById('preview-title');
+      const btn = document.getElementById('preview-btn');
+      if (card) { card.style.backgroundColor = secondary; card.style.borderColor = primary; card.parentElement.style.backgroundColor = bgGlobal; }
+      if (title) title.style.color = primary;
+      if (btn) { btn.style.backgroundColor = primary; btn.style.color = btnText; }
+    }
+    function aplicarTema(primaria, secundaria, texto, textoBotao, fundo) {
+      document.getElementById('cfg_color').value = primaria; document.getElementById('cfg_color_sec').value = secundaria; document.getElementById('cfg_color_text').value = texto; document.getElementById('cfg_color_btn_text').value = textoBotao; document.getElementById('cfg_color_bg').value = fundo; atualizarPreviewCores();
+    }
+    function closeModal(id) { const modal = document.getElementById(id); if(modal) modal.style.display = 'none'; }
+    function esc(t) { return t ? String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : ""; }
+  </script>
+</div>

@@ -126,7 +126,7 @@
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
   }
 
-  /* Cores das Faixas (Mantidas semanticamente fixas) */
+  /* Ícone da Faixa */
   .rank-icon {
     width: 60px;
     height: 60px;
@@ -140,8 +140,12 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
     text-transform: uppercase;
     border: 2px solid rgba(255, 255, 255, 0.2);
+    background: #333;
+    color: #fff;
+    /* Fallback padrão para cores não mapeadas */
   }
 
+  /* Cores Mapeadas */
   .bg-branca {
     background: #ffffff;
     color: #000;
@@ -364,7 +368,7 @@
     transform: scale(1.1);
   }
 
-  /* --- 6. MODAIS DE CONFIRMAÇÃO --- */
+  /* --- 6. MODAIS --- */
   #confirm-modal,
   #completion-screen {
     position: fixed;
@@ -556,7 +560,7 @@
 
   <div class="v-tabs">
     <div class="v-tab active" onclick="mudarAba('treino', this)">
-      <span class="material-icons">ondemand_video</span> Treino por Faixa
+      <span class="material-icons">ondemand_video</span> Treino Técnico
     </div>
     <div class="v-tab" onclick="mudarAba('exame', this)">
       <span class="material-icons">task_alt</span> Simular Exame
@@ -565,7 +569,8 @@
 
   <div id="loading-vid" style="text-align:center; margin-top:50px;">
     <div class="spinner-vid"></div>
-    <p style="color:var(--dynamic-text); opacity:0.6; font-weight:bold; margin-top:15px;">Carregando videoteca...</p>
+    <p style="color:var(--dynamic-text); opacity:0.6; font-weight:bold; margin-top:15px;">Carregando acervo oficial...
+    </p>
   </div>
 
   <div id="videos-grid" class="rank-grid"></div>
@@ -612,7 +617,7 @@
 </div>
 
 <script>
-  console.log("✅ [SAFE MODE] Videoteca.html (White-Label) carregada!");
+  console.log("✅ [SAFE MODE] Videoteca.html (White-Label Multimodal) carregada!");
 
   var acervo = {};
   var faixasPermitidas = [];
@@ -631,8 +636,9 @@
         if (videoScreen) videoScreen.style.display = 'block';
         
         const userLogin = (typeof currentUser !== 'undefined' && currentUser.LOGIN) ? currentUser.LOGIN : 'anon';
-        const userGrad = (typeof currentUser !== 'undefined' && currentUser.graduacao) ? currentUser.graduacao : 'branca';
-        var cacheKey = 'videoteca_' + userLogin + '_' + userGrad;
+        const userGrad = (typeof currentUser !== 'undefined' && (currentUser.graduacao || currentUser.GRADUACAO_ATUAL)) ? (currentUser.graduacao || currentUser.GRADUACAO_ATUAL) : 'branca';
+        const userMod = (typeof currentUser !== 'undefined' && (currentUser.modalidade || currentUser.Modalidade)) ? (currentUser.modalidade || currentUser.Modalidade) : 'geral';
+        var cacheKey = 'videoteca_' + userLogin + '_' + userGrad + '_' + userMod;
         
         if (typeof CacheSystem !== 'undefined') {
             var cached = CacheSystem.get(cacheKey);
@@ -670,9 +676,7 @@
               })
               .listarVideoteca(typeof currentUser !== 'undefined' ? currentUser : {});
         }
-    } catch (e) {
-        console.error(e);
-    }
+    } catch (e) { console.error(e); }
   }
 
   function mudarAba(modo, el) {
@@ -689,7 +693,7 @@
     grid.innerHTML = '';
 
     if (!faixasPermitidas || faixasPermitidas.length === 0) {
-        grid.innerHTML = '<p style="color:var(--dynamic-text); opacity:0.5; grid-column:1/-1; text-align:center; font-weight:bold; padding:20px; border:1px dashed rgba(255,255,255,0.2); border-radius:8px;">Nenhuma faixa disponível para o seu nível atual.</p>';
+        grid.innerHTML = '<p style="color:var(--dynamic-text); opacity:0.5; grid-column:1/-1; text-align:center; font-weight:bold; padding:20px; border:1px dashed rgba(255,255,255,0.2); border-radius:8px;">Nenhum conteúdo disponível para a sua graduação e modalidade.</p>';
         return;
     }
 
@@ -700,13 +704,14 @@
         var card = document.createElement('div');
         card.className = 'rank-card';
         var primeiraPalavra = faixa ? faixa.split(' ')[0].toLowerCase() : 'branca';
-        var corClasse = 'bg-' + primeiraPalavra;
+        var corClasse = 'bg-' + primeiraPalavra; // Fallback mapeado no CSS
         
         var textoBotao = (modoAtual === 'treino') ? (qtdTotal + " Vídeos") : "Iniciar Simulação";
         var iconBotao = (modoAtual === 'treino') ? "play_circle_outline" : "emergency_recording";
 
+        // MÁGICA DO NOME: Removemos a palavra fixa "Faixa", agora exibe puro: "Kruang Branco", "Amarela", etc.
         var html = '<div class="rank-icon ' + corClasse + '">' + (faixa ? primeiraPalavra.substring(0,2) : '??') + '</div>';
-        html += '<div class="rank-title">Faixa ' + faixa + '</div>';
+        html += '<div class="rank-title">' + faixa + '</div>';
         html += '<div class="rank-subtitle"><span class="material-icons" style="font-size:16px; color:var(--dynamic-prim);">' + iconBotao + '</span> ' + textoBotao + '</div>';
 
         card.innerHTML = html;
@@ -743,7 +748,6 @@
 
   function solicitarSaida() { document.getElementById('confirm-modal').style.display = 'flex'; }
   function cancelarSaida() { document.getElementById('confirm-modal').style.display = 'none'; }
-  
   function confirmarSaida() {
     document.getElementById('confirm-modal').style.display = 'none';
     document.getElementById('player-overlay').style.display = 'none';
@@ -753,7 +757,6 @@
   function mostrarConclusao() {
     document.getElementById('player-overlay').style.display = 'none';
     document.getElementById('player-container-inner').innerHTML = "";
-    
     var nome = (typeof currentUser !== 'undefined') ? (currentUser.nomeCompleto || currentUser.LOGIN || "Aluno") : "Atleta";
     document.getElementById('msg-parabens').textContent = "Parabéns, " + nome.split(' ')[0] + "!";
     document.getElementById('completion-screen').style.display = 'flex';
@@ -766,7 +769,6 @@
 
     var video = playlistAtual[indiceAtual];
     var container = document.getElementById('player-container-inner');
-    
     var temVideo = video.youtubeId && video.youtubeId.length > 5 && video.youtubeId !== "YOUTUBE_ID_AQUI";
 
     if (!temVideo) {
@@ -784,7 +786,6 @@
     document.getElementById('vid-title').textContent = video.titulo || "Sem Título";
     document.getElementById('vid-desc').innerText = video.descricao || "Sem descrição informada.";
     document.getElementById('vid-counter').textContent = (indiceAtual + 1) + " de " + playlistAtual.length;
-    
     document.getElementById('btn-prev').disabled = (indiceAtual === 0);
     
     var btnNext = document.getElementById('btn-next');
@@ -803,7 +804,6 @@
   }
 
   function mudarVideo(delta) { indiceAtual += delta; carregarVideoNoPlayer(); }
-
   function fecharVideoteca() {
     document.getElementById('videoteca-screen').style.display = 'none';
     document.querySelector('.dashboard-header').style.display = 'flex';

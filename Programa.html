@@ -89,7 +89,7 @@
     gap: 15px;
   }
 
-  /* ÍCONE DE GRADUAÇÃO (CORES FIXAS DO SISTEMA DE FAIXAS) */
+  /* ÍCONE DE GRADUAÇÃO */
   .faixa-icon {
     width: 45px;
     height: 45px;
@@ -98,15 +98,17 @@
     align-items: center;
     justify-content: center;
     font-weight: 900;
-    color: #000;
+    color: #fff;
     font-size: 0.85rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     text-transform: uppercase;
     letter-spacing: 1px;
     border: 2px solid rgba(255, 255, 255, 0.2);
+    background: #333;
+    /* Default genérico */
   }
 
-  /* Cores Fixas (Não herdam do White-label pois representam a cor literal da faixa) */
+  /* Cores Fixas (Fallback Visual) */
   .bg-branca {
     background-color: #ffffff;
     color: #000;
@@ -148,12 +150,12 @@
     color: #fff;
   }
 
-  /* TEXTOS DO CARD */
   .pdf-title {
     color: var(--dynamic-text);
     font-size: 1.1rem;
     font-weight: 900;
     margin: 0 0 5px 0;
+    text-transform: uppercase;
   }
 
   .pdf-status {
@@ -218,14 +220,15 @@
 
   <div id="loading-program" style="text-align: center; margin-top: 50px;">
     <div class="spinner-prog"></div>
-    <p style="color: var(--dynamic-text); opacity: 0.6; font-weight:bold; margin-top: 15px;">Buscando arquivos...</p>
+    <p style="color: var(--dynamic-text); opacity: 0.6; font-weight:bold; margin-top: 15px;">Buscando arquivos
+      oficias...</p>
   </div>
 
   <div id="lista-pdfs" class="program-list"></div>
 </div>
 
 <script>
-  console.log("✅ [SAFE MODE] Programa.html carregado (White-Label Integrado - Cache: 6h)!");
+  console.log("✅ [SAFE MODE] Programa.html carregado (White-Label Multimodal Integrado)!");
 
   function abrirPrograma(user) {
     try {
@@ -243,9 +246,11 @@
         if (lista) lista.innerHTML = '';
         if (loading) loading.style.display = 'block';
 
-        // --- CACHE ENGINE ---
-        const userGrad = (user && user.graduacao) ? user.graduacao : 'branca';
-        const cacheKey = 'programa_' + userGrad;
+        // 🧠 CACHE INTELIGENTE E BLINDADO PARA CASE SENSITIVE
+        const safeGrad = (user && (user.graduacao || user.GRADUACAO_ATUAL || user["Graduação"])) ? (user.graduacao || user.GRADUACAO_ATUAL || user["Graduação"]) : 'branca';
+        const safeMod = (user && (user.modalidade || user.Modalidade)) ? (user.modalidade || user.Modalidade) : 'geral';
+        
+        const cacheKey = 'programa_' + safeGrad + '_' + safeMod;
 
         if (typeof CacheSystem !== 'undefined') {
             const cached = CacheSystem.get(cacheKey);
@@ -260,9 +265,7 @@
         if (typeof google !== 'undefined' && google.script) {
             google.script.run
               .withSuccessHandler(function(programas) {
-                  if (typeof CacheSystem !== 'undefined') {
-                      CacheSystem.set(cacheKey, programas, 360);
-                  }
+                  if (typeof CacheSystem !== 'undefined') CacheSystem.set(cacheKey, programas, 360);
                   renderizarProgramas(programas);
               })
               .withFailureHandler(erroPrograma)
@@ -270,9 +273,7 @@
         } else {
             console.error("Ambiente Google Script não detectado.");
         }
-    } catch (e) {
-        console.error("Erro em abrirPrograma:", e);
-    }
+    } catch (e) { console.error("Erro em abrirPrograma:", e); }
   }
 
   function renderizarProgramas(programas) {
@@ -284,15 +285,14 @@
         if (!lista) return;
 
         if (!programas || programas.length === 0) {
-            lista.innerHTML = '<p style="text-align:center; color:var(--dynamic-text); opacity:0.5; font-weight:bold; padding:20px; border:1px dashed rgba(255,255,255,0.2); border-radius:8px;">Nenhum programa disponível para sua graduação.</p>';
+            lista.innerHTML = '<p style="text-align:center; color:var(--dynamic-text); opacity:0.5; font-weight:bold; padding:20px; border:1px dashed rgba(255,255,255,0.2); border-radius:8px;">Nenhum documento técnico disponível para o seu nível e modalidade.</p>';
             return;
         }
 
         programas.forEach(p => {
             const item = document.createElement('a'); 
-            const faixaStr = p.faixa || "Branca";
+            const faixaStr = p.faixa || "Geral";
             
-            // Lógica de Cores da Faixa: pega a primeira palavra para mapear o CSS
             const primeiraPalavra = faixaStr.split(' ')[0].toLowerCase();
             const classeCor = 'bg-' + primeiraPalavra; 
             
@@ -313,9 +313,9 @@
                         ${primeiraPalavra.substring(0, 2).toUpperCase()}
                     </div>
                     <div>
-                        <h3 class="pdf-title">Faixa ${faixaStr}</h3>
+                        <h3 class="pdf-title">${faixaStr}</h3>
                         <div class="pdf-status">
-                            ${p.disponivel ? 'Toque para abrir PDF' : 'Arquivo Bloqueado / Indisponível'}
+                            ${p.disponivel ? 'Toque para abrir PDF Oficial' : 'Arquivo Bloqueado / Indisponível'}
                         </div>
                     </div>
                 </div>
@@ -325,9 +325,7 @@
             `;
             lista.appendChild(item);
         });
-    } catch (e) {
-        console.error("Erro em renderizarProgramas:", e);
-    }
+    } catch (e) { console.error("Erro em renderizarProgramas:", e); }
   }
 
   function erroPrograma(e) {
@@ -337,9 +335,7 @@
         console.error("Erro crítico no programa:", e);
         const lista = document.getElementById('lista-pdfs');
         if(lista) lista.innerHTML = `<p style="color:#ff5252; text-align:center; font-weight:bold;">Falha ao carregar programas: ${e.message}</p>`;
-    } catch (err) {
-        console.error("Erro ao tratar falha:", err);
-    }
+    } catch (err) { console.error("Erro ao tratar falha:", err); }
   }
 
   function fecharPrograma() {
@@ -351,8 +347,6 @@
         if (progScreen) progScreen.style.display = 'none';
         if (dashHeader) dashHeader.style.display = 'flex';
         if (dashGrid) dashGrid.style.display = 'grid';
-    } catch (e) {
-        console.error("Erro em fecharPrograma:", e);
-    }
+    } catch (e) { console.error("Erro em fecharPrograma:", e); }
   }
 </script>
