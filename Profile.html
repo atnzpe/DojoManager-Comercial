@@ -17,9 +17,7 @@
   }
 
   .profile-card {
-    /* Usa a Cor Secundária (Fundo do Card) */
     background-color: var(--dynamic-sec) !important;
-    /* Borda com a Cor Primária (Marca) */
     border: 2px solid var(--dynamic-prim) !important;
     border-radius: 20px;
     width: 100%;
@@ -28,12 +26,21 @@
     text-align: center;
     position: relative;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    /* Cor do Texto Geral */
     color: var(--dynamic-text) !important;
     font-family: 'Roboto', sans-serif;
+    max-height: 95vh;
+    overflow-y: auto;
   }
 
-  /* Detalhe de topo com a Cor Primária */
+  .profile-card::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .profile-card::-webkit-scrollbar-thumb {
+    background: var(--dynamic-prim);
+    border-radius: 10px;
+  }
+
   .profile-card::before {
     content: '';
     position: absolute;
@@ -49,11 +56,10 @@
   .profile-img-container {
     width: 120px;
     height: 120px;
-    margin: 20px auto;
+    margin: 15px auto;
     border-radius: 50%;
     padding: 4px;
     position: relative;
-    /* Gradiente entre a Marca e o Fundo Geral */
     background: linear-gradient(45deg, var(--dynamic-prim), var(--dynamic-bg));
   }
 
@@ -95,7 +101,6 @@
     font-family: monospace;
   }
 
-  /* Badge da Faixa/Graduação */
   .profile-badge {
     display: inline-block;
     padding: 6px 16px;
@@ -106,7 +111,19 @@
     font-weight: 900;
     text-transform: uppercase;
     font-size: 0.85rem;
-    margin-bottom: 25px;
+    margin-bottom: 15px;
+  }
+
+  .mod-badge {
+    display: block;
+    width: fit-content;
+    margin: 0 auto 25px auto;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 0.8rem;
+    font-weight: bold;
+    border: 1px dashed rgba(255, 255, 255, 0.3);
   }
 
   .profile-stats {
@@ -116,13 +133,26 @@
     background: rgba(0, 0, 0, 0.15);
     border-radius: 12px;
     padding: 15px;
+    margin-bottom: 15px;
+  }
+
+  .fisio-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 12px;
+    padding: 15px;
     margin-bottom: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   .stat-label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     text-transform: uppercase;
     opacity: 0.6;
+    display: block;
+    margin-bottom: 2px;
   }
 
   .stat-value {
@@ -130,7 +160,6 @@
     font-weight: 900;
   }
 
-  /* Botões de Ação */
   .btn-profile-main {
     background-color: var(--dynamic-prim) !important;
     color: var(--dynamic-btn-text) !important;
@@ -169,7 +198,6 @@
     background: rgba(255, 255, 255, 0.05);
   }
 
-  /* Sub-modais de edição */
   .sub-modal {
     position: absolute;
     top: 50%;
@@ -208,30 +236,28 @@
     <div id="p-nome" class="profile-name">Carregando...</div>
     <div id="p-login" class="profile-login">@usuario</div>
     <div id="p-faixa" class="profile-badge">FAIXA</div>
+    <div id="p-modalidade" class="mod-badge">🛡️ Modalidade</div>
+
+    <div class="fisio-box">
+      <div>
+        <span class="stat-label">Idade</span><span id="p-idade" class="stat-value" style="color:var(--dynamic-prim)">--</span>
+      </div>
+      <div style="border-left:1px solid rgba(255,255,255,0.1); border-right:1px solid rgba(255,255,255,0.1);">
+        <span class="stat-label">Peso</span><span id="p-peso" class="stat-value">--</span></div>
+      <div><span class="stat-label">Altura</span><span id="p-altura" class="stat-value">--</span></div>
+    </div>
 
     <div class="profile-stats">
-      <div class="stat-item" style="border-right: 1px solid rgba(255,255,255,0.1);">
-        <span class="stat-label">Academia</span>
-        <span id="p-academia" class="stat-value">...</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Próximo Exame</span>
-        <span id="p-exame" class="stat-value">...</span>
-      </div>
+      <div style="border-right: 1px solid rgba(255,255,255,0.1);">
+        <span class="stat-label">Academia</span><span id="p-academia" class="stat-value">...</span></div>
+      <div><span class="stat-label">Próximo Exame</span><span id="p-exame" class="stat-value">...</span></div>
     </div>
 
     <div style="display:flex; gap:10px; margin-bottom:15px">
-      <button class="btn-profile-outline" onclick="abrirTrocaSenha()">
-        <span class="material-icons" style="font-size:18px">lock</span> Senha
-      </button>
-      <button class="btn-profile-main" onclick="gerarPDFCarteirinha()">
-        <span class="material-icons" style="font-size:18px">badge</span> Carteira
-      </button>
+      <button class="btn-profile-outline" onclick="abrirTrocaSenha()"><span class="material-icons" style="font-size:18px">lock</span> Senha</button>
+      <button class="btn-profile-main" onclick="gerarPDFCarteirinha()"><span class="material-icons" style="font-size:18px">badge</span> Carteira</button>
     </div>
-
-    <button class="btn-profile-outline" style="width:100%" onclick="fecharPerfil()">
-      <span class="material-icons">arrow_back</span> VOLTAR
-    </button>
+    <button class="btn-profile-outline" style="width:100%" onclick="fecharPerfil()"><span class="material-icons">arrow_back</span> VOLTAR</button>
 
     <div id="modal-senha" class="sub-modal">
       <h4 style="margin-top:0; color:var(--dynamic-prim)">Alterar Senha</h4>
@@ -242,7 +268,6 @@
         <button type="button" class="btn-profile-outline" style="width:100%; margin-top:10px; border:none !important" onclick="fecharSubModal('modal-senha')">CANCELAR</button>
       </form>
     </div>
-
     <div id="modal-foto" class="sub-modal">
       <h4 style="margin-top:0; color:var(--dynamic-prim)">Nova Foto</h4>
       <p style="font-size:12px; opacity:0.7">Cole a URL da sua foto (Drive ou Web).</p>
@@ -256,51 +281,41 @@
 </div>
 
 <script>
-  // Cache seguro do usuário para operações de edição
   let userCache = {};
 
-  /**
-   * CARREGAMENTO BLINDADO DE PERFIL
-   */
   function carregarDadosPerfil(user) {
-     console.log("[PROFILE] Iniciando renderização...", user);
-
-     // 1. Verificação de Segurança
-     if(!user) {
-        console.error("[PROFILE] Erro: Objeto user é null.");
-        alert("Erro de sessão. Faça login novamente.");
-        return;
-     }
-
-     userCache = user; // Armazena para uso nas edições
+     if(!user) { alert("Erro de sessão. Faça login novamente."); return; }
+     userCache = user;
 
      try {
-        const setTextSafe = (id, text) => {
-           const el = document.getElementById(id);
-           if(el) el.textContent = text;
-        };
-        const setSrcSafe = (id, src) => {
-           const el = document.getElementById(id);
-           if(el) el.src = src;
-        };
-
-        // 2. Preenchimento de Dados
-        setSrcSafe('p-foto', user.fotoUrl || "https://lh3.googleusercontent.com/d/1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv");
+        const setTextSafe = (id, text) => { const el = document.getElementById(id); if(el) el.textContent = text; };
+        
+        document.getElementById('p-foto').src = user.fotoUrl || "https://lh3.googleusercontent.com/d/1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv";
         setTextSafe('p-nome', user.nomeCompleto || "Nome Indisponível");
         setTextSafe('p-login', "@" + (user.LOGIN || "---"));
         setTextSafe('p-faixa', user.graduacao || "Iniciante");
-        
+        setTextSafe('p-modalidade', "🛡️ " + (user.modalidade || "Geral"));
         setTextSafe('p-academia', user.academia || "---");
         setTextSafe('p-exame', user.proximoExame || "A definir");
+        
+        // O PULO DO GATO: Se no login já tiver idade, usa. Se não, tenta calcular ou exibe "N/A"
+        setTextSafe('p-idade', user.idadeExata ? user.idadeExata.split(',')[0] : "--"); // Mostra só "35a" para ficar bonito
+        setTextSafe('p-peso', user.peso ? user.peso + " kg" : "--");
+        setTextSafe('p-altura', user.altura ? user.altura + " m" : "--");
 
-        // 3. Exibição
+        // COMO O CACHE DO NAVEGADOR ESTÁ SUJO (Sem peso e altura), 
+        // disparamos uma busca real pro banco só pra atualizar a telinha dele!
+        google.script.run.withSuccessHandler(freshUser => {
+           if(freshUser) {
+              setTextSafe('p-idade', freshUser.idadeExata ? freshUser.idadeExata.split(',')[0] : "--"); 
+              setTextSafe('p-peso', freshUser.peso ? freshUser.peso + " kg" : "--");
+              setTextSafe('p-altura', freshUser.altura ? freshUser.altura + " m" : "--");
+           }
+        }).buscarAlunoPorLogin(user.LOGIN);
+
         const modal = document.getElementById('modal-perfil');
         if(modal) modal.style.display = 'flex';
-
-     } catch (e) {
-        console.error("[PROFILE] Exceção:", e);
-        alert("Erro ao abrir perfil.");
-     }
+     } catch (e) { alert("Erro ao abrir perfil."); }
   }
 
   function fecharPerfil() {
@@ -310,74 +325,30 @@
      fecharSubModal('modal-foto');
   }
 
-  // --- SUB-MODAIS ---
   function abrirTrocaSenha() { document.getElementById('modal-senha').style.display = 'block'; }
   function abrirEditFoto() { document.getElementById('modal-foto').style.display = 'block'; }
   function fecharSubModal(id) { document.getElementById(id).style.display = 'none'; }
 
-  // --- LÓGICA DE AÇÃO DO USUÁRIO ---
-
   function salvarNovaSenha(e) {
       e.preventDefault();
       const btn = e.target.querySelector('button');
-      const txtOrig = btn.innerText;
-      btn.innerText = "..."; btn.disabled = true;
-
-      const form = {
-          cpf: userCache.LOGIN, // Mapeia LOGIN para o campo que o backend espera (cpf)
-          senha_antiga: document.getElementById('senha-antiga').value,
-          senha_nova: document.getElementById('senha-nova').value
-      };
-
-      google.script.run
-        .withSuccessHandler(res => {
-            alert(res);
-            btn.innerText = txtOrig; btn.disabled = false;
-            if(res.includes('✅')) { e.target.reset(); fecharSubModal('modal-senha'); }
-        })
-        .withFailureHandler(err => {
-            alert("Erro: " + err.message);
-            btn.innerText = txtOrig; btn.disabled = false;
-        })
-        .trocarSenhaUsuario(form);
+      const txtOrig = btn.innerText; btn.innerText = "..."; btn.disabled = true;
+      const form = { cpf: userCache.LOGIN, senha_antiga: document.getElementById('senha-antiga').value, senha_nova: document.getElementById('senha-nova').value };
+      google.script.run.withSuccessHandler(res => { alert(res); btn.innerText = txtOrig; btn.disabled = false; if(res.includes('✅')) { e.target.reset(); fecharSubModal('modal-senha'); } }).withFailureHandler(err => { alert("Erro: " + err.message); btn.innerText = txtOrig; btn.disabled = false; }).trocarSenhaUsuario(form);
   }
 
   function salvarNovaFoto(e) {
       e.preventDefault();
       const btn = e.target.querySelector('button');
-      const txtOrig = btn.innerText;
-      btn.innerText = "..."; btn.disabled = true;
-      
+      const txtOrig = btn.innerText; btn.innerText = "..."; btn.disabled = true;
       const novoLink = document.getElementById('link-foto').value;
-      const form = {
-          aluno_login: userCache.LOGIN,
-          nova_foto: novoLink
-      };
-
-      google.script.run
-        .withSuccessHandler(res => {
-            alert(res);
-            if(res.includes('✅')) {
-                // Atualiza visualmente e no cache local
-                document.getElementById('p-foto').src = novoLink;
-                userCache.fotoUrl = novoLink;
-                localStorage.setItem('userSession', JSON.stringify(userCache));
-                // Tenta atualizar header se possível
-                try { document.getElementById('header-img').src = novoLink; } catch(ex){}
-                fecharSubModal('modal-foto');
-                e.target.reset();
-            }
-            btn.innerText = txtOrig; btn.disabled = false;
-        })
-        .withFailureHandler(err => {
-            alert("Erro: " + err.message);
-            btn.innerText = txtOrig; btn.disabled = false;
-        })
-        .atualizarFotoPerfil(form);
+      const form = { aluno_login: userCache.LOGIN, nova_foto: novoLink };
+      google.script.run.withSuccessHandler(res => { alert(res); if(res.includes('✅')) { document.getElementById('p-foto').src = novoLink; userCache.fotoUrl = novoLink; localStorage.setItem('userSession', JSON.stringify(userCache)); try { document.getElementById('header-img').src = novoLink; } catch(ex){} fecharSubModal('modal-foto'); e.target.reset(); } btn.innerText = txtOrig; btn.disabled = false; }).withFailureHandler(err => { alert("Erro: " + err.message); btn.innerText = txtOrig; btn.disabled = false; }).atualizarFotoPerfil(form);
   }
 
   function gerarPDFCarteirinha() {
-     // Placeholder mantido conforme solicitado
-     alert("⏳ A geração de PDF estará disponível na próxima atualização!");
+      const btn = document.querySelector('.btn-profile-main[onclick="gerarPDFCarteirinha()"]');
+      const txtOrig = btn.innerHTML; btn.innerHTML = '<span class="material-icons spin" style="font-size:18px;">sync</span> GERANDO...'; btn.disabled = true;
+      google.script.run.withSuccessHandler(res => { btn.innerHTML = txtOrig; btn.disabled = false; if(res.success) { const byteCharacters = atob(res.base64); const byteNumbers = new Array(byteCharacters.length); for (let i = 0; i < byteCharacters.length; i++) { byteNumbers[i] = byteCharacters.charCodeAt(i); } const byteArray = new Uint8Array(byteNumbers); const fileBlob = new Blob([byteArray], { type: 'application/pdf' }); const fileUrl = URL.createObjectURL(fileBlob); const link = document.createElement('a'); link.href = fileUrl; link.download = res.fileName; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(fileUrl); } else { alert("Erro ao gerar PDF: " + res.msg); } }).withFailureHandler(err => { alert("Erro de servidor: " + err.message); btn.innerHTML = txtOrig; btn.disabled = false; }).gerarPDFCarteirinhaServer(userCache.LOGIN);
   }
 </script>

@@ -3,11 +3,11 @@
      INJEÇÃO DE CORES COM FALLBACK SEGURO
      ============================================================================ */
   :root {
-    --dynamic-bg: <?= typeof bgColor !== 'undefined' && bgColor ? bgColor : '#121212' ?> !important;
-    --dynamic-prim: <?= typeof primaryColor !== 'undefined' && primaryColor ? primaryColor : '#FFD700' ?> !important;
-    --dynamic-sec: <?= typeof secondaryColor !== 'undefined' && secondaryColor ? secondaryColor : '#1e1e1e' ?> !important;
-    --dynamic-text: <?= typeof textColor !== 'undefined' && textColor ? textColor : '#ffffff' ?> !important;
-    --dynamic-btn-text: <?= typeof btnTextColor !== 'undefined' && btnTextColor ? btnTextColor : '#000000' ?> !important;
+    --dynamic-bg: <?=typeof bgColor !=='undefined'&& bgColor ? bgColor: '#121212'?> !important;
+    --dynamic-prim: <?=typeof primaryColor !=='undefined'&& primaryColor ? primaryColor: '#FFD700'?> !important;
+    --dynamic-sec: <?=typeof secondaryColor !=='undefined'&& secondaryColor ? secondaryColor: '#1e1e1e'?> !important;
+    --dynamic-text: <?=typeof textColor !=='undefined'&& textColor ? textColor: '#ffffff'?> !important;
+    --dynamic-btn-text: <?=typeof btnTextColor !=='undefined'&& btnTextColor ? btnTextColor: '#000000'?> !important;
   }
 
   /* --- ESTILOS GERAIS --- */
@@ -78,10 +78,11 @@
     text-decoration: none;
     font-weight: 900;
     font-size: 1.1rem;
-    color: #ffffff !important; /* Sempre branco para contrastar com as marcas */
+    color: #ffffff !important;
+    /* Sempre branco para contrastar com as marcas */
     transition: transform 0.2s, filter 0.2s, box-shadow 0.2s;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .btn-social:hover {
@@ -95,14 +96,26 @@
   }
 
   .btn-yt {
-    background: #FF0000; /* Vermelho YouTube */
+    background: #FF0000;
+    /* Vermelho YouTube */
   }
 
   .btn-insta {
-    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); /* Gradiente Instagram */
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    /* Gradiente Instagram */
   }
 
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>
 
 <div id="social-screen" class="social-view">
@@ -115,15 +128,16 @@
   </div>
 
   <p class="social-desc">
-    Siga a <b style="color:var(--dynamic-prim);">Federação Leão do Norte</b> nas redes sociais para ficar por dentro das novidades, eventos, seminários e dicas exclusivas de treino.
+    Siga <b style="color:var(--dynamic-prim);">nossos perfis oficiais</b> nas redes sociais para ficar por dentro das
+    novidades, eventos, seminários e dicas exclusivas de treino.
   </p>
 
   <div class="social-container">
-    <a href="https://www.youtube.com/@KMLNDEFENSE" target="_blank" class="btn-social btn-yt">
+    <a href="#" id="btn-link-yt" target="_blank" class="btn-social btn-yt">
       <span class="material-icons">smart_display</span> Acessar Canal no YouTube
     </a>
 
-    <a href="https://www.instagram.com/fbkmklnoficial/" target="_blank" class="btn-social btn-insta">
+    <a href="#" id="btn-link-insta" target="_blank" class="btn-social btn-insta">
       <span class="material-icons">camera_alt</span> Seguir no Instagram
     </a>
   </div>
@@ -131,12 +145,16 @@
 </div>
 
 <script>
-  console.log("✅ [SAFE MODE] Social.html carregado (White-Label Integrado)");
+  console.log("✅ [SAFE MODE] Social.html corrigido (Lendo variáveis globais)");
 
   function abrirSocial() {
     document.getElementById('dashboard-grid').style.display = 'none';
     document.querySelector('.dashboard-header').style.display = 'none';
     document.getElementById('social-screen').style.display = 'block';
+
+    // Injeta os links reais nos botões usando as variáveis globais do Dashboard!
+    document.getElementById('btn-link-yt').href = LINK_YT_APP;
+    document.getElementById('btn-link-insta').href = LINK_INSTA_APP;
   }
 
   function fecharSocial() {
