@@ -202,7 +202,8 @@
     <div class="profile-img-container">
       <img id="p-foto" src="" class="profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=333&color=fff'">
       <div class="edit-photo-btn" onclick="abrirEditFoto()">
-        <span class="material-icons" style="font-size:16px">edit</span></div>
+        <span class="material-icons" style="font-size:16px">edit</span>
+      </div>
     </div>
 
     <div id="p-nome" class="profile-name">Carregando...</div>
@@ -377,7 +378,50 @@
   }
 
   function gerarPDFCarteirinha() {
-     // Placeholder mantido conforme solicitado
-     alert("⏳ A geração de PDF estará disponível na próxima atualização!");
+      const btn = document.querySelector('.btn-profile-main[onclick="gerarPDFCarteirinha()"]');
+      const txtOrig = btn.innerHTML;
+      
+      // Feedback visual de carregamento
+      btn.innerHTML = '<span class="material-icons spin" style="font-size:18px;">sync</span> GERANDO...';
+      btn.disabled = true;
+
+      google.script.run
+        .withSuccessHandler(res => {
+            btn.innerHTML = txtOrig; 
+            btn.disabled = false;
+            
+            if(res.success) {
+                // 1. Decodifica o Base64 para binário
+                const byteCharacters = atob(res.base64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                
+                // 2. Transforma num arquivo PDF "físico" no navegador
+                const fileBlob = new Blob([byteArray], { type: 'application/pdf' });
+                const fileUrl = URL.createObjectURL(fileBlob);
+                
+                // 3. Força o Download automático
+                const link = document.createElement('a');
+                link.href = fileUrl;
+                link.download = res.fileName;
+                document.body.appendChild(link);
+                link.click();
+                
+                // 4. Limpeza
+                document.body.removeChild(link);
+                URL.revokeObjectURL(fileUrl);
+            } else {
+                alert("Erro ao gerar PDF: " + res.msg);
+            }
+        })
+        .withFailureHandler(err => {
+            alert("Erro de comunicação com servidor: " + err.message);
+            btn.innerHTML = txtOrig; 
+            btn.disabled = false;
+        })
+        .gerarPDFCarteirinhaServer(userCache.LOGIN); // Manda o login pro backend!
   }
 </script>

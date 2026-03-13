@@ -18,7 +18,7 @@
       font-family: 'Helvetica', 'Arial', sans-serif;
       -webkit-print-color-adjust: exact;
       background-color: #ffffff;
-      /* Fundo sempre branco para impressão */
+      /* Fundo sempre branco para a folha A4 */
     }
 
     /* --- Container do Cartão (Medidas Oficiais ISO 7810 - CR80) --- */
@@ -26,24 +26,70 @@
       position: relative;
       width: 85.6mm;
       height: 53.98mm;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
       page-break-inside: avoid;
       margin-bottom: 10mm;
       border: 1px dashed #cccccc;
-      /* Guia de corte suave */
+      /* Guia de corte para a tesoura */
       border-radius: 3mm;
-      /* Borda levemente arredondada como um cartão real */
+      /* Borda levemente arredondada */
       overflow: hidden;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+
+      /* INJEÇÃO DIRETA DA COR SECUNDÁRIA COMO FUNDO DO CARTÃO */
+      background-color: <?=typeof secondaryColor !=='undefined'&& secondaryColor ? secondaryColor: '#1e1e1e'?>;
+      /* INJEÇÃO DIRETA DA COR DE TEXTO */
+      color: <?=typeof textColor !=='undefined'&& textColor ? textColor: '#ffffff'?>;
     }
 
-    /* --- Tipografia Padrão --- */
+    /* ============================================================================
+       ELEMENTOS DE DESIGN E GEOMETRIA
+       ============================================================================ */
+
+    /* Barra Superior com a Cor da Academia */
+    .top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 12mm;
+      background-color: <?=typeof primaryColor !=='undefined'&& primaryColor ? primaryColor: '#FFD700'?>;
+    }
+
+    /* Faixa de Base */
+    .bottom-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2mm;
+      background-color: <?=typeof primaryColor !=='undefined'&& primaryColor ? primaryColor: '#FFD700'?>;
+    }
+
+    /* Logo Oficial da Academia no Topo */
+    .logo-img {
+      position: absolute;
+      top: 2mm;
+      right: 5mm;
+      height: 8mm;
+      max-width: 30mm;
+      object-fit: contain;
+    }
+
+    /* Título do Documento */
+    .doc-title {
+      position: absolute;
+      top: 4mm;
+      left: 5mm;
+      font-size: 7.5pt;
+      font-weight: bold;
+      color: <?=typeof btnTextColor !=='undefined'&& btnTextColor ? btnTextColor: '#000000'?>;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* --- Tipografia Padrão dos Dados --- */
     .field {
       position: absolute;
-      color: #000080;
-      /* Azul Marinho (Contraste alto) */
       font-size: 8pt;
       line-height: 1.2;
       text-transform: uppercase;
@@ -52,96 +98,101 @@
 
     .label {
       font-weight: normal;
-      font-size: 6pt;
+      font-size: 5.5pt;
       display: block;
       margin-bottom: 2px;
-      color: #555555;
-      /* Rótulo mais discreto */
+      /* Cor primária para os rótulos */
+      color: <?=typeof primaryColor !=='undefined'&& primaryColor ? primaryColor: '#FFD700'?>;
+      letter-spacing: 0.5px;
     }
 
-    /* --- POSICIONAMENTO FRENTE --- */
+    /* ============================================================================
+       FRENTE DA CARTEIRINHA
+       ============================================================================ */
     .photo-box {
       position: absolute;
-      top: 18mm;
+      top: 16mm;
       left: 5mm;
       width: 22mm;
       height: 29mm;
       object-fit: cover;
-      border: 1.5px solid #000080;
-      /* Borda da foto */
-      background: #ffffff;
+      /* Borda da foto com a cor da marca */
+      border: 2px solid <?=typeof primaryColor !=='undefined'&& primaryColor ? primaryColor: '#FFD700'?>;
+      background: #333333;
       border-radius: 2px;
+      z-index: 2;
     }
 
     .frente-nome {
-      top: 18mm;
-      left: 32mm;
+      top: 17mm;
+      left: 31mm;
       width: 50mm;
     }
 
     .frente-grad {
-      top: 28mm;
-      left: 32mm;
+      top: 27mm;
+      left: 31mm;
       width: 50mm;
     }
 
     .frente-acad {
-      top: 38mm;
-      left: 32mm;
+      top: 37mm;
+      left: 31mm;
       width: 50mm;
     }
 
-    /* --- POSICIONAMENTO VERSO --- */
+    /* ============================================================================
+       VERSO DA CARTEIRINHA
+       ============================================================================ */
+    .disclaimer {
+      position: absolute;
+      top: 5mm;
+      width: 100%;
+      text-align: center;
+      font-size: 5pt;
+      opacity: 0.6;
+      font-style: normal;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
     .verso-cpf {
-      top: 10mm;
+      top: 12mm;
       left: 6mm;
     }
 
     .verso-filiacao {
-      top: 18mm;
+      top: 22mm;
       left: 6mm;
-      width: 60mm;
+      width: 70mm;
     }
 
     .verso-nasc-box {
-      top: 32mm;
+      top: 34mm;
       left: 6mm;
     }
 
     .verso-validade-box {
-      top: 32mm;
+      top: 34mm;
       left: 45mm;
     }
 
     .verso-validade-val {
       font-weight: bold;
-      color: #d32f2f;
-      /* Validade em vermelho para destaque */
       font-size: 9pt;
-      background: rgba(255, 255, 255, 0.8);
-      /* Fundo branco leve para leitura */
-      padding: 1px 4px;
-      border-radius: 2px;
-    }
-
-    .disclaimer {
-      position: absolute;
-      top: 4mm;
-      width: 100%;
-      text-align: center;
-      font-size: 5pt;
-      color: #555555;
-      font-style: normal;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      /* Fundo com a cor primária e texto contrastante */
+      background-color: <?=typeof primaryColor !=='undefined'&& primaryColor ? primaryColor: '#FFD700'?>;
+      color: <?=typeof btnTextColor !=='undefined'&& btnTextColor ? btnTextColor: '#000000'?>;
+      padding: 2px 6px;
+      border-radius: 3px;
     }
 
     .rodape-verso {
       position: absolute;
       bottom: 4mm;
       left: 6mm;
-      font-size: 5.5pt;
-      color: #333333;
+      font-size: 5pt;
+      opacity: 0.5;
       line-height: 1.3;
     }
   </style>
@@ -149,53 +200,62 @@
 
 <body>
 
-  <div class="card" style="background-image: url('<?= bgFrente ?>');">
-    <img src="<?= fotoUrl ?>" class="photo-box" onerror="this.src='https://ui-avatars.com/api/?background=random&color=fff&name=<?= encodeURIComponent(nome) ?>'">
+  <div class="card">
+    <div class="top-bar">
+      <div class="doc-title">IDENTIFICAÇÃO OFICIAL</div>
+      <img src="<?= typeof logoUrl !== 'undefined' ? logoUrl : 'https://ui-avatars.com/api/?name=Dojo+Manager&background=random' ?>" class="logo-img">
+    </div>
+
+    <img src="<?= typeof fotoUrl !== 'undefined' ? fotoUrl : 'https://ui-avatars.com/api/?background=random&color=fff&name=' + encodeURIComponent(typeof nome !== 'undefined' ? nome : 'Aluno') ?>" class="photo-box">
 
     <div class="field frente-nome">
       <span class="label">NOME COMPLETO</span>
-      <?= nome ?>
+      <?= typeof nome !== 'undefined' ? nome : 'ALUNO NÃO IDENTIFICADO' ?>
     </div>
 
     <div class="field frente-grad">
       <span class="label">GRADUAÇÃO ATUAL</span>
-      <?= graduacao ?>
+      <?= typeof graduacao !== 'undefined' ? graduacao : 'INICIANTE' ?>
     </div>
 
     <div class="field frente-acad">
       <span class="label">ACADEMIA / UNIDADE</span>
-      <?= academia ?>
+      <?= typeof academia !== 'undefined' ? academia : 'MATRIZ' ?>
     </div>
+
+    <div class="bottom-bar"></div>
   </div>
 
-  <div class="card" style="background-image: url('<?= bgVerso ?>');">
+  <div class="card">
     <div class="disclaimer">Documento de identificação interno desportivo</div>
 
     <div class="field verso-cpf">
       <span class="label">REGISTRO (CPF)</span>
-      <?= cpf ?>
+      <?= typeof cpf !== 'undefined' ? cpf : '000.000.000-00' ?>
     </div>
 
     <div class="field verso-filiacao">
       <span class="label">FILIAÇÃO (PAI / MÃE)</span>
-      <?= filiacao ?>
+      <?= typeof filiacao !== 'undefined' ? filiacao : 'NÃO INFORMADA' ?>
     </div>
 
     <div class="field verso-nasc-box">
       <span class="label">DATA DE NASCIMENTO</span>
-      <?= nascimento ?>
+      <?= typeof nascimento !== 'undefined' ? nascimento : '00/00/0000' ?>
     </div>
 
     <div class="field verso-validade-box">
       <span class="label">VALIDADE OFICIAL</span>
-      <span class="verso-validade-val"><?= validade ?></span>
+      <span class="verso-validade-val"><?= typeof validade !== 'undefined' ? validade : '31/12/2026' ?></span>
     </div>
 
     <div class="rodape-verso">
       <b>Data de Emissão:</b>
-      <?= emissao ?><br>
+      <?= typeof emissao !== 'undefined' ? emissao : '00/00/0000' ?><br>
       <b>Sistema:</b> DojoManager SaaS
     </div>
+
+    <div class="bottom-bar"></div>
   </div>
 
 </body>
