@@ -257,7 +257,7 @@
     border-color: #f44336;
   }
 
-  /* BOTÃO WHATSAPP */
+  /* BOTÃO WHATSAPP e PIX */
   .btn-whatsapp {
     background-color: #25D366;
     color: #fff !important;
@@ -281,6 +281,31 @@
   .btn-whatsapp:hover {
     background-color: #128C7E;
     transform: translateY(-2px);
+  }
+
+  .pix-box {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 15px;
+    text-align: center;
+    border: 2px dashed #00e676;
+  }
+
+  .qr-code-img {
+    width: 200px;
+    height: 200px;
+    margin: 10px auto;
+    display: block;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .pix-info {
+    color: #333;
+    font-size: 14px;
+    margin-bottom: 10px;
+    font-weight: bold;
   }
 
   @keyframes fadeIn {
@@ -316,9 +341,9 @@
         </div>
         <div id="aluno-status-badge" class="badge-plano">...</div>
       </div>
-
-      <a id="btn-cobranca-wpp" href="#" target="_blank" class="btn-whatsapp" style="display:none;">
-        <span class="material-icons">whatsapp</span> Regularizar / Renovar
+      <div id="area-pagamento-aluno"></div> <a id="btn-cobranca-wpp" href="#" target="_blank" class="btn-whatsapp"
+        style="display:none;">
+        <span class="material-icons">whatsapp</span> Falar com Secretaria
       </a>
     </div>
 
@@ -435,7 +460,8 @@
 </div>
 
 <script>
-  console.log("✅ [SAFE MODE] Financeiro.html carregado (White-Label)");
+  // BLINDAGEM DE ESCOPO GLOBAL - Módulo Financeiro
+  // Evita conflitos com outros arquivos HTML injetados
   
   var usuarioAtual = null;
 
@@ -451,6 +477,7 @@
       
       usuarioAtual = JSON.parse(session);
 
+      // Hierarquia: Mestre e Admin veem caixa total. Instrutor vê sua academia.
       if (usuarioAtual.isInstrutor || usuarioAtual.nivel === 'Admin' || usuarioAtual.nivel === 'Mestre') {
         document.getElementById('view-admin').style.display = 'block';
         document.getElementById('view-aluno').style.display = 'none';
@@ -461,7 +488,7 @@
         document.getElementById('view-aluno').style.display = 'block';
         carregarDadosAluno();
       }
-    } catch(e) { console.error("Erro Fin:", e); }
+    } catch(e) { console.error("Erro abrirFinanceiro:", e); }
   }
 
   function fecharFinanceiro() {
@@ -476,30 +503,101 @@
     form.style.display = form.style.display === 'none' ? 'block' : 'none';
   }
 
-  // --- ALUNO VIEW ---
+  // --- ALUNO VIEW (Front-end PIX) ---
   function carregarDadosAluno() {
     google.script.run.withSuccessHandler(function(dadosTexto) {
-      var dados = JSON.parse(dadosTexto);
-      
-      document.getElementById('aluno-plano').innerText = dados.plano || "Sem Plano Ativo";
-      document.getElementById('aluno-vencimento').innerText = "Vencimento: " + (dados.vencimento || "--/--/----");
-      
-      var badge = document.getElementById('aluno-status-badge');
-      badge.innerText = dados.status || "Indefinido";
-      var isAtivo = String(dados.status).toLowerCase() === "ativo";
-      badge.className = isAtivo ? "badge-plano" : "badge-plano badge-vencido";
+      try {
+          const dados = JSON.parse(dadosTexto);
+          const isAtivo = String(dados.status).toLowerCase() === "ativo";
+          
+          document.getElementById('aluno-plano').innerText = dados.plano || "Nenhum";
+          document.getElementById('aluno-vencimento').innerText = "Vencimento: " + (dados.vencimento || "--");
+          
+          const badge = document.getElementById('aluno-status-badge');
+          badge.innerText = dados.status || "Pendente";
+          badge.className = isAtivo ? "badge-plano" : "badge-plano badge-vencido";
 
-      // Botão WhatsApp de Cobrança Automática
-      var btnWpp = document.getElementById('btn-cobranca-wpp');
-      if (!isAtivo || (dados.diasRestantes !== -999 && dados.diasRestantes <= 5)) {
-          btnWpp.style.display = "flex";
-          var msg = "Olá! Gostaria de regularizar minha mensalidade (" + dados.plano + "). Meu login é: " + usuarioAtual.LOGIN;
-          btnWpp.href = "https://wa.me/" + (dados.contatoWhatsApp || "") + "?text=" + encodeURIComponent(msg);
-      } else {
-          btnWpp.style.display = "none";
+          document.getElementById('area-pagamento-aluno').innerHTML = ""; // Limpa tentativas anteriores
+          
+          if (!isAtivo || dados.diasRestantes <= 0) {
+            gerarFluxoPix(usuarioAtual.LOGIN);
+          }
+      } catch (err) {
+          console.error("Erro ao processar dados do aluno:", err);
+      }
+    }).getFinanceiroPessoal(usuarioAtual.LOGIN);
+  }
+
+  /**
+   * 💸 GERADOR DE PIX BLINDADO (Sem document.write ou strings soltas)
+   */
+  function gerarFluxoPix(login) {
+    google.script.run.withSuccessHandler(function(info) {
+      const container = document.getElementById('area-pagamento-aluno');
+      
+      // Validação 1: Sem retorno do servidor
+      if (!info) { 
+        document.getElementById('btn-cobranca-wpp').style.display = "flex";
+        return; 
       }
 
-    }).getFinanceiroPessoal(usuarioAtual.LOGIN);
+      // Validação 2: Chave PIX ausente na planilha (Config_App ou Locais)
+      if (!info.chave || info.chave === "undefined" || info.chave.trim() === "") {
+        console.warn("Chave PIX ausente no banco de dados.");
+        document.getElementById('btn-cobranca-wpp').style.display = "flex";
+        return;
+      }
+
+      try {
+        const chave = String(info.chave).trim();
+        const tamChave = chave.length.toString().padStart(2, '0');
+        const valorStr = parseFloat(info.valor || 0).toFixed(2);
+        const beneficiario = (info.beneficiario || "Academia").substring(0, 25); 
+        const cidade = (info.cidade || "Cidade").substring(0, 15); 
+        
+        // Payload Seguro BCB
+        let payload = "00020101021126"; 
+        let merchantInfo = "0014br.gov.bcb.pix01" + tamChave + chave;
+        payload += merchantInfo.length.toString().padStart(2, '0') + merchantInfo;
+        payload += "52040000530398654" + valorStr.length.toString().padStart(2, '0') + valorStr;
+        payload += "5802BR59" + beneficiario.length.toString().padStart(2, '0') + beneficiario; 
+        payload += "60" + cidade.length.toString().padStart(2, '0') + cidade; 
+        payload += "62070503***6304"; 
+
+        // Criação de elementos DOM para evitar erro de Token 'class' (Injeção Segura)
+        const pixBox = document.createElement('div');
+        pixBox.className = 'pix-box';
+        
+        const infoTitle = document.createElement('p');
+        infoTitle.className = 'pix-info';
+        infoTitle.innerText = 'Escaneie para pagar via PIX:';
+        
+        const img = document.createElement('img');
+        img.src = "https://quickchart.io/qr?text=" + encodeURIComponent(payload) + "&size=250&margin=1";
+        img.className = "qr-code-img";
+        
+        const details = document.createElement('p');
+        details.style = "font-size:11px; color:#666; margin-top:5px;";
+        details.innerHTML = "<b>Valor:</b> R$ " + valorStr + " | <b>Titular:</b> " + beneficiario;
+        
+        const btnWpp = document.createElement('button');
+        btnWpp.className = "btn-whatsapp";
+        btnWpp.innerHTML = '<span class="material-icons">send</span> ENVIAR COMPROVANTE';
+        btnWpp.onclick = function() {
+            window.open("https://wa.me/" + info.contatoWhatsApp + "?text=Ol%C3%A1!%20Segue%20meu%20comprovante%20de%20pagamento%20PIX%20de%20R$%20" + valorStr);
+        };
+
+        pixBox.appendChild(infoTitle);
+        pixBox.appendChild(img);
+        pixBox.appendChild(details);
+        pixBox.appendChild(btnWpp);
+        
+        container.appendChild(pixBox);
+
+      } catch (err) {
+        console.error("Erro na montagem do PIX:", err.message);
+      }
+    }).getPixDataFromServer(login);
   }
 
   // --- ADMIN VIEW ---
@@ -507,11 +605,9 @@
     google.script.run.withSuccessHandler(function(dados) {
         if (!dados) return;
 
-        // 1. Select de Lançamento
         var selAcad = document.getElementById('fin-academia');
         selAcad.innerHTML = "";
         
-        // 2. Select de Filtro
         var selFiltro = document.getElementById('filtro-academia');
         selFiltro.innerHTML = '<option value="TODAS">Todas as Unidades</option>';
 
@@ -549,7 +645,7 @@
         academia: document.getElementById('filtro-academia').value
     };
 
-    document.getElementById('lista-transacoes').innerHTML = "<div style='padding:20px;text-align:center; color:var(--dynamic-text); opacity:0.5;'>Buscando do servidor...</div>";
+    document.getElementById('lista-transacoes').innerHTML = "<div style='padding:20px;text-align:center; color:var(--dynamic-text); opacity:0.5;'>Sincronizando Caixa...</div>";
 
     google.script.run.withSuccessHandler(function(resTexto) {
         var dados = JSON.parse(resTexto);
@@ -573,7 +669,7 @@
     var container = document.getElementById('lista-transacoes');
     container.innerHTML = "";
     if (!lista || lista.length === 0) {
-      container.innerHTML = "<div style='padding:20px; text-align:center; color:var(--dynamic-text); opacity:0.5;'>Nenhum registro encontrado neste período.</div>";
+      container.innerHTML = "<div style='padding:20px; text-align:center; color:var(--dynamic-text); opacity:0.5;'>Sem movimentação no período.</div>";
       return;
     }
     lista.forEach(function(t) {
@@ -584,6 +680,7 @@
       var isReceita = tipo.indexOf('receita') !== -1;
       var cor = isReceita ? 'cor-verde' : 'cor-vermelho';
       var sinal = isReceita ? '+ ' : '- ';
+      
       var div = document.createElement('div');
       div.className = 'trx-item';
       div.innerHTML = 
@@ -626,9 +723,7 @@
     var val = document.getElementById('fin-valor').value;
     var desc = document.getElementById('fin-desc').value;
     
-    if (!val || !desc) {
-        alert("Preencha todos os campos obrigatórios (Descrição e Valor)!"); return;
-    }
+    if (!val || !desc) { alert("Preencha Descrição e Valor!"); return; }
 
     btn.disabled = true; btn.innerText = "PROCESSANDO...";
 
