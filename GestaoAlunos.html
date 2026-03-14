@@ -26,7 +26,6 @@
     animation: fadeIn 0.3s;
   }
 
-  /* Cabeçalho com Botão Voltar alinhado */
   .gestao-header {
     display: flex;
     justify-content: space-between;
@@ -72,16 +71,8 @@
     text-transform: uppercase;
   }
 
-  .gestao-toolbar {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-
-  /* --- INPUTS: PRETO NO BRANCO (Foco em Legibilidade) --- */
-  .gestao-input,
-  select.gestao-input,
-  input[type="date"].gestao-input {
+  /* INPUTS */
+  .gestao-input {
     width: 100%;
     padding: 12px;
     border: 1px solid #ccc;
@@ -90,44 +81,24 @@
     background-color: #ffffff !important;
     color: #000000 !important;
     box-sizing: border-box;
-    transition: 0.3s;
   }
 
-  .gestao-input:focus {
-    border-color: var(--dynamic-prim);
-    box-shadow: 0 0 5px var(--dynamic-prim);
-    outline: none;
-  }
-
-  select.gestao-input option {
-    color: #000000 !important;
-    background-color: #ffffff !important;
-    padding: 5px;
-  }
-
-  ::placeholder {
-    color: #888 !important;
-    opacity: 1;
-  }
-
-  /* --- TABELA --- */
+  /* TABELA UX/UI (ESTILO ADM.HTML) */
   .gestao-table {
     width: 100%;
     border-collapse: collapse;
     background: #fff;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   }
 
   .gestao-table th {
-    background: var(--dynamic-sec);
+    background: #333;
     color: var(--dynamic-prim);
     text-align: left;
     padding: 15px;
     font-size: 12px;
     text-transform: uppercase;
-    font-weight: 900;
   }
 
   .gestao-table td {
@@ -138,7 +109,20 @@
     color: #333;
   }
 
-  /* --- BADGES --- */
+  /* FISIOLOGIA VISUAL */
+  .fio-stat {
+    font-size: 13px;
+    font-weight: 900;
+    color: #0056b3;
+  }
+
+  .fio-label {
+    font-size: 10px;
+    color: #888;
+    text-transform: uppercase;
+    display: block;
+  }
+
   .badge {
     padding: 4px 8px;
     border-radius: 4px;
@@ -159,13 +143,6 @@
     border: 1px solid #f44336;
   }
 
-  .badge-bloqueado {
-    background: #e3f2fd;
-    color: #1565c0;
-    border: 1px solid #2196f3;
-  }
-
-  /* --- BOTÕES --- */
   .btn-yellow {
     padding: 10px 16px;
     background-color: var(--dynamic-prim) !important;
@@ -179,16 +156,8 @@
     gap: 5px;
     font-size: 12px;
     text-transform: uppercase;
-    transition: 0.2s;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   }
 
-  .btn-yellow:hover {
-    filter: brightness(1.15);
-    transform: translateY(-2px);
-  }
-
-  /* --- MODAL DE EDIÇÃO --- */
   .modal-overlay {
     position: fixed;
     top: 0;
@@ -209,51 +178,22 @@
     border-radius: 12px;
     width: 800px;
     max-width: 95%;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
     border: 3px solid var(--dynamic-prim);
     max-height: 90vh;
     overflow-y: auto;
     color: #333;
   }
 
-  .modal-box::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  .modal-box::-webkit-scrollbar-thumb {
-    background: var(--dynamic-prim);
-    border-radius: 10px;
-  }
-
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 15px;
-  }
-
-  .form-full {
-    grid-column: span 2;
-  }
-
-  @media (max-width: 700px) {
-    .form-grid {
-      grid-template-columns: 1fr;
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
     }
 
-    .form-full {
-      grid-column: span 1;
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
-  }
-
-  .form-label {
-    font-size: 11px;
-    font-weight: 900;
-    color: #555;
-    margin-bottom: 4px;
-    display: block;
-    margin-top: 10px;
-    text-transform: uppercase;
   }
 
   .spin {
@@ -269,23 +209,10 @@
       transform: rotate(360deg);
     }
   }
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 </style>
 
 <div id="gestao-alunos-view" style="display:none;">
   <div class="gestao-container">
-
     <div class="gestao-header">
       <div class="gestao-title-area">
         <button class="btn-back-gestao" onclick="fecharGestaoAlunos()">
@@ -293,7 +220,6 @@
         </button>
         <h2 class="gestao-title">Gestão de Alunos</h2>
       </div>
-
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <button class="btn-yellow" onclick="GestaoAlunosApp.inicializar()">
           <span class="material-icons">refresh</span> Atualizar
@@ -305,7 +231,7 @@
     </div>
 
     <div class="gestao-toolbar">
-      <input type="text" id="filtro-alunos" class="gestao-input" placeholder="🔍 Buscar por nome, login ou CPF..." onkeyup="GestaoAlunosApp.filtrar()" style="padding: 14px; font-size: 14px;">
+      <input type="text" id="filtro-alunos" class="gestao-input" placeholder="🔍 Buscar por nome, login ou CPF..." onkeyup="GestaoAlunosApp.filtrar()">
     </div>
 
     <div style="overflow-x:auto;">
@@ -313,21 +239,15 @@
         <thead>
           <tr>
             <th>Aluno / Login</th>
-            <th>Detalhes</th>
-            <th>Status / Graduação</th>
+            <th>Fisiologia / Stats</th>
+            <th>Graduação / Modalidade</th>
+            <th>Acesso / Aulas</th>
             <th>Ação</th>
           </tr>
         </thead>
-        <tbody id="tabela-alunos-body">
-          <tr>
-            <td colspan="4" style="text-align:center; padding:40px; color:#666; font-weight:bold;">
-              Aguardando sincronização...
-            </td>
-          </tr>
-        </tbody>
+        <tbody id="tabela-alunos-body"></tbody>
       </table>
     </div>
-
   </div>
 </div>
 
@@ -335,114 +255,36 @@
   <div class="modal-box">
     <div
       style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid var(--dynamic-prim); padding-bottom:15px; margin-bottom:20px;">
-      <h3 style="margin:0; color:#333; font-weight:900; font-size:1.4rem;" id="titulo-modal-gestao">Editar Aluno</h3>
-      <button onclick="GestaoAlunosApp.fecharModal()" style="background:none; border:none; cursor:pointer; font-size:24px; color:#ff5252; font-weight:bold;">✕</button>
+      <h3 style="margin:0; color:#333; font-weight:900;" id="titulo-modal-gestao">Editar Aluno</h3>
+      <button onclick="GestaoAlunosApp.fecharModal()" style="background:none; border:none; cursor:pointer; font-size:24px; color:#ff5252;">✕</button>
     </div>
-
     <form id="form-gestao-aluno" onsubmit="event.preventDefault(); GestaoAlunosApp.salvarEdicao();">
       <input type="hidden" id="ga-id">
-
       <div class="form-grid">
         <div>
-          <label class="form-label">NOME COMPLETO*</label>
-          <input type="text" id="ga-nome" class="gestao-input" required>
-
-          <label class="form-label">CPF</label>
-          <input type="text" id="ga-cpf" class="gestao-input">
-
-          <label class="form-label">DATA NASCIMENTO</label>
-          <input type="date" id="ga-nasc" class="gestao-input">
-
-          <label class="form-label">TELEFONE</label>
-          <input type="text" id="ga-tel" class="gestao-input">
-
-          <label class="form-label">NOME DO PAI</label>
-          <input type="text" id="ga-pai" class="gestao-input">
-
-          <label class="form-label">NOME DA MÃE</label>
-          <input type="text" id="ga-mae" class="gestao-input">
-        </div>
-
-        <div>
-          <label class="form-label" style="color:var(--dynamic-prim);">LOGIN (USUÁRIO)*</label>
-          <input type="text" id="ga-login" class="gestao-input" required style="border: 2px solid var(--dynamic-prim) !important; background:#fff9e6 !important; font-weight:bold;">
-
-          <label class="form-label">SENHA*</label>
-          <input type="text" id="ga-senha" class="gestao-input" required>
-
-          <label class="form-label">E-MAIL</label>
-          <input type="email" id="ga-email" class="gestao-input">
-
-          <label class="form-label">ACADEMIA VINCULADA</label>
-          <select id="ga-acad" class="gestao-input">
-            <option value="" disabled selected>Carregando...</option>
-          </select>
-
+          <label class="form-label">NOME COMPLETO*</label><input type="text" id="ga-nome" class="gestao-input" required>
+          <label class="form-label">CPF</label><input type="text" id="ga-cpf" class="gestao-input">
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <div>
-              <label class="form-label">GRADUAÇÃO</label>
-              <select id="ga-grad" class="gestao-input">
-                  <option value="" disabled selected>Carregando...</option>
-              </select>
+            <div><label class="form-label">PESO (KG)</label><input type="number" step="0.1" id="ga-peso" class="gestao-input">
             </div>
-            <div>
-              <label class="form-label">STATUS ACESSO</label>
-              <select id="ga-status" class="gestao-input" style="font-weight:bold;">
-                  <option value="Ativo" style="color:green;">Ativo</option>
-                  <option value="Inativo" style="color:red;">Inativo</option>
-                  <option value="Bloqueado" style="color:blue;">Bloqueado</option>
-              </select>
+            <div><label class="form-label">ALTURA (M)</label><input type="number" step="0.01" id="ga-altura" class="gestao-input">
             </div>
           </div>
-          <p style="font-size: 10px; color: #777; margin-top: 5px;">*O Nível de Acesso (Aluno/Instrutor) será atribuído
-            automaticamente com base na Graduação escolhida acima.</p>
-
+          <label class="form-label">DATA NASCIMENTO</label><input type="date" id="ga-nasc" class="gestao-input">
         </div>
-
-        <div class="form-full">
-          <label class="form-label">ENDEREÇO COMPLETO</label>
-          <input type="text" id="ga-end" class="gestao-input">
-        </div>
-
-        <div class="form-full" style="background:#e0e0e0; padding:15px; border-radius:8px; border: 1px dashed #999;">
-          <span style="font-size:10px; font-weight:900; color:#555; text-transform:uppercase;">Área de Controle Interno</span>
-          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:5px;">
-            <div style="flex:1">
-              <label class="form-label">PRÓX. GRADUAÇÃO</label>
-              <select id="ga-prox-grad" class="gestao-input">
-                  <option value="">Selecione...</option>
-              </select>
-            </div>
-            <div style="flex:1">
-              <label class="form-label">DATA PRÓX. EXAME</label>
-              <input type="date" id="ga-exame" class="gestao-input">
-            </div>
-            <div style="flex:1">
-              <label class="form-label">VENC. CARTEIRINHA</label>
-              <input type="date" id="ga-data-cart" class="gestao-input">
-            </div>
-          </div>
-        </div>
-
-        <div class="form-full">
-          <label class="form-label">LINK FOTO (GOOGLE DRIVE)</label>
-          <input type="text" id="ga-foto" class="gestao-input" placeholder="https://drive.google.com/...">
+        <div>
+          <label class="form-label">LOGIN*</label><input type="text" id="ga-login" class="gestao-input" required>
+          <label class="form-label">SENHA*</label><input type="text" id="ga-senha" class="gestao-input" required>
+          <label class="form-label">ACADEMIA</label><select id="ga-acad" class="gestao-input"></select>
+          <label class="form-label">GRADUAÇÃO</label><select id="ga-grad" class="gestao-input"></select>
         </div>
       </div>
-
-      <div
-        style="display:flex; justify-content:flex-end; gap:15px; border-top:1px solid #ccc; padding-top:20px; margin-top:10px;">
-        <button type="button" onclick="GestaoAlunosApp.fecharModal()" class="btn-yellow" style="background:transparent !important; color:#333 !important; border: 1px solid #333; box-shadow:none;">Cancelar</button>
-        <button type="submit" class="btn-yellow" style="padding: 12px 25px;"><span class="material-icons" style="font-size:18px;">save</span> SALVAR DADOS</button>
-      </div>
+      <button type="submit" class="btn-yellow" style="width:100%; padding:15px;"><span class="material-icons">save</span> SALVAR DADOS</button>
     </form>
   </div>
 </div>
 
 <script>
-  // ============================================================================
-  // NAMESPACE ISOLADO PARA EVITAR CONFLITOS DE VARIÁVEIS 
-  // ============================================================================
   const GestaoAlunosApp = {
       cacheLista: [],
       cacheAcademias: [],
@@ -450,7 +292,7 @@
 
       inicializar: function() {
           const tbody = document.getElementById('tabela-alunos-body');
-          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:#666"><span class="material-icons spin" style="font-size:40px; color:var(--dynamic-prim)">sync</span><br><br><b>Sincronizando banco de dados...</b></td></tr>';
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;"><span class="material-icons spin" style="font-size:40px; color:var(--dynamic-prim)">sync</span></td></tr>';
 
           google.script.run.withSuccessHandler(academias => {
               this.cacheAcademias = academias;
@@ -462,214 +304,102 @@
       },
 
       carregarDadosServidor: function() {
-          google.script.run
-            .withSuccessHandler(lista => {
+          google.script.run.withSuccessHandler(lista => {
                this.cacheLista = lista;
                this.renderizarTabela(lista);
-            })
-            .withFailureHandler(err => {
-               document.getElementById('tabela-alunos-body').innerHTML = `<tr><td colspan="4" style="color:red; text-align:center; font-weight:bold;">Erro: ${err.message}</td></tr>`;
-            })
-            .listarAlunosAdmin();
+          }).listarAlunosAdmin();
       },
 
       renderizarTabela: function(lista) {
           const tbody = document.getElementById('tabela-alunos-body');
-          tbody.innerHTML = ""; 
-
-          if(!lista || lista.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#888; font-weight:bold;">Nenhum aluno encontrado na base.</td></tr>';
-            return;
-          }
-
-          lista.forEach(a => {
-            const tr = document.createElement('tr');
-            const exibir = (valor) => valor && valor !== "" ? valor : '<span style="color:#aaa; font-style:italic;">--</span>';
+          tbody.innerHTML = lista.map(a => {
+            const statusClass = (String(a.status).toLowerCase() === 'ativo') ? 'badge-ativo' : 'badge-inativo';
+            const dataInicio = a.carimbo ? String(a.carimbo).split(' ')[0] : '--';
             
-            let badgeClass = 'badge-ativo';
-            if(String(a.status).trim() === 'Inativo') badgeClass = 'badge-inativo';
-            if(String(a.status).trim() === 'Bloqueado') badgeClass = 'badge-bloqueado';
-
-            tr.innerHTML = `
-                <td>
-                    <b style="color:#111; font-size:14px;">${a.nome || 'Sem Nome'}</b><br>
-                    <span style="color:#555; font-size:11px; font-weight:bold;">Login: ${a.login}</span><br>
-                    <span style="color:#888; font-size:11px">CPF: ${exibir(a.cpf)}</span>
-                </td>
-                <td>
-                    <span style="font-size:12px; color:#333; font-weight:bold;">Academia: ${exibir(a.academia)}</span><br>
-                    <span style="font-size:11px; color:#666">Tel: ${exibir(a.tel)}</span><br>
-                    <div style="margin-top:6px; padding-top:6px; border-top:1px dashed #ddd;">
-                      <span style="font-size:10px; color:#888; display:block;">
-                         <span class="material-icons" style="font-size:11px; vertical-align:middle;">calendar_today</span> Início: ${exibir(a.dataInicio)}
-                      </span>
-                      <span style="font-size:10px; color:#0056b3; display:block; margin-top:2px; font-weight:900;">
-                         <span class="material-icons" style="font-size:11px; vertical-align:middle;">fitness_center</span> Total de Aulas: ${a.totalAulas}
-                      </span>
-                    </div>
-                </td>
-                <td>
-                    <span class="badge ${badgeClass}">${a.status}</span><br>
-                    <span style="font-size:11px; margin-top:6px; display:block; color:#333;">Faixa: <b>${exibir(a.graduacao)}</b></span>
-                    <span class="badge" style="background:#eee; color:#333; margin-top:3px; display:inline-block; border: 1px solid #ccc;">🛡️ ${exibir(a.modalidade)}</span>
-                </td>
-                <td>
-                    <button class="btn-yellow" style="padding:8px 12px;" onclick="GestaoAlunosApp.prepararEdicao(${a.id})">
-                        <span class="material-icons" style="font-size:18px">edit</span> Editar
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-          });
+            return `
+                <tr>
+                    <td><b>${a.nome || '---'}</b><br><small>Login: ${a.login}</small></td>
+                    <td>
+                        <span class="fio-label">Idade: ${a.idadeExata || '--'}</span>
+                        <span class="fio-stat">${a.peso || '--'}kg | ${a.altura || '--'}m</span>
+                    </td>
+                    <td><b>${a.graduacao}</b><br><small>${a.modalidade}</small></td>
+                    <td>
+                        <span class="badge ${statusClass}">${a.status}</span><br>
+                        <span style="font-size:11px; color:#0056b3; font-weight:900;">Aulas: ${a.totalAulas}</span><br>
+                        <small style="font-size:9px; color:#999;">Início: ${dataInicio}</small>
+                    </td>
+                    <td>
+                        <button class="btn-yellow" style="padding:8px;" onclick="GestaoAlunosApp.prepararEdicao(${a.id})">
+                            <span class="material-icons">edit</span>
+                        </button>
+                    </td>
+                </tr>`;
+          }).join('');
       },
 
       filtrar: function() {
           const termo = document.getElementById('filtro-alunos').value.toLowerCase();
           const filtrados = this.cacheLista.filter(a => 
-              String(a.nome).toLowerCase().includes(termo) || 
-              String(a.login).toLowerCase().includes(termo) ||
-              String(a.cpf).toLowerCase().includes(termo)
+              String(a.nome).toLowerCase().includes(termo) || String(a.login).toLowerCase().includes(termo)
           );
           this.renderizarTabela(filtrados);
       },
 
-      abrirModalNovo: function() {
-          document.getElementById('form-gestao-aluno').reset();
-          document.getElementById('ga-id').value = "";
-          document.getElementById('titulo-modal-gestao').innerText = "Adicionar Novo Aluno";
-          this.popularSelects();
-          document.getElementById('modal-editar-aluno').style.display = 'flex';
-      },
-
       prepararEdicao: function(idLinha) {
-          const aluno = this.cacheLista.find(a => a.id === idLinha);
-          if(!aluno) { alert("Erro: Aluno não encontrado na memória."); return; }
+          const a = this.cacheLista.find(x => x.id === idLinha);
+          if(!a) return;
+          const dF = (v) => (v && v.includes('/')) ? v.split('/').reverse().join('-') : v;
 
-          document.getElementById('titulo-modal-gestao').innerText = "Editando: " + aluno.nome;
-          
-          this.popularSelects(aluno.academia, aluno.graduacao, aluno.proxGrad);
+          document.getElementById('ga-id').value = a.id;
+          document.getElementById('ga-nome').value = a.nome;
+          document.getElementById('ga-login').value = a.login;
+          document.getElementById('ga-senha').value = a.senha;
+          document.getElementById('ga-peso').value = a.peso;
+          document.getElementById('ga-altura').value = a.altura;
+          document.getElementById('ga-nasc').value = dF(a.nasc);
 
-          const v = (val) => val || "";
-          const d = (val) => {
-              if(!val) return "";
-              if(val.includes('/')) {
-                  const p = val.split('/');
-                  if(p.length === 3) return `${p[2]}/${p[1]}/${p[0]}`; 
-              }
-              return val; 
-          };
-          
-          document.getElementById('ga-id').value = aluno.id;
-          document.getElementById('ga-nome').value = v(aluno.nome);
-          document.getElementById('ga-cpf').value = v(aluno.cpf);
-          document.getElementById('ga-nasc').value = d(aluno.nasc);
-          document.getElementById('ga-tel').value = v(aluno.tel);
-          document.getElementById('ga-pai').value = v(aluno.pai);
-          document.getElementById('ga-mae').value = v(aluno.mae);
-          document.getElementById('ga-login').value = v(aluno.login);
-          document.getElementById('ga-senha').value = v(aluno.senha);
-          document.getElementById('ga-email').value = v(aluno.email);
-          document.getElementById('ga-status').value = v(aluno.status);
-          
-          // O campo de Nível foi removido, então não precisamos mais preenchê-lo.
-
-          document.getElementById('ga-end').value = v(aluno.endereco);
-          document.getElementById('ga-exame').value = d(aluno.proxExame); 
-          document.getElementById('ga-data-cart').value = d(aluno.dataCarteira);
-          document.getElementById('ga-foto').value = v(aluno.foto);
-
+          this.popularSelects(a.academia, a.graduacao);
           document.getElementById('modal-editar-aluno').style.display = 'flex';
       },
 
-      popularSelects: function(acadAtual, gradAtual, proxGradAtual) {
-          const selAcad = document.getElementById('ga-acad');
-          selAcad.innerHTML = '<option value="" disabled>Selecione...</option>';
-          this.cacheAcademias.forEach(ac => {
-              const opt = new Option(ac, ac);
-              if(ac === acadAtual) opt.selected = true;
-              selAcad.add(opt);
-          });
-
-          const selGrad = document.getElementById('ga-grad');
-          const selProx = document.getElementById('ga-prox-grad');
-          selGrad.innerHTML = '<option value="" disabled>Selecione...</option>';
-          selProx.innerHTML = '<option value="">Selecione...</option>'; 
-          
-          this.cacheGraduacoes.forEach(gr => {
-              const opt1 = new Option(gr, gr);
-              if(gr === gradAtual) opt1.selected = true;
-              selGrad.add(opt1);
-
-              const opt2 = new Option(gr, gr);
-              if(gr === proxGradAtual) opt2.selected = true;
-              selProx.add(opt2);
-          });
+      popularSelects: function(acad, grad) {
+          const sA = document.getElementById('ga-acad');
+          const sG = document.getElementById('ga-grad');
+          sA.innerHTML = this.cacheAcademias.map(x => `<option value="${x}" ${x===acad?'selected':''}>${x}</option>`).join('');
+          sG.innerHTML = this.cacheGraduacoes.map(x => `<option value="${x}" ${x===grad?'selected':''}>${x}</option>`).join('');
       },
 
-      fecharModal: function() {
-          document.getElementById('modal-editar-aluno').style.display = 'none';
-      },
-
+      fecharModal: function() { document.getElementById('modal-editar-aluno').style.display = 'none'; },
+      
       salvarEdicao: function() {
           const btn = document.querySelector('#form-gestao-aluno button[type="submit"]');
-          const original = btn.innerHTML;
-          btn.innerHTML = "<span class='material-icons spin'>sync</span> SALVANDO..."; btn.disabled = true;
-
-          const fd = (val) => {
-              if(!val) return "";
-              const p = val.split('-');
-              if(p.length === 3) return `${p[2]}/${p[1]}/${p[0]}`; 
-              return val;
-          };
-
+          btn.disabled = true; btn.innerHTML = "SALVANDO...";
+          
           const form = {
               aluno_id: document.getElementById('ga-id').value,
               aluno_nome: document.getElementById('ga-nome').value,
-              aluno_cpf: document.getElementById('ga-cpf').value,
-              aluno_nasc: fd(document.getElementById('ga-nasc').value), 
-              aluno_tel: document.getElementById('ga-tel').value,
-              aluno_pai: document.getElementById('ga-pai').value,
-              aluno_mae: document.getElementById('ga-mae').value,
               aluno_login: document.getElementById('ga-login').value,
               aluno_senha: document.getElementById('ga-senha').value,
-              aluno_email: document.getElementById('ga-email').value,
+              aluno_peso: document.getElementById('ga-peso').value,
+              aluno_altura: document.getElementById('ga-altura').value,
               aluno_acad: document.getElementById('ga-acad').value,
-              aluno_grad: document.getElementById('ga-grad').value,
-              aluno_status: document.getElementById('ga-status').value,
-              // ga-nivel foi removido.
-              aluno_end: document.getElementById('ga-end').value,
-              aluno_prox_grad: document.getElementById('ga-prox-grad').value, 
-              aluno_exame: fd(document.getElementById('ga-exame').value), 
-              aluno_data_cart: fd(document.getElementById('ga-data-cart').value), 
-              aluno_foto: document.getElementById('ga-foto').value,
-              editor_login: 'Admin'
+              aluno_grad: document.getElementById('ga-grad').value
           };
 
           google.script.run.withSuccessHandler(res => {
-              alert(res);
-              btn.innerHTML = original; btn.disabled = false;
-              if(res.includes('✅')) {
-                  this.fecharModal();
-                  this.carregarDadosServidor(); 
-              }
-          }).withFailureHandler(err => {
-              alert("Falha na operação: " + err.message);
-              btn.innerHTML = original; btn.disabled = false;
+              alert(res); this.fecharModal(); this.inicializar();
           }).salvarAluno(form);
       }
-  }; // Fim do Namespace
+  };
 
-  // Funções Globais de Controle de Tela
   function abrirGestaoAlunos() {
     document.getElementById('dashboard-grid').style.display = 'none';
-    document.querySelector('.dashboard-header').style.display = 'none';
     document.getElementById('gestao-alunos-view').style.display = 'block';
     GestaoAlunosApp.inicializar();
   }
-
   function fecharGestaoAlunos() {
     document.getElementById('gestao-alunos-view').style.display = 'none';
-    document.querySelector('.dashboard-header').style.display = 'flex';
     document.getElementById('dashboard-grid').style.display = 'grid';
   }
 </script>

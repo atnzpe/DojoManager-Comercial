@@ -33,7 +33,7 @@ Acompanhe a evolução do nosso sistema.
 ## 🚧 Fase 2: Gestão Financeira e Turmas (Em Andamento)
 
 - [x] Dashboard Financeiro (Inadimplência, Faturamento).
-- [ ] **[🚀 QUICK WIN] Fluxo de Pagamento Híbrido: Exibir QR Code/Chave PIX da academia e botão dinâmico "Enviar Comprovante (WhatsApp)" no painel do aluno.**
+- [ x] **[🚀 QUICK WIN] Fluxo de Pagamento Híbrido: Exibir QR Code/Chave PIX da academia e botão dinâmico "Enviar Comprovante (WhatsApp)" no painel do aluno.**
 - [ ] Separação de Turmas por Nível e Idade (Infantil, Iniciante, Avançado).
 - [ ] Check-in Antecipado (Agendamento de grade de aulas).
 
@@ -51,6 +51,7 @@ Acompanhe a evolução do nosso sistema.
 - [ ] Validar se ao fazer a cópia da planilha, o SaaS continua a funcionar de forma autônoma.
 - [ ] Criar uma apresentação do App.
 - [ ] Atualizar o manual (ajuda.html) a cada nova implementação.
+- [] Incluir eme todas as Paginas o atalho para paragina do desenvolvedor
 
 ## 🌐 Projetos Especiais
 

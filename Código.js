@@ -978,72 +978,49 @@ function calcularIdadeApenasAnos(dataNascStr) {
 }
 
 /**
- * [ADMIN] Retorna lista completa de alunos (AGORA COM DADOS FISIOLÓGICOS E IDADE)
+ * 🩺 ENRIQUECIMENTO DE DADOS FISIOLÓGICOS E CRUDS
+ * Ajuste na função listarAlunosAdmin para incluir idade exata e métricas
+ * Localização: Código.gs (~ Linha 370)
  */
 function listarAlunosAdmin() {
   try {
-    const sheetAlunos = getSheet("cadastro_de_alunos");
-    const dataAlunos = sheetAlunos.getDataRange().getDisplayValues();
-    const h = dataAlunos[0].map(c => String(c).trim().toLowerCase());
+    const alunos = lerTabelaDinamica(NOME_ABA_ALUNOS);
+    const chamadas = lerTabelaDinamica("Registro_Chamada");
 
-    const col = {
-      nome: h.indexOf("nome completo"), nasc: h.indexOf("data de nascimento"), tel: h.indexOf("telefone"),
-      cpf: h.indexOf("cpf"), pai: h.indexOf("nome do pai"), mae: h.indexOf("nome da mãe"),
-      end: h.indexOf("endereço"), acad: h.indexOf("academia vinculada"), email: h.indexOf("e-mail") > -1 ? h.indexOf("e-mail") : h.indexOf("endereço de e-mail"),
-      login: h.indexOf("login"), senha: h.indexOf("senha"), grad: h.indexOf("graduacao_atual") > -1 ? h.indexOf("graduacao_atual") : h.indexOf("graduação_atual"),
-      foto: h.indexOf("foto 3x4 (para a carteirinha)"), ultCarteira: h.indexOf("data ultima carteirinha"),
-      status: h.indexOf("status"), proxGrad: h.indexOf("prox_graduacao") > -1 ? h.indexOf("prox_graduacao") : h.indexOf("próxima graduação"),
-      nivel: h.indexOf("nível do praticante") > -1 ? h.indexOf("nível do praticante") : h.indexOf("nivel do praticante"),
-      exame: h.indexOf("data próximo exame"), dataInicio: h.indexOf("carimbo de data/hora"), modalidade: h.indexOf("modalidade"),
-      peso: h.indexOf("peso"), altura: h.indexOf("altura") // <-- NOVAS COLUNAS
-    };
+    return alunos.map(a => {
+      // 1. Cálculo de Idade Exata (Garante que não apareça undefined)
+      // Ajuste de cabeçalho: Verifique se na sua planilha é "data_de_nascimento_" ou "data_de_nascimento"
+      const dataNasc = a.data_de_nascimento_ || a.data_de_nascimento;
+      const idadeCalculada = calcularIdadeExata(dataNasc);
 
-    const safeGet = (row, idx) => (idx > -1 && row[idx]) ? row[idx] : "";
+      // 2. Cálculo de Frequência (Total de Aulas)
+      const loginBusca = String(a.login).toLowerCase().trim();
+      const totalAulas = chamadas.filter(c =>
+        String(c.lista_alunos_ids).toLowerCase().includes(loginBusca)
+      ).length;
 
-    let contagemAulas = {};
-    try {
-      const sheetChamada = getSheet("Registro_Chamada");
-      const dadosChamada = sheetChamada.getDataRange().getValues();
-      const headChamada = dadosChamada[0].map(c => String(c).trim().toLowerCase());
-      const colIds = headChamada.indexOf("lista_alunos_ids");
-      if (colIds !== -1) {
-        for (let i = 1; i < dadosChamada.length; i++) {
-          const idsRaw = String(dadosChamada[i][colIds]).toLowerCase().split(",");
-          idsRaw.forEach(idText => {
-            const loginLimpo = idText.trim();
-            if (loginLimpo) contagemAulas[loginLimpo] = (contagemAulas[loginLimpo] || 0) + 1;
-          });
-        }
-      }
-    } catch (e) { }
-
-    return dataAlunos.slice(1).map((row, i) => {
-      const loginAluno = safeGet(row, col.login).toLowerCase();
-      let carimboRaw = safeGet(row, col.dataInicio);
-      let dataNascimento = safeGet(row, col.nasc);
+      // 3. Normalização do Carimbo (Para exibição da data de início)
+      // FIX: Removida a divisão matemática errada que existia antes
+      const carimboOriginal = a["carimbo_de_data/hora"] || a.carimbo_de_data_hora || "";
 
       return {
-        id: i + 2,
-        carimbo: carimboRaw,
-        tempoCadastrado: calcularTempoCadastro(carimboRaw), // Função que já criamos antes
-        nome: safeGet(row, col.nome), nasc: dataNascimento, tel: safeGet(row, col.tel),
-        cpf: safeGet(row, col.cpf), pai: safeGet(row, col.pai), mae: safeGet(row, col.mae),
-        endereco: safeGet(row, col.end), academia: safeGet(row, col.acad), email: safeGet(row, col.email),
-        login: safeGet(row, col.login), senha: safeGet(row, col.senha), graduacao: safeGet(row, col.grad),
-        foto: padronizarLinkDrive(safeGet(row, col.foto)), dataCarteira: safeGet(row, col.ultCarteira),
-        status: safeGet(row, col.status) || "Ativo", proxGrad: safeGet(row, col.proxGrad),
-        nivel: safeGet(row, col.nivel), proxExame: safeGet(row, col.exame),
-        dataInicio: carimboRaw.split(' ')[0],
-        modalidade: safeGet(row, col.modalidade) || "Geral",
-        totalAulas: contagemAulas[loginAluno] || 0,
-        // DADOS FISIOLÓGICOS E IDADE DINÂMICA
-        peso: safeGet(row, col.peso),
-        altura: safeGet(row, col.altura),
-        idadeExata: calcularIdadeExata(dataNascimento), // "35a, 4m, 10d"
-        idadeAnos: calcularIdadeApenasAnos(dataNascimento) // 35 (Para matemática)
+        ...a,
+        id: a._linha,
+        nome: a.nome_completo || "Sem Nome",
+        login: a.login || "---",
+        graduacao: a.graduacao_atual || "Iniciante",
+        modalidade: a.modalidade || "Geral",
+        status: a.status || "Ativo",
+        idadeExata: idadeCalculada,
+        totalAulas: totalAulas,
+        carimbo: carimboOriginal, // Passando o carimbo limpo
+        statusAssinatura: a.status_assinatura || "Inativo"
       };
     });
-  } catch (e) { return []; }
+  } catch (e) {
+    console.error("ERRO CRÍTICO ADMIN: " + e.message);
+    return [];
+  }
 }
 
 function buscarAlunoPorLogin(login) {
@@ -1052,19 +1029,63 @@ function buscarAlunoPorLogin(login) {
 }
 
 /**
- * [ADMIN] Cria ou Atualiza um Aluno (ACEITANDO FISIOLOGIA E MULTIMODALIDADE).
+ * 🛠️ FIX: MAPEAMENTO DINÂMICO PARA EVITAR CHAVE 'UNDEFINED'
  */
+function getDadosPagamentoAluno(login) {
+  try {
+    const configApp = lerTabelaDinamica("Config_App")[0];
+    const alunos = lerTabelaDinamica(NOME_ABA_ALUNOS);
+    const locais = lerTabelaDinamica(NOME_ABA_LOCAIS);
+    const assinaturas = lerTabelaDinamica("Fin_Assinaturas");
+    const pacotes = lerTabelaDinamica("Fin_Pacotes");
+
+    const aluno = alunos.find(a => String(a.login).toLowerCase() === String(login).toLowerCase());
+    const assinatura = assinaturas.find(as => String(as.login_aluno).toLowerCase() === String(login).toLowerCase());
+    const pacote = pacotes.find(p => p.nome_pacote === assinatura?.pacote_atual);
+
+    let info = {
+      chave: configApp.pix_chave,
+      beneficiario: configApp.pix_nome || "Dojo Manager",
+      cidade: configApp.pix_cidade || "RECIFE",
+      valor: pacote ? pacote.valor_padrao : 0,
+      contatoWhatsApp: ""
+    };
+
+    // REGRA: Se não for Global, busca o PIX da Unidade
+    if (configApp.pix_global_ativo !== "Sim") {
+      const local = locais.find(l => l.nome_do_local === aluno.academia_vinculada);
+      if (local && local.pix_chave) {
+        info.chave = local.pix_chave;
+        info.beneficiario = local.pix_nome || info.beneficiario;
+        info.cidade = local.pix_cidade || info.cidade;
+      }
+    }
+
+    // Busca o WhatsApp do local para o envio do comprovante
+    const localResp = locais.find(l => l.nome_do_local === aluno.academia_vinculada);
+    info.contatoWhatsApp = localResp?.contato ? String(localResp.contato).replace(/\D/g, "") : "5581997629232";
+
+    return info;
+  } catch (e) {
+    console.error("Erro fatal no servidor ao buscar PIX: " + e.message);
+    return null;
+  }
+}
+
 function salvarAluno(form) {
   try {
-    const faixaEscolhida = String(form.aluno_grad || "").trim();
-    const mapaGrad = getMapaGraduacoes();
-    const gradInfo = mapaGrad[faixaEscolhida.toLowerCase()] || { nivel: "Aluno", modalidade: "Geral" };
+    // 1. Blindagem de Nível (Respeita a validação de dados da planilha)
+    let nivelValido = "Aluno";
+    const n = String(form.aluno_nivel || "Aluno").toUpperCase();
+    if (n.includes("MESTRE")) nivelValido = "Mestre";
+    else if (n.includes("PROFESSOR")) nivelValido = "Professor";
+    else if (n.includes("N1")) nivelValido = "Instrutor N1";
+    else if (n.includes("N2")) nivelValido = "Instrutor N2";
+    else if (n.includes("N3")) nivelValido = "Instrutor N3";
 
-    const modalidadeFinal = form.aluno_modalidade ? form.aluno_modalidade : gradInfo.modalidade;
-    const carimboData = form.aluno_carimbo || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
-
+    // 2. Montagem do Objeto seguindo os cabeçalhos EXATOS da planilha
     const dados = {
-      "Carimbo de data/hora": carimboData,
+      "Carimbo de data/hora": form.aluno_carimbo || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss"),
       "Endereço de e-mail": form.aluno_email,
       "Nome Completo": form.aluno_nome,
       "Data de Nascimento": form.aluno_nasc,
@@ -1077,29 +1098,36 @@ function salvarAluno(form) {
       "E-mail": form.aluno_email,
       "LOGIN": form.aluno_login,
       "Senha": form.aluno_senha,
-      "Graduação": form.aluno_grad,
-      "Foto 3x4 (para a carteirinha)": padronizarLinkDrive(form.aluno_foto),
-      "Data Ultima Carteirinha": form.aluno_data_cart,
       "STATUS": form.aluno_status,
       "GRADUACAO_ATUAL": form.aluno_grad,
       "PROX_GRADUACAO": form.aluno_prox_grad,
       "Data Próximo Exame": form.aluno_exame,
-      "Nível do Praticante": gradInfo.nivel,
-      "NivelAdministrativo": gradInfo.nivel,
-      "Modalidade": modalidadeFinal,
-      "Peso": form.aluno_peso, // <-- SALVANDO DADOS FISIOLÓGICOS
-      "Altura": form.aluno_altura // <-- SALVANDO DADOS FISIOLÓGICOS
+      "Nível do Praticante": nivelValido,
+      "Modalidade": form.aluno_modalidade || "Geral",
+      "Peso": form.aluno_peso,
+      "Altura": form.aluno_altura,
+      "Foto 3x4 (para a carteirinha)": form.aluno_foto,
+      "Data Ultima Carteirinha": form.aluno_data_cart
     };
 
     const idLinha = parseInt(form.aluno_id);
+    // Salva na aba principal
+    salvarDadosSeguro(NOME_ABA_ALUNOS, dados, idLinha);
 
-    if (!isNaN(idLinha) && idLinha > 1) {
-      salvarDadosSeguro("cadastro_de_alunos", dados, idLinha);
-      return "✅ Ficha do Aluno atualizada com sucesso!";
-    } else {
-      salvarDadosSeguro("cadastro_de_alunos", dados);
-      return "✅ Novo aluno cadastrado com sucesso!";
+    // 3. Sincronização Automática com Fin_Assinaturas (Evita dados órfãos)
+    if (form.aluno_pacote) {
+      const dadosAssin = {
+        "Login_Aluno": form.aluno_login,
+        "Pacote_Atual": form.aluno_pacote,
+        "Data_Fim": form.aluno_vencimento,
+        "Status_Assinatura": form.aluno_status_assinatura
+      };
+      const assinatuasExistentes = lerTabelaDinamica("Fin_Assinaturas");
+      const aAtual = assinatuasExistentes.find(a => String(a.login_aluno).toLowerCase() === String(form.aluno_login).toLowerCase());
+      salvarDadosSeguro("Fin_Assinaturas", dadosAssin, aAtual ? aAtual._linha : null);
     }
+
+    return "✅ Ficha do Aluno e Dados Financeiros salvos com sucesso!";
   } catch (e) { return "❌ Erro ao salvar: " + e.message; }
 }
 
@@ -1444,7 +1472,7 @@ function salvarTicketSuporte(form) {
 }
 
 // ============================================================================
-// 6. AUTENTICAÇÃO E A BALA DE PRATA (COM DADOS FISIOLÓGICOS)
+// 6. AUTENTICAÇÃO E A BALA DE PRATA (COM DADOS FISIOLÓGICOS E AULAS)
 // ============================================================================
 
 function verificarCredenciais(formObject) {
@@ -1466,12 +1494,22 @@ function verificarCredenciais(formObject) {
       status: headers.indexOf("status"),
       modalidade: headers.indexOf("modalidade"),
       exame: headers.indexOf("data próximo exame"),
-      nasc: headers.indexOf("data de nascimento"), // Para calcular Idade
-      peso: headers.indexOf("peso"),               // <-- NOVA COLUNA LIDA
-      altura: headers.indexOf("altura")            // <-- NOVA COLUNA LIDA
+      nasc: headers.indexOf("data de nascimento"),
+      peso: headers.indexOf("peso"),
+      altura: headers.indexOf("altura"),
+      // BUSCANDO A DATA DE INGRESSO (CARIMBO)
+      carimbo: headers.findIndex(h => h.includes("carimbo"))
     };
 
     if (col.login === -1) throw new Error("Coluna LOGIN não encontrada.");
+
+    // Prepara a leitura de chamadas para contar as aulas do aluno
+    let chamadas = [];
+    try {
+      chamadas = getSheet("Registro_Chamada").getDataRange().getDisplayValues();
+    } catch (e) {
+      console.warn("Aba Registro_Chamada ainda não existe ou está vazia.");
+    }
 
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
@@ -1491,9 +1529,25 @@ function verificarCredenciais(formObject) {
         const isMestre = nivelOficial.includes("MESTRE");
         const isAdmin = nivelOficial.includes("ADMIN") || nivelOficial.includes("MESTRE");
 
-        // Calcula a idade na hora do login se a data de nascimento existir
         const dataNascimento = (col.nasc > -1) ? row[col.nasc] : "";
         const idadeCalculada = calcularIdadeExata(dataNascimento);
+
+        // 🧠 CÁLCULO DE AULAS TOTAIS
+        let totalAulas = 0;
+        if (chamadas.length > 1) {
+          const colIdsChamada = chamadas[0].map(h => String(h).trim().toLowerCase()).indexOf("lista_alunos_ids");
+          if (colIdsChamada !== -1) {
+            for (let c = 1; c < chamadas.length; c++) {
+              // Se o login do aluno estiver na lista de IDs da aula, soma 1
+              if (String(chamadas[c][colIdsChamada]).toLowerCase().includes(loginInput)) {
+                totalAulas++;
+              }
+            }
+          }
+        }
+
+        // 🧠 FORMATANDO DATA DE INGRESSO
+        let dataIngresso = (col.carimbo > -1 && row[col.carimbo]) ? String(row[col.carimbo]).split(" ")[0] : "--/--/----";
 
         const userPayload = {
           LOGIN: loginInput,
@@ -1504,9 +1558,11 @@ function verificarCredenciais(formObject) {
           academia: (col.acad > -1) ? row[col.acad] : "---",
           proximoExame: (col.exame > -1) ? row[col.exame] : "A definir",
           modalidade: userModalidade,
-          peso: (col.peso > -1) ? row[col.peso] : "",     // <-- INJETADO NO PERFIL DO ALUNO
-          altura: (col.altura > -1) ? row[col.altura] : "", // <-- INJETADO NO PERFIL DO ALUNO
-          idadeExata: idadeCalculada,                     // <-- INJETADO NO PERFIL DO ALUNO
+          peso: (col.peso > -1) ? row[col.peso] : "",
+          altura: (col.altura > -1) ? row[col.altura] : "",
+          idadeExata: idadeCalculada,
+          totalAulas: totalAulas, // <-- ENVIANDO PRO FRONTEND
+          carimbo: dataIngresso,  // <-- ENVIANDO PRO FRONTEND
           isInstrutor: isInstrutor,
           isMestre: isMestre,
           isAdmin: isAdmin
@@ -2146,6 +2202,53 @@ function getAlunoFullData(loginInput) {
     }
     return null;
   } catch (e) { return null; }
+}
+
+/**
+ * 🛠️ BACKEND: BUSCA DADOS PIX (Renomeada para evitar conflito)
+ * Localização: Código.gs
+ */
+function getPixDataFromServer(login) {
+  try {
+    const configApp = lerTabelaDinamica("Config_App")[0];
+    const alunos = lerTabelaDinamica(NOME_ABA_ALUNOS);
+    const locais = lerTabelaDinamica(NOME_ABA_LOCAIS);
+    const assinaturas = lerTabelaDinamica("Fin_Assinaturas");
+    const pacotes = lerTabelaDinamica("Fin_Pacotes");
+
+    const aluno = alunos.find(a => String(a.login).toLowerCase() === String(login).toLowerCase());
+    if (!aluno) return null;
+
+    const assinatura = assinaturas.find(as => String(as.login_aluno).toLowerCase() === String(login).toLowerCase());
+    const pacote = pacotes.find(p => p.nome_pacote === assinatura?.pacote_atual);
+
+    let info = {
+      chave: configApp.pix_chave,
+      beneficiario: configApp.pix_nome || "Dojo Manager",
+      cidade: configApp.pix_cidade || "RECIFE",
+      valor: pacote ? pacote.valor_padrao : 150.00, // Fallback de valor
+      contatoWhatsApp: ""
+    };
+
+    // Lógica PIX Local (Coluna Ativo Sim/Não)
+    if (configApp.pix_global_ativo !== "Sim") {
+      const local = locais.find(l => l.nome_do_local === aluno.academia_vinculada);
+      // Blindagem: Verifica se a coluna 'Ativo' do PIX no local está como 'Sim'
+      if (local && local.ativo === "Sim") {
+        info.chave = local.pix_chave;
+        info.beneficiario = local.pix_nome;
+        info.cidade = local.pix_cidade;
+      }
+    }
+
+    const localResp = locais.find(l => l.nome_do_local === aluno.academia_vinculada);
+    info.contatoWhatsApp = localResp?.contato ? String(localResp.contato).replace(/\D/g, "") : "5581997629232";
+
+    return info;
+  } catch (e) {
+    console.error("Erro no Servidor PIX: " + e.message);
+    return null;
+  }
 }
 
 /**
