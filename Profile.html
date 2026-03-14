@@ -223,6 +223,24 @@
     border-radius: 6px;
     box-sizing: border-box;
   }
+
+  /* NOVO: Aulas e Ingresso Box (Ajustado para Flex) */
+  .aulas-box {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--dynamic-prim);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 25px;
+    color: var(--dynamic-prim);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .aulas-valor {
+    font-size: 1.6rem;
+    font-weight: 900;
+  }
 </style>
 
 <div id="modal-perfil" class="profile-overlay">
@@ -230,7 +248,8 @@
     <div class="profile-img-container">
       <img id="p-foto" src="" class="profile-img" onerror="this.src='https://ui-avatars.com/api/?name=User&background=333&color=fff'">
       <div class="edit-photo-btn" onclick="abrirEditFoto()">
-        <span class="material-icons" style="font-size:16px">edit</span></div>
+        <span class="material-icons" style="font-size:16px">edit</span>
+      </div>
     </div>
 
     <div id="p-nome" class="profile-name">Carregando...</div>
@@ -243,13 +262,26 @@
         <span class="stat-label">Idade</span><span id="p-idade" class="stat-value" style="color:var(--dynamic-prim)">--</span>
       </div>
       <div style="border-left:1px solid rgba(255,255,255,0.1); border-right:1px solid rgba(255,255,255,0.1);">
-        <span class="stat-label">Peso</span><span id="p-peso" class="stat-value">--</span></div>
+        <span class="stat-label">Peso</span><span id="p-peso" class="stat-value">--</span>
+      </div>
       <div><span class="stat-label">Altura</span><span id="p-altura" class="stat-value">--</span></div>
+    </div>
+
+    <div class="aulas-box">
+      <div style="text-align: left;">
+        <span class="stat-label" style="color:var(--dynamic-text); opacity:0.8;">Total de Aulas</span>
+        <div id="p-aulas" class="aulas-valor">--</div>
+      </div>
+      <div style="text-align: right;">
+        <span class="stat-label" style="color:var(--dynamic-text); opacity:0.8;">Membro Desde</span>
+        <div id="p-ingresso" class="aulas-valor" style="font-size: 1.2rem;">--/--/----</div>
+      </div>
     </div>
 
     <div class="profile-stats">
       <div style="border-right: 1px solid rgba(255,255,255,0.1);">
-        <span class="stat-label">Academia</span><span id="p-academia" class="stat-value">...</span></div>
+        <span class="stat-label">Academia</span><span id="p-academia" class="stat-value">...</span>
+      </div>
       <div><span class="stat-label">Próximo Exame</span><span id="p-exame" class="stat-value">...</span></div>
     </div>
 
@@ -298,18 +330,28 @@
         setTextSafe('p-academia', user.academia || "---");
         setTextSafe('p-exame', user.proximoExame || "A definir");
         
-        // O PULO DO GATO: Se no login já tiver idade, usa. Se não, tenta calcular ou exibe "N/A"
-        setTextSafe('p-idade', user.idadeExata ? user.idadeExata.split(',')[0] : "--"); // Mostra só "35a" para ficar bonito
+        setTextSafe('p-idade', user.idadeExata ? user.idadeExata.split(',')[0] : "--"); // Mostra só "35a"
         setTextSafe('p-peso', user.peso ? user.peso + " kg" : "--");
         setTextSafe('p-altura', user.altura ? user.altura + " m" : "--");
+        
+        // Exibindo do cache enquanto o fresh load carrega (Fase 1.5)
+        setTextSafe('p-aulas', user.totalAulas !== undefined ? user.totalAulas : "--");
+        setTextSafe('p-ingresso', user.carimbo ? String(user.carimbo).split(' ')[0] : "--/--/----");
 
-        // COMO O CACHE DO NAVEGADOR ESTÁ SUJO (Sem peso e altura), 
-        // disparamos uma busca real pro banco só pra atualizar a telinha dele!
+        // Fresh Load do Banco para trazer o número de Aulas e Fisiologia atualizados
         google.script.run.withSuccessHandler(freshUser => {
            if(freshUser) {
               setTextSafe('p-idade', freshUser.idadeExata ? freshUser.idadeExata.split(',')[0] : "--"); 
               setTextSafe('p-peso', freshUser.peso ? freshUser.peso + " kg" : "--");
               setTextSafe('p-altura', freshUser.altura ? freshUser.altura + " m" : "--");
+              
+              // INJETANDO O TOTAL DE AULAS DIRETO DA BASE DE CHAMADA
+              setTextSafe('p-aulas', freshUser.totalAulas !== undefined ? freshUser.totalAulas : "0");
+              setTextSafe('p-ingresso', freshUser.carimbo ? String(freshUser.carimbo).split(' ')[0] : "--/--/----");
+              
+              // Atualiza o local storage para a sessão se manter fresca
+              localStorage.setItem('userSession', JSON.stringify(freshUser));
+              userCache = freshUser;
            }
         }).buscarAlunoPorLogin(user.LOGIN);
 

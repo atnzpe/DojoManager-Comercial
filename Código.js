@@ -1472,7 +1472,7 @@ function salvarTicketSuporte(form) {
 }
 
 // ============================================================================
-// 6. AUTENTICAÇÃO E A BALA DE PRATA (COM DADOS FISIOLÓGICOS)
+// 6. AUTENTICAÇÃO E A BALA DE PRATA (COM DADOS FISIOLÓGICOS E AULAS)
 // ============================================================================
 
 function verificarCredenciais(formObject) {
@@ -1494,12 +1494,22 @@ function verificarCredenciais(formObject) {
       status: headers.indexOf("status"),
       modalidade: headers.indexOf("modalidade"),
       exame: headers.indexOf("data próximo exame"),
-      nasc: headers.indexOf("data de nascimento"), // Para calcular Idade
-      peso: headers.indexOf("peso"),               // <-- NOVA COLUNA LIDA
-      altura: headers.indexOf("altura")            // <-- NOVA COLUNA LIDA
+      nasc: headers.indexOf("data de nascimento"),
+      peso: headers.indexOf("peso"),
+      altura: headers.indexOf("altura"),
+      // BUSCANDO A DATA DE INGRESSO (CARIMBO)
+      carimbo: headers.findIndex(h => h.includes("carimbo"))
     };
 
     if (col.login === -1) throw new Error("Coluna LOGIN não encontrada.");
+
+    // Prepara a leitura de chamadas para contar as aulas do aluno
+    let chamadas = [];
+    try {
+      chamadas = getSheet("Registro_Chamada").getDataRange().getDisplayValues();
+    } catch (e) {
+      console.warn("Aba Registro_Chamada ainda não existe ou está vazia.");
+    }
 
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
@@ -1519,9 +1529,25 @@ function verificarCredenciais(formObject) {
         const isMestre = nivelOficial.includes("MESTRE");
         const isAdmin = nivelOficial.includes("ADMIN") || nivelOficial.includes("MESTRE");
 
-        // Calcula a idade na hora do login se a data de nascimento existir
         const dataNascimento = (col.nasc > -1) ? row[col.nasc] : "";
         const idadeCalculada = calcularIdadeExata(dataNascimento);
+
+        // 🧠 CÁLCULO DE AULAS TOTAIS
+        let totalAulas = 0;
+        if (chamadas.length > 1) {
+          const colIdsChamada = chamadas[0].map(h => String(h).trim().toLowerCase()).indexOf("lista_alunos_ids");
+          if (colIdsChamada !== -1) {
+            for (let c = 1; c < chamadas.length; c++) {
+              // Se o login do aluno estiver na lista de IDs da aula, soma 1
+              if (String(chamadas[c][colIdsChamada]).toLowerCase().includes(loginInput)) {
+                totalAulas++;
+              }
+            }
+          }
+        }
+
+        // 🧠 FORMATANDO DATA DE INGRESSO
+        let dataIngresso = (col.carimbo > -1 && row[col.carimbo]) ? String(row[col.carimbo]).split(" ")[0] : "--/--/----";
 
         const userPayload = {
           LOGIN: loginInput,
@@ -1532,9 +1558,11 @@ function verificarCredenciais(formObject) {
           academia: (col.acad > -1) ? row[col.acad] : "---",
           proximoExame: (col.exame > -1) ? row[col.exame] : "A definir",
           modalidade: userModalidade,
-          peso: (col.peso > -1) ? row[col.peso] : "",     // <-- INJETADO NO PERFIL DO ALUNO
-          altura: (col.altura > -1) ? row[col.altura] : "", // <-- INJETADO NO PERFIL DO ALUNO
-          idadeExata: idadeCalculada,                     // <-- INJETADO NO PERFIL DO ALUNO
+          peso: (col.peso > -1) ? row[col.peso] : "",
+          altura: (col.altura > -1) ? row[col.altura] : "",
+          idadeExata: idadeCalculada,
+          totalAulas: totalAulas, // <-- ENVIANDO PRO FRONTEND
+          carimbo: dataIngresso,  // <-- ENVIANDO PRO FRONTEND
           isInstrutor: isInstrutor,
           isMestre: isMestre,
           isAdmin: isAdmin
