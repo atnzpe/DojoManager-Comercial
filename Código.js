@@ -1088,57 +1088,150 @@ function getDadosPagamentoAluno(login) {
 }
 
 /**
- * 🛡️ FIX: ANTI-APAGÃO - HYDRATION DE ALUNOS (SALVA A TURMA)
+ * ============================================================================
+ * 🛡️ FIX DEFINITIVO: ANTI-APAGÃO (HYDRATION V5 NÍVEL DEUS)
+ * MODIFICADO POR: Arquitetura de Dados / QA
+ * PORQUE MUDOU: O método antigo apagava dados se o formulário HTML não 
+ * enviasse todos os campos (Ex: Painel reduzido do Instrutor) ou se houvesse 
+ * divergência de acentos/espaços no cabeçalho.
+ * O QUE FAZ AGORA: Lê a linha original, cruza as 26 colunas e "hidrata" 
+ * os dados faltantes antes de salvar, além de atualizar as colunas duplicadas.
+ * ============================================================================
  */
 function salvarAluno(form) {
   try {
-    let nivelValido = "Aluno";
-    const n = String(form.aluno_nivel || "Aluno").toUpperCase();
-    if (n.includes("MESTRE")) nivelValido = "Mestre"; else if (n.includes("PROFESSOR")) nivelValido = "Professor"; else if (n.includes("N1")) nivelValido = "Instrutor N1"; else if (n.includes("N2")) nivelValido = "Instrutor N2"; else if (n.includes("N3")) nivelValido = "Instrutor N3";
+    const sheet = getSheet(NOME_ABA_ALUNOS);
+    // 1. Puxa todos os cabeçalhos diretamente da linha 1 para saber a verdade absoluta
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    
+    // 2. Normaliza para garantir o "match" (ignora acentos, espaços extras, maiúsculas)
+    const normalize = (str) => String(str).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "");
+    
+    const headerMap = {};
+    headers.forEach((h) => {
+        if (h) headerMap[normalize(h)] = h; // Mapeia a string normalizada para o NOME REAL e exato da sua planilha
+    });
 
-    const alunos = lerTabelaDinamica(NOME_ABA_ALUNOS);
     const idLinha = parseInt(form.aluno_id);
-    const alunoAntigo = isNaN(idLinha) ? {} : (alunos.find(a => a._linha === idLinha) || {});
+    let linhaExistente = [];
+    
+    // 3. Se for um aluno que já existe, pega a linha INTEIRA antes de fazer qualquer coisa
+    if (!isNaN(idLinha) && idLinha > 1 && idLinha <= sheet.getLastRow()) {
+        linhaExistente = sheet.getRange(idLinha, 1, 1, headers.length).getValues()[0];
+    }
 
-    // Mapeamento Blindado
-    const dados = {
-      "Carimbo de data/hora": form.aluno_carimbo || alunoAntigo["carimbo_de_data/hora"] || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss"),
-      "Endereço de e-mail": form.aluno_email || alunoAntigo.endereço_de_e_mail || "",
-      "Nome Completo": form.aluno_nome || alunoAntigo.nome_completo,
-      "Data de Nascimento": form.aluno_nasc || alunoAntigo.data_de_nascimento_ || "",
-      "Telefone": form.aluno_tel || alunoAntigo.telefone || "",
-      "CPF": form.aluno_cpf || alunoAntigo.cpf || "",
-      "Nome do Pai": form.aluno_pai || alunoAntigo.nome_do_pai || "",
-      "Nome da Mãe": form.aluno_mae || alunoAntigo.nome_da_mãe || "",
-      "Endereço": form.aluno_end || alunoAntigo.endereço || "",
-      "Academia Vinculada": form.aluno_acad || alunoAntigo.academia_vinculada,
-      "Turma Vinculada": form.aluno_turma || alunoAntigo.turma_vinculada || "", // <-- 🚀 SALVANDO A TURMA
-      "E-mail": form.aluno_email || alunoAntigo.e_mail || "",
-      "LOGIN": form.aluno_login || alunoAntigo.login,
-      "Senha": form.aluno_senha || alunoAntigo.senha,
-      "STATUS": form.aluno_status || alunoAntigo.status,
-      "GRADUACAO_ATUAL": form.aluno_grad || alunoAntigo.graduacao_atual,
-      "PROX_GRADUACAO": form.aluno_prox_grad || alunoAntigo.prox_graduacao,
-      "Data Próximo Exame": form.aluno_exame || alunoAntigo.data_próximo_exame || "",
-      "Nível do Praticante": nivelValido,
-      "Modalidade": form.aluno_modalidade || alunoAntigo.modalidade || "Geral",
-      "Peso": form.aluno_peso || alunoAntigo.peso || "",
-      "Altura": form.aluno_altura || alunoAntigo.altura || "",
-      "Foto 3x4 (para a carteirinha)": form.aluno_foto || alunoAntigo["foto_3x4_(para_a_carteirinha)"] || "",
-      "Data Ultima Carteirinha": form.aluno_data_cart || alunoAntigo.data_ultima_carteirinha || ""
+    const getOldVal = (nomeRealColuna) => {
+        if (linhaExistente.length === 0) return "";
+        const idx = headers.indexOf(nomeRealColuna);
+        return idx !== -1 ? linhaExistente[idx] : "";
     };
 
-    salvarDadosSeguro(NOME_ABA_ALUNOS, dados, isNaN(idLinha) ? null : idLinha);
+    // 🚀 O MOTOR DE BLINDAGEM (O Coração do Sistema DCU)
+    const resolveField = (formKey, colPlanilha1, colPlanilha2 = "") => {
+        const realCol1 = headerMap[normalize(colPlanilha1)];
+        const realCol2 = colPlanilha2 ? headerMap[normalize(colPlanilha2)] : null;
+        
+        let valorParaSalvar = "";
+        let campoFoiEnviadoPelaTela = Object.prototype.hasOwnProperty.call(form, formKey);
 
-    if (form.aluno_pacote) {
-      const dadosAssin = { "Login_Aluno": form.aluno_login, "Pacote_Atual": form.aluno_pacote, "Data_Fim": form.aluno_vencimento, "Status_Assinatura": form.aluno_status_assinatura };
-      const assinaturasExistentes = lerTabelaDinamica("Fin_Assinaturas");
-      const aAtual = assinaturasExistentes.find(a => String(a.login_aluno).toLowerCase() === String(form.aluno_login).toLowerCase());
+        // Se o front-end (HTML) mandou o campo, nós usamos o valor que veio (mesmo que seja vazio, pois o Admin pode querer apagar)
+        if (campoFoiEnviadoPelaTela) {
+            valorParaSalvar = form[formKey];
+        } else {
+            // Se a tela NÃO enviou o campo, nós resgatamos a fotocópia da planilha para NÃO APAGAR!
+            let old1 = realCol1 ? getOldVal(realCol1) : "";
+            let old2 = realCol2 ? getOldVal(realCol2) : "";
+            valorParaSalvar = old1 || old2 || ""; 
+        }
+
+        const results = [];
+        if (realCol1) results.push({ col: realCol1, val: valorParaSalvar });
+        // Se houver coluna duplicada (ex: E-mail e Endereço de e-mail), salva nas duas para garantir a sincronia!
+        if (realCol2 && realCol2 !== realCol1) results.push({ col: realCol2, val: valorParaSalvar });
+        
+        return results;
+    };
+
+    // 🚀 LÓGICA DE NÍVEL DE ACESSO (Com Proteção)
+    let nivelValido = "";
+    if (Object.prototype.hasOwnProperty.call(form, 'aluno_nivel')) {
+        const n = String(form.aluno_nivel).toUpperCase();
+        if (n.includes("MESTRE")) nivelValido = "Mestre"; 
+        else if (n.includes("PROFESSOR")) nivelValido = "Professor"; 
+        else if (n.includes("N1")) nivelValido = "Instrutor N1"; 
+        else if (n.includes("N2")) nivelValido = "Instrutor N2"; 
+        else if (n.includes("N3")) nivelValido = "Instrutor N3";
+        else if (n.includes("ADMIN")) nivelValido = "Admin";
+        else nivelValido = "Aluno";
+    } else {
+        // Se o formulário não tem o campo nível, puxa o antigo
+        nivelValido = getOldVal(headerMap[normalize("Nível do Praticante")]) || getOldVal(headerMap[normalize("NivelAdministrativo")]) || "Aluno";
+    }
+
+    // 🚀 MAPEAMENTO EXATO DAS SUAS 26 COLUNAS!
+    const campos = [
+        ...resolveField("aluno_carimbo", "Carimbo de data/hora"),
+        ...resolveField("aluno_email", "Endereço de e-mail", "E-mail"),
+        ...resolveField("aluno_nome", "Nome Completo"),
+        ...resolveField("aluno_nasc", "Data de Nascimento"),
+        ...resolveField("aluno_peso", "Peso"),
+        ...resolveField("aluno_altura", "Altura"),
+        ...resolveField("aluno_tel", "Telefone"),
+        ...resolveField("aluno_cpf", "CPF"),
+        ...resolveField("aluno_pai", "Nome do Pai"),
+        ...resolveField("aluno_mae", "Nome da Mãe"),
+        ...resolveField("aluno_end", "Endereço"),
+        ...resolveField("aluno_turma", "Turma Vinculada"),
+        ...resolveField("aluno_acad", "Academia Vinculada"),
+        ...resolveField("aluno_login", "LOGIN"),
+        ...resolveField("aluno_senha", "Senha"),
+        ...resolveField("aluno_grad", "Graduação", "GRADUACAO_ATUAL"),
+        ...resolveField("aluno_foto", "Foto 3x4 (para a carteirinha)"),
+        ...resolveField("aluno_data_cart", "Data Ultima Carteirinha"),
+        ...resolveField("aluno_status", "STATUS"),
+        ...resolveField("aluno_prox_grad", "PROX_GRADUACAO"),
+        ...resolveField("aluno_modalidade", "Modalidade"),
+        ...resolveField("aluno_exame", "Data Próximo Exame")
+    ];
+
+    const dadosFinais = {};
+    campos.forEach(item => {
+        dadosFinais[item.col] = item.val;
+    });
+
+    // Injeta os níveis nas duas colunas administrativas (Retrocompatibilidade)
+    const colNiv1 = headerMap[normalize("Nível do Praticante")];
+    const colNiv2 = headerMap[normalize("NivelAdministrativo")];
+    if (colNiv1) dadosFinais[colNiv1] = nivelValido;
+    if (colNiv2) dadosFinais[colNiv2] = nivelValido;
+
+    // Se for aluno novo (sem carimbo), cria a data de ingresso
+    const colCarimbo = headerMap[normalize("Carimbo de data/hora")];
+    if (colCarimbo && (!dadosFinais[colCarimbo] || dadosFinais[colCarimbo] === "")) {
+        dadosFinais[colCarimbo] = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
+    }
+
+    // DISPARO SEGURO PRO BANCO DE DADOS
+    salvarDadosSeguro(NOME_ABA_ALUNOS, dadosFinais, isNaN(idLinha) ? null : idLinha);
+
+    // Sincronização de Pacote Financeiro (Protegida)
+    if (Object.prototype.hasOwnProperty.call(form, 'aluno_pacote')) {
+      let loginFinanceiro = dadosFinais[headerMap[normalize("LOGIN")]] || form.aluno_login;
+      const dadosAssin = { 
+          "Login_Aluno": loginFinanceiro, 
+          "Pacote_Atual": form.aluno_pacote, 
+          "Data_Fim": form.aluno_vencimento, 
+          "Status_Assinatura": form.aluno_status_assinatura 
+      };
+      const assinaturas = lerTabelaDinamica("Fin_Assinaturas");
+      const aAtual = assinaturas.find(a => String(a.login_aluno).toLowerCase() === String(loginFinanceiro).toLowerCase());
       salvarDadosSeguro("Fin_Assinaturas", dadosAssin, aAtual ? aAtual._linha : null);
     }
 
-    return "✅ Aluno salvo com Sucesso (Turma Vinculada)!";
-  } catch (e) { return "❌ Erro ao salvar: " + e.message; }
+    return "✅ Aluno salvo com Sucesso! (Blindagem contra apagão ativada)";
+  } catch (e) {
+      return "❌ Erro ao salvar: " + e.message;
+  }
 }
 
 /**
