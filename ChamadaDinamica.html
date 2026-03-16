@@ -6,7 +6,6 @@
     color: var(--dynamic-text);
     max-width: 600px;
     margin: 0 auto;
-    /* Remove fundo preto fixo, usa o fundo translúcido dos cards */
     background-color: var(--dynamic-sec);
     border-radius: 12px;
     min-height: 400px;
@@ -24,8 +23,7 @@
     padding: 20px;
     border-radius: 16px;
     margin: 20px 0;
-    /* Fundo leve da cor primária */
-    background: rgba(255, 255, 255, 0.05); 
+    background: rgba(255, 255, 255, 0.05);
     text-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
     letter-spacing: 5px;
   }
@@ -37,12 +35,18 @@
     margin-top: 15px;
     max-height: 400px;
     overflow-y: auto;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 10px;
   }
 
-  .grid-alunos::-webkit-scrollbar { width: 6px; }
-  .grid-alunos::-webkit-scrollbar-thumb { background: var(--dynamic-prim); border-radius: 10px; }
+  .grid-alunos::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .grid-alunos::-webkit-scrollbar-thumb {
+    background: var(--dynamic-prim);
+    border-radius: 10px;
+  }
 
   .card-aluno {
     background: rgba(0, 0, 0, 0.3);
@@ -51,12 +55,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-left: 5px solid rgba(255,255,255,0.2);
+    border-left: 5px solid rgba(255, 255, 255, 0.2);
     animation: slideIn 0.3s;
     transition: all 0.3s ease;
   }
 
-  /* Cores Universais de Feedback (Verde/Azul/Vermelho) Mantidas */
   .card-aluno.status-ok {
     border-left-color: #4caf50;
     background: rgba(76, 175, 80, 0.1);
@@ -93,13 +96,23 @@
     font-weight: bold;
     font-size: 18px;
     transition: transform 0.1s, box-shadow 0.2s;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   }
 
-  .btn-acao:active { transform: scale(0.85); box-shadow: none; }
+  .btn-acao:active {
+    transform: scale(0.85);
+    box-shadow: none;
+  }
 
-  .cor-sim { background: #4caf50; color: white; }
-  .cor-nao { background: #f44336; color: white; }
+  .cor-sim {
+    background: #4caf50;
+    color: white;
+  }
+
+  .cor-nao {
+    background: #f44336;
+    color: white;
+  }
 
   .cor-gold {
     background-color: var(--dynamic-prim) !important;
@@ -116,9 +129,11 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
   }
 
-  .cor-gold:hover { filter: brightness(1.15); transform: translateY(-2px); }
+  .cor-gold:hover {
+    filter: brightness(1.15);
+    transform: translateY(-2px);
+  }
 
-  /* Botão Manual */
   .btn-manual-add {
     background: transparent;
     color: var(--dynamic-text);
@@ -142,7 +157,6 @@
     opacity: 1;
   }
 
-  /* Inputs e Badges */
   .input-std {
     width: 100%;
     padding: 14px;
@@ -162,7 +176,7 @@
   }
 
   .badge-data {
-    background-color: rgba(255,255,255,0.1);
+    background-color: rgba(255, 255, 255, 0.1);
     color: var(--dynamic-prim);
     padding: 2px 6px;
     border-radius: 4px;
@@ -171,12 +185,14 @@
     font-weight: normal;
   }
 
-  /* Modal Manual (Busca de Alunos) */
   #modal-manual {
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.85);
-    z-index: 100000; /* Acima do painel inteiro */
+    z-index: 100000;
     display: none;
     justify-content: center;
     align-items: center;
@@ -187,7 +203,8 @@
     background-color: var(--dynamic-sec);
     padding: 25px;
     border-radius: 12px;
-    width: 90%; max-width: 400px;
+    width: 90%;
+    max-width: 400px;
     border: 2px solid var(--dynamic-prim);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
   }
@@ -197,12 +214,19 @@
     overflow-y: auto;
     margin-top: 15px;
   }
-  .lista-busca::-webkit-scrollbar { width: 6px; }
-  .lista-busca::-webkit-scrollbar-thumb { background: var(--dynamic-prim); border-radius: 10px; }
+
+  .lista-busca::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .lista-busca::-webkit-scrollbar-thumb {
+    background: var(--dynamic-prim);
+    border-radius: 10px;
+  }
 
   .item-busca {
     padding: 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
     gap: 12px;
@@ -211,9 +235,10 @@
     border-radius: 6px;
   }
 
-  .item-busca:hover { background: rgba(0, 0, 0, 0.4); }
+  .item-busca:hover {
+    background: rgba(0, 0, 0, 0.4);
+  }
 
-  /* Toast Notification */
   #toast-box {
     visibility: hidden;
     min-width: 250px;
@@ -229,28 +254,60 @@
     transform: translateX(-50%);
     font-size: 14px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     opacity: 0;
     transition: opacity 0.5s, bottom 0.5s;
     font-weight: 900;
   }
 
-  #toast-box.show { visibility: visible; opacity: 1; bottom: 50px; }
-
-  /* Layout Card Aula Auxiliar */
-  .aula-card-aux {
-    background: rgba(0,0,0,0.3); border-radius: 8px; padding: 15px; margin-bottom: 10px;
-    display: flex; justify-content: space-between; align-items: center; cursor: pointer;
-    border: 1px solid rgba(255,255,255,0.1); transition: 0.2s;
+  #toast-box.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 50px;
   }
-  .aula-card-aux:hover { border-color: var(--dynamic-prim); transform: translateY(-2px); }
 
-  @keyframes slideIn { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .aula-card-aux {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: 0.2s;
+  }
+
+  .aula-card-aux:hover {
+    border-color: var(--dynamic-prim);
+    transform: translateY(-2px);
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
 </style>
 
 <div id="screen-chamada-final" class="chamada-wrapper" style="display:none">
-
   <div id="toast-box">Notificação</div>
 
   <div id="modal-manual">
@@ -274,10 +331,13 @@
   </div>
 
   <div id="painel-instrutor-live" style="display:none">
-    <h3 style="color:var(--dynamic-text); opacity:0.6; margin:0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px;">Código de Acesso</h3>
+    <h3
+      style="color:var(--dynamic-text); opacity:0.6; margin:0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px;">
+      Código de Acesso</h3>
     <div id="box-pin-live" class="pin-box">----</div>
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
+    <div
+      style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">
       <div style="text-align:left;">
         <span style="color:var(--dynamic-text); opacity:0.7; font-size:0.9rem;">Alunos na sala:</span>
         <b id="contador-live" style="color:var(--dynamic-text); font-size:1.6rem; margin-left: 5px;">0</b>
@@ -287,10 +347,12 @@
       </button>
     </div>
 
-    <div id="status-conexao" style="font-size:0.75rem; color:#4caf50; font-weight:bold; text-align:left; margin-top:10px;">● Sincronizado</div>
+    <div id="status-conexao"
+      style="font-size:0.75rem; color:#4caf50; font-weight:bold; text-align:left; margin-top:10px;">● Sincronizado</div>
 
     <div id="container-lista-live" class="grid-alunos">
-      <div style="padding:40px; color:var(--dynamic-text); opacity:0.5; font-style: italic;">Aguardando alunos conectarem...</div>
+      <div style="padding:40px; color:var(--dynamic-text); opacity:0.5; font-style: italic;">Aguardando alunos
+        conectarem...</div>
     </div>
 
     <div style="margin-top: 25px;">
@@ -313,10 +375,16 @@
       <h3 style="color:var(--dynamic-prim); margin:0; font-weight:900;">Nova Aula</h3>
       <button onclick="voltarDashFinal()" style="background:none; border:none; color:var(--dynamic-text); cursor:pointer;"><span class="material-icons">close</span></button>
     </div>
-    
-    <label style="color:var(--dynamic-text); opacity:0.8; font-size:0.8rem; margin-bottom:5px; font-weight:bold; display:block;">Local de Treino</label>
-    <select id="sel-local-final" class="input-std" style="margin-bottom:10px;"><option>Carregando...</option></select>
-    <input type="text" id="txt-local-custom" class="input-std" placeholder="Digite o nome do Local Externo..." style="display:none; margin-bottom:10px; border-color:var(--dynamic-prim);">
+
+    <label style="color:var(--dynamic-text); opacity:0.8; font-size:0.8rem; margin-bottom:5px; font-weight:bold; display:block;">1. Local de Treino</label>
+    <select id="sel-local-final" class="input-std" style="margin-bottom:15px;" onchange="filtrarTurmasPorLocal()">
+      <option value="" disabled selected>Carregando Unidades...</option>
+    </select>
+
+    <label style="color:var(--dynamic-text); opacity:0.8; font-size:0.8rem; margin-bottom:5px; font-weight:bold; display:block;">2. Turma Oficial</label>
+    <select id="sel-turma-final" class="input-std" style="margin-bottom:15px; border: 2px solid var(--dynamic-prim);">
+      <option value="" disabled selected>Selecione a Unidade primeiro...</option>
+    </select>
 
     <label style="color:var(--dynamic-text); opacity:0.8; font-size:0.8rem; margin-bottom:5px; font-weight:bold; display:block;">Data da Aula</label>
     <input type="date" id="txt-data-final" class="input-std" style="margin-bottom:15px;">
@@ -331,14 +399,15 @@
         <input type="time" id="txt-fim-final" class="input-std">
       </div>
     </div>
-    
+
     <button onclick="salvarAulaFinal()" class="cor-gold">GERAR PIN DE ACESSO</button>
   </div>
 
 </div>
 
 <script>
-  // --- VARIÁVEIS GLOBAIS ---
+  console.log("✅ [SAFE MODE] ChamadaDinamica.html (CASCATA UX/UI Integrada)");
+
   var _prodAulaId = null;
   var _prodTimer = null;
   var _prodCache = [];
@@ -346,12 +415,15 @@
   var _prodDataAula = "";
   var _buscaTimer = null; 
 
+  // Variáveis para a cascata de turmas
+  var _todasTurmasCache = [];
+
   function showToast(msg, tipo='info') {
       var x = document.getElementById("toast-box");
       x.innerText = msg;
       x.style.borderLeft = tipo === 'erro' ? "5px solid #f44336" : "5px solid #4caf50";
       x.className = "show";
-      setTimeout(() => { x.className = x.className.replace("show", ""); }, 3000);
+      setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
   }
 
   function initChamadaDinamica(modo) {
@@ -362,14 +434,13 @@
       if(screen.parentElement !== main) main.appendChild(screen);
       screen.style.display = 'block';
 
-      ['painel-aluno','painel-menu','painel-criar','painel-instrutor-live'].forEach(id => document.getElementById(id).style.display = 'none');
+      ['painel-aluno','painel-menu','painel-criar','painel-instrutor-live'].forEach(function(id){ document.getElementById(id).style.display = 'none'; });
 
       var user = JSON.parse(localStorage.getItem('userSession'));
       if (modo === 'instrutor') carregarMenuFinal(user);
       else { document.getElementById('painel-aluno').style.display = 'block'; carregarAlunoFinal(user); }
   }
 
-  // --- LÓGICA DE MONITORAMENTO (INSTRUTOR) ---
   function iniciarMonitoramentoFinal(id, pin, dataAula) {
       _prodAulaId = id;
       _prodDataAula = dataAula || "";
@@ -385,7 +456,7 @@
 
   function processarPollingFinal() {
       if (!_prodAulaId) return;
-      google.script.run.withSuccessHandler(res => {
+      google.script.run.withSuccessHandler(function(res) {
           document.getElementById('status-conexao').innerText = "● Sincronizado";
           document.getElementById('status-conexao').style.color = "#4caf50";
           if (!res.success || res.status === "ENCERRADA") {
@@ -395,13 +466,13 @@
               return;
           }
           if (res.checkins) {
-              let listaMesclada = res.checkins.map(a => {
+              let listaMesclada = res.checkins.map(function(a) {
                   if (_prodConfirmadosLocal[a.login]) a.status = 'Confirmado';
                   return a;
               });
               desenharListaFinal(listaMesclada);
           }
-      }).withFailureHandler(err => {
+      }).withFailureHandler(function(err) {
           document.getElementById('status-conexao').innerText = "⚠ Falha na Conexão. Reconectando...";
           document.getElementById('status-conexao').style.color = "#f44336";
       }).buscarCheckinsAula(_prodAulaId);
@@ -414,56 +485,44 @@
       container.innerHTML = "";
 
       if (_prodCache.length === 0) {
-          container.innerHTML = `
-            <div style="padding:40px 20px; text-align:center; color:var(--dynamic-text); opacity:0.5; display:flex; flex-direction:column; align-items:center;">
-                <span class="material-icons" style="font-size:48px; margin-bottom:10px;">qr_code_scanner</span>
-                <p style="margin:0; font-size:1rem; font-weight:bold;">Sala vazia</p>
-                <p style="margin:5px 0 0; font-size:0.8rem;">Alunos devem digitar o PIN de 4 dígitos no app.</p>
-            </div>`;
+          container.innerHTML = "<div style='padding:40px 20px; text-align:center; color:var(--dynamic-text); opacity:0.5; display:flex; flex-direction:column; align-items:center;'><span class='material-icons' style='font-size:48px; margin-bottom:10px;'>qr_code_scanner</span><p style='margin:0; font-size:1rem; font-weight:bold;'>Sala vazia</p><p style='margin:5px 0 0; font-size:0.8rem;'>Alunos devem digitar o PIN de 4 dígitos no app.</p></div>";
           return;
       }
 
-      _prodCache.sort((a,b) => (a.status === 'Confirmado' ? 1 : -1));
+      _prodCache.sort(function(a,b) { return (a.status === 'Confirmado' ? 1 : -1); });
 
-      _prodCache.forEach(aluno => {
+      _prodCache.forEach(function(aluno) {
           var div = document.createElement('div');
           var confirmado = aluno.status === 'Confirmado';
-          div.className = `card-aluno ${confirmado ? 'status-ok' : 'status-vis'}`;
+          div.className = "card-aluno " + (confirmado ? 'status-ok' : 'status-vis');
           var img = (aluno.foto && aluno.foto.length > 5) ? aluno.foto : 'https://via.placeholder.com/50';
 
-          div.innerHTML = `
-              <div class="info-flex">
-                  <img src="${img}" class="foto-perfil">
-                  <div>
-                      <div style="font-weight:900; color:var(--dynamic-text); font-size:1rem;">${aluno.nome}</div>
-                      <div style="font-size:0.8rem; color:var(--dynamic-text); opacity:0.7;">
-                          ${aluno.graduacao} • ${aluno.hora || '--:--'}
-                          <span class="badge-data">${_prodDataAula}</span>
-                      </div>
-                  </div>
-              </div>
-              <div style="display:flex; gap:10px;">
-                  ${!confirmado ? `
-                      <button class="btn-acao cor-nao" onclick="acaoRecusarFinal('${aluno.login}')">✕</button>
-                      <button class="btn-acao cor-sim" onclick="acaoAceitarFinal('${aluno.login}')">✓</button>
-                  ` : '<span class="material-icons" style="color:#4caf50; font-size:32px;">verified</span>'}
-              </div>
-          `;
+          var statusHtml = !confirmado ? 
+              "<button class='btn-acao cor-nao' onclick=\"acaoRecusarFinal('" + aluno.login + "')\">✕</button><button class='btn-acao cor-sim' onclick=\"acaoAceitarFinal('" + aluno.login + "')\">✓</button>" : 
+              "<span class='material-icons' style='color:#4caf50; font-size:32px;'>verified</span>";
+
+          div.innerHTML = "<div class='info-flex'>" +
+                          "<img src='" + img + "' class='foto-perfil'>" +
+                          "<div>" +
+                          "<div style='font-weight:900; color:var(--dynamic-text); font-size:1rem;'>" + aluno.nome + "</div>" +
+                          "<div style='font-size:0.8rem; color:var(--dynamic-text); opacity:0.7;'>" + aluno.graduacao + " • " + (aluno.hora || '--:--') + " <span class='badge-data'>" + _prodDataAula + "</span></div>" +
+                          "</div>" +
+                          "</div>" +
+                          "<div style='display:flex; gap:10px;'>" + statusHtml + "</div>";
           container.appendChild(div);
       });
   }
 
-  // --- AÇÕES DO INSTRUTOR ---
   function acaoAceitarFinal(login) {
       _prodConfirmadosLocal[login] = true;
-      var item = _prodCache.find(a => a.login === login);
+      var item = _prodCache.find(function(a) { return a.login === login; });
       if(item) { item.status = 'Confirmado'; desenharListaFinal(_prodCache); }
       showToast("Check-in validado!", "sucesso");
   }
 
   function acaoRecusarFinal(login) {
       if(!confirm("Deseja realmente remover este aluno da chamada?")) return;
-      _prodCache = _prodCache.filter(a => a.login !== login);
+      _prodCache = _prodCache.filter(function(a) { return a.login !== login; });
       delete _prodConfirmadosLocal[login]; 
       desenharListaFinal(_prodCache);
       showToast("Aluno removido da lista.", "info");
@@ -471,24 +530,23 @@
 
   function acaoFinalizarFinal() {
       if(_prodCache.length === 0 && !confirm("Nenhum aluno marcou presença. Encerrar aula vazia?")) return;
-      const pendentes = _prodCache.filter(a => a.status !== 'Confirmado').length;
-      if (pendentes > 0 && !confirm(`Atenção: ${pendentes} alunos ainda estão pendentes de validação (✕ ou ✓). Se encerrar, eles receberão presença. Continuar?`)) return;
+      const pendentes = _prodCache.filter(function(a){ return a.status !== 'Confirmado'; }).length;
+      if (pendentes > 0 && !confirm("Atenção: " + pendentes + " alunos ainda estão pendentes de validação (✕ ou ✓). Se encerrar, eles receberão presença. Continuar?")) return;
       if (pendentes === 0 && !confirm("Validar todos os registros e salvar no banco de dados?")) return;
 
       clearInterval(_prodTimer);
-      const listaFinal = _prodCache.map(a => ({...a, status: 'Confirmado'}));
-      google.script.run.withSuccessHandler(res => {
+      const listaFinal = _prodCache.map(function(a) { return {...a, status: 'Confirmado'}; });
+      google.script.run.withSuccessHandler(function(res) {
           showToast(res.msg, "sucesso");
           setTimeout(voltarDashFinal, 1500);
       }).finalizarAulaDinamica(_prodAulaId, listaFinal);
   }
 
-  // --- ADIÇÃO MANUAL (VISITANTE/ESQUECEU CELULAR) ---
   function abrirModalManual() {
       document.getElementById('modal-manual').style.display = 'flex';
       document.getElementById('busca-aluno-input').value = '';
       document.getElementById('resultado-busca').innerHTML = '';
-      setTimeout(() => document.getElementById('busca-aluno-input').focus(), 100);
+      setTimeout(function() { document.getElementById('busca-aluno-input').focus(); }, 100);
   }
 
   function fecharModalManual() { document.getElementById('modal-manual').style.display = 'none'; }
@@ -505,45 +563,31 @@
       const divRes = document.getElementById('resultado-busca');
       divRes.innerHTML = '<div style="color:var(--dynamic-text); opacity:0.6; padding:10px; text-align:center;"><span class="material-icons spin">sync</span></div>';
 
-      google.script.run.withSuccessHandler(lista => {
+      google.script.run.withSuccessHandler(function(lista) {
           divRes.innerHTML = "";
-          
-          lista.forEach(a => {
+          lista.forEach(function(a) {
               const item = document.createElement('div');
               item.className = 'item-busca';
-              item.innerHTML = `
-                  <img src="${a.foto}" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
-                  <div>
-                      <div style="font-weight:bold; color:var(--dynamic-text);">${a.nome}</div>
-                      <div style="font-size:0.7rem; color:var(--dynamic-text); opacity:0.6;">${a.graduacao}</div>
-                  </div>
-              `;
-              item.onclick = () => adicionarNaLista(a.login);
+              item.innerHTML = "<img src='" + a.foto + "' style='width:36px; height:36px; border-radius:50%; object-fit:cover;'>" +
+                               "<div><div style='font-weight:bold; color:var(--dynamic-text);'>" + a.nome + "</div><div style='font-size:0.7rem; color:var(--dynamic-text); opacity:0.6;'>" + a.graduacao + "</div></div>";
+              item.onclick = function() { adicionarNaLista(a.login); };
               divRes.appendChild(item);
           });
-
-          // Visitante Force Add
           const itemVisitante = document.createElement('div');
           itemVisitante.className = 'item-busca';
           itemVisitante.style.borderTop = "1px dashed rgba(255,255,255,0.2)";
           itemVisitante.style.marginTop = "5px";
-          itemVisitante.innerHTML = `
-              <div style="width:36px; height:36px; border-radius:50%; background:var(--dynamic-prim); display:flex; align-items:center; justify-content:center; color:var(--dynamic-btn-text); font-weight:900;">+</div>
-              <div>
-                  <div style="font-weight:bold; color:var(--dynamic-prim);">Adicionar "${termo}"</div>
-                  <div style="font-size:0.7rem; color:var(--dynamic-text); opacity:0.6;">Marcar como Visitante Externo</div>
-              </div>
-          `;
-          itemVisitante.onclick = () => adicionarNaLista("VISITANTE_" + termo);
+          itemVisitante.innerHTML = "<div style='width:36px; height:36px; border-radius:50%; background:var(--dynamic-prim); display:flex; align-items:center; justify-content:center; color:var(--dynamic-btn-text); font-weight:900;'>+</div>" +
+                                    "<div><div style='font-weight:bold; color:var(--dynamic-prim);'>Adicionar " + termo + "</div><div style='font-size:0.7rem; color:var(--dynamic-text); opacity:0.6;'>Marcar como Visitante Externo</div></div>";
+          itemVisitante.onclick = function() { adicionarNaLista("VISITANTE_" + termo); };
           divRes.appendChild(itemVisitante);
-
       }).buscarAlunosParaManual(termo);
   }
 
   function adicionarNaLista(login) {
       fecharModalManual();
       showToast("Adicionando aluno...", "info");
-      google.script.run.withSuccessHandler(res => {
+      google.script.run.withSuccessHandler(function(res) {
           if(res.success) {
               showToast("Inclusão manual feita!", "sucesso");
               _prodConfirmadosLocal[login] = true; 
@@ -554,7 +598,6 @@
       }).adicionarAlunoManual(_prodAulaId, login);
   }
 
-  // --- NAVEGAÇÃO GERAL ---
   function voltarDashFinal() {
       if(_prodTimer) clearInterval(_prodTimer);
       document.getElementById('screen-chamada-final').style.display = 'none';
@@ -562,64 +605,94 @@
       document.getElementById('dashboard-grid').style.display = 'grid';
   }
 
-  // --- MÓDULO INSTRUTOR (MENU E CRIAR) ---
   function carregarMenuFinal(user) {
       document.getElementById('painel-menu').style.display = 'block';
       const div = document.getElementById('feed-aulas-instrutor');
       div.innerHTML = "<div style='color:var(--dynamic-text); opacity:0.5; padding:10px; text-align:center;'>Buscando do servidor...</div>";
-      google.script.run.withSuccessHandler(aulas => {
+      google.script.run.withSuccessHandler(function(aulas) {
           div.innerHTML = "";
-          if(aulas.length===0) div.innerHTML = "<div style='color:var(--dynamic-text); opacity:0.5; padding:20px; text-align:center; border:1px dashed rgba(255,255,255,0.2); border-radius:8px;'>Você não tem nenhuma aula ativa no momento.</div>";
-          aulas.forEach(a => {
+          if(aulas.length===0) div.innerHTML = "<div style='color:var(--dynamic-text); opacity:0.5; padding:20px; text-align:center; border:1px dashed rgba(255,255,255,0.2); border-radius:8px;'>Nenhuma aula ativa no momento.</div>";
+          aulas.forEach(function(a) {
               const txtAlunos = a.qtd === 1 ? "aluno" : "alunos";
-              div.innerHTML += `
-              <div class='aula-card-aux' onclick="iniciarMonitoramentoFinal('${a.id}','${a.pin}', '${a.data}')">
-                  <div style="text-align:left;">
-                      <h4 style="color:var(--dynamic-prim); margin:0 0 5px 0; font-weight:900;">${a.academia}</h4>
-                      <small style="color:var(--dynamic-text); opacity:0.7; font-size:0.85rem; display:block;">📅 ${a.data} &nbsp;|&nbsp; ⏰ ${a.horario}</small>
-                      <div style="margin-top:8px; font-size:0.85rem; color:#4caf50; font-weight:bold;">
-                          <span class="material-icons" style="font-size:14px; vertical-align:middle;">groups</span> 
-                          ${a.qtd} ${txtAlunos} na sala
-                      </div>
-                  </div>
-                  <div style="text-align:center; background:var(--dynamic-prim); padding:10px 15px; border-radius:8px; color:var(--dynamic-btn-text);">
-                      <div style="font-weight:900; font-size:1.4rem; letter-spacing:2px;">${a.pin}</div>
-                      <div style="font-size:0.6rem; text-transform:uppercase; font-weight:bold;">Acessar</div>
-                  </div>
-              </div>`;
+              div.innerHTML += "<div class='aula-card-aux' onclick=\"iniciarMonitoramentoFinal('" + a.id + "','" + a.pin + "', '" + a.data + "')\">" +
+                               "<div style='text-align:left;'><h4 style='color:var(--dynamic-prim); margin:0 0 5px 0; font-weight:900;'>" + a.academia + "</h4><small style='color:var(--dynamic-text); opacity:0.7; font-size:0.85rem; display:block;'>📅 " + a.data + " &nbsp;|&nbsp; ⏰ " + a.horario + "</small><div style='margin-top:8px; font-size:0.85rem; color:#4caf50; font-weight:bold;'><span class='material-icons' style='font-size:14px; vertical-align:middle;'>groups</span> " + a.qtd + " " + txtAlunos + " na sala</div></div>" +
+                               "<div style='text-align:center; background:var(--dynamic-prim); padding:10px 15px; border-radius:8px; color:var(--dynamic-btn-text);'><div style='font-weight:900; font-size:1.4rem; letter-spacing:2px;'>" + a.pin + "</div><div style='font-size:0.6rem; text-transform:uppercase; font-weight:bold;'>Acessar</div></div>" +
+                               "</div>";
           });
       }).buscarAulasAtivasInstrutor(user.nomeCompleto);
   }
 
+  // --- LÓGICA CASCATA: LOCAL -> TURMA ---
   function irParaCriarFinal() {
       document.getElementById('painel-menu').style.display = 'none';
       document.getElementById('painel-criar').style.display = 'block';
-      const sel = document.getElementById('sel-local-final');
-      sel.innerHTML = "<option>Carregando Unidades...</option>";
-      google.script.run.withSuccessHandler(locais => {
-          sel.innerHTML = "";
-          locais.forEach(l => sel.innerHTML += `<option value="${l}">${l}</option>`);
-          sel.innerHTML += `<option value="OUTRO_CUSTOM">📍 Outro Local / Evento Externo...</option>`;
-          sel.onchange = function() { document.getElementById('txt-local-custom').style.display = (this.value === 'OUTRO_CUSTOM') ? 'block' : 'none'; }
-      }).getListaAcademias();
+      
       document.getElementById('txt-data-final').valueAsDate = new Date();
+
+      const selLocal = document.getElementById('sel-local-final');
+      const selTurma = document.getElementById('sel-turma-final');
+
+      selLocal.innerHTML = "<option>Carregando...</option>";
+      selTurma.innerHTML = "<option value='' disabled selected>Aguardando local...</option>";
+
+      // Dispara 2 requisições paralelas para carregar a UX de forma rápida
+      google.script.run.withSuccessHandler(function(locais) {
+          selLocal.innerHTML = "<option value='' disabled selected>Selecione a Unidade</option>";
+          locais.forEach(function(l) {
+              selLocal.innerHTML += "<option value='" + l + "'>" + l + "</option>";
+          });
+      }).getListaAcademias();
+
+      google.script.run.withSuccessHandler(function(turmas) {
+          _todasTurmasCache = turmas || [];
+      }).listarTurmasAdmin();
+  }
+
+  function filtrarTurmasPorLocal() {
+      const localSelecionado = document.getElementById('sel-local-final').value;
+      const selTurma = document.getElementById('sel-turma-final');
+
+      selTurma.innerHTML = "<option value='' disabled selected>Selecione a Turma...</option>";
+
+      const turmasDoLocal = _todasTurmasCache.filter(function(t) { 
+          return t.local === localSelecionado && t.status === "Ativa"; 
+      });
+
+      if (turmasDoLocal.length === 0) {
+          selTurma.innerHTML = "<option value='' disabled selected>Nenhuma turma cadastrada neste local</option>";
+          return;
+      }
+
+      turmasDoLocal.forEach(function(t) {
+          selTurma.innerHTML += "<option value='" + t.nome + "'>" + t.nome + " (" + t.modalidade + " - " + t.faixaEtaria + ")</option>";
+      });
   }
 
   function salvarAulaFinal() {
       const user = JSON.parse(localStorage.getItem('userSession'));
-      let local = document.getElementById('sel-local-final').value;
-      if(local === 'OUTRO_CUSTOM') local = document.getElementById('txt-local-custom').value;
+      const localSel = document.getElementById('sel-local-final').value;
+      const turmaSel = document.getElementById('sel-turma-final').value;
       const dataRaw = document.getElementById('txt-data-final').value;
-      const dados = { instrutor: user.nomeCompleto, academia: local, data: dataRaw, inicio: document.getElementById('txt-inicio-final').value, fim: document.getElementById('txt-fim-final').value };
 
-      if(!dados.inicio || !dados.academia) { showToast("Preencha o horário e o local!", "erro"); return; }
+      if(!localSel || !turmaSel || !document.getElementById('txt-inicio-final').value) { 
+          showToast("Preencha o Local, a Turma e o Horário!", "erro"); 
+          return; 
+      }
 
       const btn = document.querySelector('button[onclick="salvarAulaFinal()"]');
       const originalText = btn.innerText;
       btn.innerText = "CRIANDO SALA..."; btn.disabled = true;
       let dataFormatada = dataRaw.split('-').reverse().join('/');
 
-      google.script.run.withSuccessHandler(res => {
+      const dados = { 
+          instrutor: user.nomeCompleto, 
+          academia: turmaSel, // Enviamos o nome exato da Turma para o Backend buscar o local correto
+          data: dataRaw, 
+          inicio: document.getElementById('txt-inicio-final').value, 
+          fim: document.getElementById('txt-fim-final').value 
+      };
+
+      google.script.run.withSuccessHandler(function(res) {
           btn.innerText = originalText; btn.disabled = false;
           if(res.success) iniciarMonitoramentoFinal(res.idAula, res.pin, dataFormatada);
           else showToast("Erro: " + res.erro, "erro");
@@ -629,20 +702,14 @@
   // --- MÓDULO ALUNO (CHECKIN VIA MENU) ---
   function carregarAlunoFinal(user) {
       const div = document.getElementById('feed-aulas-aluno');
-      div.innerHTML = "<div style='color:var(--dynamic-text); opacity:0.6; text-align:center;'>Procurando aulas na sua região...</div>";
-      google.script.run.withSuccessHandler(aulas => {
+      div.innerHTML = "<div style='color:var(--dynamic-text); opacity:0.6; text-align:center;'>Procurando aulas...</div>";
+      google.script.run.withSuccessHandler(function(aulas) {
           div.innerHTML = "";
-          if(aulas.length === 0) div.innerHTML = "<div style='padding:20px; border:1px dashed rgba(255,255,255,0.2); border-radius:8px; color:var(--dynamic-text); opacity:0.6; text-align:center;'>Você não tem aulas ativas agora.<br>Aguarde o instrutor gerar o PIN.</div>";
-          aulas.forEach(a => {
-              div.innerHTML += `<div class='aula-card-aux' onclick="preencherPinFinal('${a.pin}')">
-                  <div>
-                    <h4 style="color:var(--dynamic-prim); margin:0 0 5px 0; font-weight:900;">${a.instrutor}</h4>
-                    <small style="color:var(--dynamic-text); opacity:0.7;">📍 ${a.academia} | ⏰ ${a.horario}</small>
-                  </div>
-                  <div style="background:var(--dynamic-sec); border:1px solid var(--dynamic-prim); color:var(--dynamic-prim); padding:8px 12px; border-radius:6px; font-size:0.75rem; font-weight:bold;">Tocar P/ Inserir</div>
-              </div>`;
+          if(aulas.length === 0) div.innerHTML = "<div style='padding:20px; border:1px dashed rgba(255,255,255,0.2); border-radius:8px; color:var(--dynamic-text); opacity:0.6; text-align:center;'>Nenhuma sala aberta. Aguarde o instrutor.</div>";
+          aulas.forEach(function(a) {
+              div.innerHTML += "<div class='aula-card-aux' onclick=\"preencherPinFinal('" + a.pin + "')\"><div><h4 style='color:var(--dynamic-prim); margin:0 0 5px 0; font-weight:900;'>" + a.instrutor + "</h4><small style='color:var(--dynamic-text); opacity:0.7;'>📍 Turma: " + a.academia + " | ⏰ " + a.horario + "</small></div><div style='background:var(--dynamic-sec); border:1px solid var(--dynamic-prim); color:var(--dynamic-prim); padding:8px 12px; border-radius:6px; font-size:0.75rem; font-weight:bold;'>Tocar</div></div>";
           });
-      }).buscarAulasDisponiveisAluno("TODOS"); // Traz tudo para ele achar rápido
+      }).buscarAulasDisponiveisAluno("TODOS");
   }
 
   function preencherPinFinal(pin) { 
@@ -653,7 +720,7 @@
 
   function executarCheckinFinal() {
       const pin = document.getElementById('input-pin-aluno').value;
-      if(!pin || pin.length < 4) { showToast("Digite o PIN completo.", "erro"); return; }
+      if(!pin || pin.length < 4) { showToast("Digite o PIN.", "erro"); return; }
       
       const user = JSON.parse(localStorage.getItem('userSession'));
       const feedback = document.getElementById('feedback-aluno');
@@ -662,7 +729,7 @@
       const btnOk = document.querySelector('#painel-aluno .cor-gold');
       btnOk.disabled = true;
 
-      google.script.run.withSuccessHandler(res => {
+      google.script.run.withSuccessHandler(function(res) {
           feedback.innerText = res.msg;
           feedback.style.color = res.success ? "#4caf50" : "#f44336";
           btnOk.disabled = false;

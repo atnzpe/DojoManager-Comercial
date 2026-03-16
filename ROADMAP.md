@@ -9,33 +9,32 @@ Acompanhe a evolução do nosso sistema.
 - [x] Dashboard Responsivo em Dark Mode.
 - [x] CRUD Administrativo completo (Alunos, Turmas, Locais).
 
-## 🧹 Fase 1.5: Auditoria e White-Label (Prioridade Atual)
+## 🧹 Fase 1.5: Auditoria e White-Label (Concluindo)
 
 - [x] Implementar a personalização de imagens de logo, background e 5 cores.
 - [x] Ajustar CSS para que todas as telas tenham o mesmo estilo CSS.
-- [x] Remover Hardcode do botão loja.
-- [x] Remover Hardcode do link financeiro.
-- [x] Remover Hardcode da tela de mídias sociais.
+- [x] Remover Hardcode do botão loja, link financeiro e mídias sociais.
 - [x] **Ajuda.html:** Reescrever manual neutro e modularizar.
 - [x] **Social.html:** Transformar botões em links dinâmicos.
 - [x] **Código.js:** Alterar `.setTitle()` para buscar o nome da academia dinamicamente.
 - [x] **CardTemplate.html:** Recriar a carteirinha usando apenas HTML e CSS puro (Adeus imagens estáticas de fundo).
 - [x] **O CHEFÃO:** Remover Hardcode de graduação. Permitir cadastro de ID (ordem), cor e modalidade.
 - [x] Permitir o Instrutor/Mestre acompanhar o desenvolvimento do Aluno (aulas, tempo de tatame).
-- [x] Exibir no Perfil do Aluno e no CRUD de Alunos: Peso, Idade (anos, meses e dias), Modalidade, Altura. Criar o "Super Relatório" administrativo para competições e exames.
-- [ ] Validar a renderização das imagens (Base64) na carteirinha em PDF em diferentes dispositivos antes de implementar na Confederação Pernambucana de Sambo.
-- [ ] Gestão de Turmas.
-- [ ] Gestão de cadastro de Modalidades, associados aos locais de treino.
-- [ ] Validar todos os arquivos do projeto (Pente fino).
+- [x] Exibir no Perfil do Aluno e no CRUD de Alunos: Peso, Idade (anos, meses e dias), Modalidade, Altura. Criar o "Super Relatório" administrativo.
+- [ ] 🚨 **Auditoria de Integridade de CRUDs (Anti-Apagão):** Aplicada regra de *Hydration* na edição de alunos para não apagar colunas não editadas. Validar quas as funções serao hydratadas
+
+- [ ] Replicar blindagem Anti-Apagão (*Hydration*) para os demais CRUDs menores (Cursos, Locais, Vídeos).
+- [ ] Validar a renderização das imagens (Base64) na carteirinha em PDF em diferentes dispositivos.
 - [ ] Validar se a planilha Mestra funciona perfeitamente para clonagem.
 - [ ] Criar alertas de limite de escalabilidade (Avisar QA/Dev quando o banco Sheets chegar a 50% da capacidade).
 
-## 🚧 Fase 2: Gestão Financeira e Turmas (Em Andamento)
+## 🚧 Fase 2: Gestão Financeira e Turmas (Em Andamento - FOCO ATUAL 🎯)
 
 - [x] Dashboard Financeiro (Inadimplência, Faturamento).
-- [ x] **[🚀 QUICK WIN] Fluxo de Pagamento Híbrido: Exibir QR Code/Chave PIX da academia e botão dinâmico "Enviar Comprovante (WhatsApp)" no painel do aluno.**
-- [ ] Separação de Turmas por Nível e Idade (Infantil, Iniciante, Avançado).
-- [ ] Check-in Antecipado (Agendamento de grade de aulas).
+- [x] **[🚀 QUICK WIN] Fluxo de Pagamento Híbrido:** Exibir QR Code/Chave PIX da academia e botão dinâmico no painel do aluno.
+- [ ] **[🔥 ALTO ROI] Gestão de Turmas Administrativa:** Criar CRUD de Turmas associando Modalidade, Dia e Horário.
+- [ ] **[🔥 ALTO ROI] Separação de Turmas por Nível e Idade:** (Infantil, Iniciante, Avançado) para resolver a dor do professor multitarefa.
+- [ ] Check-in Antecipado (Agendamento de grade de aulas pelo aluno).
 
 ## 🔮 Fase 3: Automação, CRM e Compliance (Próximos Passos)
 
@@ -48,11 +47,9 @@ Acompanhe a evolução do nosso sistema.
 - [ ] **Compliance:** Controle de Anuidade (Bloqueio em caso de inadimplência).
 - [ ] **Compliance:** Trava de inatividade por falta de presença no Congresso Oficial.
 - [ ] **Compliance:** Controle de Assiduidade em Treinos de Instrutores.
-- [ ] Validar se ao fazer a cópia da planilha, o SaaS continua a funcionar de forma autônoma.
 - [ ] Criar uma apresentação do App.
 - [ ] Atualizar o manual (ajuda.html) a cada nova implementação.
-- [] Incluir eme todas as Paginas o atalho para paragina do desenvolvedor
-
+- [ ] Incluir em todas as páginas o atalho para página do desenvolvedor (Rodapé White-Label).
 ## 🌐 Projetos Especiais
 
 - [ ] Adaptação do sistema base para a **Confederação Pernambucana de Sambo**.

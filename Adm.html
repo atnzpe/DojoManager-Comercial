@@ -348,6 +348,9 @@
   <div class="adm-nav">
     <div class="adm-nav-item active" onclick="navAdmin('alunos')"><span class="material-icons">people</span> Alunos
     </div>
+    <div class="adm-nav-item" onclick="navAdmin('turmas')">
+      <span class="material-icons">event_note</span> Turmas
+    </div>
     <div class="adm-nav-item" onclick="navAdmin('pacotes')"><span class="material-icons">sell</span> Planos</div>
     <div class="adm-nav-item" onclick="navAdmin('graduacoes')"><span class="material-icons">military_tech</span>
       Graduações</div>
@@ -362,7 +365,8 @@
       Certificados</div>
     <div class="adm-nav-item" onclick="navAdmin('config')"><span class="material-icons">settings</span> Config</div>
     <div class="adm-nav-item" style="margin-left: auto; border-left: 1px solid #333;" onclick="fecharAdmin()">
-      <span class="material-icons" style="color: #ff5252;">close</span> Voltar</div>
+      <span class="material-icons" style="color: #ff5252;">close</span> Voltar
+    </div>
   </div>
 
   <div id="adm-tab-alunos" class="adm-tab-content active">
@@ -387,6 +391,31 @@
           </tr>
         </thead>
         <tbody id="lista-alunos-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="adm-tab-turmas" class="adm-tab-content">
+    <div class="adm-h3">Gestão de Turmas e Grade
+      <div style="display:flex; gap:10px;">
+        <button class="adm-btn adm-btn-outline" onclick="carregarTurmas()"><span class="material-icons" style="font-size:16px;">refresh</span></button>
+        <button class="adm-btn" onclick="abrirModalTurma()">+ NOVA TURMA</button>
+      </div>
+    </div>
+    <div class="adm-toolbar"><input type="text" id="search-turmas" class="adm-input" placeholder="🔍 Filtrar por nome ou modalidade..." onkeyup="filtrarTurmas()">
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th>Turma / Modalidade</th>
+            <th>Local / Idade</th>
+            <th>Dias / Horários</th>
+            <th>Status</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody id="lista-turmas-body"></tbody>
       </table>
     </div>
   </div>
@@ -640,14 +669,25 @@
           </div>
           <div style="display:flex; gap:10px;">
             <div style="flex:1;">
-              <label class="adm-label">Academia</label><select id="aluno_acad" name="aluno_acad" class="adm-input"></select>
+              <label class="adm-label">Academia</label>
+              <select id="aluno_acad" name="aluno_acad" class="adm-input" onchange="carregarTurmasSelectParaAlunos(this.value, '')"></select>
             </div>
             <div style="flex:1;">
-              <label class="adm-label">Status Acesso</label><select id="aluno_status" name="aluno_status" class="adm-input" style="font-weight:bold;"><option value="Ativo" style="color:green;">Ativo</option><option value="Inativo" style="color:red;">Inativo</option><option value="Bloqueado" style="color:blue;">Bloqueado</option></select>
+              <label class="adm-label" style="color:#2196f3;">Turma Oficial</label>
+              <select id="aluno_turma" name="aluno_turma" class="adm-input" style="border: 1px solid #2196f3;">
+       <option value="">Sem Turma</option>
+    </select>
             </div>
           </div>
-          <div>
-            <label class="adm-label">Nível Sistema</label><select id="aluno_nivel" name="aluno_nivel" class="adm-input"><option value="Aluno">Aluno</option><option value="Instrutor N1">Instrutor</option><option value="Professor">Professor</option><option value="Mestre">Mestre</option><option value="Admin">Admin</option></select>
+          <div style="display:flex; gap:10px; margin-top:10px;">
+            <div style="flex:1;">
+              <label class="adm-label">Status Acesso</label>
+              <select id="aluno_status" name="aluno_status" class="adm-input" style="font-weight:bold;"><option value="Ativo" style="color:green;">Ativo</option><option value="Inativo" style="color:red;">Inativo</option><option value="Bloqueado" style="color:blue;">Bloqueado</option></select>
+            </div>
+            <div style="flex:1;">
+              <label class="adm-label">Nível Sistema</label>
+              <select id="aluno_nivel" name="aluno_nivel" class="adm-input"><option value="Aluno">Aluno</option><option value="Instrutor N1">Instrutor</option><option value="Professor">Professor</option><option value="Mestre">Mestre</option><option value="Admin">Admin</option></select>
+            </div>
           </div>
           <hr style="border:0; border-top:1px dashed #ccc; margin:15px 0;">
           <label class="adm-label" style="color:#1e90ff;">🏅 Modalidades Praticadas</label>
@@ -713,7 +753,8 @@
       style="margin-top:20px; max-height:400px; overflow-y:auto; border-top:1px solid #ccc; padding-top:20px; display:none;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
         <h4 style="margin:0; color:#333;">Resultados:
-          <span id="qtd-resultados" style="color:var(--dynamic-prim);">0</span> atleta(s)</h4>
+          <span id="qtd-resultados" style="color:var(--dynamic-prim);">0</span> atleta(s)
+        </h4>
         <button class="adm-btn" style="background:#ff5252; color:white; font-size:11px;" onclick="imprimirSuperRelatorio()"><span class="material-icons" style="font-size:14px;">picture_as_pdf</span> Imprimir PDF</button>
       </div>
       <table class="adm-table" id="tabela-resultados-rel">
@@ -751,6 +792,67 @@
     </form>
   </div>
 </div>
+
+<div id="adm-modal-turma" class="adm-modal">
+  <div class="adm-modal-box">
+    <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
+      <span id="titulo-modal-turma">Nova Turma</span>
+      <button type="button" onclick="closeModal('adm-modal-turma')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+    </div>
+    <form onsubmit="handleAdmForm(event, 'salvarTurma')">
+      <input type="hidden" name="turma_linha_id" id="turma_linha_id">
+      <input type="hidden" name="turma_id" id="turma_id">
+
+      <label class="adm-label">Nome da Turma*</label>
+      <input type="text" name="turma_nome" id="turma_nome" class="adm-input" placeholder="Ex: Muay Thai - Adulto Noite" required>
+
+      <div class="form-grid">
+        <div>
+          <label class="adm-label">Modalidade*</label>
+          <select name="turma_mod" id="turma_mod" class="adm-input" required></select>
+        </div>
+        <div>
+          <label class="adm-label">Faixa Etária</label>
+          <select name="turma_idade" id="turma_idade" class="adm-input">
+            <option value="Adulto">Adulto</option>
+            <option value="Infantil">Infantil</option>
+            <option value="Misto">Misto</option>
+          </select>
+        </div>
+      </div>
+
+      <label class="adm-label">Local Vinculado*</label>
+      <select name="turma_local" id="turma_local" class="adm-input" required></select>
+
+      <label class="adm-label">Dias da Semana*</label>
+      <input type="text" name="turma_dias" id="turma_dias" class="adm-input" placeholder="Ex: Seg, Qua, Sex" required>
+
+      <div class="form-grid">
+        <div>
+          <label class="adm-label">Horário Início*</label>
+          <input type="time" name="turma_inicio" id="turma_inicio" class="adm-input" required>
+        </div>
+        <div>
+          <label class="adm-label">Horário Fim*</label>
+          <input type="time" name="turma_fim" id="turma_fim" class="adm-input" required>
+        </div>
+      </div>
+
+      <label class="adm-label">Status</label>
+      <select name="turma_status" id="turma_status" class="adm-input">
+        <option value="Ativa">Ativa</option>
+        <option value="Inativa">Inativa</option>
+      </select>
+
+      <div
+        style="display:flex; justify-content:flex-end; gap:10px; margin-top:25px; border-top: 1px solid #ddd; padding-top: 15px;">
+        <button type="button" onclick="closeModal('adm-modal-turma')" class="adm-btn adm-btn-outline">Cancelar</button>
+        <button type="submit" class="adm-btn">Salvar Turma</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div id="adm-modal-grad" class="adm-modal">
   <div class="adm-modal-box">
     <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
@@ -898,7 +1000,7 @@
 </div>
 
 <script>
-  var cache = { alunos: [], videos: [], locais: [], cursos: [], lib: [], prog: [], certificados: [], graduacoesObj: [], modalidadesGlobais: [], pacotes: [] };
+  var cache = { alunos: [], videos: [], locais: [], cursos: [], lib: [], prog: [], certificados: [], graduacoesObj: [], modalidadesGlobais: [], pacotes: [], turmas: [] };
     const userSessionLocal = JSON.parse(localStorage.getItem('userSession') || '{}');
     const editorLogin = userSessionLocal.LOGIN || 'Admin';
 
@@ -921,6 +1023,7 @@
         if(tabName === 'programas') carregarProg();
         if(tabName === 'config') carregarConfig();
         if(tabName === 'certificados') carregarCertificados();
+        if(tabName === 'turmas') carregarTurmas();
       } catch(e) { console.error("Erro navAdmin:", e); }
     }
 
@@ -950,6 +1053,8 @@
                 if(func==='salvarAluno') { closeModal('adm-modal-aluno'); carregarAlunos(); }
                 if(func==='salvarLocal') { closeModal('adm-modal-local'); carregarLocais(); }
                 if(func==='salvarPacote') { closeModal('adm-modal-pacote'); carregarPacotes(); }
+                if(func==='salvarTurma') { closeModal('adm-modal-turma'); carregarTurmas(); }
+
             } 
         }).withFailureHandler(err => { alert("Erro: "+err.message); btn.disabled=false; btn.innerHTML=original; })[func](formData); 
     }
@@ -1115,6 +1220,9 @@
             const s = document.getElementById('aluno_acad');
             s.innerHTML = '<option value="" disabled>Selecione...</option>';
             ac.forEach(x => { const o = new Option(x, x); if(x===d.academia) o.selected=true; s.add(o); });
+            
+            // Dispara a busca das turmas daquela academia e seta a turma do aluno
+            carregarTurmasSelectParaAlunos(d.academia, d.turma);
         }).getListaAcademias();
         
         google.script.run.withSuccessHandler(pac => { 
@@ -1408,9 +1516,94 @@
     function carregarConfig() { google.script.run.withSuccessHandler(cfg => { document.getElementById('cfg_icon').value = cfg.iconId || ''; document.getElementById('cfg_bg').value = cfg.bgId || ''; document.getElementById('cfg_color').value = cfg.primaryColor || '#FFD700'; document.getElementById('cfg_color_sec').value = cfg.secondaryColor || '#1e1e1e'; document.getElementById('cfg_color_text').value = cfg.textColor || '#ffffff'; document.getElementById('cfg_color_btn_text').value = cfg.btnTextColor || '#000000'; document.getElementById('cfg_color_bg').value = cfg.bgColor || '#121212'; document.getElementById('cfg_link_loja').value = cfg.linkLoja || ''; document.getElementById('cfg_link_insta').value = cfg.linkInstagram || ''; document.getElementById('cfg_link_yt').value = cfg.linkYouTube || ''; document.getElementById('cfg_link_cad').value = cfg.linkCadastro || ''; document.getElementById('cfg_nome_acad').value = cfg.nomeAcademia || ''; document.getElementById('cfg_pix_global').value = cfg.pixGlobal || 'Nao'; document.getElementById('cfg_pix_chave').value = cfg.pixChave || ''; document.getElementById('cfg_pix_nome').value = cfg.pixNome || ''; document.getElementById('cfg_pix_cidade').value = cfg.pixCidade || ''; }).getAppConfig(); }
 
     function aplicarTema(primaria, secundaria, texto, textoBotao, fundo) { document.getElementById('cfg_color').value = primaria; document.getElementById('cfg_color_sec').value = secundaria; document.getElementById('cfg_color_text').value = texto; document.getElementById('cfg_color_btn_text').value = textoBotao; document.getElementById('cfg_color_bg').value = fundo; }
-    
+    // ============================================================================
+    // 🏫 ENGINE DE TURMAS
+    // ============================================================================
+    function carregarTurmas() {
+        const tbody = document.getElementById('lista-turmas-body');
+        if(!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Sincronizando...</td></tr>';
+        
+        google.script.run.withSuccessHandler(lista => { 
+            cache.turmas = lista; 
+            renderTurmas(lista);
+        }).listarTurmasAdmin();
+    }
+
+    function renderTurmas(lista) {
+        const tbody = document.getElementById('lista-turmas-body');
+        tbody.innerHTML = "";
+        if(!lista || lista.length === 0) { 
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhuma turma cadastrada.</td></tr>'; 
+            return; 
+        }
+        
+        lista.forEach(t => { 
+            let statusClass = (t.status === 'Inativa') ? 'bg-red' : 'bg-green';
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${esc(t.nome)}</b><br><small style="color:#666;">🛡️ ${esc(t.modalidade)}</small></td>
+                <td><b style="color:#0056b3;">${esc(t.local)}</b><br><small>Idade: ${esc(t.faixaEtaria)}</small></td>
+                <td><span class="adm-badge bg-dark">${esc(t.dias)}</span><br><small>${esc(t.inicio)} às ${esc(t.fim)}</small></td>
+                <td><span class="adm-badge ${statusClass}">${esc(t.status)}</span></td>
+                <td><button class="adm-btn" onclick='prepEditTurma(${JSON.stringify(t)})'><span class="material-icons" style="font-size:14px">edit</span></button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function filtrarTurmas() {
+        const termo = document.getElementById('search-turmas').value.toLowerCase();
+        const filtrados = cache.turmas.filter(t => String(t.nome).toLowerCase().includes(termo) || String(t.modalidade).toLowerCase().includes(termo));
+        renderTurmas(filtrados);
+    }
+
+    function abrirModalTurma() {
+        document.getElementById('adm-modal-turma').style.display = 'flex';
+        document.querySelector('#adm-modal-turma form').reset();
+        document.getElementById('turma_linha_id').value = "";
+        document.getElementById('turma_id').value = "";
+        document.getElementById('titulo-modal-turma').innerText = "Nova Turma";
+        
+        // Puxa Locais e Modalidades (Aproveita as funções que já existem!)
+        popularSelectModalidadesPuras('turma_mod');
+        google.script.run.withSuccessHandler(ac => {
+            const s = document.getElementById('turma_local');
+            s.innerHTML = ac.map(x => `<option value="${x}">${x}</option>`).join('');
+        }).getListaAcademias();
+    }
+
+    function prepEditTurma(t) {
+        abrirModalTurma();
+        document.getElementById('titulo-modal-turma').innerText = "Editar Turma: " + t.nome;
+        
+        document.getElementById('turma_linha_id').value = t.idLinha;
+        document.getElementById('turma_id').value = t.idTurma;
+        document.getElementById('turma_nome').value = t.nome;
+        document.getElementById('turma_idade').value = t.faixaEtaria;
+        document.getElementById('turma_dias').value = t.dias;
+        document.getElementById('turma_inicio').value = t.inicio;
+        document.getElementById('turma_fim').value = t.fim;
+        document.getElementById('turma_status').value = t.status;
+
+        setTimeout(() => { document.getElementById('turma_mod').value = t.modalidade || "Geral"; }, 600);
+        setTimeout(() => { document.getElementById('turma_local').value = t.local || "Matriz"; }, 800);
+    }
     function closeModal(id) { const modal = document.getElementById(id); if(modal) modal.style.display = 'none'; }
     function esc(t) { if(!t) return ""; return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-    
+    // --- LÓGICA DE TURMAS NO CRM ADMIN ---
+    function carregarTurmasSelectParaAlunos(localSelecionado, turmaAtual) {
+        const selTurma = document.getElementById('aluno_turma');
+        selTurma.innerHTML = '<option value="">Carregando...</option>';
+        google.script.run.withSuccessHandler(turmas => {
+            selTurma.innerHTML = '<option value="">Sem Turma</option>';
+            const filtradas = turmas.filter(t => t.local === localSelecionado && t.status === 'Ativa');
+            filtradas.forEach(t => {
+                const opt = new Option(t.nome, t.nome);
+                if (t.nome === turmaAtual) opt.selected = true;
+                selTurma.add(opt);
+            });
+        }).listarTurmasAdmin();
+    }
     window.onload = () => carregarAlunos();
 </script>

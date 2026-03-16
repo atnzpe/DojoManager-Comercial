@@ -3,11 +3,11 @@
      INJEÇÃO DE CORES COM FALLBACK SEGURO
      ============================================================================ */
   :root {
-    --dynamic-bg: <?= typeof bgColor !== 'undefined' && bgColor ? bgColor : '#121212' ?> !important;
-    --dynamic-prim: <?= typeof primaryColor !== 'undefined' && primaryColor ? primaryColor : '#FFD700' ?> !important;
-    --dynamic-sec: <?= typeof secondaryColor !== 'undefined' && secondaryColor ? secondaryColor : '#1e1e1e' ?> !important;
-    --dynamic-text: <?= typeof textColor !== 'undefined' && textColor ? textColor : '#ffffff' ?> !important;
-    --dynamic-btn-text: <?= typeof btnTextColor !== 'undefined' && btnTextColor ? btnTextColor : '#000000' ?> !important;
+    --dynamic-bg: <?=typeof bgColor !=='undefined'&& bgColor ? bgColor: '#121212'?> !important;
+    --dynamic-prim: <?=typeof primaryColor !=='undefined'&& primaryColor ? primaryColor: '#FFD700'?> !important;
+    --dynamic-sec: <?=typeof secondaryColor !=='undefined'&& secondaryColor ? secondaryColor: '#1e1e1e'?> !important;
+    --dynamic-text: <?=typeof textColor !=='undefined'&& textColor ? textColor: '#ffffff'?> !important;
+    --dynamic-btn-text: <?=typeof btnTextColor !=='undefined'&& btnTextColor ? btnTextColor: '#000000'?> !important;
   }
 
   /* --- ESTILOS GERAIS DO MÓDULO --- */
@@ -93,7 +93,9 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
   }
 
-  .full-col { grid-column: 1 / -1; }
+  .full-col {
+    grid-column: 1 / -1;
+  }
 
   .inst-input {
     width: 100%;
@@ -125,6 +127,7 @@
     opacity: 0.7;
     margin-bottom: 5px;
     display: block;
+    text-transform: uppercase;
   }
 
   /* LISTA DE ALUNOS (CHAMADA MANUAL) */
@@ -148,8 +151,14 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   }
 
-  .student-card.checked .st-nome { color: var(--dynamic-btn-text) !important; }
-  .student-card.checked .st-desc { color: var(--dynamic-btn-text) !important; opacity: 0.8 !important; }
+  .student-card.checked .st-nome {
+    color: var(--dynamic-btn-text) !important;
+  }
+
+  .student-card.checked .st-desc {
+    color: var(--dynamic-btn-text) !important;
+    opacity: 0.8 !important;
+  }
 
   .st-avatar {
     width: 45px;
@@ -157,7 +166,7 @@
     border-radius: 50%;
     object-fit: cover;
     background: #000;
-    border: 2px solid rgba(255,255,255,0.2);
+    border: 2px solid rgba(255, 255, 255, 0.2);
   }
 
   /* HISTÓRICO (CARDS) */
@@ -170,13 +179,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
     transition: 0.2s;
   }
 
-  .hist-item:hover { border-color: var(--dynamic-prim); transform: translateY(-2px); }
+  .hist-item:hover {
+    border-color: var(--dynamic-prim);
+    transform: translateY(-2px);
+  }
 
-  .hist-info { flex: 1; }
+  .hist-info {
+    flex: 1;
+  }
 
   .hist-date {
     color: var(--dynamic-prim);
@@ -200,7 +214,7 @@
   .btn-pdf-mini {
     background: rgba(0, 0, 0, 0.4);
     color: var(--dynamic-text);
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 10px 15px;
     border-radius: 8px;
     cursor: pointer;
@@ -231,14 +245,18 @@
     text-transform: uppercase;
     font-size: 12px;
     transition: 0.2s;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   }
-  .adm-btn:hover { filter: brightness(1.15); transform: translateY(-2px); }
+
+  .adm-btn:hover {
+    filter: brightness(1.15);
+    transform: translateY(-2px);
+  }
 
   .fab-save {
     position: fixed;
     bottom: 30px;
-    left: 30px; /* Posicionado na esquerda */
+    left: 30px;
     background: var(--dynamic-prim);
     color: var(--dynamic-btn-text);
     border: none;
@@ -254,12 +272,19 @@
     transition: 0.2s;
     font-size: 1rem;
   }
-  .fab-save:hover { filter: brightness(1.2); transform: scale(1.05); }
 
-  /* --- MODAL RELATÓRIO A4 RESPONSIVO (MANTIDO INTACTO P/ IMPRESSÃO) --- */
+  .fab-save:hover {
+    filter: brightness(1.2);
+    transform: scale(1.05);
+  }
+
+  /* --- MODAL RELATÓRIO A4 RESPONSIVO --- */
   #modal-relatorio {
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0, 0, 0, 0.95);
     z-index: 100000;
     display: none;
@@ -274,7 +299,9 @@
 
   .print-controls {
     position: fixed;
-    top: 0; left: 0; width: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
     background: var(--dynamic-sec);
     padding: 15px;
     display: flex;
@@ -299,33 +326,123 @@
     margin: 0 auto;
   }
 
-  .rep-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-  .rep-logo { height: 80px; object-fit: contain; display: block; margin: 0 auto 10px auto; }
-  .rep-title { font-size: 18pt; font-weight: bold; margin: 10px 0; text-transform: uppercase; }
-  .rep-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; font-size: 11pt; }
-  @media (max-width: 600px) { .rep-grid { grid-template-columns: 1fr; } }
-  .rep-label { font-weight: bold; }
-  .rep-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10pt; }
-  .rep-table th { border: 1px solid #000; padding: 8px; background: #eee; text-align: left; }
-  .rep-table td { border: 1px solid #000; padding: 8px; }
-  .rep-footer { margin-top: 40px; text-align: center; font-size: 9pt; padding-top: 20px; border-top: 1px solid #ccc; }
+  .rep-header {
+    text-align: center;
+    border-bottom: 2px solid #000;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
 
-  /* MODO IMPRESSÃO (PERFEITO) */
-  @media print {
-    body * { visibility: hidden; }
-    #modal-relatorio, #conteudo-relatorio, #conteudo-relatorio * { visibility: visible; }
-    #modal-relatorio {
-      position: absolute; left: 0; top: 0; background: white;
-      padding: 0; margin: 0; display: block; overflow: visible; width: 100%; height: auto;
-    }
-    .print-controls { display: none !important; }
-    .paper-a4 {
-      width: 100%; max-width: none; margin: 0; padding: 10mm;
-      box-shadow: none; border: none; min-height: auto;
+  .rep-logo {
+    height: 80px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto 10px auto;
+  }
+
+  .rep-title {
+    font-size: 18pt;
+    font-weight: bold;
+    margin: 10px 0;
+    text-transform: uppercase;
+  }
+
+  .rep-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 11pt;
+  }
+
+  @media (max-width: 600px) {
+    .rep-grid {
+      grid-template-columns: 1fr;
     }
   }
 
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .rep-label {
+    font-weight: bold;
+  }
+
+  .rep-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 10pt;
+  }
+
+  .rep-table th {
+    border: 1px solid #000;
+    padding: 8px;
+    background: #eee;
+    text-align: left;
+  }
+
+  .rep-table td {
+    border: 1px solid #000;
+    padding: 8px;
+  }
+
+  .rep-footer {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 9pt;
+    padding-top: 20px;
+    border-top: 1px solid #ccc;
+  }
+
+  /* MODO IMPRESSÃO */
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+
+    #modal-relatorio,
+    #conteudo-relatorio,
+    #conteudo-relatorio * {
+      visibility: visible;
+    }
+
+    #modal-relatorio {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background: white;
+      padding: 0;
+      margin: 0;
+      display: block;
+      overflow: visible;
+      width: 100%;
+      height: auto;
+    }
+
+    .print-controls {
+      display: none !important;
+    }
+
+    .paper-a4 {
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      padding: 10mm;
+      box-shadow: none;
+      border: none;
+      min-height: auto;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 </style>
 
 <div id="instrutor-view" class="instrutor-view">
@@ -333,7 +450,7 @@
     <button class="btn-back-inst" onclick="fecharInstrutor()">
       <span class="material-icons" style="font-size: 28px;">arrow_back</span>
     </button>
-    <h2 style="margin:0; font-size:1.6rem; font-weight:900; color:var(--dynamic-text);">Gestão de Turmas</h2>
+    <h2 style="margin:0; font-size:1.6rem; font-weight:900; color:var(--dynamic-text);">Gestão de Aula</h2>
   </div>
 
   <div class="inst-tabs">
@@ -343,26 +460,33 @@
 
   <div id="tab-chamada">
     <div class="call-grid">
-      <div><label class="adm-label">DATA DO TREINO</label><input type="date" id="c-data" class="inst-input"></div>
-      <div><label class="adm-label">HORA INÍCIO</label><input type="time" id="c-hora" class="inst-input" value="19:00"></div>
       <div class="full-col">
-        <label class="adm-label">MINISTRANTE</label><select id="c-ministrante" class="inst-input"><option value="" disabled selected>Carregando...</option></select>
+        <label class="adm-label" style="color:var(--dynamic-prim)">SELECIONAR TURMA (OBRIGATÓRIO)</label>
+        <select id="c-turma" class="inst-input" style="border:2px solid var(--dynamic-prim); font-weight:bold;">
+          <option value="" disabled selected>Carregando turmas...</option>
+        </select>
       </div>
+
+      <div><label class="adm-label">DATA DO TREINO</label><input type="date" id="c-data" class="inst-input"></div>
+      <div><label class="adm-label">HORA INÍCIO</label><input type="time" id="c-hora" class="inst-input" value="19:00">
+      </div>
+
       <div class="full-col">
-        <label class="adm-label">LOCAL DA AULA</label><select id="c-local" class="inst-input" onchange="checkOutro(this)"><option value="" disabled selected>Carregando...</option></select>
-        <input type="text" id="c-local-outro" class="inst-input" style="display:none; margin-top:10px;" placeholder="Digite o nome do local externo...">
+        <label class="adm-label">MINISTRANTE</label>
+        <select id="c-ministrante" class="inst-input"><option value="" disabled selected>Carregando...</option></select>
       </div>
     </div>
 
     <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
       <input type="text" id="c-busca" class="inst-input" placeholder="🔍 Buscar aluno por nome..." onkeyup="filtrarListaChamada()">
       <label style="display:flex; align-items:center; gap:8px; color:var(--dynamic-text); opacity:0.8; font-size:0.9rem; font-weight:bold; cursor:pointer;">
-        <input type="checkbox" id="c-todos" onchange="filtrarListaChamada()" style="width:18px; height:18px; cursor:pointer;"> Mostrar alunos de outras Unidades / Visitantes
+        <input type="checkbox" id="c-todos" onchange="filtrarListaChamada()" style="width:18px; height:18px; cursor:pointer;"> Mostrar alunos de outras Turmas / Visitantes
       </label>
     </div>
 
     <div id="lista-chamada">
-      <p style="text-align:center; color:var(--dynamic-text); opacity:0.5; margin-top:30px; font-weight:bold;">Aguardando carregamento de alunos...</p>
+      <p style="text-align:center; color:var(--dynamic-text); opacity:0.5; margin-top:30px; font-weight:bold;">
+        Aguardando carregamento de alunos...</p>
     </div>
 
     <button class="fab-save" onclick="salvarChamada()">
@@ -375,8 +499,8 @@
       <div><label class="adm-label">DATA INICIAL</label><input type="date" id="h-inicio" class="inst-input"></div>
       <div><label class="adm-label">DATA FINAL</label><input type="date" id="h-fim" class="inst-input"></div>
       <div class="full-col">
-        <label class="adm-label">FILTRAR POR LOCAL</label>
-        <select id="h-local" class="inst-input"><option value="">Todos os Locais</option></select>
+        <label class="adm-label">FILTRAR POR TURMA</label>
+        <select id="h-local" class="inst-input"><option value="">Todas as Turmas</option></select>
       </div>
       <div class="full-col">
         <button class="adm-btn" style="width:100%" onclick="carregarHistoricoFiltrado()">BUSCAR HISTÓRICO</button>
@@ -390,7 +514,6 @@
   <div class="print-controls">
     <button class="adm-btn" onclick="document.getElementById('modal-relatorio').style.display='none'" style="background:#444 !important; color:#fff !important;">FECHAR</button>
     <button class="adm-btn" onclick="window.print()"><span class="material-icons" style="font-size:16px; vertical-align:middle;">print</span> IMPRIMIR / PDF</button>
-    <button class="adm-btn" onclick="compartilharRelatorio()" id="btn-share" style="display:none; background:#007bff !important; color:#fff !important;">COMPARTILHAR</button>
   </div>
 
   <div class="paper-a4" id="conteudo-relatorio">
@@ -402,8 +525,9 @@
     <div class="rep-grid">
       <div><span class="rep-label">Data:</span> <span id="r-data"></span></div>
       <div><span class="rep-label">Hora:</span> <span id="r-hora"></span></div>
-      <div style="grid-column:1/-1"><span class="rep-label">Local:</span> <span id="r-local"></span></div>
-      <div style="grid-column:1/-1"><span class="rep-label">Instrutor/Responsável:</span> <span id="r-inst"></span></div>
+      <div style="grid-column:1/-1"><span class="rep-label">Turma/Local:</span> <span id="r-local"></span></div>
+      <div style="grid-column:1/-1"><span class="rep-label">Instrutor/Responsável:</span> <span id="r-inst"></span>
+      </div>
       <div><span class="rep-label">ID Chamada:</span> <span id="r-id" style="font-family:monospace"></span></div>
     </div>
     <div style="margin-bottom:10px; font-weight:bold; border-bottom:1px solid #000;">Alunos Presentes</div>
@@ -419,16 +543,17 @@
     </table>
     <div class="rep-footer">
       Documento gerado digitalmente em <span id="r-gerado"></span>.<br>
-      Sistema de Gestão Desportiva - DojoManager.
+      Sistema de Gestão Desportiva - DojoManager SaaS.
     </div>
   </div>
 </div>
 
 <script>
-  console.log("✅ [SAFE MODE] Instrutor.html carregado (White-Label)");
+  console.log("✅ [SAFE MODE] Instrutor.html (Módulo Turmas Integrado)");
 
   let userInst = {};
   let dbAlunos = [];
+  let dbTurmas = [];
   let selecao = new Set();
 
   function abrirTelaChamada(user) {
@@ -446,14 +571,13 @@
     
     const hoje = new Date();
     const passado = new Date();
-    passado.setDate(hoje.getDate() - 30); // Busca de histórico de 30 dias (padrão SaaS)
+    passado.setDate(hoje.getDate() - 30); 
     try { 
         document.getElementById('c-data').value = hoje.toISOString().split('T')[0];
         document.getElementById('h-inicio').value = passado.toISOString().split('T')[0];
         document.getElementById('h-fim').value = hoje.toISOString().split('T')[0];
     } catch(e){}
     
-    // Puxa a logo do header para o PDF
     try {
         const logo = document.getElementById("header-img").src;
         if(logo && logo.indexOf('ui-avatars') === -1) {
@@ -461,7 +585,10 @@
         }
     } catch(e){}
     
+    // Inicia a busca combinada: Alunos + Turmas do Instrutor
     google.script.run.withSuccessHandler(initChamada).getDadosParaChamada();
+    // Chamada à API que listará as turmas (já criada no Código.gs no seu último passo)
+    google.script.run.withSuccessHandler(carregarTurmasSelect).listarTurmasAdmin();
   }
 
   function fecharInstrutor() {
@@ -471,7 +598,7 @@
   }
 
   function navInst(tab, el) {
-    document.querySelectorAll('.inst-tab').forEach(e => e.classList.remove('active'));
+    document.querySelectorAll('.inst-tab').forEach(function(e) { e.classList.remove('active'); });
     if(el) el.classList.add('active');
     document.getElementById('tab-chamada').style.display = 'none';
     document.getElementById('tab-historico').style.display = 'none';
@@ -479,26 +606,34 @@
     if(tab === 'historico') carregarHistoricoFiltrado();
   }
 
+  function carregarTurmasSelect(turmasData) {
+      dbTurmas = turmasData || [];
+      const selTurma = document.getElementById('c-turma');
+      const selFiltroHist = document.getElementById('h-local');
+      
+      if(selTurma && selFiltroHist) {
+          selTurma.innerHTML = '<option value="" disabled selected>Selecione a Turma que irá treinar...</option>';
+          selFiltroHist.innerHTML = '<option value="">Todas as Turmas e Locais</option>';
+          
+          dbTurmas.forEach(function(t) {
+              if(t.status === "Ativa") {
+                  const nomeFormatado = t.nome + " (" + t.modalidade + " - " + t.faixaEtaria + ")";
+                  selTurma.add(new Option(nomeFormatado, t.nome));
+                  selFiltroHist.add(new Option(nomeFormatado, t.nome));
+              }
+          });
+      }
+  }
+
   function initChamada(res) {
     if(!res) return;
     dbAlunos = res.alunos || [];
-    const selC = document.getElementById('c-local');
-    const selH = document.getElementById('h-local');
     const selInst = document.getElementById('c-ministrante');
     
-    if(selC && res.locais) {
-        selC.innerHTML = '<option value="" disabled selected>Selecione a Unidade...</option>';
-        res.locais.forEach(l => { selC.add(new Option(l, l, false, userInst.academia === l)); });
-        selC.add(new Option("📍 Outro Local / Evento", "Outros"));
-    }
-    if(selH && res.locais) {
-        selH.innerHTML = '<option value="">Todos os Locais</option>';
-        res.locais.forEach(l => selH.add(new Option(l, l)));
-    }
     if(selInst) {
         selInst.innerHTML = '';
         if(res.instrutores && res.instrutores.length > 0) {
-            res.instrutores.forEach(i => selInst.add(new Option(i, i, false, i === userInst.nomeCompleto)));
+            res.instrutores.forEach(function(i) { selInst.add(new Option(i, i, false, i === userInst.nomeCompleto)); });
         } else {
             selInst.add(new Option(userInst.nomeCompleto, userInst.nomeCompleto));
         }
@@ -506,20 +641,18 @@
     filtrarListaChamada();
   }
 
-  function checkOutro(sel) { 
-      const input = document.getElementById('c-local-outro'); 
-      if(input) input.style.display = (sel.value === 'Outros') ? 'block' : 'none'; 
-  }
-
   function filtrarListaChamada() {
     const termo = document.getElementById('c-busca').value.toLowerCase();
     const global = document.getElementById('c-todos').checked;
+    
+    // Agora o filtro de academia local passa a ser flexível, pois o aluno pode ou não estar na turma,
+    // mas a base de exibição continua sendo os ativos do Dojo.
     const localInst = userInst.academia || "";
     const container = document.getElementById('lista-chamada');
     if(!container) return;
     container.innerHTML = "";
     
-    const filtrados = dbAlunos.filter(a => {
+    const filtrados = dbAlunos.filter(function(a) {
         const matchNome = a.nome.toLowerCase().includes(termo);
         const matchLocal = global ? true : (a.academia === localInst);
         return matchNome && matchLocal;
@@ -530,20 +663,19 @@
         return; 
     }
     
-    filtrados.forEach(a => {
+    filtrados.forEach(function(a) {
         const div = document.createElement('div');
         const isSel = selecao.has(a.login);
-        div.className = `student-card ${isSel ? 'checked' : ''}`;
-        div.onclick = () => toggleSel(a.login, div);
+        div.className = "student-card" + (isSel ? " checked" : "");
+        div.onclick = function() { toggleSel(a.login, div); };
         
-        div.innerHTML = `
-          <img src="${a.foto}" class="st-avatar" onerror="this.src='https://ui-avatars.com/api/?name=${a.login}'">
-          <div style="flex:1">
-            <div class="st-nome" style="font-weight:900; color:var(--dynamic-text)">${a.nome}</div>
-            <div class="st-desc" style="font-size:0.8rem; color:var(--dynamic-text); opacity:0.6">${a.graduacao} • ${a.academia}</div>
-          </div>
-          <span class="material-icons" style="color:${isSel?'var(--dynamic-btn-text)':'rgba(255,255,255,0.2)'}">${isSel ? 'check_circle' : 'radio_button_unchecked'}</span>
-        `;
+        // Uso de concatenação (+) para evitar o erro Unexpected token 'class' do Apps Script!
+        div.innerHTML = "<img src='" + a.foto + "' class='st-avatar' onerror=\"this.src='https://ui-avatars.com/api/?name=" + a.login + "'\">" +
+                        "<div style='flex:1'>" +
+                        "<div class='st-nome' style='font-weight:900; color:var(--dynamic-text)'>" + a.nome + "</div>" +
+                        "<div class='st-desc' style='font-size:0.8rem; color:var(--dynamic-text); opacity:0.6'>" + a.graduacao + " • " + a.academia + "</div>" +
+                        "</div>" +
+                        "<span class='material-icons' style='color:" + (isSel ? 'var(--dynamic-btn-text)' : 'rgba(255,255,255,0.2)') + "'>" + (isSel ? 'check_circle' : 'radio_button_unchecked') + "</span>";
         container.appendChild(div);
     });
   }
@@ -571,25 +703,27 @@
 
   function salvarChamada() {
     if(selecao.size === 0) { alert("Nenhum aluno foi selecionado para receber presença!"); return; }
-    let local = document.getElementById('c-local').value;
-    if(local === "Outros") local = document.getElementById('c-local-outro').value;
-    if(!local) { alert("Por favor, selecione ou informe o local da aula."); return; }
+    
+    // Mudança: Agora exige a Turma em vez de só o local
+    const turmaSelecionada = document.getElementById('c-turma').value;
+    if(!turmaSelecionada) { alert("Por favor, SELECIONE UMA TURMA no menu superior para registrar a aula."); return; }
     
     const btn = document.querySelector('.fab-save'); 
     const txt = btn.innerHTML; 
     btn.innerHTML = "<span class='material-icons spin'>sync</span> PROCESSANDO..."; 
     btn.disabled = true;
     
-    const listaFinal = dbAlunos.filter(a => selecao.has(a.login));
+    const listaFinal = dbAlunos.filter(function(a) { return selecao.has(a.login); });
+    
     const payload = { 
         instrutor: document.getElementById('c-ministrante').value, 
-        local: local, 
+        local: turmaSelecionada, // Salvamos a Turma no lugar do Local para o Histórico ser mais rico
         dataTreino: document.getElementById('c-data').value, 
         horaTreino: document.getElementById('c-hora').value, 
         alunos: listaFinal 
     };
     
-    google.script.run.withSuccessHandler(res => {
+    google.script.run.withSuccessHandler(function(res) {
         alert(res.message); 
         selecao.clear(); 
         atualizarContador(); 
@@ -611,32 +745,32 @@
         instrutor: "" 
     };
     
-    google.script.run.withSuccessHandler(lista => {
+    google.script.run.withSuccessHandler(function(lista) {
         div.innerHTML = "";
         if(lista.length === 0) { div.innerHTML = "<p style='text-align:center; color:var(--dynamic-text); opacity:0.5; font-weight:bold; margin-top:20px;'>Nenhum registro encontrado no período.</p>"; return; }
         
-        lista.forEach(h => {
-            div.innerHTML += `
-              <div class="hist-item">
-                <div class="hist-info">
-                  <div class="hist-date">${h.data} - ${h.hora}</div>
-                  <div class="hist-local">${h.local}</div>
-                  <div class="hist-detail">${h.instrutor} • <b>${h.qtd} Alunos</b></div>
-                </div>
-                <div class="btn-pdf-mini" onclick="gerarRelatorioPDF('${h.id}')">
-                  <span class="material-icons" style="font-size:24px;">picture_as_pdf</span> PDF
-                </div>
-              </div>`;
+        lista.forEach(function(h) {
+            // Concatenação segura para evitar o bug do Google Apps Script
+            div.innerHTML += "<div class='hist-item'>" +
+                             "<div class='hist-info'>" +
+                             "<div class='hist-date'>" + h.data + " - " + h.hora + "</div>" +
+                             "<div class='hist-local'>" + h.local + "</div>" +
+                             "<div class='hist-detail'>" + h.instrutor + " • <b>" + h.qtd + " Alunos</b></div>" +
+                             "</div>" +
+                             "<div class='btn-pdf-mini' onclick=\"gerarRelatorioPDF('" + h.id + "')\">" +
+                             "<span class='material-icons' style='font-size:24px;'>picture_as_pdf</span> PDF" +
+                             "</div>" +
+                             "</div>";
         });
     }).getHistoricoFiltrado(filtros);
   }
 
   function gerarRelatorioPDF(idChamada) {
-    google.script.run.withSuccessHandler(data => {
+    google.script.run.withSuccessHandler(function(data) {
         if(!data) { alert("Falha ao carregar dados do banco."); return; }
         document.getElementById('r-data').innerText = data.data; 
         document.getElementById('r-hora').innerText = data.hora; 
-        document.getElementById('r-local').innerText = data.local; 
+        document.getElementById('r-local').innerText = data.local; // Aqui agora aparecerá o nome da Turma
         document.getElementById('r-inst').innerText = data.instrutor; 
         document.getElementById('r-id').innerText = data.id; 
         document.getElementById('r-gerado').innerText = new Date().toLocaleString();
@@ -645,25 +779,12 @@
         if(tbody) { 
             tbody.innerHTML = ""; 
             const nomes = data.listaNomes ? data.listaNomes.split(",") : []; 
-            nomes.forEach((nome, idx) => { 
-                tbody.innerHTML += `<tr><td>${idx+1}</td><td>${nome.trim()}</td><td></td></tr>`; 
+            nomes.forEach(function(nome, idx) { 
+                tbody.innerHTML += "<tr><td>" + (idx+1) + "</td><td>" + nome.trim() + "</td><td></td></tr>"; 
             }); 
         }
         
-        if(navigator.share) document.getElementById('btn-share').style.display = 'inline-flex';
         document.getElementById('modal-relatorio').style.display = 'flex';
     }).getDetalhesChamada(idChamada);
-  }
-
-  function compartilharRelatorio() {
-      if(navigator.share) {
-          navigator.share({
-              title: 'Relatório Oficial - DojoManager',
-              text: 'Relatório de Treino do dia ' + document.getElementById('r-data').innerText,
-              url: window.location.href
-          }).catch(console.error);
-      } else {
-          alert("A função de compartilhar não é suportada neste navegador. Gere o PDF ou Print a tela.");
-      }
   }
 </script>

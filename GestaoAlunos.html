@@ -83,7 +83,7 @@
     box-sizing: border-box;
   }
 
-  /* TABELA UX/UI (ESTILO ADM.HTML) */
+  /* TABELA UX/UI */
   .gestao-table {
     width: 100%;
     border-collapse: collapse;
@@ -224,9 +224,6 @@
         <button class="btn-yellow" onclick="GestaoAlunosApp.inicializar()">
           <span class="material-icons">refresh</span> Atualizar
         </button>
-        <button class="btn-yellow" onclick="GestaoAlunosApp.abrirModalNovo()">
-          <span class="material-icons">add</span> Novo Aluno
-        </button>
       </div>
     </div>
 
@@ -240,7 +237,7 @@
           <tr>
             <th>Aluno / Login</th>
             <th>Fisiologia / Stats</th>
-            <th>Graduação / Modalidade</th>
+            <th>Turma / Graduação</th>
             <th>Acesso / Aulas</th>
             <th>Ação</th>
           </tr>
@@ -260,26 +257,33 @@
     </div>
     <form id="form-gestao-aluno" onsubmit="event.preventDefault(); GestaoAlunosApp.salvarEdicao();">
       <input type="hidden" id="ga-id">
-      <div class="form-grid">
+      <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap:15px;">
         <div>
-          <label class="form-label">NOME COMPLETO*</label><input type="text" id="ga-nome" class="gestao-input" required>
-          <label class="form-label">CPF</label><input type="text" id="ga-cpf" class="gestao-input">
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <div><label class="form-label">PESO (KG)</label><input type="number" step="0.1" id="ga-peso" class="gestao-input">
+          <label class="form-label" style="font-size:10px; font-weight:bold;">NOME COMPLETO*</label><input type="text" id="ga-nome" class="gestao-input" required>
+          <label class="form-label" style="font-size:10px; font-weight:bold; margin-top:10px; display:block;">CPF</label><input type="text" id="ga-cpf" class="gestao-input">
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
+            <div><label class="form-label" style="font-size:10px; font-weight:bold;">PESO (KG)</label><input type="number" step="0.1" id="ga-peso" class="gestao-input">
             </div>
-            <div><label class="form-label">ALTURA (M)</label><input type="number" step="0.01" id="ga-altura" class="gestao-input">
+            <div><label class="form-label" style="font-size:10px; font-weight:bold;">ALTURA (M)</label><input type="number" step="0.01" id="ga-altura" class="gestao-input">
             </div>
           </div>
-          <label class="form-label">DATA NASCIMENTO</label><input type="date" id="ga-nasc" class="gestao-input">
+          <label class="form-label" style="font-size:10px; font-weight:bold; margin-top:10px; display:block;">DATA NASCIMENTO</label><input type="date" id="ga-nasc" class="gestao-input">
         </div>
         <div>
-          <label class="form-label">LOGIN*</label><input type="text" id="ga-login" class="gestao-input" required>
-          <label class="form-label">SENHA*</label><input type="text" id="ga-senha" class="gestao-input" required>
-          <label class="form-label">ACADEMIA</label><select id="ga-acad" class="gestao-input"></select>
-          <label class="form-label">GRADUAÇÃO</label><select id="ga-grad" class="gestao-input"></select>
+          <label class="form-label" style="font-size:10px; font-weight:bold;">LOGIN*</label><input type="text" id="ga-login" class="gestao-input" required>
+          <label class="form-label" style="font-size:10px; font-weight:bold; margin-top:10px; display:block;">SENHA*</label><input type="text" id="ga-senha" class="gestao-input" required>
+
+          <label class="form-label" style="font-size:10px; font-weight:bold; margin-top:10px; display:block;">ACADEMIA</label>
+          <select id="ga-acad" class="gestao-input" onchange="GestaoAlunosApp.carregarTurmasAluno()"></select>
+
+          <label class="form-label" style="font-size:10px; font-weight:bold; margin-top:10px; display:block; color:#2196f3;">TURMA VINCULADA</label>
+          <select id="ga-turma" class="gestao-input" style="border:1px solid #2196f3;"><option value="">Sem Turma</option></select>
+
+          <label class="form-label" style="font-size:10px; font-weight:bold; margin-top:10px; display:block;">GRADUAÇÃO</label>
+          <select id="ga-grad" class="gestao-input"></select>
         </div>
       </div>
-      <button type="submit" class="btn-yellow" style="width:100%; padding:15px;"><span class="material-icons">save</span> SALVAR DADOS</button>
+      <button type="submit" class="btn-yellow" style="width:100%; padding:15px; margin-top:20px;"><span class="material-icons">save</span> SALVAR DADOS</button>
     </form>
   </div>
 </div>
@@ -289,18 +293,18 @@
       cacheLista: [],
       cacheAcademias: [],
       cacheGraduacoes: [],
+      cacheTodasTurmas: [], // Guarda as turmas puxadas do servidor
 
       inicializar: function() {
           const tbody = document.getElementById('tabela-alunos-body');
           tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;"><span class="material-icons spin" style="font-size:40px; color:var(--dynamic-prim)">sync</span></td></tr>';
 
-          google.script.run.withSuccessHandler(academias => {
-              this.cacheAcademias = academias;
-              google.script.run.withSuccessHandler(graduacoes => {
-                  this.cacheGraduacoes = graduacoes;
-                  this.carregarDadosServidor();
-              }).getListaGraduacoes();
-          }).getListaAcademias();
+          // Carrega dependências em paralelo
+          google.script.run.withSuccessHandler(ac => { this.cacheAcademias = ac; }).getListaAcademias();
+          google.script.run.withSuccessHandler(gr => { this.cacheGraduacoes = gr; }).getListaGraduacoes();
+          google.script.run.withSuccessHandler(tr => { this.cacheTodasTurmas = tr || []; }).listarTurmasAdmin();
+
+          this.carregarDadosServidor();
       },
 
       carregarDadosServidor: function() {
@@ -318,12 +322,15 @@
             
             return `
                 <tr>
-                    <td><b>${a.nome || '---'}</b><br><small>Login: ${a.login}</small></td>
+                    <td><b style="font-size:14px">${a.nome || '---'}</b><br><small style="color:#666;">@${a.login}</small></td>
                     <td>
                         <span class="fio-label">Idade: ${a.idadeExata || '--'}</span>
                         <span class="fio-stat">${a.peso || '--'}kg | ${a.altura || '--'}m</span>
                     </td>
-                    <td><b>${a.graduacao}</b><br><small>${a.modalidade}</small></td>
+                    <td>
+                        <span style="color:#2196f3; font-weight:bold; font-size:11px;">🎓 ${a.turma}</span><br>
+                        <b>${a.graduacao}</b><br><small>${a.modalidade}</small>
+                    </td>
                     <td>
                         <span class="badge ${statusClass}">${a.status}</span><br>
                         <span style="font-size:11px; color:#0056b3; font-weight:900;">Aulas: ${a.totalAulas}</span><br>
@@ -331,7 +338,7 @@
                     </td>
                     <td>
                         <button class="btn-yellow" style="padding:8px;" onclick="GestaoAlunosApp.prepararEdicao(${a.id})">
-                            <span class="material-icons">edit</span>
+                            <span class="material-icons" style="font-size:16px">edit</span>
                         </button>
                     </td>
                 </tr>`;
@@ -341,7 +348,7 @@
       filtrar: function() {
           const termo = document.getElementById('filtro-alunos').value.toLowerCase();
           const filtrados = this.cacheLista.filter(a => 
-              String(a.nome).toLowerCase().includes(termo) || String(a.login).toLowerCase().includes(termo)
+              String(a.nome).toLowerCase().includes(termo) || String(a.login).toLowerCase().includes(termo) || String(a.turma).toLowerCase().includes(termo)
           );
           this.renderizarTabela(filtrados);
       },
@@ -355,11 +362,13 @@
           document.getElementById('ga-nome').value = a.nome;
           document.getElementById('ga-login').value = a.login;
           document.getElementById('ga-senha').value = a.senha;
-          document.getElementById('ga-peso').value = a.peso;
-          document.getElementById('ga-altura').value = a.altura;
+          document.getElementById('ga-peso').value = String(a.peso).replace(',','.');
+          document.getElementById('ga-altura').value = String(a.altura).replace(',','.');
           document.getElementById('ga-nasc').value = dF(a.nasc);
 
           this.popularSelects(a.academia, a.graduacao);
+          this.carregarTurmasAluno(a.turma); // Atualiza a cascata de turma
+          
           document.getElementById('modal-editar-aluno').style.display = 'flex';
       },
 
@@ -368,6 +377,21 @@
           const sG = document.getElementById('ga-grad');
           sA.innerHTML = this.cacheAcademias.map(x => `<option value="${x}" ${x===acad?'selected':''}>${x}</option>`).join('');
           sG.innerHTML = this.cacheGraduacoes.map(x => `<option value="${x}" ${x===grad?'selected':''}>${x}</option>`).join('');
+      },
+
+      // 🚀 CASCATA LOCAL -> TURMA (Gestão do Instrutor)
+      carregarTurmasAluno: function(turmaAtual = "") {
+          const sAcad = document.getElementById('ga-acad').value;
+          const sTurma = document.getElementById('ga-turma');
+          sTurma.innerHTML = '<option value="">Sem Turma</option>';
+          
+          if(this.cacheTodasTurmas.length > 0) {
+              const turmasDoLocal = this.cacheTodasTurmas.filter(t => t.local === sAcad && t.status === "Ativa");
+              turmasDoLocal.forEach(t => {
+                  const isSelected = (t.nome === turmaAtual) ? "selected" : "";
+                  sTurma.innerHTML += `<option value="${t.nome}" ${isSelected}>${t.nome}</option>`;
+              });
+          }
       },
 
       fecharModal: function() { document.getElementById('modal-editar-aluno').style.display = 'none'; },
@@ -384,6 +408,7 @@
               aluno_peso: document.getElementById('ga-peso').value,
               aluno_altura: document.getElementById('ga-altura').value,
               aluno_acad: document.getElementById('ga-acad').value,
+              aluno_turma: document.getElementById('ga-turma').value, // <-- SALVANDO TURMA
               aluno_grad: document.getElementById('ga-grad').value
           };
 
