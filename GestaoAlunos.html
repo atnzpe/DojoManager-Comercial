@@ -260,8 +260,18 @@
       </div>
     </div>
 
-    <div class="gestao-toolbar">
-      <input type="text" id="filtro-alunos" class="gestao-input" placeholder="🔍 Buscar por nome, login ou CPF..." onkeyup="GestaoAlunosApp.filtrar()">
+    <div class="gestao-toolbar"
+      style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+      <input type="text" id="filtro-alunos" class="gestao-input" placeholder="🔍 Nome, Login ou CPF..." onkeyup="GestaoAlunosApp.filtrar()">
+      <select id="filter-acad-instrutor" class="gestao-input" onchange="GestaoAlunosApp.atualizarFiltroTurmas(); GestaoAlunosApp.filtrar();">
+         <option value="">Todas as Academias</option>
+      </select>
+      <select id="filter-mod-instrutor" class="gestao-input" onchange="GestaoAlunosApp.filtrar()">
+         <option value="">Todas as Modalidades</option>
+      </select>
+      <select id="filter-turma-instrutor" class="gestao-input" onchange="GestaoAlunosApp.filtrar()">
+         <option value="">Todas as Turmas</option>
+      </select>
     </div>
 
     <div style="overflow-x:auto;">
@@ -402,12 +412,37 @@
           const tbody = document.getElementById('tabela-alunos-body');
           tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;"><span class="material-icons spin" style="font-size:40px; color:var(--dynamic-prim)">sync</span></td></tr>';
 
-          google.script.run.withSuccessHandler(ac => { this.cacheAcademias = ac; }).getListaAcademias();
+          google.script.run.withSuccessHandler(ac => { 
+              this.cacheAcademias = ac; 
+              const sAcad = document.getElementById('filter-acad-instrutor');
+              sAcad.innerHTML = '<option value="">Todas as Academias</option>' + ac.map(x => `<option value="${x}">${x}</option>`).join('');
+          }).getListaAcademias();
+          
           google.script.run.withSuccessHandler(gr => { this.cacheGraduacoes = gr; }).listarGraduacoesAdminCompleto();
-          google.script.run.withSuccessHandler(tr => { this.cacheTodasTurmas = tr || []; }).listarTurmasAdmin();
           google.script.run.withSuccessHandler(pac => { this.cachePacotes = pac || []; }).getPacotesDisponiveis();
 
+          google.script.run.withSuccessHandler(mods => { 
+              const sMod = document.getElementById('filter-mod-instrutor');
+              sMod.innerHTML = '<option value="">Todas as Modalidades</option>' + mods.map(m => `<option value="${m}">${m}</option>`).join('');
+          }).getListaModalidades();
+
+          google.script.run.withSuccessHandler(tr => { 
+              this.cacheTodasTurmas = tr || []; 
+              this.atualizarFiltroTurmas();
+          }).listarTurmasAdmin();
+
           this.carregarDadosServidor();
+      },
+
+      atualizarFiltroTurmas: function() {
+          const acad = document.getElementById('filter-acad-instrutor').value;
+          const s = document.getElementById('filter-turma-instrutor');
+          s.innerHTML = '<option value="">Todas as Turmas</option>';
+          let turmasFiltradas = this.cacheTodasTurmas;
+          if (acad !== "") turmasFiltradas = turmasFiltradas.filter(t => t.local === acad && t.status === "Ativa");
+          turmasFiltradas.forEach(t => {
+              s.innerHTML += `<option value="${t.nome}">${t.nome}</option>`;
+          });
       },
 
       carregarDadosServidor: function() {
@@ -456,7 +491,21 @@
 
       filtrar: function() {
           const termo = document.getElementById('filtro-alunos').value.toLowerCase();
-          const filtrados = this.cacheLista.filter(a => String(a.nome).toLowerCase().includes(termo) || String(a.login).toLowerCase().includes(termo) || String(a.cpf).toLowerCase().includes(termo));
+          const fAcad = document.getElementById('filter-acad-instrutor').value.toLowerCase();
+          const fMod = document.getElementById('filter-mod-instrutor').value.toLowerCase();
+          const fTurma = document.getElementById('filter-turma-instrutor').value.toLowerCase();
+
+          const filtrados = this.cacheLista.filter(a => {
+              const matchTermo = String(a.nome).toLowerCase().includes(termo) || 
+                                 String(a.login).toLowerCase().includes(termo) || 
+                                 String(a.cpf).toLowerCase().includes(termo);
+              
+              const matchAcad = fAcad === "" || String(a.academia || "").toLowerCase() === fAcad;
+              const matchMod = fMod === "" || String(a.modalidade || "").toLowerCase().includes(fMod);
+              const matchTurma = fTurma === "" || String(a.turma || "").toLowerCase() === fTurma;
+
+              return matchTermo && matchAcad && matchMod && matchTurma;
+          });
           this.renderizarTabela(filtrados);
       },
 

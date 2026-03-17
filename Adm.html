@@ -377,7 +377,18 @@
         <button class="adm-btn" onclick="abrirModalNovoAluno()"><span class="material-icons" style="font-size:16px;">person_add</span> Novo Aluno</button>
       </div>
     </div>
-    <div class="adm-toolbar"><input type="text" id="search-alunos" class="adm-input" placeholder="🔍 Filtrar por nome ou login..." onkeyup="filtrarAlunos()">
+    <div class="adm-toolbar"
+      style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+      <input type="text" id="search-alunos" class="adm-input" placeholder="🔍 Nome, Login ou CPF..." onkeyup="filtrarAlunos()">
+      <select id="filter-acad-alunos" class="adm-input" onchange="atualizarFiltroTurmasAdm(); filtrarAlunos();">
+         <option value="">Todas as Academias</option>
+      </select>
+      <select id="filter-mod-alunos" class="adm-input" onchange="filtrarAlunos()">
+         <option value="">Todas as Modalidades</option>
+      </select>
+      <select id="filter-turma-alunos" class="adm-input" onchange="filtrarAlunos()">
+         <option value="">Todas as Turmas</option>
+      </select>
     </div>
     <div style="overflow-x:auto;">
       <table class="adm-table">
@@ -1107,7 +1118,7 @@
         const tbody = document.getElementById('lista-alunos-body');
         if(!tbody) return;
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px;">Sincronizando Atletas...</td></tr>';
-
+        initFiltrosAlunosAdm();
         google.script.run.withSuccessHandler(function(lista) { 
             cache.alunos = lista; 
             if (!lista || lista.length === 0) {
@@ -1118,9 +1129,55 @@
         }).listarAlunosAdmin();
     }
 
+    // --- MOTOR DO FILTRO TRIPLO DE ALUNOS ---
+    function initFiltrosAlunosAdm() {
+        google.script.run.withSuccessHandler(ac => {
+            const s = document.getElementById('filter-acad-alunos');
+            s.innerHTML = '<option value="">Todas as Academias</option>' + ac.map(x => `<option value="${x}">${x}</option>`).join('');
+        }).getListaAcademias();
+
+        google.script.run.withSuccessHandler(lista => {
+            const s = document.getElementById('filter-mod-alunos');
+            s.innerHTML = '<option value="">Todas as Modalidades</option>' + lista.map(x => `<option value="${x}">${x}</option>`).join('');
+        }).getListaModalidades();
+
+        google.script.run.withSuccessHandler(tr => {
+            cache.todasTurmas = tr || [];
+            atualizarFiltroTurmasAdm();
+        }).listarTurmasAdmin();
+    }
+
+    function atualizarFiltroTurmasAdm() {
+        const acad = document.getElementById('filter-acad-alunos').value;
+        const s = document.getElementById('filter-turma-alunos');
+        s.innerHTML = '<option value="">Todas as Turmas</option>';
+        if(cache.todasTurmas) {
+            let turmasFiltradas = cache.todasTurmas;
+            if (acad !== "") turmasFiltradas = turmasFiltradas.filter(t => t.local === acad && t.status === "Ativa");
+            turmasFiltradas.forEach(t => {
+                s.innerHTML += `<option value="${t.nome}">${t.nome}</option>`;
+            });
+        }
+    }
+
     function filtrarAlunos() {
         const termo = document.getElementById('search-alunos').value.toLowerCase();
-        const filtrados = cache.alunos.filter(a => String(a.nome).toLowerCase().includes(termo) || String(a.login).toLowerCase().includes(termo) || String(a.cpf).toLowerCase().includes(termo));
+        const fAcad = document.getElementById('filter-acad-alunos').value.toLowerCase();
+        const fMod = document.getElementById('filter-mod-alunos').value.toLowerCase();
+        const fTurma = document.getElementById('filter-turma-alunos').value.toLowerCase();
+
+        const filtrados = cache.alunos.filter(a => {
+            const matchTermo = String(a.nome).toLowerCase().includes(termo) || 
+                               String(a.login).toLowerCase().includes(termo) || 
+                               String(a.cpf).toLowerCase().includes(termo);
+            
+            const matchAcad = fAcad === "" || String(a.academia || "").toLowerCase() === fAcad;
+            const matchMod = fMod === "" || String(a.modalidade || "").toLowerCase().includes(fMod);
+            const matchTurma = fTurma === "" || String(a.turma || "").toLowerCase() === fTurma;
+
+            return matchTermo && matchAcad && matchMod && matchTurma;
+        });
+        
         renderAlunosTable(filtrados);
     }
 

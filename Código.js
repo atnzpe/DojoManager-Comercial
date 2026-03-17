@@ -2465,28 +2465,70 @@ function listarTurmasAdmin() {
 }
 
 /**
- * Salva ou edita uma turma no banco de dados
+ * ============================================================================
+ * 🛡️ FIX: ANTI-APAGÃO PARA TURMAS (HYDRATION)
+ * Garante que a edição de uma turma não apague colunas extras que o cliente 
+ * possa adicionar no futuro na aba 'Config_Turmas'.
+ * ============================================================================
  */
 function salvarTurma(form) {
   try {
+    const nomeAba = "Config_Turmas";
+    const sheet = getSheet(nomeAba);
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    
+    const normalize = (str) => String(str).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "");
+    const headerMap = {};
+    headers.forEach(h => { if (h) headerMap[normalize(h)] = h; });
+
     const idLinha = parseInt(form.turma_linha_id);
+    let linhaExistente = [];
+    
+    // Puxa os dados antigos se for edição
+    if (!isNaN(idLinha) && idLinha > 1 && idLinha <= sheet.getLastRow()) {
+        linhaExistente = sheet.getRange(idLinha, 1, 1, headers.length).getValues()[0];
+    }
 
-    // Se for uma turma nova, gera um ID único, senão usa o que veio do formulário
-    const idTurmaGerado = form.turma_id || ("TUR-" + Date.now());
-
-    const dados = {
-      "ID_Turma": idTurmaGerado,
-      "Nome da Turma": form.turma_nome,
-      "Modalidade": form.turma_mod,
-      "Faixa Etária": form.turma_idade,
-      "Local Vinculado": form.turma_local,
-      "Dias da Semana": form.turma_dias,
-      "Horário Início": form.turma_inicio,
-      "Horário Fim": form.turma_fim,
-      "Status": form.turma_status
+    const getOldVal = (nomeRealColuna) => {
+        if (linhaExistente.length === 0) return "";
+        const idx = headers.indexOf(nomeRealColuna);
+        return idx !== -1 ? linhaExistente[idx] : "";
     };
 
-    salvarDadosSeguro("Config_Turmas", dados, isNaN(idLinha) ? null : idLinha);
+    const resolveField = (formKey, colPlanilha) => {
+        const realCol = headerMap[normalize(colPlanilha)];
+        if (!realCol) return null;
+        
+        let valorParaSalvar = "";
+        if (Object.prototype.hasOwnProperty.call(form, formKey)) {
+            valorParaSalvar = form[formKey];
+        } else {
+            valorParaSalvar = getOldVal(realCol);
+        }
+        return { col: realCol, val: valorParaSalvar };
+    };
+
+    // Gera ID único se for turma nova, ou mantém o antigo
+    const idTurmaGerado = form.turma_id || getOldVal(headerMap[normalize("ID_Turma")]) || ("TUR-" + Date.now());
+
+    // Mapeamento das colunas padrão de Turmas
+    const campos = [
+        { col: headerMap[normalize("ID_Turma")], val: idTurmaGerado },
+        resolveField("turma_nome", "Nome da Turma"),
+        resolveField("turma_mod", "Modalidade"),
+        resolveField("turma_idade", "Faixa Etária"),
+        resolveField("turma_local", "Local Vinculado"),
+        resolveField("turma_dias", "Dias da Semana"),
+        resolveField("turma_inicio", "Horário Início"),
+        resolveField("turma_fim", "Horário Fim"),
+        resolveField("turma_status", "Status")
+    ];
+
+    const dadosFinais = {};
+    campos.forEach(item => { if (item && item.col) dadosFinais[item.col] = item.val; });
+
+    salvarDadosSeguro(nomeAba, dadosFinais, isNaN(idLinha) ? null : idLinha);
+    
     return isNaN(idLinha) ? "✅ Turma criada com sucesso!" : "✅ Turma atualizada com sucesso!";
   } catch (e) {
     return "❌ Erro ao salvar turma: " + e.message;
