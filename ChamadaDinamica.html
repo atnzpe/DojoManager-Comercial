@@ -501,11 +501,24 @@
               "<button class='btn-acao cor-nao' onclick=\"acaoRecusarFinal('" + aluno.login + "')\">✕</button><button class='btn-acao cor-sim' onclick=\"acaoAceitarFinal('" + aluno.login + "')\">✓</button>" : 
               "<span class='material-icons' style='color:#4caf50; font-size:32px;'>verified</span>";
 
+          // 🎨 MÓDULO VISUAL: RENDERIZAÇÃO DE TAGS INTELIGENTES
+          let tagCor = "#666"; // Padrão
+          let idadeTexto = aluno.idade || "?";
+          let categoria = aluno.categoria || "N/A";
+          
+          if(categoria === "Infantil") tagCor = "#ff9800"; // Laranja
+          else if(categoria === "Adulto") tagCor = "#2196f3"; // Azul
+          else if(categoria === "Visitante") tagCor = "#9c27b0"; // Roxo
+          else if(aluno.tipo === "Visitante") { categoria = "Externo"; tagCor = "#9c27b0"; } // Fallback para visitantes manuais
+          
+          const badgeIdade = `<span style="background-color:${tagCor}; color:white; padding:2px 6px; border-radius:4px; font-size:0.65rem; font-weight:900; margin-left:8px; text-transform:uppercase; letter-spacing:1px; box-shadow:0 2px 5px rgba(0,0,0,0.3);">[${categoria} - ${idadeTexto} Anos]</span>`;
+
           div.innerHTML = "<div class='info-flex'>" +
                           "<img src='" + img + "' class='foto-perfil'>" +
                           "<div>" +
-                          "<div style='font-weight:900; color:var(--dynamic-text); font-size:1rem;'>" + aluno.nome + "</div>" +
-                          "<div style='font-size:0.8rem; color:var(--dynamic-text); opacity:0.7;'>" + aluno.graduacao + " • " + (aluno.hora || '--:--') + " <span class='badge-data'>" + _prodDataAula + "</span></div>" +
+                          // 👇 INJETAMOS A TAG LOGO APÓS O NOME DO ALUNO 👇
+                          "<div style='font-weight:900; color:var(--dynamic-text); font-size:1rem; display:flex; align-items:center;'>" + aluno.nome + badgeIdade + "</div>" +
+                          "<div style='font-size:0.8rem; color:var(--dynamic-text); opacity:0.7; margin-top:3px;'>" + aluno.graduacao + " • " + (aluno.hora || '--:--') + " <span class='badge-data'>" + _prodDataAula + "</span></div>" +
                           "</div>" +
                           "</div>" +
                           "<div style='display:flex; gap:10px;'>" + statusHtml + "</div>";
