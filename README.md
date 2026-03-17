@@ -1,7 +1,11 @@
 # 🥋 DojoManager Pro - Sistema Completo para Academias
 
+![Status](https://img.shields.io/badge/Status-Em_Desenvolvimento-brightgreen)
+![Version](https://img.shields.io/badge/Version-1.5.0-blue)
+![Ecosystem](https://img.shields.io/badge/Ecosystem-Google_Workspace-orange)
+
 **Aumente seus ganhos e produtividade.**
-O DojoManager é uma plataforma White-Label, sem limites de alunos, construída sobre o ecossistema Google Workspace (Sheets + Apps Script). Projetada para academias de artes marciais gerenciarem alunos, contratos, presenças e fluxo de caixa de forma descomplicada.
+O **DojoManager** é uma plataforma White-Label, sem limites de alunos, construída de forma *Serverless* sobre o ecossistema Google Workspace (Sheets + Apps Script). Projetada exclusivamente para academias de artes marciais gerenciarem alunos, contratos, presenças e fluxo de caixa de forma descomplicada e altamente escalável.
 
 ## 🚀 Funcionalidades Essenciais
 
@@ -17,9 +21,15 @@ O DojoManager é uma plataforma White-Label, sem limites de alunos, construída 
 2. Acesse `Extensões > Apps Script` na sua planilha.
 3. Copie os arquivos deste repositório para o editor.
 4. Clique em `Implantar > Nova Implantação` (Web App).
-5. Configure sua Logomarca e Cores no painel **Admin > Config**.
+5. Configure sua Logomarca, Cores e Links no painel **Admin > Config**.
 
 ## 💻 Tecnologias Utilizadas
-* **Backend & DB:** Google Apps Script / Google Sheets
-* **Frontend:** HTML5, CSS3, Vanilla JS (SPA Architecture)
-* **Design:** Dark Mode responsivo para Mobile e Desktop.
+
+* **Backend & DB:** Google Apps Script (V8) / Google Sheets API
+* **Frontend:** HTML5, CSS3, Vanilla JS (SPA Architecture / DCU)
+* **Design:** Dark Mode responsivo para Mobile e Desktop (White-Label UI).
+
+## 🗺️ Roadmap e Evolução
+
+Quer saber o que estamos construindo agora e o que vem no futuro?
+👉 **[Confira o nosso Roadmap Oficial clicando aqui](ROADMAP.md)**
