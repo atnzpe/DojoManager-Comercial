@@ -71,7 +71,6 @@
     text-transform: uppercase;
   }
 
-  /* INPUTS */
   .gestao-input {
     width: 100%;
     padding: 12px;
@@ -83,7 +82,6 @@
     box-sizing: border-box;
   }
 
-  /* TABELA UX/UI (ESTILO ADM.HTML) */
   .gestao-table {
     width: 100%;
     border-collapse: collapse;
@@ -107,20 +105,6 @@
     font-size: 13px;
     vertical-align: middle;
     color: #333;
-  }
-
-  /* FISIOLOGIA VISUAL */
-  .fio-stat {
-    font-size: 13px;
-    font-weight: 900;
-    color: #0056b3;
-  }
-
-  .fio-label {
-    font-size: 10px;
-    color: #888;
-    text-transform: uppercase;
-    display: block;
   }
 
   .badge {
@@ -174,14 +158,63 @@
 
   .modal-box {
     background: #f8f9fa;
-    padding: 30px;
+    padding: 25px;
     border-radius: 12px;
-    width: 800px;
+    width: 900px;
     max-width: 95%;
     border: 3px solid var(--dynamic-prim);
     max-height: 90vh;
     overflow-y: auto;
     color: #333;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+
+  .form-label {
+    font-size: 11px;
+    font-weight: bold;
+    color: #000;
+    display: block;
+    margin-bottom: 4px;
+    margin-top: 10px;
+    text-transform: uppercase;
+  }
+
+  .checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 10px;
+  }
+
+  .mod-check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #333;
+    background: #f4f4f4;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    transition: 0.2s;
+  }
+
+  .mod-check-input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--dynamic-prim);
+    cursor: pointer;
   }
 
   @keyframes fadeIn {
@@ -224,9 +257,6 @@
         <button class="btn-yellow" onclick="GestaoAlunosApp.inicializar()">
           <span class="material-icons">refresh</span> Atualizar
         </button>
-        <button class="btn-yellow" onclick="GestaoAlunosApp.abrirModalNovo()">
-          <span class="material-icons">add</span> Novo Aluno
-        </button>
       </div>
     </div>
 
@@ -238,10 +268,10 @@
       <table class="gestao-table">
         <thead>
           <tr>
-            <th>Aluno / Login</th>
-            <th>Fisiologia / Stats</th>
-            <th>Graduação / Modalidade</th>
-            <th>Acesso / Aulas</th>
+            <th>Nome | Login</th>
+            <th>Idade | Peso | Altura</th>
+            <th>Turma | Graduação | Modalidade</th>
+            <th>Acesso | Aulas Assistidas</th>
             <th>Ação</th>
           </tr>
         </thead>
@@ -254,32 +284,108 @@
 <div id="modal-editar-aluno" class="modal-overlay">
   <div class="modal-box">
     <div
-      style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid var(--dynamic-prim); padding-bottom:15px; margin-bottom:20px;">
-      <h3 style="margin:0; color:#333; font-weight:900;" id="titulo-modal-gestao">Editar Aluno</h3>
+      style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--dynamic-prim); padding-bottom:10px; margin-bottom:15px;">
+      <h3 style="margin:0; color:#333; font-weight:900;" id="titulo-modal-gestao">Ficha do Aluno</h3>
       <button onclick="GestaoAlunosApp.fecharModal()" style="background:none; border:none; cursor:pointer; font-size:24px; color:#ff5252;">✕</button>
     </div>
+
     <form id="form-gestao-aluno" onsubmit="event.preventDefault(); GestaoAlunosApp.salvarEdicao();">
       <input type="hidden" id="ga-id">
-      <div class="form-grid">
-        <div>
-          <label class="form-label">NOME COMPLETO*</label><input type="text" id="ga-nome" class="gestao-input" required>
-          <label class="form-label">CPF</label><input type="text" id="ga-cpf" class="gestao-input">
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <div><label class="form-label">PESO (KG)</label><input type="number" step="0.1" id="ga-peso" class="gestao-input">
-            </div>
-            <div><label class="form-label">ALTURA (M)</label><input type="number" step="0.01" id="ga-altura" class="gestao-input">
-            </div>
+      <input type="hidden" id="ga-carimbo">
+
+      <div
+        style="background:#f4f4f4; padding:15px; border-radius:8px; border-left: 4px solid var(--dynamic-prim); margin-bottom: 15px;">
+        <h4 style="margin:0 0 10px 0; color:#333; text-transform:uppercase; font-size:12px;">👤 Dados Pessoais &
+          Localização</h4>
+        <div class="form-grid">
+          <div><label class="form-label">Nome Completo</label><input type="text" id="ga-nome" class="gestao-input" required>
           </div>
-          <label class="form-label">DATA NASCIMENTO</label><input type="date" id="ga-nasc" class="gestao-input">
+          <div><label class="form-label">CPF</label><input type="text" id="ga-cpf" class="gestao-input"></div>
         </div>
-        <div>
-          <label class="form-label">LOGIN*</label><input type="text" id="ga-login" class="gestao-input" required>
-          <label class="form-label">SENHA*</label><input type="text" id="ga-senha" class="gestao-input" required>
-          <label class="form-label">ACADEMIA</label><select id="ga-acad" class="gestao-input"></select>
-          <label class="form-label">GRADUAÇÃO</label><select id="ga-grad" class="gestao-input"></select>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+          <div><label class="form-label">Nascimento</label><input type="date" id="ga-nasc" class="gestao-input"></div>
+          <div><label class="form-label">Telefone</label><input type="text" id="ga-tel" class="gestao-input"></div>
+          <div><label class="form-label">Peso (kg)</label><input type="number" step="0.1" id="ga-peso" class="gestao-input">
+          </div>
+          <div><label class="form-label">Altura (m)</label><input type="number" step="0.01" id="ga-altura" class="gestao-input">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div><label class="form-label">E-mail</label><input type="email" id="ga-email" class="gestao-input"></div>
+          <div><label class="form-label">Endereço Completo</label><input type="text" id="ga-end" class="gestao-input">
+          </div>
+          <div><label class="form-label">Nome da Mãe</label><input type="text" id="ga-mae" class="gestao-input"></div>
+          <div><label class="form-label">Nome do Pai</label><input type="text" id="ga-pai" class="gestao-input"></div>
+        </div>
+        <label class="form-label">Link Foto 3x4 (Drive)</label><input type="text" id="ga-foto" class="gestao-input">
+      </div>
+
+      <div
+        style="background:#f9f9f9; padding:15px; border-radius:8px; border-left: 4px solid #2196f3; margin-bottom: 15px;">
+        <h4 style="margin:0 0 10px 0; color:#333; text-transform:uppercase; font-size:12px;">🥋 Dados de Tatame &
+          Sistema</h4>
+
+        <div class="form-grid">
+          <div><label class="form-label">Login (App)*</label><input type="text" id="ga-login" class="gestao-input" required style="background:#fffdf5 !important; font-weight:bold;">
+          </div>
+          <div><label class="form-label">Senha*</label><input type="text" id="ga-senha" class="gestao-input" required>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div>
+            <label class="form-label">Academia Vinculada</label>
+            <select id="ga-acad" class="gestao-input" onchange="GestaoAlunosApp.carregarTurmasAluno()"></select>
+          </div>
+          <div>
+            <label class="form-label" style="color:#2196f3;">Turma Oficial</label>
+            <select id="ga-turma" class="gestao-input" style="border: 1px solid #2196f3;"><option value="">Sem Turma</option></select>
+          </div>
+        </div>
+
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+          <div>
+            <label class="form-label">Status Acesso</label>
+            <select id="ga-status" class="gestao-input" style="font-weight:bold;"><option value="Ativo" style="color:green;">Ativo</option><option value="Inativo" style="color:red;">Inativo</option><option value="Bloqueado" style="color:blue;">Bloqueado</option></select>
+          </div>
+          <div>
+            <label class="form-label">Nível Sistema</label>
+            <select id="ga-nivel" class="gestao-input"><option value="Aluno">Aluno</option><option value="Instrutor N1">Instrutor N1</option><option value="Instrutor N2">Instrutor N2</option><option value="Instrutor N3">Instrutor N3</option><option value="Professor">Professor</option><option value="Mestre">Mestre</option><option value="Admin">Admin</option></select>
+          </div>
+        </div>
+
+        <label class="form-label" style="color:#1e90ff;">🏅 Modalidades Praticadas</label>
+        <div id="ga-modalidades-aluno" class="checkbox-grid"></div>
+        <input type="hidden" id="ga-modalidade-final">
+
+        <div class="form-grid">
+          <div><label class="form-label">Graduação Atual</label><select id="ga-grad" class="gestao-input"></select>
+          </div>
+          <div>
+            <label class="form-label">Próxima Graduação</label><select id="ga-prox-grad" class="gestao-input"></select>
+          </div>
+          <div><label class="form-label">Data Próx. Exame</label><input type="date" id="ga-exame" class="gestao-input">
+          </div>
+          <div><label class="form-label">Venc. Carteirinha</label><input type="date" id="ga-data-cart" class="gestao-input">
+          </div>
         </div>
       </div>
-      <button type="submit" class="btn-yellow" style="width:100%; padding:15px;"><span class="material-icons">save</span> SALVAR DADOS</button>
+
+      <div style="background:#e8f5e9; padding:15px; border-radius:8px; border-left: 4px solid #4caf50;">
+        <h4 style="margin:0 0 10px 0; color:#2e7d32; text-transform:uppercase; font-size:12px;">💳 Plano Financeiro</h4>
+        <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr;">
+          <div>
+            <label class="form-label">Pacote / Plano</label><select id="ga-pacote" class="gestao-input"><option value="">Sem Pacote</option></select>
+          </div>
+          <div><label class="form-label">Vencimento</label><input type="date" id="ga-vencimento" class="gestao-input">
+          </div>
+          <div>
+            <label class="form-label">Status Pagto</label><select id="ga-status-assinatura" class="gestao-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-yellow" style="width:100%; padding:15px; margin-top:20px;"><span class="material-icons">save</span> SALVAR FICHA DE ALUNO</button>
     </form>
   </div>
 </div>
@@ -289,18 +395,19 @@
       cacheLista: [],
       cacheAcademias: [],
       cacheGraduacoes: [],
+      cacheTodasTurmas: [],
+      cachePacotes: [],
 
       inicializar: function() {
           const tbody = document.getElementById('tabela-alunos-body');
           tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;"><span class="material-icons spin" style="font-size:40px; color:var(--dynamic-prim)">sync</span></td></tr>';
 
-          google.script.run.withSuccessHandler(academias => {
-              this.cacheAcademias = academias;
-              google.script.run.withSuccessHandler(graduacoes => {
-                  this.cacheGraduacoes = graduacoes;
-                  this.carregarDadosServidor();
-              }).getListaGraduacoes();
-          }).getListaAcademias();
+          google.script.run.withSuccessHandler(ac => { this.cacheAcademias = ac; }).getListaAcademias();
+          google.script.run.withSuccessHandler(gr => { this.cacheGraduacoes = gr; }).listarGraduacoesAdminCompleto();
+          google.script.run.withSuccessHandler(tr => { this.cacheTodasTurmas = tr || []; }).listarTurmasAdmin();
+          google.script.run.withSuccessHandler(pac => { this.cachePacotes = pac || []; }).getPacotesDisponiveis();
+
+          this.carregarDadosServidor();
       },
 
       carregarDadosServidor: function() {
@@ -312,62 +419,131 @@
 
       renderizarTabela: function(lista) {
           const tbody = document.getElementById('tabela-alunos-body');
-          tbody.innerHTML = lista.map(a => {
-            const statusClass = (String(a.status).toLowerCase() === 'ativo') ? 'badge-ativo' : 'badge-inativo';
+          tbody.innerHTML = "";
+          lista.forEach(a => {
+            const statusClass = (String(a.status).toLowerCase() === 'inativo') ? 'badge-inativo' : 'badge-ativo';
             const dataInicio = a.carimbo ? String(a.carimbo).split(' ')[0] : '--';
             
-            return `
+            // Tabela 100% copiada da sua melhoria no Admin!
+            tbody.innerHTML += `
                 <tr>
-                    <td><b>${a.nome || '---'}</b><br><small>Login: ${a.login}</small></td>
-                    <td>
-                        <span class="fio-label">Idade: ${a.idadeExata || '--'}</span>
-                        <span class="fio-stat">${a.peso || '--'}kg | ${a.altura || '--'}m</span>
-                    </td>
-                    <td><b>${a.graduacao}</b><br><small>${a.modalidade}</small></td>
-                    <td>
-                        <span class="badge ${statusClass}">${a.status}</span><br>
-                        <span style="font-size:11px; color:#0056b3; font-weight:900;">Aulas: ${a.totalAulas}</span><br>
-                        <small style="font-size:9px; color:#999;">Início: ${dataInicio}</small>
-                    </td>
-                    <td>
-                        <button class="btn-yellow" style="padding:8px;" onclick="GestaoAlunosApp.prepararEdicao(${a.id})">
-                            <span class="material-icons">edit</span>
-                        </button>
-                    </td>
+                  <td>
+                    <b style="font-size:14px; color:#222;">${a.nome || '---'}</b><br>
+                    <small style="color:#666;">@${a.login}</small>
+                  </td>
+                  <td>
+                    <span style="font-size:11px; font-weight:bold; color:#0056b3;">Idade: ${a.idadeExata || 'Data nascimento não preenchida ...'}</span><br>
+                    <small style="font-weight:700;">${String(a.peso || '0 ').replace('.',',')}kg | ${String(a.altura || '0 ').replace('.',',')}m</small><br>
+                  </td>
+                  <td>
+                    <span style="color:#2196f3; font-weight:bold; font-size:11px;">🎓 ${a.turma || 'Sem Turma'}</span><br>
+                    <b style="font-size:12px;">${a.graduacao}</b><br>
+                    <span class="badge" style="background:#eee; border:1px solid #ccc; color:#333; font-size:9px;">🛡️ ${a.modalidade || 'Sem Modalidade'}</span>
+                  </td>
+                  <td>
+                    <span class="badge ${statusClass}">${a.status}</span><br>
+                    <small style="font-weight:bold; color:#555;">${a.totalAulas} Aulas Assistidas</small><br>
+                    <small style="color:#999; font-size:9px;">Inscrito em: ${dataInicio}</small>
+                  </td>
+                  <td>
+                    <button class="btn-yellow" style="padding:8px;" onclick="GestaoAlunosApp.prepararEdicao(${a.id})">
+                        <span class="material-icons" style="font-size:16px">edit</span>
+                    </button>
+                  </td>
                 </tr>`;
-          }).join('');
+          });
       },
 
       filtrar: function() {
           const termo = document.getElementById('filtro-alunos').value.toLowerCase();
-          const filtrados = this.cacheLista.filter(a => 
-              String(a.nome).toLowerCase().includes(termo) || String(a.login).toLowerCase().includes(termo)
-          );
+          const filtrados = this.cacheLista.filter(a => String(a.nome).toLowerCase().includes(termo) || String(a.login).toLowerCase().includes(termo) || String(a.cpf).toLowerCase().includes(termo));
           this.renderizarTabela(filtrados);
       },
 
       prepararEdicao: function(idLinha) {
           const a = this.cacheLista.find(x => x.id === idLinha);
           if(!a) return;
+
+          document.getElementById('titulo-modal-gestao').innerText = "Editando: " + (a.nome || a.login);
+
+          const setVal = (idInput, val) => {
+              const el = document.getElementById(idInput);
+              if(!el) return;
+              if(val === undefined || val === null || String(val).trim() === "") {
+                  el.value = ""; el.placeholder = "Campo Vazio";
+              } else { el.value = val; }
+          };
+
           const dF = (v) => (v && v.includes('/')) ? v.split('/').reverse().join('-') : v;
 
           document.getElementById('ga-id').value = a.id;
-          document.getElementById('ga-nome').value = a.nome;
-          document.getElementById('ga-login').value = a.login;
-          document.getElementById('ga-senha').value = a.senha;
-          document.getElementById('ga-peso').value = a.peso;
-          document.getElementById('ga-altura').value = a.altura;
-          document.getElementById('ga-nasc').value = dF(a.nasc);
+          setVal('ga-carimbo', a.carimbo);
+          setVal('ga-nome', a.nome);
+          setVal('ga-cpf', a.cpf);
+          setVal('ga-nasc', dF(a.nasc));
+          setVal('ga-tel', a.tel);
+          setVal('ga-email', a.email);
+          setVal('ga-pai', a.pai);
+          setVal('ga-mae', a.mae);
+          setVal('ga-end', a.endereco);
+          setVal('ga-foto', a.foto);
+          setVal('ga-login', a.login);
+          setVal('ga-senha', a.senha);
+          setVal('ga-peso', String(a.peso || "").replace(',','.'));
+          setVal('ga-altura', String(a.altura || "").replace(',','.'));
+          setVal('ga-exame', dF(a.proxExame));
+          setVal('ga-data-cart', dF(a.dataCarteira));
+          
+          document.getElementById('ga-status').value = a.status || "Ativo";
+          
+          let n = String(a.nivel || "Aluno").toUpperCase();
+          if(n.includes("MESTRE")) n = "Mestre"; else if(n.includes("PROFESSOR")) n = "Professor"; else if(n.includes("N1")) n = "Instrutor N1"; else if(n.includes("N2")) n = "Instrutor N2"; else if(n.includes("N3")) n = "Instrutor N3"; else if(n.includes("ADMIN")) n = "Admin"; else n = "Aluno";
+          document.getElementById('ga-nivel').value = n;
 
-          this.popularSelects(a.academia, a.graduacao);
+          this.popularSelectsBasicos(a.academia, a.graduacao, a.proxGrad, a.pacote);
+          this.popularModalidadesCheckbox(a.modalidade);
+          this.carregarTurmasAluno(a.turma);
+          
           document.getElementById('modal-editar-aluno').style.display = 'flex';
       },
 
-      popularSelects: function(acad, grad) {
+      popularSelectsBasicos: function(acad, grad, proxGrad, pacoteAtual) {
           const sA = document.getElementById('ga-acad');
-          const sG = document.getElementById('ga-grad');
-          sA.innerHTML = this.cacheAcademias.map(x => `<option value="${x}" ${x===acad?'selected':''}>${x}</option>`).join('');
-          sG.innerHTML = this.cacheGraduacoes.map(x => `<option value="${x}" ${x===grad?'selected':''}>${x}</option>`).join('');
+          sA.innerHTML = '<option value="" disabled>Selecione...</option>' + this.cacheAcademias.map(x => `<option value="${x}" ${x===acad?'selected':''}>${x}</option>`).join('');
+          
+          const sG1 = document.getElementById('ga-grad');
+          const sG2 = document.getElementById('ga-prox-grad');
+          const gradHtml = '<option value="" disabled>Selecione...</option>' + this.cacheGraduacoes.map(g => `<option value="${g.graduacao}">${g.graduacao}</option>`).join('');
+          sG1.innerHTML = gradHtml; sG1.value = grad || "";
+          sG2.innerHTML = '<option value="">Nenhuma / Carregando...</option>' + gradHtml; sG2.value = proxGrad || "";
+
+          const sP = document.getElementById('ga-pacote');
+          sP.innerHTML = '<option value="">Sem Pacote</option>' + this.cachePacotes.map(p => `<option value="${p.nome_pacote}" ${p.nome_pacote===pacoteAtual?'selected':''}>${p.nome_pacote}</option>`).join('');
+      },
+
+      popularModalidadesCheckbox: function(modAtuais = "") {
+          const container = document.getElementById('ga-modalidades-aluno');
+          container.innerHTML = '<span style="font-size:11px;">Carregando...</span>';
+          google.script.run.withSuccessHandler(listaMods => {
+              container.innerHTML = "";
+              const modsDoAluno = modAtuais.split(',').map(m => m.trim().toLowerCase());
+              listaMods.forEach(mod => {
+                  const isChecked = modsDoAluno.includes(mod.toLowerCase()) ? "checked" : "";
+                  container.innerHTML += `<label class='mod-check-label'><input type="checkbox" name="ga-mod-chk" value="${mod}" ${isChecked} class="mod-check-input"> ${mod}</label>`;
+              });
+          }).getListaModalidades();
+      },
+
+      carregarTurmasAluno: function(turmaAtual = "") {
+          const sAcad = document.getElementById('ga-acad').value;
+          const sTurma = document.getElementById('ga-turma');
+          sTurma.innerHTML = '<option value="">Sem Turma</option>';
+          if(this.cacheTodasTurmas.length > 0) {
+              const turmasDoLocal = this.cacheTodasTurmas.filter(t => t.local === sAcad && t.status === "Ativa");
+              turmasDoLocal.forEach(t => {
+                  sTurma.innerHTML += `<option value="${t.nome}" ${t.nome===turmaAtual?'selected':''}>${t.nome}</option>`;
+              });
+          }
       },
 
       fecharModal: function() { document.getElementById('modal-editar-aluno').style.display = 'none'; },
@@ -376,15 +552,38 @@
           const btn = document.querySelector('#form-gestao-aluno button[type="submit"]');
           btn.disabled = true; btn.innerHTML = "SALVANDO...";
           
+          // Agrupa os checkboxes de modalidade
+          const checkboxes = document.querySelectorAll('input[name="ga-mod-chk"]:checked');
+          let modsSelecionadas = Array.from(checkboxes).map(cb => cb.value).join(", ");
+          
           const form = {
               aluno_id: document.getElementById('ga-id').value,
+              aluno_carimbo: document.getElementById('ga-carimbo').value,
               aluno_nome: document.getElementById('ga-nome').value,
+              aluno_cpf: document.getElementById('ga-cpf').value,
+              aluno_nasc: document.getElementById('ga-nasc').value,
+              aluno_tel: document.getElementById('ga-tel').value,
+              aluno_email: document.getElementById('ga-email').value,
+              aluno_pai: document.getElementById('ga-pai').value,
+              aluno_mae: document.getElementById('ga-mae').value,
+              aluno_end: document.getElementById('ga-end').value,
+              aluno_foto: document.getElementById('ga-foto').value,
               aluno_login: document.getElementById('ga-login').value,
               aluno_senha: document.getElementById('ga-senha').value,
               aluno_peso: document.getElementById('ga-peso').value,
               aluno_altura: document.getElementById('ga-altura').value,
               aluno_acad: document.getElementById('ga-acad').value,
-              aluno_grad: document.getElementById('ga-grad').value
+              aluno_turma: document.getElementById('ga-turma').value,
+              aluno_status: document.getElementById('ga-status').value,
+              aluno_nivel: document.getElementById('ga-nivel').value,
+              aluno_modalidade: modsSelecionadas,
+              aluno_grad: document.getElementById('ga-grad').value,
+              aluno_prox_grad: document.getElementById('ga-prox-grad').value,
+              aluno_exame: document.getElementById('ga-exame').value,
+              aluno_data_cart: document.getElementById('ga-data-cart').value,
+              aluno_pacote: document.getElementById('ga-pacote').value,
+              aluno_vencimento: document.getElementById('ga-vencimento').value,
+              aluno_status_assinatura: document.getElementById('ga-status-assinatura').value
           };
 
           google.script.run.withSuccessHandler(res => {

@@ -348,6 +348,9 @@
   <div class="adm-nav">
     <div class="adm-nav-item active" onclick="navAdmin('alunos')"><span class="material-icons">people</span> Alunos
     </div>
+    <div class="adm-nav-item" onclick="navAdmin('turmas')">
+      <span class="material-icons">event_note</span> Turmas
+    </div>
     <div class="adm-nav-item" onclick="navAdmin('pacotes')"><span class="material-icons">sell</span> Planos</div>
     <div class="adm-nav-item" onclick="navAdmin('graduacoes')"><span class="material-icons">military_tech</span>
       Graduações</div>
@@ -362,7 +365,8 @@
       Certificados</div>
     <div class="adm-nav-item" onclick="navAdmin('config')"><span class="material-icons">settings</span> Config</div>
     <div class="adm-nav-item" style="margin-left: auto; border-left: 1px solid #333;" onclick="fecharAdmin()">
-      <span class="material-icons" style="color: #ff5252;">close</span> Voltar</div>
+      <span class="material-icons" style="color: #ff5252;">close</span> Voltar
+    </div>
   </div>
 
   <div id="adm-tab-alunos" class="adm-tab-content active">
@@ -379,14 +383,39 @@
       <table class="adm-table">
         <thead>
           <tr>
-            <th>Login / Info</th>
-            <th>Fisiologia / Stats</th>
-            <th>Graduação / Modalidade</th>
-            <th>Acesso</th>
+            <th>Nome | Login</th>
+            <th>Idade | Peso | Altura</th>
+            <th>Turma | Graduação | Modalidade</th>
+            <th>Acesso | Aulas Assistidas</th>
             <th>Ação</th>
           </tr>
         </thead>
         <tbody id="lista-alunos-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="adm-tab-turmas" class="adm-tab-content">
+    <div class="adm-h3">Gestão de Turmas e Grade
+      <div style="display:flex; gap:10px;">
+        <button class="adm-btn adm-btn-outline" onclick="carregarTurmas()"><span class="material-icons" style="font-size:16px;">refresh</span></button>
+        <button class="adm-btn" onclick="abrirModalTurma()">+ NOVA TURMA</button>
+      </div>
+    </div>
+    <div class="adm-toolbar"><input type="text" id="search-turmas" class="adm-input" placeholder="🔍 Filtrar por nome ou modalidade..." onkeyup="filtrarTurmas()">
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th>Turma / Modalidade</th>
+            <th>Local / Idade</th>
+            <th>Dias / Horários</th>
+            <th>Status</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody id="lista-turmas-body"></tbody>
       </table>
     </div>
   </div>
@@ -598,83 +627,120 @@
 </div>
 
 <div id="adm-modal-aluno" class="adm-modal">
-  <div class="adm-modal-box large">
+  <div class="adm-modal-box large" style="max-width: 900px;">
     <div
       style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #FFD700; padding-bottom:10px; margin-bottom:15px;">
       <h3 id="titulo-modal-aluno" style="margin:0;">Ficha do Aluno</h3>
       <button type="button" onclick="closeModal('adm-modal-aluno')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
     </div>
+
     <form id="form-edit-aluno" onsubmit="handleAdmForm(event, 'salvarAluno')">
-      <input type="hidden" name="aluno_id" id="aluno_id"><input type="hidden" name="aluno_carimbo" id="aluno_carimbo">
-      <div class="form-grid">
-        <div style="background:#f4f4f4; padding:15px; border-radius:8px; border:1px solid #ddd;">
-          <h4 style="margin:0 0 10px 0; color:#333; text-transform:uppercase;">Dados Pessoais</h4>
-          <label class="adm-label">Nome Completo*</label><input type="text" id="aluno_nome" name="aluno_nome" class="adm-input" required>
-          <label class="adm-label">CPF</label><input type="text" id="aluno_cpf" name="aluno_cpf" class="adm-input">
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div><label class="adm-label">Data Nascimento*</label><input type="date" id="aluno_nasc" name="aluno_nasc" class="adm-input" required>
-            </div>
-            <div><label class="adm-label">Telefone</label><input type="text" id="aluno_tel" name="aluno_tel" class="adm-input">
-            </div>
+      <input type="hidden" name="aluno_id" id="aluno_id">
+      <input type="hidden" name="aluno_carimbo" id="aluno_carimbo">
+
+      <div
+        style="background:#f4f4f4; padding:15px; border-radius:8px; border-left: 4px solid #FFD700; margin-bottom: 15px;">
+        <h4 style="margin:0 0 10px 0; color:#333; text-transform:uppercase; font-size:12px;">👤 Dados Pessoais &
+          Localização</h4>
+        <div class="form-grid">
+          <div><label class="adm-label">Nome Completo</label><input type="text" id="aluno_nome" name="aluno_nome" class="adm-input" required>
           </div>
-          <div
-            style="display:grid; grid-template-columns:1fr 1fr; gap:10px; background:#e8f5e9; padding:10px; border-radius:6px; border:1px solid #c8e6c9; margin-top:10px;">
-            <div><label class="adm-label" style="margin-top:0;">Peso (kg)</label><input type="number" step="0.1" id="aluno_peso" name="aluno_peso" class="adm-input" placeholder="Ex: 75.5">
-            </div>
-            <div><label class="adm-label" style="margin-top:0;">Altura (m)</label><input type="number" step="0.01" id="aluno_altura" name="aluno_altura" class="adm-input" placeholder="Ex: 1.80">
-            </div>
+          <div><label class="adm-label">CPF</label><input type="text" id="aluno_cpf" name="aluno_cpf" class="adm-input">
           </div>
-          <label class="adm-label">E-mail</label><input type="email" id="aluno_email" name="aluno_email" class="adm-input">
-          <label class="adm-label">Nome do Pai</label><input type="text" id="aluno_pai" name="aluno_pai" class="adm-input">
-          <label class="adm-label">Nome da Mãe</label><input type="text" id="aluno_mae" name="aluno_mae" class="adm-input">
-          <label class="adm-label">Endereço Completo</label><input type="text" id="aluno_end" name="aluno_end" class="adm-input">
-          <label class="adm-label">Link Foto 3x4 (Drive)</label><input type="text" id="aluno_foto" name="aluno_foto" class="adm-input" placeholder="https://...">
         </div>
-        <div style="background:#f9f9f9; padding:15px; border-radius:8px; border:1px solid #ddd;">
-          <h4 style="margin:0 0 10px 0; color:#333; text-transform:uppercase;">Dados de Tatame & Financeiro</h4>
-          <div style="display:flex; gap:10px;">
-            <div style="flex:1;"><label class="adm-label">LOGIN (Usuário)*</label><input type="text" id="aluno_login" name="aluno_login" class="adm-input" required style="border-left:4px solid #FFD700; background:#fffdf5 !important;">
-            </div>
-            <div style="flex:1;"><label class="adm-label">Senha*</label><input type="text" id="aluno_senha" name="aluno_senha" class="adm-input" required>
-            </div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+          <div><label class="adm-label">Nascimento</label><input type="date" id="aluno_nasc" name="aluno_nasc" class="adm-input">
           </div>
-          <div style="display:flex; gap:10px;">
-            <div style="flex:1;">
-              <label class="adm-label">Academia</label><select id="aluno_acad" name="aluno_acad" class="adm-input"></select>
-            </div>
-            <div style="flex:1;">
-              <label class="adm-label">Status Acesso</label><select id="aluno_status" name="aluno_status" class="adm-input" style="font-weight:bold;"><option value="Ativo" style="color:green;">Ativo</option><option value="Inativo" style="color:red;">Inativo</option><option value="Bloqueado" style="color:blue;">Bloqueado</option></select>
-            </div>
+          <div><label class="adm-label">Telefone</label><input type="text" id="aluno_tel" name="aluno_tel" class="adm-input">
+          </div>
+          <div><label class="adm-label">Peso (kg)</label><input type="number" step="0.1" id="aluno_peso" name="aluno_peso" class="adm-input">
+          </div>
+          <div><label class="adm-label">Altura (m)</label><input type="number" step="0.01" id="aluno_altura" name="aluno_altura" class="adm-input">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div><label class="adm-label">E-mail</label><input type="email" id="aluno_email" name="aluno_email" class="adm-input">
+          </div>
+          <div><label class="adm-label">Endereço Completo</label><input type="text" id="aluno_end" name="aluno_end" class="adm-input">
+          </div>
+          <div><label class="adm-label">Nome da Mãe</label><input type="text" id="aluno_mae" name="aluno_mae" class="adm-input">
+          </div>
+          <div><label class="adm-label">Nome do Pai</label><input type="text" id="aluno_pai" name="aluno_pai" class="adm-input">
+          </div>
+        </div>
+        <label class="adm-label">Link Foto 3x4 (Drive)</label><input type="text" id="aluno_foto" name="aluno_foto" class="adm-input">
+      </div>
+
+      <div
+        style="background:#f9f9f9; padding:15px; border-radius:8px; border-left: 4px solid #2196f3; margin-bottom: 15px;">
+        <h4 style="margin:0 0 10px 0; color:#333; text-transform:uppercase; font-size:12px;">🥋 Dados de Tatame &
+          Sistema</h4>
+
+        <div class="form-grid">
+          <div><label class="adm-label">Login (App)*</label><input type="text" id="aluno_login" name="aluno_login" class="adm-input" required style="background:#fffdf5 !important; font-weight:bold;">
+          </div>
+          <div><label class="adm-label">Senha*</label><input type="text" id="aluno_senha" name="aluno_senha" class="adm-input" required>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div>
+            <label class="adm-label">Academia Vinculada</label>
+            <select id="aluno_acad" name="aluno_acad" class="adm-input" onchange="carregarTurmasSelectParaAlunos(this.value, '')"></select>
           </div>
           <div>
-            <label class="adm-label">Nível Sistema</label><select id="aluno_nivel" name="aluno_nivel" class="adm-input"><option value="Aluno">Aluno</option><option value="Instrutor N1">Instrutor</option><option value="Professor">Professor</option><option value="Mestre">Mestre</option><option value="Admin">Admin</option></select>
+            <label class="adm-label" style="color:#2196f3;">Turma Oficial</label>
+            <select id="aluno_turma" name="aluno_turma" class="adm-input" style="border: 1px solid #2196f3;"><option value="">Sem Turma</option></select>
           </div>
-          <hr style="border:0; border-top:1px dashed #ccc; margin:15px 0;">
-          <label class="adm-label" style="color:#1e90ff;">🏅 Modalidades Praticadas</label>
-          <div id="container-modalidades-aluno" class="checkbox-grid"></div>
-          <label class="adm-label">Graduação / Faixa Principal (Atual)</label><select id="aluno_grad" name="aluno_grad" class="adm-input"><option value="" disabled selected>Carregando...</option></select>
-          <label class="adm-label">Próxima Graduação Alvo</label><select id="aluno_prox_grad" name="aluno_prox_grad" class="adm-input"><option value="">Nenhuma / Carregando...</option></select>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div><label class="adm-label">Data Próx. Exame</label><input type="date" id="aluno_exame" name="aluno_exame" class="adm-input">
-            </div>
-            <div><label class="adm-label">Venc. Carteirinha</label><input type="date" id="aluno_data_cart" name="aluno_data_cart" class="adm-input">
-            </div>
+        </div>
+
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+          <div>
+            <label class="adm-label">Status Acesso</label>
+            <select id="aluno_status" name="aluno_status" class="adm-input" style="font-weight:bold;"><option value="Ativo" style="color:green;">Ativo</option><option value="Inativo" style="color:red;">Inativo</option><option value="Bloqueado" style="color:blue;">Bloqueado</option></select>
           </div>
-          <hr style="border:0; border-top:1px dashed #ccc; margin:15px 0;">
-          <h4 style="margin:0 0 10px 0; color:#4caf50; text-transform:uppercase;">💳 Plano Financeiro</h4>
-          <label class="adm-label">Pacote / Plano Atual</label><select id="aluno_pacote" name="aluno_pacote" class="adm-input"><option value="">Nenhum / Sem Pacote</option></select>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div><label class="adm-label">Vencimento</label><input type="date" id="aluno_vencimento" name="aluno_vencimento" class="adm-input">
-            </div>
-            <div>
-              <label class="adm-label">Status Pagto</label><select id="aluno_status_assinatura" name="aluno_status_assinatura" class="adm-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select>
-            </div>
+          <div>
+            <label class="adm-label">Nível Sistema</label>
+            <select id="aluno_nivel" name="aluno_nivel" class="adm-input"><option value="Aluno">Aluno</option><option value="Instrutor N1">Instrutor N1</option><option value="Instrutor N2">Instrutor N2</option><option value="Instrutor N3">Instrutor N3</option><option value="Professor">Professor</option><option value="Mestre">Mestre</option><option value="Admin">Admin</option></select>
+          </div>
+        </div>
+
+        <label class="adm-label" style="color:#1e90ff;">🏅 Modalidades Praticadas</label>
+        <div id="container-modalidades-aluno" class="checkbox-grid"></div>
+        <input type="hidden" name="aluno_modalidade" id="aluno_modalidade">
+
+        <div class="form-grid">
+          <div>
+            <label class="adm-label">Graduação Atual</label><select id="aluno_grad" name="aluno_grad" class="adm-input"></select>
+          </div>
+          <div>
+            <label class="adm-label">Próxima Graduação</label><select id="aluno_prox_grad" name="aluno_prox_grad" class="adm-input"></select>
+          </div>
+          <div><label class="adm-label">Data Próx. Exame</label><input type="date" id="aluno_exame" name="aluno_exame" class="adm-input">
+          </div>
+          <div><label class="adm-label">Venc. Carteirinha</label><input type="date" id="aluno_data_cart" name="aluno_data_cart" class="adm-input">
           </div>
         </div>
       </div>
+
+      <div style="background:#e8f5e9; padding:15px; border-radius:8px; border-left: 4px solid #4caf50;">
+        <h4 style="margin:0 0 10px 0; color:#2e7d32; text-transform:uppercase; font-size:12px;">💳 Plano Financeiro</h4>
+        <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr;">
+          <div>
+            <label class="adm-label">Pacote / Plano</label><select id="aluno_pacote" name="aluno_pacote" class="adm-input"><option value="">Sem Pacote</option></select>
+          </div>
+          <div><label class="adm-label">Vencimento</label><input type="date" id="aluno_vencimento" name="aluno_vencimento" class="adm-input">
+          </div>
+          <div>
+            <label class="adm-label">Status Pagto</label><select id="aluno_status_assinatura" name="aluno_status_assinatura" class="adm-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select>
+          </div>
+        </div>
+      </div>
+
       <div
         style="display:flex; justify-content:flex-end; gap:15px; margin-top:25px; padding-top:15px; border-top:1px solid #ccc;">
-        <button type="button" onclick="closeModal('adm-modal-aluno')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn"><span class="material-icons" style="font-size:16px;">save</span> Salvar Ficha</button>
+        <button type="button" onclick="closeModal('adm-modal-aluno')" class="adm-btn adm-btn-outline">Cancelar</button>
+        <button type="submit" class="adm-btn"><span class="material-icons" style="font-size:16px;">save</span> Salvar Ficha</button>
       </div>
     </form>
   </div>
@@ -713,7 +779,8 @@
       style="margin-top:20px; max-height:400px; overflow-y:auto; border-top:1px solid #ccc; padding-top:20px; display:none;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
         <h4 style="margin:0; color:#333;">Resultados:
-          <span id="qtd-resultados" style="color:var(--dynamic-prim);">0</span> atleta(s)</h4>
+          <span id="qtd-resultados" style="color:var(--dynamic-prim);">0</span> atleta(s)
+        </h4>
         <button class="adm-btn" style="background:#ff5252; color:white; font-size:11px;" onclick="imprimirSuperRelatorio()"><span class="material-icons" style="font-size:14px;">picture_as_pdf</span> Imprimir PDF</button>
       </div>
       <table class="adm-table" id="tabela-resultados-rel">
@@ -751,6 +818,67 @@
     </form>
   </div>
 </div>
+
+<div id="adm-modal-turma" class="adm-modal">
+  <div class="adm-modal-box">
+    <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
+      <span id="titulo-modal-turma">Nova Turma</span>
+      <button type="button" onclick="closeModal('adm-modal-turma')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+    </div>
+    <form onsubmit="handleAdmForm(event, 'salvarTurma')">
+      <input type="hidden" name="turma_linha_id" id="turma_linha_id">
+      <input type="hidden" name="turma_id" id="turma_id">
+
+      <label class="adm-label">Nome da Turma*</label>
+      <input type="text" name="turma_nome" id="turma_nome" class="adm-input" placeholder="Ex: Muay Thai - Adulto Noite" required>
+
+      <div class="form-grid">
+        <div>
+          <label class="adm-label">Modalidade*</label>
+          <select name="turma_mod" id="turma_mod" class="adm-input" required></select>
+        </div>
+        <div>
+          <label class="adm-label">Faixa Etária</label>
+          <select name="turma_idade" id="turma_idade" class="adm-input">
+            <option value="Adulto">Adulto</option>
+            <option value="Infantil">Infantil</option>
+            <option value="Misto">Misto</option>
+          </select>
+        </div>
+      </div>
+
+      <label class="adm-label">Local Vinculado*</label>
+      <select name="turma_local" id="turma_local" class="adm-input" required></select>
+
+      <label class="adm-label">Dias da Semana*</label>
+      <input type="text" name="turma_dias" id="turma_dias" class="adm-input" placeholder="Ex: Seg, Qua, Sex" required>
+
+      <div class="form-grid">
+        <div>
+          <label class="adm-label">Horário Início*</label>
+          <input type="time" name="turma_inicio" id="turma_inicio" class="adm-input" required>
+        </div>
+        <div>
+          <label class="adm-label">Horário Fim*</label>
+          <input type="time" name="turma_fim" id="turma_fim" class="adm-input" required>
+        </div>
+      </div>
+
+      <label class="adm-label">Status</label>
+      <select name="turma_status" id="turma_status" class="adm-input">
+        <option value="Ativa">Ativa</option>
+        <option value="Inativa">Inativa</option>
+      </select>
+
+      <div
+        style="display:flex; justify-content:flex-end; gap:10px; margin-top:25px; border-top: 1px solid #ddd; padding-top: 15px;">
+        <button type="button" onclick="closeModal('adm-modal-turma')" class="adm-btn adm-btn-outline">Cancelar</button>
+        <button type="submit" class="adm-btn">Salvar Turma</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div id="adm-modal-grad" class="adm-modal">
   <div class="adm-modal-box">
     <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
@@ -898,7 +1026,7 @@
 </div>
 
 <script>
-  var cache = { alunos: [], videos: [], locais: [], cursos: [], lib: [], prog: [], certificados: [], graduacoesObj: [], modalidadesGlobais: [], pacotes: [] };
+  var cache = { alunos: [], videos: [], locais: [], cursos: [], lib: [], prog: [], certificados: [], graduacoesObj: [], modalidadesGlobais: [], pacotes: [], turmas: [] };
     const userSessionLocal = JSON.parse(localStorage.getItem('userSession') || '{}');
     const editorLogin = userSessionLocal.LOGIN || 'Admin';
 
@@ -921,6 +1049,7 @@
         if(tabName === 'programas') carregarProg();
         if(tabName === 'config') carregarConfig();
         if(tabName === 'certificados') carregarCertificados();
+        if(tabName === 'turmas') carregarTurmas();
       } catch(e) { console.error("Erro navAdmin:", e); }
     }
 
@@ -950,6 +1079,8 @@
                 if(func==='salvarAluno') { closeModal('adm-modal-aluno'); carregarAlunos(); }
                 if(func==='salvarLocal') { closeModal('adm-modal-local'); carregarLocais(); }
                 if(func==='salvarPacote') { closeModal('adm-modal-pacote'); carregarPacotes(); }
+                if(func==='salvarTurma') { closeModal('adm-modal-turma'); carregarTurmas(); }
+
             } 
         }).withFailureHandler(err => { alert("Erro: "+err.message); btn.disabled=false; btn.innerHTML=original; })[func](formData); 
     }
@@ -983,51 +1114,48 @@
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum aluno encontrado.</td></tr>';
                 return;
             }
-            tbody.innerHTML = "";
-            lista.forEach(function(a) {
-                let statusClass = (String(a.status).toLowerCase() === 'inativo') ? 'bg-red' : 'bg-green';
-                let dataInicio = a.carimbo ? String(a.carimbo).split(' ')[0] : '--';
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>
-                      <b style="font-size:14px; color:#222;">${esc(a.login)}</b><br>
-                      <small style="color:#666;">${esc(a.nome)}</small>
-                    </td>
-                    <td>
-                      <span style="font-size:11px; font-weight:bold; color:#0056b3;">Idade: ${a.idadeExata || '--'}</span><br>
-                      <small style="font-weight:700;">${a.peso || '--'}kg | ${a.altura || '--'}m</small><br>
-                      <small style="color:#999; font-size:9px;">Início: ${dataInicio}</small>
-                    </td>
-                    <td>
-                      <b style="font-size:12px;">${esc(a.graduacao)}</b><br>
-                      <span class="adm-badge bg-dark" style="font-size:9px;">🛡️ ${esc(a.modalidade)}</span>
-                    </td>
-                    <td>
-                      <span class="adm-badge ${statusClass}">${esc(a.status)}</span><br>
-                      <small style="font-weight:bold; color:#555;">${a.totalAulas} Aulas Oficiais</small>
-                    </td>
-                    <td>
-                      <button class="adm-btn" onclick="prepEditAluno(${a.id})">
-                        <span class="material-icons" style="font-size:14px">edit</span>
-                      </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+            renderAlunosTable(lista);
         }).listarAlunosAdmin();
     }
 
     function filtrarAlunos() {
         const termo = document.getElementById('search-alunos').value.toLowerCase();
         const filtrados = cache.alunos.filter(a => String(a.nome).toLowerCase().includes(termo) || String(a.login).toLowerCase().includes(termo) || String(a.cpf).toLowerCase().includes(termo));
-        
+        renderAlunosTable(filtrados);
+    }
+
+    function renderAlunosTable(lista) {
         const tbody = document.getElementById('lista-alunos-body');
         tbody.innerHTML = "";
-        filtrados.forEach(function(a) {
+        lista.forEach(function(a) {
             let statusClass = (String(a.status).toLowerCase() === 'inativo') ? 'bg-red' : 'bg-green';
             let dataInicio = a.carimbo ? String(a.carimbo).split(' ')[0] : '--';
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td><b style="font-size:14px; color:#222;">${esc(a.login)}</b><br><small style="color:#666;">${esc(a.nome)}</small></td><td><span style="font-size:11px; font-weight:bold; color:#0056b3;">Idade: ${a.idadeExata || '--'}</span><br><small style="font-weight:700;">${a.peso || '--'}kg | ${a.altura || '--'}m</small><br><small style="color:#999; font-size:9px;">Início: ${dataInicio}</small></td><td><b style="font-size:12px;">${esc(a.graduacao)}</b><br><span class="adm-badge bg-dark" style="font-size:9px;">🛡️ ${esc(a.modalidade)}</span></td><td><span class="adm-badge ${statusClass}">${esc(a.status)}</span><br><small style="font-weight:bold; color:#555;">${a.totalAulas} Aulas</small></td><td><button class="adm-btn" onclick="prepEditAluno(${a.id})"><span class="material-icons" style="font-size:14px">edit</span></button></td>`;
+            
+            // Design exato do GestaoAlunos
+            tr.innerHTML = `
+                <td>
+                  <b style="font-size:14px; color:#222;">${esc(a.nome || '---')}</b><br>
+                  <small style="color:#666;">@${esc(a.login)}</small>
+                </td>
+                <td>
+                  <span style="font-size:11px; font-weight:bold; color:#0056b3;">Idade: ${a.idadeExata || 'Data nascimento não preenchida ...'}</span><br>
+                  <small style="font-weight:700;">${String(a.peso || '0 ').replace('.',',')}kg | ${String(a.altura || '0 ').replace('.',',')}m</small><br>
+                </td>
+                <td>
+                  <span style="color:#2196f3; font-weight:bold; font-size:11px;">🎓 ${esc(a.turma || 'Sem Turma')}</span><br>
+                  <b style="font-size:12px;">${esc(a.graduacao)}</b><br>
+                  <span class="adm-badge bg-dark" style="font-size:9px;">🛡️ ${esc(a.modalidade || 'Sem Modalidade')}</span>
+                </td>
+                <td>
+                  <span class="adm-badge ${statusClass}">${esc(a.status)}</span><br>
+                  <small style="font-weight:bold; color:#555;">${a.totalAulas} Aulas Assistidas</small><br>
+                  <small style="color:#999; font-size:9px;">Inscrito em: ${dataInicio}</small>
+                </td>
+                <td>
+                  <button class="adm-btn" onclick="prepEditAluno(${a.id})"><span class="material-icons" style="font-size:14px">edit</span></button>
+                </td>
+            `;
             tbody.appendChild(tr);
         });
     }
@@ -1075,13 +1203,22 @@
 
     function prepEditAluno(id) {
         const d = cache.alunos.find(a => a.id === id);
-        if(!d) {
-           console.error("Aluno não encontrado no cache.");
-           return;
-        }
+        if(!d) { console.error("Aluno não encontrado no cache."); return; }
 
-        document.getElementById('titulo-modal-aluno').innerText = "Editando: " + d.nome;
-        const v = (val) => (val === undefined || val === null) ? "" : val;
+        document.getElementById('titulo-modal-aluno').innerText = "Editando: " + (d.nome || d.login);
+        
+        // 🚀 O MOTOR UX: "Campo Vazio"
+        const setVal = (idInput, val) => {
+            const el = document.getElementById(idInput);
+            if(!el) return;
+            if(val === undefined || val === null || String(val).trim() === "") {
+                el.value = "";
+                el.placeholder = "Campo Vazio"; // Aviso visual elegante
+            } else {
+                el.value = val;
+            }
+        };
+
         const dF = (val) => {
             if(!val || val === "") return "";
             if(val.includes('/')) { const p = val.split('/'); return p[2]+"-"+p[1]+"-"+p[0]; }
@@ -1089,34 +1226,49 @@
         };
 
         document.getElementById('aluno_id').value = d.id;
-        document.getElementById('aluno_carimbo').value = v(d.carimbo);
-        document.getElementById('aluno_nome').value = v(d.nome);
-        document.getElementById('aluno_cpf').value = v(d.cpf);
-        document.getElementById('aluno_nasc').value = dF(d.nasc);
-        document.getElementById('aluno_tel').value = v(d.tel);
-        document.getElementById('aluno_email').value = v(d.email);
-        document.getElementById('aluno_pai').value = v(d.pai);
-        document.getElementById('aluno_mae').value = v(d.mae);
-        document.getElementById('aluno_end').value = v(d.endereco);
-        document.getElementById('aluno_foto').value = v(d.foto);
-        document.getElementById('aluno_login').value = v(d.login);
-        document.getElementById('aluno_senha').value = v(d.senha);
-        document.getElementById('aluno_status').value = v(d.status) || "Ativo";
-        document.getElementById('aluno_nivel').value = v(d.nivel) || "Aluno";
-        document.getElementById('aluno_peso').value = String(v(d.peso)).replace(',','.');
-        document.getElementById('aluno_altura').value = String(v(d.altura)).replace(',','.');
-        document.getElementById('aluno_exame').value = dF(d.proxExame);
-        document.getElementById('aluno_data_cart').value = dF(d.dataCarteira);
+        setVal('aluno_carimbo', d.carimbo);
+        setVal('aluno_nome', d.nome);
+        setVal('aluno_cpf', d.cpf);
+        setVal('aluno_nasc', dF(d.nasc));
+        setVal('aluno_tel', d.tel);
+        setVal('aluno_email', d.email);
+        setVal('aluno_pai', d.pai);
+        setVal('aluno_mae', d.mae);
+        setVal('aluno_end', d.endereco);
+        setVal('aluno_foto', d.foto);
+        setVal('aluno_login', d.login);
+        setVal('aluno_senha', d.senha);
+        setVal('aluno_peso', String(d.peso || "").replace(',','.'));
+        setVal('aluno_altura', String(d.altura || "").replace(',','.'));
+        setVal('aluno_exame', dF(d.proxExame));
+        setVal('aluno_data_cart', dF(d.dataCarteira));
         
-        document.getElementById('aluno_vencimento').value = dF(d.vencimento);
-        document.getElementById('aluno_status_assinatura').value = v(d.statusAssinatura) || "Ativo";
+        document.getElementById('aluno_status').value = d.status || "Ativo";
+        
+        // Ajuste no Nível
+        let n = String(d.nivel || "Aluno").toUpperCase();
+        if(n.includes("MESTRE")) n = "Mestre";
+        else if(n.includes("PROFESSOR")) n = "Professor";
+        else if(n.includes("N1")) n = "Instrutor N1";
+        else if(n.includes("N2")) n = "Instrutor N2";
+        else if(n.includes("N3")) n = "Instrutor N3";
+        else if(n.includes("ADMIN")) n = "Admin";
+        else n = "Aluno";
+        document.getElementById('aluno_nivel').value = n;
 
+        // 🚀 CASCATA: Local -> Turma
         google.script.run.withSuccessHandler(ac => {
             const s = document.getElementById('aluno_acad');
             s.innerHTML = '<option value="" disabled>Selecione...</option>';
             ac.forEach(x => { const o = new Option(x, x); if(x===d.academia) o.selected=true; s.add(o); });
+            
+            // Dispara a busca das turmas vinculadas ao local escolhido
+            carregarTurmasSelectParaAlunos(d.academia, d.turma);
         }).getListaAcademias();
         
+        // Financeiro & Outros
+        setVal('aluno_vencimento', dF(d.vencimento));
+        document.getElementById('aluno_status_assinatura').value = d.statusAssinatura || "Ativo";
         google.script.run.withSuccessHandler(pac => { 
             const sel = document.getElementById('aluno_pacote'); sel.innerHTML = '<option value="">Sem Pacote</option>'; 
             pac.forEach(p => { const opt = new Option(p.nome_pacote, p.nome_pacote); if(p.nome_pacote === d.pacote) opt.selected = true; sel.add(opt); }); 
@@ -1127,36 +1279,6 @@
         popularModalidadesCheckbox(d.modalidade);
 
         document.getElementById('adm-modal-aluno').style.display = 'flex';
-    }
-
-    function abrirSuperRelatorio() {
-        document.getElementById('adm-modal-relatorio').style.display = 'flex';
-        document.getElementById('resultado-relatorio').style.display = 'none';
-        document.getElementById('form-super-relatorio').reset();
-        
-        google.script.run.withSuccessHandler(lista => {
-            const selMod = document.getElementById('rel_mod');
-            if(selMod) {
-                selMod.innerHTML = '<option value="">Todas as Modalidades</option>';
-                lista.forEach(m => selMod.add(new Option(m, m)));
-            }
-        }).getListaModalidades();
-
-        google.script.run.withSuccessHandler(gr => {
-            const selGrad = document.getElementById('rel_grad');
-            if(selGrad) {
-                selGrad.innerHTML = '<option value="">Todas as Graduações</option>';
-                gr.forEach(g => selGrad.add(new Option(g.graduacao + (g.modalidade !== 'Geral' ? ` (${g.modalidade})` : ''), g.graduacao)));
-            }
-        }).listarGraduacoesAdminCompleto();
-
-        google.script.run.withSuccessHandler(academias => {
-            const selAcad = document.getElementById('rel_acad');
-            if(selAcad) {
-                selAcad.innerHTML = '<option value="">Todas as Academias</option>';
-                academias.forEach(ac => selAcad.add(new Option(ac, ac)));
-            }
-        }).getListaAcademias();
     }
 
     function gerarSuperRelatorio(e) {
@@ -1408,9 +1530,94 @@
     function carregarConfig() { google.script.run.withSuccessHandler(cfg => { document.getElementById('cfg_icon').value = cfg.iconId || ''; document.getElementById('cfg_bg').value = cfg.bgId || ''; document.getElementById('cfg_color').value = cfg.primaryColor || '#FFD700'; document.getElementById('cfg_color_sec').value = cfg.secondaryColor || '#1e1e1e'; document.getElementById('cfg_color_text').value = cfg.textColor || '#ffffff'; document.getElementById('cfg_color_btn_text').value = cfg.btnTextColor || '#000000'; document.getElementById('cfg_color_bg').value = cfg.bgColor || '#121212'; document.getElementById('cfg_link_loja').value = cfg.linkLoja || ''; document.getElementById('cfg_link_insta').value = cfg.linkInstagram || ''; document.getElementById('cfg_link_yt').value = cfg.linkYouTube || ''; document.getElementById('cfg_link_cad').value = cfg.linkCadastro || ''; document.getElementById('cfg_nome_acad').value = cfg.nomeAcademia || ''; document.getElementById('cfg_pix_global').value = cfg.pixGlobal || 'Nao'; document.getElementById('cfg_pix_chave').value = cfg.pixChave || ''; document.getElementById('cfg_pix_nome').value = cfg.pixNome || ''; document.getElementById('cfg_pix_cidade').value = cfg.pixCidade || ''; }).getAppConfig(); }
 
     function aplicarTema(primaria, secundaria, texto, textoBotao, fundo) { document.getElementById('cfg_color').value = primaria; document.getElementById('cfg_color_sec').value = secundaria; document.getElementById('cfg_color_text').value = texto; document.getElementById('cfg_color_btn_text').value = textoBotao; document.getElementById('cfg_color_bg').value = fundo; }
-    
+    // ============================================================================
+    // 🏫 ENGINE DE TURMAS
+    // ============================================================================
+    function carregarTurmas() {
+        const tbody = document.getElementById('lista-turmas-body');
+        if(!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Sincronizando...</td></tr>';
+        
+        google.script.run.withSuccessHandler(lista => { 
+            cache.turmas = lista; 
+            renderTurmas(lista);
+        }).listarTurmasAdmin();
+    }
+
+    function renderTurmas(lista) {
+        const tbody = document.getElementById('lista-turmas-body');
+        tbody.innerHTML = "";
+        if(!lista || lista.length === 0) { 
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhuma turma cadastrada.</td></tr>'; 
+            return; 
+        }
+        
+        lista.forEach(t => { 
+            let statusClass = (t.status === 'Inativa') ? 'bg-red' : 'bg-green';
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${esc(t.nome)}</b><br><small style="color:#666;">🛡️ ${esc(t.modalidade)}</small></td>
+                <td><b style="color:#0056b3;">${esc(t.local)}</b><br><small>Idade: ${esc(t.faixaEtaria)}</small></td>
+                <td><span class="adm-badge bg-dark">${esc(t.dias)}</span><br><small>${esc(t.inicio)} às ${esc(t.fim)}</small></td>
+                <td><span class="adm-badge ${statusClass}">${esc(t.status)}</span></td>
+                <td><button class="adm-btn" onclick='prepEditTurma(${JSON.stringify(t)})'><span class="material-icons" style="font-size:14px">edit</span></button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function filtrarTurmas() {
+        const termo = document.getElementById('search-turmas').value.toLowerCase();
+        const filtrados = cache.turmas.filter(t => String(t.nome).toLowerCase().includes(termo) || String(t.modalidade).toLowerCase().includes(termo));
+        renderTurmas(filtrados);
+    }
+
+    function abrirModalTurma() {
+        document.getElementById('adm-modal-turma').style.display = 'flex';
+        document.querySelector('#adm-modal-turma form').reset();
+        document.getElementById('turma_linha_id').value = "";
+        document.getElementById('turma_id').value = "";
+        document.getElementById('titulo-modal-turma').innerText = "Nova Turma";
+        
+        // Puxa Locais e Modalidades (Aproveita as funções que já existem!)
+        popularSelectModalidadesPuras('turma_mod');
+        google.script.run.withSuccessHandler(ac => {
+            const s = document.getElementById('turma_local');
+            s.innerHTML = ac.map(x => `<option value="${x}">${x}</option>`).join('');
+        }).getListaAcademias();
+    }
+
+    function prepEditTurma(t) {
+        abrirModalTurma();
+        document.getElementById('titulo-modal-turma').innerText = "Editar Turma: " + t.nome;
+        
+        document.getElementById('turma_linha_id').value = t.idLinha;
+        document.getElementById('turma_id').value = t.idTurma;
+        document.getElementById('turma_nome').value = t.nome;
+        document.getElementById('turma_idade').value = t.faixaEtaria;
+        document.getElementById('turma_dias').value = t.dias;
+        document.getElementById('turma_inicio').value = t.inicio;
+        document.getElementById('turma_fim').value = t.fim;
+        document.getElementById('turma_status').value = t.status;
+
+        setTimeout(() => { document.getElementById('turma_mod').value = t.modalidade || "Geral"; }, 600);
+        setTimeout(() => { document.getElementById('turma_local').value = t.local || "Matriz"; }, 800);
+    }
     function closeModal(id) { const modal = document.getElementById(id); if(modal) modal.style.display = 'none'; }
     function esc(t) { if(!t) return ""; return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-    
+    // --- LÓGICA DE TURMAS NO CRM ADMIN ---
+    function carregarTurmasSelectParaAlunos(localSelecionado, turmaAtual) {
+        const selTurma = document.getElementById('aluno_turma');
+        selTurma.innerHTML = '<option value="">Carregando...</option>';
+        google.script.run.withSuccessHandler(turmas => {
+            selTurma.innerHTML = '<option value="">Sem Turma</option>';
+            const filtradas = turmas.filter(t => t.local === localSelecionado && t.status === 'Ativa');
+            filtradas.forEach(t => {
+                const opt = new Option(t.nome, t.nome);
+                if (t.nome === turmaAtual) opt.selected = true;
+                selTurma.add(opt);
+            });
+        }).listarTurmasAdmin();
+    }
     window.onload = () => carregarAlunos();
 </script>
