@@ -535,15 +535,7 @@
     google.script.run.withSuccessHandler(function(info) {
       const container = document.getElementById('area-pagamento-aluno');
       
-      // Validação 1: Sem retorno do servidor
-      if (!info) { 
-        document.getElementById('btn-cobranca-wpp').style.display = "flex";
-        return; 
-      }
-
-      // Validação 2: Chave PIX ausente na planilha (Config_App ou Locais)
-      if (!info.chave || info.chave === "undefined" || info.chave.trim() === "") {
-        console.warn("Chave PIX ausente no banco de dados.");
+      if (!info || !info.chave || info.chave.trim() === "") {
         document.getElementById('btn-cobranca-wpp').style.display = "flex";
         return;
       }
@@ -554,8 +546,9 @@
         const valorStr = parseFloat(info.valor || 0).toFixed(2);
         const beneficiario = (info.beneficiario || "Academia").substring(0, 25); 
         const cidade = (info.cidade || "Cidade").substring(0, 15); 
+        const banco = info.banco || "Instituição Bancária";
         
-        // Payload Seguro BCB
+        // Payload Seguro BCB (Este é o código Copia e Cola!)
         let payload = "00020101021126"; 
         let merchantInfo = "0014br.gov.bcb.pix01" + tamChave + chave;
         payload += merchantInfo.length.toString().padStart(2, '0') + merchantInfo;
@@ -564,24 +557,39 @@
         payload += "60" + cidade.length.toString().padStart(2, '0') + cidade; 
         payload += "62070503***6304"; 
 
-        // Criação de elementos DOM para evitar erro de Token 'class' (Injeção Segura)
         const pixBox = document.createElement('div');
         pixBox.className = 'pix-box';
+        pixBox.style = 'border: 2px solid var(--dynamic-prim); background: rgba(0,0,0,0.2);';
         
         const infoTitle = document.createElement('p');
         infoTitle.className = 'pix-info';
-        infoTitle.innerText = 'Escaneie para pagar via PIX:';
+        infoTitle.style.color = 'var(--dynamic-text)';
+        infoTitle.innerText = 'Escaneie ou Copie o Código PIX:';
         
         const img = document.createElement('img');
         img.src = "https://quickchart.io/qr?text=" + encodeURIComponent(payload) + "&size=250&margin=1";
         img.className = "qr-code-img";
+        img.style.borderRadius = "12px";
         
-        const details = document.createElement('p');
-        details.style = "font-size:11px; color:#666; margin-top:5px;";
-        details.innerHTML = "<b>Valor:</b> R$ " + valorStr + " | <b>Titular:</b> " + beneficiario;
+        const details = document.createElement('div');
+        details.style = "font-size:0.8rem; color:var(--dynamic-text); opacity:0.8; margin:10px 0; line-height:1.5;";
+        details.innerHTML = `<b>Valor:</b> R$ ${valorStr}<br><b>Recebedor:</b> ${beneficiario}<br><b>Chave:</b> ${chave}<br><b>Banco:</b> ${banco}`;
         
+        // 🚀 BOTÃO COPIA E COLA
+        const btnCopy = document.createElement('button');
+        btnCopy.className = "btn-whatsapp"; // Aproveita o estilo bonito do botão
+        btnCopy.style.backgroundColor = "var(--dynamic-prim)";
+        btnCopy.style.color = "var(--dynamic-btn-text)";
+        btnCopy.innerHTML = '<span class="material-icons">content_copy</span> PIX COPIA E COLA';
+        btnCopy.onclick = function() {
+            navigator.clipboard.writeText(payload).then(() => {
+                alert("✅ Código PIX Copiado! Abra o app do seu banco e cole.");
+            }).catch(err => alert("Erro ao copiar. Tente selecionar o código manualmente."));
+        };
+
         const btnWpp = document.createElement('button');
         btnWpp.className = "btn-whatsapp";
+        btnWpp.style.marginTop = "10px";
         btnWpp.innerHTML = '<span class="material-icons">send</span> ENVIAR COMPROVANTE';
         btnWpp.onclick = function() {
             window.open("https://wa.me/" + info.contatoWhatsApp + "?text=Ol%C3%A1!%20Segue%20meu%20comprovante%20de%20pagamento%20PIX%20de%20R$%20" + valorStr);
@@ -590,13 +598,11 @@
         pixBox.appendChild(infoTitle);
         pixBox.appendChild(img);
         pixBox.appendChild(details);
+        pixBox.appendChild(btnCopy);
         pixBox.appendChild(btnWpp);
         
         container.appendChild(pixBox);
-
-      } catch (err) {
-        console.error("Erro na montagem do PIX:", err.message);
-      }
+      } catch (err) { console.error("Erro na montagem do PIX:", err.message); }
     }).getPixDataFromServer(login);
   }
 

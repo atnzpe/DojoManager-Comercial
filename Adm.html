@@ -739,11 +739,12 @@
         </div>
 
         <div class="form-grid">
-          <div>
-            <label class="adm-label">Academia Vinculada</label>
-            <select id="aluno_acad" name="aluno_acad" class="adm-input" onchange="carregarTurmasSelectParaAlunos(this.value, '')"></select>
+          <div class="form-full">
+            <label class="adm-label">Academias Vinculadas (Múltiplas)</label>
+            <div id="container-acad-aluno" class="checkbox-grid"></div>
+            <input type="hidden" name="aluno_acad" id="aluno_acad">
           </div>
-          <div>
+          <div class="form-full">
             <label class="adm-label" style="color:#2196f3;">Turma Oficial</label>
             <select id="aluno_turma" name="aluno_turma" class="adm-input" style="border: 1px solid #2196f3;"><option value="">Sem Turma</option></select>
           </div>
@@ -881,7 +882,7 @@
       <button type="button" onclick="closeModal('adm-modal-turma')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
     </div>
 
-    <form onsubmit="handleAdmForm(event, 'salvarTurma')">
+    <form onsubmit="interceptarSalvarTurma(event)">
       <input type="hidden" name="turma_linha_id" id="turma_linha_id">
       <input type="hidden" name="turma_id" id="turma_id">
 
@@ -928,9 +929,20 @@
           <label class="adm-label">Local Vinculado*</label>
           <select name="turma_local" id="turma_local" class="adm-input" required></select>
         </div>
-        <div>
+        <input type="hidden" name="turma_dias" id="turma_dias">
+
+        <div class="form-full">
           <label class="adm-label">Dias da Semana*</label>
-          <input type="text" name="turma_dias" id="turma_dias" class="adm-input" placeholder="Ex: Seg, Qua, Sex" required>
+          <div id="container-dias-turma" class="checkbox-grid">
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Segunda"> Seg</label>
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Terça"> Ter</label>
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Quarta"> Qua</label>
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Quinta"> Qui</label>
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Sexta"> Sex</label>
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Sábado"> Sáb</label>
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Domingo"> Dom</label>
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Todos"> Todos</label>
+          </div>
         </div>
       </div>
 
@@ -983,44 +995,91 @@
     </form>
   </div>
 </div>
+
 <div id="adm-modal-local" class="adm-modal">
   <div class="adm-modal-box">
     <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
-      <span>Academia / Local</span><button type="button" onclick="closeModal('adm-modal-local')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+      <span>Infraestrutura / Prédio</span>
+      <button type="button" onclick="closeModal('adm-modal-local')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
     </div>
+
+    <div
+      style="font-size: 11px; color:#666; margin-bottom: 15px; border-left: 3px solid var(--dynamic-prim); padding-left: 10px;">
+      <b>Dica do Sistema:</b> Não é necessário inserir dias ou horários aqui. A agenda é gerada automaticamente baseada
+      nas <b>Turmas</b> vinculadas a este local.
+    </div>
+
     <form id="form-locais" onsubmit="handleAdmForm(event, 'salvarLocal')">
-      <input type="hidden" name="loc_id" id="loc_id"><input type="hidden" name="editor_login" id="loc_editor_login"><label class="adm-label">Nome do Local*</label><input type="text" name="loc_nome" id="loc_nome" class="adm-input" required>
+      <input type="hidden" name="loc_id" id="loc_id">
+      <input type="hidden" name="editor_login" id="loc_editor_login">
+
+      <label class="adm-label">Nome Oficial do Local*</label>
+      <input type="text" name="loc_nome" id="loc_nome" class="adm-input" required placeholder="Ex: CT Matriz - Absolute">
+
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-        <div><label class="adm-label">Responsável</label><input type="text" name="loc_resp" id="loc_resp" class="adm-input">
+        <div>
+          <label class="adm-label">Responsável / Diretor</label>
+          <input type="text" name="loc_resp" id="loc_resp" class="adm-input" placeholder="Campo vazio na base de dados">
         </div>
         <div>
-          <label class="adm-label">Status</label><select name="loc_status" id="loc_status" class="adm-input"><option value="Ativo">✅ Ativo</option><option value="Inativo">❌ Inativo</option></select>
+          <label class="adm-label">Status da Unidade</label>
+          <select name="loc_status" id="loc_status" class="adm-input">
+            <option value="Ativo">✅ Ativo (Aberto)</option>
+            <option value="Inativo">❌ Inativo (Fechado)</option>
+          </select>
         </div>
       </div>
-      <label class="adm-label">Cidade/Estado</label><input type="text" name="loc_cidade" id="loc_cidade" class="adm-input"><label class="adm-label">Endereço</label><input type="text" name="loc_end" id="loc_end" class="adm-input"><label class="adm-label">Contato</label><input type="text" name="loc_contato" id="loc_contato" class="adm-input">
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-        <div><label class="adm-label">Dias</label><input type="text" name="loc_dias" id="loc_dias" class="adm-input">
+
+      <div style="display:grid; grid-template-columns: 1fr 2fr; gap:10px; margin-top: 10px;">
+        <div>
+          <label class="adm-label">Cidade / Estado</label>
+          <input type="text" name="loc_cidade" id="loc_cidade" class="adm-input" placeholder="Ex: Recife - PE">
         </div>
-        <div><label class="adm-label">Horários</label><input type="text" name="loc_horas" id="loc_horas" class="adm-input">
+        <div>
+          <label class="adm-label">Endereço Completo</label>
+          <input type="text" name="loc_end" id="loc_end" class="adm-input" placeholder="Rua, Número, Bairro">
         </div>
       </div>
-      <label class="adm-label">Link Maps</label><input type="text" name="loc_maps" id="loc_maps" class="adm-input"><label class="adm-label">HTML Iframe</label><input type="text" name="loc_iframe" id="loc_iframe" class="adm-input">
-      <div style="background:#e3f2fd; padding:15px; border-radius:8px; border:1px solid #bbdefb; margin-top: 15px;">
-        <h4 style="margin:0 0 10px 0; color:#1565c0;">Dados de Recebimento (PIX do Local)</h4>
-        <label class="adm-label">Chave PIX do Professor</label><input type="text" name="loc_pix_chave" id="loc_pix_chave" class="adm-input">
+
+      <label class="adm-label">Telefone da Recepção (WhatsApp)</label>
+      <input type="text" name="loc_contato" id="loc_contato" class="adm-input" placeholder="Campo vazio na base de dados">
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 10px;">
+        <div>
+          <label class="adm-label">Link Maps (Para botão ROTA)</label>
+          <input type="text" name="loc_maps" id="loc_maps" class="adm-input" placeholder="Campo vazio na base de dados">
+        </div>
+        <div>
+          <label class="adm-label">IFrame do Maps (Embed)</label>
+          <input type="text" name="loc_iframe" id="loc_iframe" class="adm-input" placeholder="<iframe src='...'>">
+        </div>
+      </div>
+
+      <div style="background:#e3f2fd; padding:15px; border-radius:8px; border:1px solid #bbdefb; margin-top: 20px;">
+        <h4 style="margin:0 0 10px 0; color:#1565c0;">💰 Dados de Recebimento (PIX Independente)</h4>
+        <label class="adm-label">Chave PIX da Unidade</label>
+        <input type="text" name="loc_pix_chave" id="loc_pix_chave" class="adm-input" placeholder="Campo vazio na base de dados">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <div><label class="adm-label">Nome do Titular</label><input type="text" name="loc_pix_nome" id="loc_pix_nome" class="adm-input" maxlength="25">
+          <div>
+            <label class="adm-label">Nome do Titular</label>
+            <input type="text" name="loc_pix_nome" id="loc_pix_nome" class="adm-input" maxlength="25" placeholder="Campo vazio na base de dados">
           </div>
-          <div><label class="adm-label">Cidade</label><input type="text" name="loc_pix_cidade" id="loc_pix_cidade" class="adm-input" maxlength="15">
+          <div>
+            <label class="adm-label">Cidade da Conta</label>
+            <input type="text" name="loc_pix_cidade" id="loc_pix_cidade" class="adm-input" maxlength="15" placeholder="Campo vazio na base de dados">
           </div>
         </div>
       </div>
+
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
-        <button type="button" onclick="closeModal('adm-modal-local')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+        <button type="button" onclick="closeModal('adm-modal-local')" class="adm-btn adm-btn-outline">Cancelar</button>
+        <button type="submit" class="adm-btn">Salvar Unidade</button>
       </div>
     </form>
   </div>
 </div>
+
+
 <div id="adm-modal-video" class="adm-modal">
   <div class="adm-modal-box">
     <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
@@ -1196,26 +1255,33 @@
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum aluno encontrado.</td></tr>';
                 return;
             }
-            renderAlunosTable(lista);
+            filtrarAlunos(); // 🚨 Aplica o filtro de cara para Instrutores só verem a sua base!
         }).listarAlunosAdmin();
     }
 
-    // --- MOTOR DO FILTRO TRIPLO DE ALUNOS ---
     function initFiltrosAlunosAdm() {
         google.script.run.withSuccessHandler(ac => {
             const s = document.getElementById('filter-acad-alunos');
-            s.innerHTML = '<option value="">Todas as Academias</option>' + ac.map(x => `<option value="${x}">${x}</option>`).join('');
+            const isGod = userSessionLocal.isAdmin;
+            const myAcads = userSessionLocal.academia ? userSessionLocal.academia.split(',').map(a => a.trim()) : [];
+            
+            if(isGod) {
+                s.innerHTML = '<option value="">Todas as Academias</option>' + ac.map(x => `<option value="${x}">${x}</option>`).join('');
+            } else {
+                s.innerHTML = '<option value="">Minhas Academias</option>' + myAcads.map(x => `<option value="${x}">${x}</option>`).join('');
+            }
         }).getListaAcademias();
+        
         google.script.run.withSuccessHandler(lista => {
             const s = document.getElementById('filter-mod-alunos');
             s.innerHTML = '<option value="">Todas as Modalidades</option>' + lista.map(x => `<option value="${x}">${x}</option>`).join('');
         }).getListaModalidades();
+        
         google.script.run.withSuccessHandler(tr => {
             cache.todasTurmas = tr || [];
             atualizarFiltroTurmasAdm();
         }).listarTurmasAdmin();
     }
-
 
     function atualizarFiltroTurmasAdm() {
         const acad = document.getElementById('filter-acad-alunos').value;
@@ -1232,12 +1298,23 @@
         const fAcad = document.getElementById('filter-acad-alunos').value.toLowerCase();
         const fMod = document.getElementById('filter-mod-alunos').value.toLowerCase();
         const fTurma = document.getElementById('filter-turma-alunos').value.toLowerCase();
+        
+        const isGod = userSessionLocal.isAdmin;
+        const myAcads = userSessionLocal.academia ? userSessionLocal.academia.split(',').map(a => a.trim().toLowerCase()) : [];
+
         const filtrados = cache.alunos.filter(a => {
             const matchTermo = String(a.nome).toLowerCase().includes(termo) || String(a.login).toLowerCase().includes(termo) || String(a.cpf).toLowerCase().includes(termo);
-            const matchAcad = fAcad === "" || String(a.academia || "").toLowerCase() === fAcad;
+            
+            const acadAlunoStr = String(a.academia || "").toLowerCase();
+            
+            // 🛡️ O Mestre vê todos, o Instrutor só vê alunos das academias dele
+            const hasAccess = isGod || myAcads.some(acad => acadAlunoStr.includes(acad));
+            
+            const matchAcad = fAcad === "" || acadAlunoStr.includes(fAcad);
             const matchMod = fMod === "" || String(a.modalidade || "").toLowerCase().includes(fMod);
             const matchTurma = fTurma === "" || String(a.turma || "").toLowerCase() === fTurma;
-            return matchTermo && matchAcad && matchMod && matchTurma;
+            
+            return matchTermo && matchAcad && matchMod && matchTurma && hasAccess;
         });
         renderAlunosTable(filtrados);
     }
@@ -1250,7 +1327,6 @@
             let dataInicio = a.carimbo ? String(a.carimbo).split(' ')[0] : '--';
             const tr = document.createElement('tr');
             
-            // Design exato do GestaoAlunos
             tr.innerHTML = `
                 <td>
                   <b style="font-size:14px; color:#222;">${esc(a.nome || '---')}</b><br>
@@ -1278,21 +1354,29 @@
         });
     }
 
-    function popularModalidadesCheckbox(modAtuais = "") {
-        const container = document.getElementById('container-modalidades-aluno');
+    // =========================================================
+    // 🏢 CHECKBOXES DE ACADEMIAS NO ALUNO
+    // =========================================================
+    function popularAcademiasCheckboxAluno(acadAtuais = "") {
+        const container = document.getElementById('container-acad-aluno');
+        if(!container) return;
         container.innerHTML = '<span style="font-size:11px;">Carregando...</span>';
-        google.script.run.withSuccessHandler(listaMods => {
+        google.script.run.withSuccessHandler(locais => {
             container.innerHTML = "";
-            const modsDoAluno = modAtuais.split(',').map(m => m.trim().toLowerCase());
-            listaMods.forEach(mod => {
-                const isChecked = modsDoAluno.includes(mod.toLowerCase()) ? "checked" : "";
-                const lbl = document.createElement('label');
-                lbl.className = 'mod-check-label';
-                lbl.innerHTML = `<input type="checkbox" name="aluno_modalidade" value="${mod}" ${isChecked} class="mod-check-input"> ${mod}`;
-                container.appendChild(lbl);
+            const acadDoAluno = acadAtuais.split(',').map(m => m.trim().toLowerCase());
+            locais.forEach(local => {
+                const isChecked = acadDoAluno.includes(local.toLowerCase()) ? "checked" : "";
+                container.innerHTML += `<label class='mod-check-label'><input type="checkbox" name="aluno_acad_chk" value="${local}" ${isChecked} class="mod-check-input" onchange="atualizarAcademiasHidden()"> ${local}</label>`;
             });
-            if(listaMods.length === 0) container.innerHTML = '<span style="font-size:11px; color:#888;">Nenhuma modalidade na aba Graduação.</span>';
-        }).getListaModalidades();
+            atualizarAcademiasHidden();
+        }).getListaAcademias();
+    }
+
+    function atualizarAcademiasHidden() {
+        const checkboxes = document.querySelectorAll('input[name="aluno_acad_chk"]:checked');
+        const selecionadas = Array.from(checkboxes).map(cb => cb.value).join(", ");
+        document.getElementById('aluno_acad').value = selecionadas;
+        carregarTurmasSelectParaAlunos(selecionadas, document.getElementById('aluno_turma').value);
     }
 
     function abrirModalNovoAluno() {
@@ -1303,11 +1387,7 @@
         document.getElementById('aluno_nivel').value = "Aluno";
         document.getElementById('titulo-modal-aluno').innerText = "Novo Aluno (CRM)";
         
-        google.script.run.withSuccessHandler(academias => {
-            const selAcad = document.getElementById('aluno_acad');
-            selAcad.innerHTML = '<option value="" disabled selected>Selecione...</option>';
-            academias.forEach(ac => selAcad.add(new Option(ac, ac)));
-        }).getListaAcademias();
+        popularAcademiasCheckboxAluno(""); // 🚨 Chama as caixinhas vazias
         
         google.script.run.withSuccessHandler(pacotes => { 
             const sel = document.getElementById('aluno_pacote'); sel.innerHTML = '<option value="">Nenhum / Sem Pacote</option>'; 
@@ -1321,20 +1401,15 @@
 
     function prepEditAluno(id) {
         const d = cache.alunos.find(a => a.id === id);
-        if(!d) { console.error("Aluno não encontrado no cache."); return; }
+        if(!d) return;
 
         document.getElementById('titulo-modal-aluno').innerText = "Editando: " + (d.nome || d.login);
         
-        // 🚀 O MOTOR UX: "Campo Vazio"
         const setVal = (idInput, val) => {
             const el = document.getElementById(idInput);
             if(!el) return;
-            if(val === undefined || val === null || String(val).trim() === "") {
-                el.value = "";
-                el.placeholder = "Campo Vazio"; // Aviso visual elegante
-            } else {
-                el.value = val;
-            }
+            if(val === undefined || val === null || String(val).trim() === "") { el.value = ""; el.placeholder = "Campo Vazio"; } 
+            else { el.value = val; }
         };
 
         const dF = (val) => {
@@ -1363,28 +1438,12 @@
         
         document.getElementById('aluno_status').value = d.status || "Ativo";
         
-        // Ajuste no Nível
         let n = String(d.nivel || "Aluno").toUpperCase();
-        if(n.includes("MESTRE")) n = "Mestre";
-        else if(n.includes("PROFESSOR")) n = "Professor";
-        else if(n.includes("N1")) n = "Instrutor N1";
-        else if(n.includes("N2")) n = "Instrutor N2";
-        else if(n.includes("N3")) n = "Instrutor N3";
-        else if(n.includes("ADMIN")) n = "Admin";
-        else n = "Aluno";
+        if(n.includes("MESTRE")) n = "Mestre"; else if(n.includes("PROFESSOR")) n = "Professor"; else if(n.includes("N1")) n = "Instrutor N1"; else if(n.includes("N2")) n = "Instrutor N2"; else if(n.includes("N3")) n = "Instrutor N3"; else if(n.includes("ADMIN")) n = "Admin"; else n = "Aluno";
         document.getElementById('aluno_nivel').value = n;
 
-        // 🚀 CASCATA: Local -> Turma
-        google.script.run.withSuccessHandler(ac => {
-            const s = document.getElementById('aluno_acad');
-            s.innerHTML = '<option value="" disabled>Selecione...</option>';
-            ac.forEach(x => { const o = new Option(x, x); if(x===d.academia) o.selected=true; s.add(o); });
-            
-            // Dispara a busca das turmas vinculadas ao local escolhido
-            carregarTurmasSelectParaAlunos(d.academia, d.turma);
-        }).getListaAcademias();
+        popularAcademiasCheckboxAluno(d.academia); // 🚨 Chama as caixinhas preenchidas
         
-        // Financeiro & Outros
         setVal('aluno_vencimento', dF(d.vencimento));
         document.getElementById('aluno_status_assinatura').value = d.statusAssinatura || "Ativo";
         google.script.run.withSuccessHandler(pac => { 
@@ -1397,6 +1456,20 @@
         popularModalidadesCheckbox(d.modalidade);
 
         document.getElementById('adm-modal-aluno').style.display = 'flex';
+    }
+
+    function popularModalidadesCheckbox(modAtuais = "") {
+        const container = document.getElementById('container-modalidades-aluno');
+        container.innerHTML = '<span style="font-size:11px;">Carregando...</span>';
+        google.script.run.withSuccessHandler(listaMods => {
+            container.innerHTML = "";
+            const modsDoAluno = modAtuais.split(',').map(m => m.trim().toLowerCase());
+            listaMods.forEach(mod => {
+                const isChecked = modsDoAluno.includes(mod.toLowerCase()) ? "checked" : "";
+                container.innerHTML += `<label class='mod-check-label'><input type="checkbox" name="aluno_modalidade" value="${mod}" ${isChecked} class="mod-check-input"> ${mod}</label>`;
+            });
+            if(listaMods.length === 0) container.innerHTML = '<span style="font-size:11px; color:#888;">Nenhuma modalidade na aba Graduação.</span>';
+        }).getListaModalidades();
     }
 
     function gerarSuperRelatorio(e) {
@@ -1426,7 +1499,7 @@
             const matchPeso = (peso >= pMin && peso <= pMax);
             const matchMod = mod === "" || (a.modalidade || "").toLowerCase().includes(mod);
             const matchGrad = grad === "" || (a.graduacao || "").toLowerCase().includes(grad);
-            const matchAcad = acad === "" || (a.academia || "").toLowerCase() === acad;
+            const matchAcad = acad === "" || (a.academia || "").toLowerCase().includes(acad);
 
             return matchIdade && matchPeso && matchMod && matchGrad && matchAcad && String(a.status).toLowerCase() === 'ativo';
         });
@@ -1527,19 +1600,6 @@
         }).listarGraduacoesAdminCompleto(); 
     }
 
-    function popularDatalistModalidades(id) {
-        const dl = document.getElementById(id);
-        if(!dl) return;
-        google.script.run.withSuccessHandler(lista => {
-            dl.innerHTML = '';
-            lista.forEach(m => { 
-                const opt = document.createElement('option'); 
-                opt.value = m; 
-                dl.appendChild(opt); 
-            });
-        }).getListaModalidades();
-    }
-
     function popularSelectResponsaveis(respAtual) {
         const sel = document.getElementById('turma_resp');
         sel.innerHTML = '<option value="">Selecione um Responsável...</option>';
@@ -1557,11 +1617,12 @@
         }
     }
 
+    // Modalidade "Geral" Fixada
     function popularSelectModalidadesPuras(selectId) {
         const select = document.getElementById(selectId);
         if (!select) return;
         google.script.run.withSuccessHandler(lista => {
-            select.innerHTML = '<option value="">Todas (Geral)</option>';
+            select.innerHTML = '<option value="Geral">Todas (Geral)</option>'; // 🚨 FIX
             lista.forEach(m => {
                 const opt = document.createElement('option');
                 opt.value = m;
@@ -1615,7 +1676,17 @@
         document.querySelector('#adm-modal-grad form').reset();
         document.getElementById('grad_linha_id').value = "";
         document.getElementById('titulo-modal-grad').innerText = "Nova Graduação";
-        popularDatalistModalidades('datalist-modalidades-grad');
+        
+        // Use a list de modalidades para gerar um Datalist
+        const dl = document.getElementById('datalist-modalidades-grad');
+        if(dl) {
+            google.script.run.withSuccessHandler(lista => {
+                dl.innerHTML = '';
+                lista.forEach(m => { 
+                    const opt = document.createElement('option'); opt.value = m; dl.appendChild(opt); 
+                });
+            }).getListaModalidades();
+        }
     }
 
     function prepEditGrad(g) {
@@ -1644,9 +1715,32 @@
     function abrirModalProg() { document.getElementById('adm-modal-prog').style.display='flex'; document.querySelector('#adm-modal-prog form').reset(); document.getElementById('prog_id').value=""; popularFaixasSelect('prog_faixa', ''); popularSelectModalidadesPuras('prog_mod'); }
     function prepEditProg(p) { abrirModalProg(); document.getElementById('prog_id').value=p.id; popularFaixasSelect('prog_faixa', p.faixa); document.getElementById('prog_link').value=p.link_original || ""; document.getElementById('prog_desc').value=p.descricao || ""; setTimeout(()=>{ document.getElementById('prog_mod').value = p.modalidade || "Geral"; }, 500); }
 
-    function carregarLocais() { document.getElementById('lista-locais-body').innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { cache.locais = lista; document.getElementById('lista-locais-body').innerHTML = lista.map(l => `<tr><td><b>${esc(l.nome)}</b><br><small>${esc(l.cidade)}</small></td><td>${esc(l.contato)}<br><small>Resp: ${esc(l.responsavel)}</small></td><td><span class="adm-badge ${l.status === 'Ativo' ? 'bg-green' : 'bg-red'}">${l.status}</span><br><span style="font-size:10px; color:#888;">PIX: ${l.Pix_Chave ? '✅' : '❌'}</span></td><td><button class="adm-btn" onclick='prepEditLocal(${JSON.stringify(l)})'>EDITAR</button></td></tr>`).join(''); }).listarLocaisAdmin(); }
+    function carregarLocais() { document.getElementById('lista-locais-body').innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { cache.locais = lista; document.getElementById('lista-locais-body').innerHTML = lista.map(l => `<tr><td><b>${esc(l.nome)}</b><br><small>${esc(l.cidade)}</small></td><td>${esc(l.contato)}<br><small>Resp: ${esc(l.responsavel)}</small></td><td><span class="adm-badge ${l.status === 'Ativo' ? 'bg-green' : 'bg-red'}">${l.status}</span><br><span style="font-size:10px; color:#888;">PIX: ${l.pixChave ? '✅' : '❌'}</span></td><td><button class="adm-btn" onclick='prepEditLocal(${JSON.stringify(l)})'>EDITAR</button></td></tr>`).join(''); }).listarLocaisAdmin(); }
     function openModalLocal() { document.getElementById('form-locais').reset(); document.getElementById('loc_id').value = ""; document.getElementById('loc_status').value = "Ativo"; document.getElementById('loc_editor_login').value = editorLogin; document.getElementById('adm-modal-local').style.display = 'flex'; }
-    function prepEditLocal(l) { openModalLocal(); document.getElementById('loc_id').value = l.id; document.getElementById('loc_nome').value = l.nome; document.getElementById('loc_resp').value = l.responsavel || ""; document.getElementById('loc_status').value = l.status || "Ativo"; document.getElementById('loc_cidade').value = l.cidade || ""; document.getElementById('loc_end').value = l.endereco || ""; document.getElementById('loc_contato').value = l.contato || ""; document.getElementById('loc_dias').value = l.dias || ""; document.getElementById('loc_horas').value = l.horarios || ""; document.getElementById('loc_maps').value = l.linkMaps || ""; document.getElementById('loc_iframe').value = l.iframeHtml || ""; document.getElementById('loc_pix_chave').value = l.Pix_Chave || ""; document.getElementById('loc_pix_nome').value = l.Pix_Nome || ""; document.getElementById('loc_pix_cidade').value = l.Pix_Cidade || ""; }
+
+    function prepEditLocal(l) { 
+        openModalLocal(); 
+        
+        // Helper interno para UX: Se vier em branco, deixar no placeholder (Campo vazio), mas garantir que o input fique limpo
+        const setValOrEmpty = (id, val) => {
+           const el = document.getElementById(id);
+           if(!el) return;
+           el.value = (val === undefined || val === null) ? "" : String(val).trim();
+        };
+
+        setValOrEmpty('loc_id', l.id); 
+        setValOrEmpty('loc_nome', l.nome); 
+        setValOrEmpty('loc_resp', l.responsavel); 
+        document.getElementById('loc_status').value = l.status || "Ativo"; 
+        setValOrEmpty('loc_cidade', l.cidade); 
+        setValOrEmpty('loc_end', l.endereco); 
+        setValOrEmpty('loc_contato', l.contato); 
+        setValOrEmpty('loc_maps', l.linkMaps); 
+        setValOrEmpty('loc_iframe', l.iframeHtml); 
+        setValOrEmpty('loc_pix_chave', l.pixChave); 
+        setValOrEmpty('loc_pix_nome', l.pixNome); 
+        setValOrEmpty('loc_pix_cidade', l.pixCidade); 
+    }
 
     function carregarCursos() { document.getElementById('lista-cursos-body').innerHTML = '<tr><td colspan="5" style="text-align:center">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { cache.cursos = lista; document.getElementById('lista-cursos-body').innerHTML = lista.map(c => `<tr><td><img src="${c.imagem}" style="width:40px; height:40px; object-fit:cover; border-radius:4px" onerror="this.src='https://via.placeholder.com/40'"></td><td><b>${esc(c.nome)}</b></td><td>${esc(c.data)}<br><small>${esc(c.vagas)}</small></td><td><span class="adm-badge bg-green">${c.status}</span></td><td><button class="adm-btn" onclick='prepEditCurso(${JSON.stringify(c)})'>EDITAR</button></td></tr>`).join(''); }).listarCursosAdmin(); }
     function abrirModalCurso() { document.getElementById('adm-modal-curso').style.display = 'flex'; document.querySelector('#adm-modal-curso form').reset(); document.getElementById('curso_id').value = ""; document.getElementById('titulo-modal-curso').innerText = "Novo Curso"; document.getElementById('editor_curso_login').value = editorLogin; }
@@ -1665,8 +1759,9 @@
     function carregarConfig() { google.script.run.withSuccessHandler(cfg => { document.getElementById('cfg_icon').value = cfg.iconId || ''; document.getElementById('cfg_bg').value = cfg.bgId || ''; document.getElementById('cfg_color').value = cfg.primaryColor || '#FFD700'; document.getElementById('cfg_color_sec').value = cfg.secondaryColor || '#1e1e1e'; document.getElementById('cfg_color_text').value = cfg.textColor || '#ffffff'; document.getElementById('cfg_color_btn_text').value = cfg.btnTextColor || '#000000'; document.getElementById('cfg_color_bg').value = cfg.bgColor || '#121212'; document.getElementById('cfg_link_loja').value = cfg.linkLoja || ''; document.getElementById('cfg_link_insta').value = cfg.linkInstagram || ''; document.getElementById('cfg_link_yt').value = cfg.linkYouTube || ''; document.getElementById('cfg_link_cad').value = cfg.linkCadastro || ''; document.getElementById('cfg_nome_acad').value = cfg.nomeAcademia || ''; document.getElementById('cfg_pix_global').value = cfg.pixGlobal || 'Nao'; document.getElementById('cfg_pix_chave').value = cfg.pixChave || ''; document.getElementById('cfg_pix_nome').value = cfg.pixNome || ''; document.getElementById('cfg_pix_cidade').value = cfg.pixCidade || ''; }).getAppConfig(); }
 
     function aplicarTema(primaria, secundaria, texto, textoBotao, fundo) { document.getElementById('cfg_color').value = primaria; document.getElementById('cfg_color_sec').value = secundaria; document.getElementById('cfg_color_text').value = texto; document.getElementById('cfg_color_btn_text').value = textoBotao; document.getElementById('cfg_color_bg').value = fundo; }
+    
     // ============================================================================
-    // 🏫 ENGINE DE TURMAS
+    // 🏫 ENGINE DE TURMAS (Com suporte aos novos Checkboxes)
     // ============================================================================
     function carregarTurmas() {
         const tbody = document.getElementById('lista-turmas-body');
@@ -1711,6 +1806,29 @@
         const filtrados = cache.turmas.filter(t => String(t.nome).toLowerCase().includes(termo) || String(t.modalidade).toLowerCase().includes(termo));
         renderTurmas(filtrados);
     }
+    
+    // =========================================================
+    // 📅 MODAL DE TURMAS E CHECKBOXES DE DIAS DA SEMANA
+    // =========================================================
+
+    function interceptarSalvarTurma(e) {
+        e.preventDefault(); 
+        
+        // 🚨 Puxa todas as caixinhas que foram marcadas
+        const checkboxes = document.querySelectorAll('input[name="turma_dias_chk"]:checked');
+        const diasSelecionados = Array.from(checkboxes).map(cb => cb.value).join(", ");
+        
+        if (diasSelecionados === "") {
+            alert("⚠️ Selecione pelo menos um dia da semana para a turma!");
+            return;
+        }
+        
+        // 🚨 Atualiza o input escondido que vai para o banco
+        document.getElementById('turma_dias').value = diasSelecionados;
+        
+        // Dispara o salvamento
+        handleAdmForm(e, 'salvarTurma');
+    }
 
     function abrirModalTurma() {
         document.getElementById('adm-modal-turma').style.display = 'flex';
@@ -1719,6 +1837,11 @@
         document.getElementById('turma_id').value = "";
         document.getElementById('turma_tel').value = "";  
         document.getElementById('titulo-modal-turma').innerText = "Nova Turma";
+        
+        // 🚨 LIMPA AS CAIXINHAS
+        document.querySelectorAll('input[name="turma_dias_chk"]').forEach(cb => cb.checked = false);
+        document.getElementById('turma_dias').value = "";
+
         popularSelectResponsaveis(""); 
         popularSelectModalidadesPuras('turma_mod');
         google.script.run.withSuccessHandler(ac => {
@@ -1735,25 +1858,35 @@
         document.getElementById('turma_nome').value = t.nome;
         document.getElementById('turma_idade').value = t.faixaEtaria;
         document.getElementById('turma_tel').value = t.telefone || "";
-        document.getElementById('turma_dias').value = t.dias;
         document.getElementById('turma_inicio').value = t.inicio;
         document.getElementById('turma_fim').value = t.fim;
         document.getElementById('turma_status').value = t.status;
+        
+        // 🚨 LÊ O BANCO DE DADOS E MARCA AS CAIXINHAS CORRETAS
+        const diasTurma = String(t.dias).toLowerCase();
+        document.querySelectorAll('input[name="turma_dias_chk"]').forEach(cb => {
+            cb.checked = diasTurma.includes(cb.value.toLowerCase());
+        });
+        document.getElementById('turma_dias').value = t.dias; // Popula o hidden também
+
         popularSelectResponsaveis(t.responsavel);
         setTimeout(() => { document.getElementById('turma_mod').value = t.modalidade || "Geral"; }, 600);
         setTimeout(() => { document.getElementById('turma_local').value = t.local || "Matriz"; }, 800);
     }
 
-
     function closeModal(id) { const modal = document.getElementById(id); if(modal) modal.style.display = 'none'; }
     function esc(t) { if(!t) return ""; return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
-    // --- LÓGICA DE TURMAS NO CRM ADMIN ---
+    
+    // --- LÓGICA DE TURMAS NO CRM ADMIN (MANTÉM SELECT ANTIGO AQUI, POIS É SÓ FILTRO) ---
     function carregarTurmasSelectParaAlunos(localSelecionado, turmaAtual) {
         const selTurma = document.getElementById('aluno_turma');
+        if(!selTurma) return;
         selTurma.innerHTML = '<option value="">Carregando...</option>';
         google.script.run.withSuccessHandler(turmas => {
             selTurma.innerHTML = '<option value="">Sem Turma</option>';
-            const filtradas = turmas.filter(t => t.local === localSelecionado && t.status === 'Ativa');
+            const locaisArray = localSelecionado.split(',').map(l => l.trim().toLowerCase());
+            
+            const filtradas = turmas.filter(t => locaisArray.includes(String(t.local).toLowerCase()) && t.status === 'Ativa');
             filtradas.forEach(t => {
                 const opt = new Option(t.nome, t.nome);
                 if (t.nome === turmaAtual) opt.selected = true;
@@ -1761,5 +1894,6 @@
             });
         }).listarTurmasAdmin();
     }
+
     window.onload = () => carregarAlunos();
 </script>

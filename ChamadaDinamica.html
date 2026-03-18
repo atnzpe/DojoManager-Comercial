@@ -581,9 +581,10 @@
           lista.forEach(function(a) {
               const item = document.createElement('div');
               item.className = 'item-busca';
+              // 🚨 FIX: Agora passamos a.login na função onClick
               item.innerHTML = "<img src='" + a.foto + "' style='width:36px; height:36px; border-radius:50%; object-fit:cover;'>" +
-                               "<div><div style='font-weight:bold; color:var(--dynamic-text);'>" + a.nome + "</div><div style='font-size:0.7rem; color:var(--dynamic-text); opacity:0.6;'>" + a.graduacao + "</div></div>";
-              item.onclick = function() { adicionarNaLista(a.login); };
+                               "<div><div style='font-weight:bold; color:var(--dynamic-text);'>" + a.nome + "</div><div style='font-size:0.7rem; color:var(--dynamic-text); opacity:0.6;'>" + a.graduacao + " (@" + a.login + ")</div></div>";
+              item.onclick = function() { adicionarNaLista(a.login); }; 
               divRes.appendChild(item);
           });
           const itemVisitante = document.createElement('div');
@@ -639,7 +640,6 @@
   function irParaCriarFinal() {
       document.getElementById('painel-menu').style.display = 'none';
       document.getElementById('painel-criar').style.display = 'block';
-      
       document.getElementById('txt-data-final').valueAsDate = new Date();
 
       const selLocal = document.getElementById('sel-local-final');
@@ -648,11 +648,19 @@
       selLocal.innerHTML = "<option>Carregando...</option>";
       selTurma.innerHTML = "<option value='' disabled selected>Aguardando local...</option>";
 
-      // Dispara 2 requisições paralelas para carregar a UX de forma rápida
+      // 🛡️ Busca academias e cruza com as permissões do usuário
       google.script.run.withSuccessHandler(function(locais) {
+          const user = JSON.parse(localStorage.getItem('userSession'));
+          const isGod = user.isAdmin === true;
+          // Separa as academias do professor por vírgula e limpa os espaços
+          const userAcads = user.academia ? user.academia.split(',').map(a => a.trim().toLowerCase()) : [];
+
           selLocal.innerHTML = "<option value='' disabled selected>Selecione a Unidade</option>";
           locais.forEach(function(l) {
-              selLocal.innerHTML += "<option value='" + l + "'>" + l + "</option>";
+              // Mágica Multi-Tenancy: Mostra se for ADM ou se o local estiver na lista dele!
+              if (isGod || userAcads.includes(l.trim().toLowerCase())) {
+                  selLocal.innerHTML += "<option value='" + l + "'>" + l + "</option>";
+              }
           });
       }).getListaAcademias();
 
@@ -690,8 +698,10 @@
       const localSel = document.getElementById('sel-local-final').value;
       const turmaSel = document.getElementById('sel-turma-final').value;
       const dataRaw = document.getElementById('txt-data-final').value;
+      const inicioRaw = document.getElementById('txt-inicio-final').value;
+      const fimRaw = document.getElementById('txt-fim-final').value;
 
-      if(!localSel || !turmaSel || !document.getElementById('txt-inicio-final').value) { 
+      if(!localSel || !turmaSel || !inicioRaw) { 
           showToast("Preencha o Local, a Turma e o Horário!", "erro"); 
           return; 
       }
@@ -701,14 +711,13 @@
       btn.innerText = "CRIANDO SALA..."; btn.disabled = true;
       let dataFormatada = dataRaw.split('-').reverse().join('/');
 
-      // Cria o Payload com chaves fixas que serão mapeadas no Backend dinamicamente
       const dados = { 
           instrutor: user.nomeCompleto, 
           local: localSel, 
           turma: turmaSel, 
           data: dataRaw, 
-          inicio: document.getElementById('txt-inicio-final').value, 
-          fim: document.getElementById('txt-fim-final').value 
+          inicio: inicioRaw, 
+          fim: fimRaw 
       };
 
       google.script.run.withSuccessHandler(function(res) {
@@ -739,11 +748,12 @@
 
   function executarCheckinFinal() {
       const pin = document.getElementById('input-pin-aluno').value;
-      if(!pin || pin.length < 4) { showToast("Digite o PIN.", "erro"); return; }
+      if(!pin || pin.length < 4) { showToast("Digite o PIN de 4 dígitos.", "erro"); return; }
       
       const user = JSON.parse(localStorage.getItem('userSession'));
       const feedback = document.getElementById('feedback-aluno');
-      feedback.innerText = "Processando código..."; feedback.style.color = "var(--dynamic-prim)";
+      feedback.innerText = "Processando código..."; 
+      feedback.style.color = "var(--dynamic-prim)";
       
       const btnOk = document.querySelector('#painel-aluno .cor-gold');
       btnOk.disabled = true;
@@ -756,6 +766,12 @@
             showToast("PRESENÇA CONFIRMADA!", "sucesso");
             document.getElementById('input-pin-aluno').value = "";
           }
+      }).withFailureHandler(function(err) {
+          // 🛡️ NOVO: Captura erros fatais do Apps Script para não morrer em silêncio
+          feedback.innerText = "Erro no servidor. Tente novamente.";
+          feedback.style.color = "#f44336";
+          btnOk.disabled = false;
+          console.error("Falha no check-in:", err);
       }).realizarCheckinAluno(user.LOGIN, pin);
   }
 </script>
