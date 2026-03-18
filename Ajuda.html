@@ -25,7 +25,6 @@
     /* --- ESTILOS GERAIS --- */
     body {
       background-color: transparent !important;
-      /* Libera para a imagem de fundo aparecer */
       color: var(--dynamic-text);
       font-family: 'Roboto', sans-serif;
       margin: 0;
@@ -54,7 +53,6 @@
       width: 100%;
       height: 100%;
       background-color: rgba(0, 0, 0, 0.85);
-      /* Escurece para destacar o texto */
       z-index: -1;
     }
 
@@ -72,10 +70,8 @@
       align-items: center;
       margin-bottom: 25px;
       border-bottom: 2px solid var(--dynamic-prim);
-      /* Borda da Marca */
       padding-bottom: 15px;
       background-color: var(--dynamic-sec);
-      /* Fundo do Card */
       position: sticky;
       top: 0;
       z-index: 10;
@@ -88,7 +84,6 @@
       background: none;
       border: none;
       color: var(--dynamic-prim);
-      /* Cor da Marca */
       cursor: pointer;
       padding: 0;
       margin-right: 15px;
@@ -103,7 +98,6 @@
       font-size: 1.5rem;
       font-weight: bold;
       color: var(--dynamic-prim);
-      /* Cor da Marca */
       margin: 0;
     }
 
@@ -137,7 +131,6 @@
     .panel {
       padding: 0 18px;
       background-color: rgba(0, 0, 0, 0.3);
-      /* Fundo com transparência */
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.3s ease-out;
@@ -223,7 +216,7 @@
       </div>
     </div>
 
-    <div class="chapter-title">1. Primeiros Passos</div>
+    <div class="chapter-title">1. Primeiros Passos e Perfil</div>
 
     <button class="accordion">
       <span><span class="material-icons icon-topic">login</span> Como fazer Login?</span>
@@ -251,6 +244,30 @@
       </ol>
     </div>
 
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">badge</span> Como acessar minha Carteirinha Digital? <span class="highlight">NOVO</span></span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>Sua identidade oficial do tatame está sempre com você!</p>
+      <ol>
+        <li>No painel principal, clique no botão <strong>"Carteirinha"</strong> ou acesse o menu do seu perfil.</li>
+        <li>Sua carteirinha digital com foto, graduação, validade e QR Code (se aplicável) será exibida na tela.</li>
+        <li>Você pode apresentá-la na recepção de eventos oficiais ou na entrada da academia.</li>
+      </ol>
+    </div>
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">ondemand_video</span> Videoteca e Programas Técnicos <span class="highlight">NOVO</span></span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>O sistema possui inteligência de <strong>Multimodalidade</strong> para o seu aprendizado em casa.</p>
+      <ul>
+        <li>Acesse os cards <strong>"Vídeos"</strong> ou <strong>"Programas/PDFs"</strong> no seu dashboard.</li>
+        <li>O aplicativo <strong>filtra automaticamente</strong> os conteúdos que você tem permissão para ver, baseando-se na sua Modalidade atual e no seu nível de Graduação.</li>
+        <li>Se você treina mais de uma arte marcial, verá os conteúdos liberados para ambas simultaneamente!</li>
+      </ul>
+    </div>
     <div class="chapter-title">2. Treinos e Check-in</div>
 
     <button class="accordion">
@@ -278,6 +295,15 @@
       Clique no card "Check-in Aula" no painel principal. Em seguida, digite o <strong>PIN</strong> numérico (código de 4 dígitos) que o instrutor disponibilizar.</p>
     </div>
 
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">gpp_bad</span> O App bloqueou meu Check-in (Trava de Idade). E agora? <span class="highlight">NOVO</span></span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>O sistema possui uma <strong>Trava de Segurança Inteligente</strong> para separar turmas (ex: Infantil vs Adulto).</p>
+      <p>Se você tentar fazer check-in pelo seu celular em uma turma que não corresponde à sua faixa etária, o aplicativo bloqueará o acesso por segurança.</p>
+      <p><strong>A Solução:</strong> Caso você esteja autorizado a participar daquela aula como exceção, basta avisar o seu Instrutor. Ele possui autorização para forçar a sua entrada na lista de presença através da <strong>Chamada Manual</strong> no painel dele.</p>
+    </div>
     <div class="chapter-title">3. Financeiro & Planos</div>
 
     <button class="accordion">
@@ -305,21 +331,42 @@
     <div class="chapter-title">4. Para Instrutores e Gestores</div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">add_location_alt</span> Criar Aula (Fixa ou Externa)</span>
+      <span><span class="material-icons icon-topic">groups</span> Gestão de Turmas e Filtros <span class="highlight">NOVO</span></span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>O sistema é flexível e permite a abertura de turmas em qualquer lugar:</p>
+      <p>O painel de Gestão de Alunos (CRM) agora possui um <strong>Filtro Triplo Dinâmico</strong>:</p>
+      <ul>
+        <li>Você pode combinar <strong>Academia + Modalidade + Turma</strong> para enxugar a lista e visualizar apenas os alunos exatos de um determinado horário.</li>
+        <li>No Painel Administrativo, ao criar uma nova Turma, você pode vincular um <strong>Professor Responsável</strong> (buscando diretamente do banco de dados de alunos/instrutores) e o telefone dele será auto-preenchido para os relatórios.</li>
+      </ul>
+    </div>
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">add_location_alt</span> Criar Aula e Vincular Turmas</span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>A abertura de aulas agora está conectada às turmas oficiais:</p>
       <ul>
         <li>Acesse <strong>"Fazer Chamada"</strong> e clique em <strong>"CRIAR NOVA AULA"</strong>.</li>
-        <li>No campo "Local", selecione sua academia padrão OU escolha a opção <strong>"📍 Outro Local / Evento Externo"</strong> para seminários e eventos.</li>
-        <li>Verifique se a Data e a Hora estão corretas.</li>
+        <li>Selecione o Local de Treino. Automaticamente, o sistema carregará apenas as <strong>Turmas Ativas</strong> vinculadas àquela unidade.</li>
         <li>Ao gerar o PIN, esta aula aparecerá imediatamente no App de todos os seus alunos.</li>
       </ul>
     </div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">person_add_alt</span> Adicionar Aluno Manual / Visitante <span class="highlight">NOVO</span></span>
+      <span><span class="material-icons icon-topic">visibility</span> Controle de Idade no Tatame (Tags Visuais) <span class="highlight">NOVO</span></span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>Durante a chamada ao vivo (Tela de Aguardando Confirmação), o sistema ajuda o instrutor a identificar o perfil da turma rapidamente:</p>
+      <ul>
+        <li>Ao lado do nome de cada aluno que digitar o PIN, aparecerá uma etiqueta colorida brilhante (Ex: <strong style="color:#ff9800;">[INFANTIL - 12 ANOS]</strong> ou <strong style="color:#2196f3;">[ADULTO - 25 ANOS]</strong>).</li>
+        <li>Se o aplicativo bloquear um aluno pela Trava de Idade, você pode usar o botão cinza <strong>"Manual"</strong> para autorizar a entrada dele. A tag de idade indicará a categoria real do aluno na tela, garantindo que você tem ciência da exceção.</li>
+      </ul>
+    </div>
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">person_add_alt</span> Adicionar Aluno Manual / Visitante</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
@@ -333,6 +380,19 @@
       <p><em>Isso garante que o treino nunca pare por problemas técnicos!</em></p>
     </div>
 
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">analytics</span> Super Relatório de Atletas (Filtros Avançados) <span class="highlight">NOVO</span></span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>Ferramenta ideal para organizar competições ou exames de faixa:</p>
+      <ol>
+        <li>No painel Administrativo, vá na aba <strong>"Alunos"</strong>.</li>
+        <li>Clique no botão amarelo <strong>"Super Relatório"</strong>.</li>
+        <li>Cruze dados como: Idade Mínima/Máxima, Peso (Kg), Faixa, Modalidade e Academia.</li>
+        <li>O sistema entrega a lista exata e permite <strong>Imprimir em PDF</strong> (Formato A4) para levar na prancheta.</li>
+      </ol>
+    </div>
     <button class="accordion">
       <span><span class="material-icons icon-topic">account_balance_wallet</span> Lançamentos Financeiros</span>
       <span class="material-icons chevron">expand_more</span>

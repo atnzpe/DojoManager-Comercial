@@ -492,7 +492,7 @@
       document.getElementById("main-content").style.display = "block";
     }
 
-    // Controle de Acesso (RBAC)
+    // 🔒 CONTROLE DE ACESSO (RBAC) BLINDADO
     function getMenuCards(user) {
       const list = [
         { title: "Perfil do Aluno", subtitle: "Dados e carteirinha", icon: "person", action: "perfil" },
@@ -504,22 +504,31 @@
         { title: "Locais de Treino", subtitle: "Unidades", icon: "location_on", action: "locais" },
         { title: "Mídias Sociais", subtitle: "Nossas redes", icon: "groups", action: "social" },
         { title: "Biblioteca", subtitle: "Manuais e livros", icon: "menu_book", action: "biblioteca" },
-        { title: "Certificados", subtitle: "Diplomas", icon: "workspace_premium", action: "certificados" },
-        { title: "Financeiro", subtitle: "Pagamentos e Planos", icon: "attach_money", action: "financeiro" },
+        { title: "Certificados", subtitle: "Diplomas", icon: "workspace_premium", action: "certificados" }
       ];
       
-      const grad = String(user.graduacao || "").toUpperCase();
-      const nivel = String(user.nivel || "").toUpperCase();
-      const staff = LISTA_INSTRUTOR.some(f => grad.includes(f) || nivel.includes(f));
-      const admin = LISTA_ADMIN.some(f => grad.includes(f) || nivel.includes(f));
+      // Validação estrita do Backend (Booleans)
+      const isStaff = user.isInstrutor === true || user.isMestre === true;
+      const isGodMode = user.isAdmin === true;
 
-      if (staff || admin) {
+      // 💰 REGRA FINANCEIRO
+      if (isGodMode || (!isStaff && !isGodMode)) {
+        list.push({ title: "Financeiro", subtitle: "Pagamentos e Planos", icon: "attach_money", action: "financeiro" });
+      }
+
+      // 🥋 REGRAS DE TATAME E GESTÃO
+      if (isStaff || isGodMode) {
         list.push({ title: "Fazer Chamada", subtitle: "Gerenciar Aula (PIN)", icon: "qr_code_2", action: "chamada_instrutor", special: true });
         list.push({ title: "Gestão Alunos", subtitle: "Cadastros e Edição", icon: "manage_accounts", action: "view_instrutor", special: true });
       } else {
         list.push({ title: "Check-in Aula", subtitle: "Marcar Presença", icon: "qr_code_scanner", action: "chamada_aluno", special: true });
       }
-      if (admin) { list.push({ title: "Painel Admin", subtitle: "Configurações SaaS", icon: "settings_suggest", action: "view_admin", special: true }); }
+
+      // ⚙️ REGRA PAINEL ADMIN
+      if (isGodMode) { 
+        list.push({ title: "Painel Admin", subtitle: "Configurações SaaS", icon: "settings_suggest", action: "view_admin", special: true }); 
+      }
+      
       return list;
     }
 
@@ -549,15 +558,30 @@
       if (map[action]) map[action]();
     }
 
-    // Renderiza Widget de Treino Ativo no Topo
-    function criarCardTreino(nome, hora, detalhe, live, maps, pin, corDetalhe = "#888") {
+    // ============================================================================
+    // 🗓️ WIDGET INTELIGENTE DE TREINOS DE HOJE (DCU + Relacional)
+    // ============================================================================
+
+    function criarCardTreino(nome, dataHora, detalhe, live, maps, pin, corDetalhe = "#888") {
        const div = document.createElement('div');
        div.className = 'item-treino';
+       
+       // Destaque visual lateral se a aula estiver Ao Vivo
+       div.style.borderLeft = live ? "4px solid #4caf50" : "4px solid rgba(255,255,255,0.1)";
+
        let areaBotoes = '<div style="display:flex; gap:8px; align-items:center;">';
        if (maps) areaBotoes += `<a href="${maps}" target="_blank" class="btn-rota-sm"><span class="material-icons" style="font-size:16px">near_me</span> ROTA</a>`;
-       if (live) areaBotoes += `<button onclick="irParaCheckin('${pin}')" class="btn-rota-sm" style="background:var(--success-color, #4caf50) !important; color:#fff !important; border:none !important;"><span class="material-icons" style="font-size:14px">qr_code</span> CHECK-IN</button>`;
+       if (live) areaBotoes += `<button onclick="irParaCheckin('${pin}')" class="btn-rota-sm" style="background:#4caf50 !important; color:#fff !important; border:none !important; box-shadow: 0 0 10px rgba(76, 175, 80, 0.4);"><span class="material-icons" style="font-size:14px">qr_code</span> CHECK-IN</button>`;
        areaBotoes += '</div>';
-       div.innerHTML = `<div class="info-treino"><h4 style="${live ? 'color:var(--primary-color)' : ''}">${nome}</h4><p><span class="material-icons" style="font-size:12px;vertical-align:middle">schedule</span> ${hora}</p><p style="font-size:10px; color:${corDetalhe}">${detalhe}</p></div>${areaBotoes}`;
+
+       div.innerHTML = `
+         <div class="info-treino">
+            <h4 style="${live ? 'color:#4caf50' : 'color:var(--dynamic-prim)'}">${nome}</h4>
+            <p style="font-weight:bold; color:var(--dynamic-text); opacity:0.9; font-size:0.85rem; margin-top:5px;">${dataHora}</p>
+            <p style="font-size:11px; color:${corDetalhe}; opacity:0.7; margin-top:2px;">${detalhe}</p>
+         </div>
+         ${areaBotoes}
+       `;
        return div;
     }
 
@@ -570,38 +594,84 @@
 
     function carregarTreinosDeHoje() {
         const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
-        const diaHojeStr = diasSemana[new Date().getDay()];
-        document.getElementById('lbl-dia-semana').textContent = `(${diaHojeStr})`;
+        const hojeDate = new Date();
+        const diaHojeStr = diasSemana[hojeDate.getDay()];
+        const diaHojeCurto = diaHojeStr.toLowerCase().slice(0, 3); // Extrai "seg", "ter", etc.
+        
+        // Pega a data exata de hoje no formato PT-BR
+        const dataHojePT = hojeDate.toLocaleDateString('pt-BR');
+
+        // Atualiza o título do Widget com o Dia e a Data
+        document.getElementById('lbl-dia-semana').textContent = `- ${diaHojeStr}, ${dataHojePT}`;
+        
         const container = document.getElementById('lista-hoje-container');
         
+        // 🚀 O MOTOR RELACIONAL (Dispara as 3 buscas em simultâneo)
         google.script.run.withSuccessHandler(aulasLive => {
             google.script.run.withSuccessHandler(locaisFixos => {
-                container.innerHTML = ""; let encontrouAlgum = false;
-                if (aulasLive && aulasLive.length > 0) {
-                    aulasLive.forEach(aula => {
-                        encontrouAlgum = true;
-                        const localObj = locaisFixos ? locaisFixos.find(l => l.nome.trim().toLowerCase() === String(aula.academia).trim().toLowerCase()) : null;
-                        const isLocalConhecido = !!localObj;
-                        let detalheTexto = isLocalConhecido ? `Aula Ativa com ${aula.instrutor.split(' ')[0]}` : `⚠️ Consulte ${aula.instrutor.split(' ')[0]} para o local.`;
-                        let corTexto = isLocalConhecido ? "var(--text-color)" : "var(--primary-color)";
-                        let linkMapa = isLocalConhecido ? localObj.linkMaps : null;
-                        container.appendChild(criarCardTreino(aula.academia, aula.horario, detalheTexto, true, linkMapa, aula.pin, corTexto));
-                    });
-                }
-                if (locaisFixos) {
-                    locaisFixos.forEach(local => {
-                        const diasLocal = String(local.dias).toLowerCase();
-                        if (diasLocal.includes(diaHojeStr.toLowerCase().slice(0, 3)) || diasLocal.includes("todos")) {
-                            if (!aulasLive.some(al => al.academia.toLowerCase() === local.nome.toLowerCase())) {
-                                encontrouAlgum = true;
-                                container.appendChild(criarCardTreino(local.nome, local.horarios, local.cidade || "Unidade Oficial", false, local.linkMaps, null));
-                            }
-                        }
-                    });
-                }
-                document.getElementById('widget-treino-hoje').style.display = encontrouAlgum ? 'block' : 'none';
+                google.script.run.withSuccessHandler(todasTurmas => {
+                    
+                    container.innerHTML = ""; 
+                    let encontrouAlgum = false;
+
+                    // Mapeia Locais para pegar o Link do Mapa rapidamente
+                    const mapaLocais = {};
+                    if(locaisFixos) locaisFixos.forEach(l => mapaLocais[l.nome.trim().toLowerCase()] = l);
+
+                    // 1. RENDERIZAR AULAS AO VIVO (O Mestre já abriu a sala)
+                    const liveTurmasIds = []; // Array para evitar duplicar turmas
+                    if (aulasLive && aulasLive.length > 0) {
+                        aulasLive.forEach(aula => {
+                            encontrouAlgum = true;
+                            const localNorm = String(aula.academia).trim().toLowerCase();
+                            const localObj = mapaLocais[localNorm];
+                            const linkMapa = localObj ? localObj.linkMaps : null;
+                            
+                            // Guarda o nome da turma para não a renderizar de novo abaixo
+                            liveTurmasIds.push(String(aula.turma).trim().toLowerCase());
+
+                            const titulo = aula.turma || "Aula Extra/Especial";
+                            const dataHoraStr = `📅 ${dataHojePT} | ⏰ ${aula.horario}`;
+                            const detalheTexto = `📍 ${aula.academia} • 🔴 Ao Vivo com ${aula.instrutor.split(' ')[0]}`;
+                            
+                            container.appendChild(criarCardTreino(titulo, dataHoraStr, detalheTexto, true, linkMapa, aula.pin, "var(--dynamic-text)"));
+                        });
+                    }
+
+                    // 2. RENDERIZAR TURMAS AGENDADAS (Que o instrutor ainda não abriu)
+                    if (todasTurmas && todasTurmas.length > 0) {
+                        // Filtra apenas as turmas que acontecem HOJE
+                        const turmasHoje = todasTurmas.filter(t => {
+                            const d = String(t.dias).toLowerCase();
+                            return t.status === "Ativa" && (d.includes(diaHojeCurto) || d.includes("todos") || d.includes("diario"));
+                        });
+
+                        turmasHoje.forEach(turma => {
+                            const turmaNorm = String(turma.nome).trim().toLowerCase();
+                            
+                            // Se a turma já está Ao Vivo (array acima), salta para não duplicar!
+                            if (liveTurmasIds.includes(turmaNorm)) return;
+
+                            const localNorm = String(turma.local).trim().toLowerCase();
+                            const localObj = mapaLocais[localNorm];
+                            const linkMapa = localObj ? localObj.linkMaps : null;
+
+                            encontrouAlgum = true;
+                            
+                            const titulo = turma.nome;
+                            const dataHoraStr = `📅 ${dataHojePT} | ⏰ ${turma.inicio} às ${turma.fim}`;
+                            const detalheTexto = `📍 ${turma.local} • ⏳ Aguarde o instrutor abrir`;
+
+                            container.appendChild(criarCardTreino(titulo, dataHoraStr, detalheTexto, false, linkMapa, null, "var(--dynamic-text)"));
+                        });
+                    }
+
+                    // Se encontrou turmas, mostra o Widget, senão oculta.
+                    document.getElementById('widget-treino-hoje').style.display = encontrouAlgum ? 'block' : 'none';
+
+                }).listarTurmasAdmin(); // 👈 Lendo da Aba de Turmas!
             }).getLocaisTreino();
-        }).buscarAulasDisponiveisAluno("TODOS");
+        }).buscarAulasDisponiveisAluno("TODOS"); 
     }
 
     // Toggle Admin View
@@ -639,6 +709,100 @@
           alert("Enviado com sucesso!"); fecharModalAjuda(); btn.innerText = "ENVIAR MENSAGEM"; btn.disabled = false;
       }).salvarTicketSuporte(new FormData(e.target));
     }
+
+  /**
+   * 💸 GERADOR DE PIX BLINDADO (Com Algoritmo CRC16 Oficial do Banco Central)
+   */
+  function gerarFluxoPix(login) {
+    google.script.run.withSuccessHandler(function(info) {
+      const container = document.getElementById('area-pagamento-aluno');
+      
+      if (!info || !info.chave || info.chave.trim() === "") {
+        document.getElementById('btn-cobranca-wpp').style.display = "flex";
+        return;
+      }
+
+      try {
+        const chave = String(info.chave).trim();
+        const valorStr = parseFloat(info.valor || 0).toFixed(2);
+        
+        // Remove acentos para evitar erro no Leitor do Banco
+        const removerAcentos = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9 ]/g, "");
+        const beneficiario = removerAcentos(info.beneficiario || "Academia").substring(0, 25).toUpperCase(); 
+        const cidade = removerAcentos(info.cidade || "Cidade").substring(0, 15).toUpperCase(); 
+        const banco = info.banco || "Instituição Bancária";
+        
+        // 🧠 MOTOR DE PAYLOAD PIX (Padrão EMV)
+        const f = (id, val) => id + val.length.toString().padStart(2, '0') + val;
+        let p = "000201" + "010211"; // Formato e Estático
+        let merch = f("00", "br.gov.bcb.pix") + f("01", chave);
+        p += f("26", merch);
+        p += "52040000" + "5303986"; // Categoria e Moeda (BRL)
+        if(parseFloat(valorStr) > 0) p += f("54", valorStr);
+        p += "5802BR";
+        p += f("59", beneficiario) + f("60", cidade);
+        p += f("62", f("05", "***")); // ID Transação
+        p += "6304"; // Início do CRC16
+        
+        // Algoritmo CRC16-CCITT
+        let crc = 0xFFFF;
+        for (let i = 0; i < p.length; i++) {
+            crc ^= p.charCodeAt(i) << 8;
+            for (let j = 0; j < 8; j++) {
+                if ((crc & 0x8000) > 0) crc = (crc << 1) ^ 0x1021;
+                else crc = crc << 1;
+            }
+        }
+        const crcHex = (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+        const payloadOficial = p + crcHex;
+
+        const pixBox = document.createElement('div');
+        pixBox.className = 'pix-box';
+        pixBox.style = 'border: 2px solid var(--dynamic-prim); background: rgba(0,0,0,0.2); text-align:center; padding:20px; border-radius:12px; margin-top:15px;';
+        
+        const infoTitle = document.createElement('p');
+        infoTitle.style = 'color:var(--dynamic-text); font-weight:bold; margin-bottom:10px;';
+        infoTitle.innerText = 'Escaneie ou Copie o Código PIX:';
+        
+        const img = document.createElement('img');
+        img.src = "https://quickchart.io/qr?text=" + encodeURIComponent(payloadOficial) + "&size=250&margin=1";
+        img.className = "qr-code-img";
+        img.style = "width:200px; height:200px; border-radius:12px; margin:0 auto; display:block;";
+        
+        const details = document.createElement('div');
+        details.style = "font-size:0.85rem; color:var(--dynamic-text); opacity:0.9; margin:15px 0; line-height:1.6; text-align:left; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;";
+        details.innerHTML = `💰 <b>Valor:</b> R$ ${valorStr}<br>👤 <b>Recebedor:</b> ${beneficiario}<br>🔑 <b>Chave:</b> ${chave}<br>🏦 <b>Banco:</b> ${banco}`;
+        
+        // 🚀 BOTÃO COPIA E COLA
+        const btnCopy = document.createElement('button');
+        btnCopy.className = "btn-whatsapp"; 
+        btnCopy.style = "background-color: var(--dynamic-prim); color: var(--dynamic-btn-text); width:100%; border:none; padding:12px; border-radius:8px; font-weight:900; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; margin-bottom:10px;";
+        btnCopy.innerHTML = '<span class="material-icons">content_copy</span> PIX COPIA E COLA';
+        btnCopy.onclick = function() {
+            navigator.clipboard.writeText(payloadOficial).then(() => {
+                alert("✅ Código PIX Copiado! Abra o app do seu banco e cole.");
+            }).catch(err => alert("Erro ao copiar. Selecione e copie o código manualmente."));
+        };
+
+        const btnWpp = document.createElement('button');
+        btnWpp.className = "btn-whatsapp";
+        btnWpp.style = "background-color: #25D366; color: #fff; width:100%; border:none; padding:12px; border-radius:8px; font-weight:900; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer;";
+        btnWpp.innerHTML = '<span class="material-icons">send</span> ENVIAR COMPROVANTE';
+        btnWpp.onclick = function() {
+            window.open("https://wa.me/" + info.contatoWhatsApp + "?text=Ol%C3%A1!%20Segue%20meu%20comprovante%20de%20pagamento%20PIX%20de%20R$%20" + valorStr);
+        };
+
+        pixBox.appendChild(infoTitle);
+        pixBox.appendChild(img);
+        pixBox.appendChild(details);
+        pixBox.appendChild(btnCopy);
+        pixBox.appendChild(btnWpp);
+        
+        container.appendChild(pixBox);
+      } catch (err) { console.error("Erro na montagem do PIX:", err.message); }
+    }).getPixDataFromServer(login);
+  }
+
   </script>
 </body>
 

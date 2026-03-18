@@ -260,8 +260,18 @@
       </div>
     </div>
 
-    <div class="gestao-toolbar">
-      <input type="text" id="filtro-alunos" class="gestao-input" placeholder="🔍 Buscar por nome, login ou CPF..." onkeyup="GestaoAlunosApp.filtrar()">
+    <div class="gestao-toolbar"
+      style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+      <input type="text" id="filtro-alunos" class="gestao-input" placeholder="🔍 Nome, Login ou CPF..." onkeyup="GestaoAlunosApp.filtrar()">
+      <select id="filter-acad-instrutor" class="gestao-input" onchange="GestaoAlunosApp.atualizarFiltroTurmas(); GestaoAlunosApp.filtrar();">
+         <option value="">Todas as Academias</option>
+      </select>
+      <select id="filter-mod-instrutor" class="gestao-input" onchange="GestaoAlunosApp.filtrar()">
+         <option value="">Todas as Modalidades</option>
+      </select>
+      <select id="filter-turma-instrutor" class="gestao-input" onchange="GestaoAlunosApp.filtrar()">
+         <option value="">Todas as Turmas</option>
+      </select>
     </div>
 
     <div style="overflow-x:auto;">
@@ -333,11 +343,12 @@
         </div>
 
         <div class="form-grid">
-          <div>
-            <label class="form-label">Academia Vinculada</label>
-            <select id="ga-acad" class="gestao-input" onchange="GestaoAlunosApp.carregarTurmasAluno()"></select>
+          <div class="form-full">
+            <label class="form-label">Academias Vinculadas (Múltiplas)</label>
+            <div id="container-acad-aluno" class="checkbox-grid"></div>
+            <input type="hidden" id="ga-acad">
           </div>
-          <div>
+          <div class="form-full">
             <label class="form-label" style="color:#2196f3;">Turma Oficial</label>
             <select id="ga-turma" class="gestao-input" style="border: 1px solid #2196f3;"><option value="">Sem Turma</option></select>
           </div>
@@ -402,18 +413,55 @@
           const tbody = document.getElementById('tabela-alunos-body');
           tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;"><span class="material-icons spin" style="font-size:40px; color:var(--dynamic-prim)">sync</span></td></tr>';
 
-          google.script.run.withSuccessHandler(ac => { this.cacheAcademias = ac; }).getListaAcademias();
+          // 🚨 NOVO FILTRO MULTI-ACADEMIAS PARA O INSTRUTOR
+          google.script.run.withSuccessHandler(ac => { 
+              this.cacheAcademias = ac; 
+              const sAcad = document.getElementById('filter-acad-instrutor');
+              const sessionUser = JSON.parse(localStorage.getItem('userSession'));
+              
+              if(sessionUser && sessionUser.isAdmin) {
+                  // Se for Mestre (Deus), vê todas as academias
+                  sAcad.innerHTML = '<option value="">Todas as Academias</option>' + ac.map(x => `<option value="${x}">${x}</option>`).join('');
+              } else if (sessionUser && sessionUser.academia) {
+                  // Se for Instrutor, vê apenas as academias onde trabalha (Mesmo que sejam várias separadas por vírgula)
+                  const academiasDoInstrutor = sessionUser.academia.split(',').map(a => a.trim());
+                  // Mostra apenas as academias do instrutor no dropdown, com uma opção "Todas as Minhas"
+                  sAcad.innerHTML = '<option value="">Minhas Academias</option>' + 
+                                    academiasDoInstrutor.map(x => `<option value="${x}">${x}</option>`).join('');
+              }
+          }).getListaAcademias();
+          
           google.script.run.withSuccessHandler(gr => { this.cacheGraduacoes = gr; }).listarGraduacoesAdminCompleto();
-          google.script.run.withSuccessHandler(tr => { this.cacheTodasTurmas = tr || []; }).listarTurmasAdmin();
           google.script.run.withSuccessHandler(pac => { this.cachePacotes = pac || []; }).getPacotesDisponiveis();
 
+          google.script.run.withSuccessHandler(mods => { 
+              const sMod = document.getElementById('filter-mod-instrutor');
+              sMod.innerHTML = '<option value="">Todas as Modalidades</option>' + mods.map(m => `<option value="${m}">${m}</option>`).join('');
+          }).getListaModalidades();
+
+          google.script.run.withSuccessHandler(tr => { 
+              this.cacheTodasTurmas = tr || []; 
+              this.atualizarFiltroTurmas();
+          }).listarTurmasAdmin();
+
           this.carregarDadosServidor();
+      },
+
+      atualizarFiltroTurmas: function() {
+          const acad = document.getElementById('filter-acad-instrutor').value;
+          const s = document.getElementById('filter-turma-instrutor');
+          s.innerHTML = '<option value="">Todas as Turmas</option>';
+          let turmasFiltradas = this.cacheTodasTurmas;
+          if (acad !== "") turmasFiltradas = turmasFiltradas.filter(t => t.local === acad && t.status === "Ativa");
+          turmasFiltradas.forEach(t => {
+              s.innerHTML += `<option value="${t.nome}">${t.nome}</option>`;
+          });
       },
 
       carregarDadosServidor: function() {
           google.script.run.withSuccessHandler(lista => {
                this.cacheLista = lista;
-               this.renderizarTabela(lista);
+               this.filtrar(); // 🚨 Mudança Crítica: Chama a função de filtro para aplicar as regras de hierarquia imediatamente
           }).listarAlunosAdmin();
       },
 
@@ -424,7 +472,6 @@
             const statusClass = (String(a.status).toLowerCase() === 'inativo') ? 'badge-inativo' : 'badge-ativo';
             const dataInicio = a.carimbo ? String(a.carimbo).split(' ')[0] : '--';
             
-            // Tabela 100% copiada da sua melhoria no Admin!
             tbody.innerHTML += `
                 <tr>
                   <td>
@@ -456,7 +503,33 @@
 
       filtrar: function() {
           const termo = document.getElementById('filtro-alunos').value.toLowerCase();
-          const filtrados = this.cacheLista.filter(a => String(a.nome).toLowerCase().includes(termo) || String(a.login).toLowerCase().includes(termo) || String(a.cpf).toLowerCase().includes(termo));
+          const fAcad = document.getElementById('filter-acad-instrutor').value.toLowerCase();
+          const fMod = document.getElementById('filter-mod-instrutor').value.toLowerCase();
+          const fTurma = document.getElementById('filter-turma-instrutor').value.toLowerCase();
+          
+          const sessionUser = JSON.parse(localStorage.getItem('userSession'));
+          const isGod = sessionUser.isAdmin === true;
+          // Pega as academias do instrutor e coloca num array para verificação rápida
+          const academiasDoInstrutor = sessionUser.academia ? sessionUser.academia.split(',').map(a => a.trim().toLowerCase()) : [];
+
+          const filtrados = this.cacheLista.filter(a => {
+              const matchTermo = String(a.nome).toLowerCase().includes(termo) || 
+                                 String(a.login).toLowerCase().includes(termo) || 
+                                 String(a.cpf).toLowerCase().includes(termo);
+              
+              const acadAlunoString = String(a.academia || "").toLowerCase();
+              
+              // 🚨 RBAC DE ACESSO AOS ALUNOS:
+              // Se for ADMIN, vê todos.
+              // Se for Instrutor, o aluno TEM de pertencer a uma das academias do Instrutor!
+              const hasHierarchyAccess = isGod || academiasDoInstrutor.some(acadInst => acadAlunoString.includes(acadInst));
+              
+              const matchAcad = fAcad === "" || acadAlunoString.includes(fAcad);
+              const matchMod = fMod === "" || String(a.modalidade || "").toLowerCase().includes(fMod);
+              const matchTurma = fTurma === "" || String(a.turma || "").toLowerCase() === fTurma;
+
+              return matchTermo && matchAcad && matchMod && matchTurma && hasHierarchyAccess;
+          });
           this.renderizarTabela(filtrados);
       },
 
@@ -502,15 +575,74 @@
 
           this.popularSelectsBasicos(a.academia, a.graduacao, a.proxGrad, a.pacote);
           this.popularModalidadesCheckbox(a.modalidade);
+          
+          // 🚨 MODIFICAÇÃO PARA CHECKBOXES DE ACADEMIA:
+          this.popularAcademiasCheckboxAluno(a.academia);
+          
           this.carregarTurmasAluno(a.turma);
           
           document.getElementById('modal-editar-aluno').style.display = 'flex';
       },
+      
+      // 🚀 FUNÇÃO INJETADA AQUI PARA OS CHECKBOXES MÚLTIPLOS DE ACADEMIA
+      popularAcademiasCheckboxAluno: function(acadAtuais = "") {
+          const container = document.getElementById('container-acad-aluno');
+          if (!container) return; 
+          container.innerHTML = '<span style="font-size:11px;">Carregando...</span>';
+          
+          google.script.run.withSuccessHandler(locais => {
+              container.innerHTML = "";
+              const acadDoAluno = acadAtuais.split(',').map(m => m.trim().toLowerCase());
+              
+              locais.forEach(local => {
+                  const isChecked = acadDoAluno.includes(local.toLowerCase()) ? "checked" : "";
+                  container.innerHTML += `
+                      <label class='mod-check-label'>
+                          <input type="checkbox" name="ga_acad_chk" value="${local}" ${isChecked} class="mod-check-input" onchange="GestaoAlunosApp.atualizarAcademiasHidden()"> 
+                          ${local}
+                      </label>
+                  `;
+              });
+              this.atualizarAcademiasHidden(); 
+          }).getListaAcademias();
+      },
+
+      // Atualiza o input hidden e a lista de turmas ao clicar na caixinha
+      atualizarAcademiasHidden: function() {
+          const checkboxes = document.querySelectorAll('input[name="ga_acad_chk"]:checked');
+          const selecionadas = Array.from(checkboxes).map(cb => cb.value).join(", ");
+          
+          // Se o elemento antigo <select> ainda existir, atualiza-o, senão cria uma variável oculta se necessário
+          const inputAcad = document.getElementById('ga-acad');
+          if(inputAcad) {
+              // Hack para manter compatibilidade com o <select> antigo se você ainda o estiver usando no HTML
+              if (inputAcad.tagName === 'SELECT') {
+                  inputAcad.innerHTML = `<option value="${selecionadas}">${selecionadas}</option>`;
+                  inputAcad.value = selecionadas;
+              } else {
+                  inputAcad.value = selecionadas;
+              }
+          }
+          
+          const turmaAtual = document.getElementById('ga-turma').value;
+          this.carregarTurmasMultiplas(selecionadas, turmaAtual);
+      },
+      
+      // Carrega turmas baseadas em várias academias
+      carregarTurmasMultiplas: function(locaisSelecionados, turmaAtual) {
+          const sTurma = document.getElementById('ga-turma');
+          if(!sTurma) return;
+          sTurma.innerHTML = '<option value="">Sem Turma</option>';
+          if(this.cacheTodasTurmas.length > 0) {
+              const locaisArray = locaisSelecionados.split(',').map(l => l.trim().toLowerCase());
+              const turmasDoLocal = this.cacheTodasTurmas.filter(t => locaisArray.includes(String(t.local).toLowerCase()) && t.status === "Ativa");
+              turmasDoLocal.forEach(t => {
+                  sTurma.innerHTML += `<option value="${t.nome}" ${t.nome===turmaAtual?'selected':''}>${t.nome}</option>`;
+              });
+          }
+      },
 
       popularSelectsBasicos: function(acad, grad, proxGrad, pacoteAtual) {
-          const sA = document.getElementById('ga-acad');
-          sA.innerHTML = '<option value="" disabled>Selecione...</option>' + this.cacheAcademias.map(x => `<option value="${x}" ${x===acad?'selected':''}>${x}</option>`).join('');
-          
           const sG1 = document.getElementById('ga-grad');
           const sG2 = document.getElementById('ga-prox-grad');
           const gradHtml = '<option value="" disabled>Selecione...</option>' + this.cacheGraduacoes.map(g => `<option value="${g.graduacao}">${g.graduacao}</option>`).join('');
@@ -531,19 +663,14 @@
                   const isChecked = modsDoAluno.includes(mod.toLowerCase()) ? "checked" : "";
                   container.innerHTML += `<label class='mod-check-label'><input type="checkbox" name="ga-mod-chk" value="${mod}" ${isChecked} class="mod-check-input"> ${mod}</label>`;
               });
+              if(listaMods.length === 0) container.innerHTML = '<span style="font-size:11px; color:#888;">Nenhuma modalidade na aba Graduação.</span>';
           }).getListaModalidades();
       },
 
       carregarTurmasAluno: function(turmaAtual = "") {
+          // Fallback para quando não se usar o Multi-Academias
           const sAcad = document.getElementById('ga-acad').value;
-          const sTurma = document.getElementById('ga-turma');
-          sTurma.innerHTML = '<option value="">Sem Turma</option>';
-          if(this.cacheTodasTurmas.length > 0) {
-              const turmasDoLocal = this.cacheTodasTurmas.filter(t => t.local === sAcad && t.status === "Ativa");
-              turmasDoLocal.forEach(t => {
-                  sTurma.innerHTML += `<option value="${t.nome}" ${t.nome===turmaAtual?'selected':''}>${t.nome}</option>`;
-              });
-          }
+          this.carregarTurmasMultiplas(sAcad, turmaAtual);
       },
 
       fecharModal: function() { document.getElementById('modal-editar-aluno').style.display = 'none'; },
@@ -552,9 +679,12 @@
           const btn = document.querySelector('#form-gestao-aluno button[type="submit"]');
           btn.disabled = true; btn.innerHTML = "SALVANDO...";
           
-          // Agrupa os checkboxes de modalidade
-          const checkboxes = document.querySelectorAll('input[name="ga-mod-chk"]:checked');
-          let modsSelecionadas = Array.from(checkboxes).map(cb => cb.value).join(", ");
+          const checkboxesMod = document.querySelectorAll('input[name="ga-mod-chk"]:checked');
+          let modsSelecionadas = Array.from(checkboxesMod).map(cb => cb.value).join(", ");
+          
+          // 🚨 PEGA O VALOR REAL DAS ACADEMIAS (MULTIPLAS)
+          const checkboxesAcad = document.querySelectorAll('input[name="ga_acad_chk"]:checked');
+          let acadsSelecionadas = Array.from(checkboxesAcad).map(cb => cb.value).join(", ");
           
           const form = {
               aluno_id: document.getElementById('ga-id').value,
@@ -572,7 +702,7 @@
               aluno_senha: document.getElementById('ga-senha').value,
               aluno_peso: document.getElementById('ga-peso').value,
               aluno_altura: document.getElementById('ga-altura').value,
-              aluno_acad: document.getElementById('ga-acad').value,
+              aluno_acad: acadsSelecionadas, // <-- SALVA AQUI!
               aluno_turma: document.getElementById('ga-turma').value,
               aluno_status: document.getElementById('ga-status').value,
               aluno_nivel: document.getElementById('ga-nivel').value,
@@ -588,6 +718,7 @@
 
           google.script.run.withSuccessHandler(res => {
               alert(res); this.fecharModal(); this.inicializar();
+              btn.disabled = false; btn.innerHTML = "SALVAR FICHA DE ALUNO";
           }).salvarAluno(form);
       }
   };

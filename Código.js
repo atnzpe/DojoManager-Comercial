@@ -1103,100 +1103,100 @@ function salvarAluno(form) {
     const sheet = getSheet(NOME_ABA_ALUNOS);
     // 1. Puxa todos os cabeçalhos diretamente da linha 1 para saber a verdade absoluta
     const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-    
+
     // 2. Normaliza para garantir o "match" (ignora acentos, espaços extras, maiúsculas)
     const normalize = (str) => String(str).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "");
-    
+
     const headerMap = {};
     headers.forEach((h) => {
-        if (h) headerMap[normalize(h)] = h; // Mapeia a string normalizada para o NOME REAL e exato da sua planilha
+      if (h) headerMap[normalize(h)] = h; // Mapeia a string normalizada para o NOME REAL e exato da sua planilha
     });
 
     const idLinha = parseInt(form.aluno_id);
     let linhaExistente = [];
-    
+
     // 3. Se for um aluno que já existe, pega a linha INTEIRA antes de fazer qualquer coisa
     if (!isNaN(idLinha) && idLinha > 1 && idLinha <= sheet.getLastRow()) {
-        linhaExistente = sheet.getRange(idLinha, 1, 1, headers.length).getValues()[0];
+      linhaExistente = sheet.getRange(idLinha, 1, 1, headers.length).getValues()[0];
     }
 
     const getOldVal = (nomeRealColuna) => {
-        if (linhaExistente.length === 0) return "";
-        const idx = headers.indexOf(nomeRealColuna);
-        return idx !== -1 ? linhaExistente[idx] : "";
+      if (linhaExistente.length === 0) return "";
+      const idx = headers.indexOf(nomeRealColuna);
+      return idx !== -1 ? linhaExistente[idx] : "";
     };
 
     // 🚀 O MOTOR DE BLINDAGEM (O Coração do Sistema DCU)
     const resolveField = (formKey, colPlanilha1, colPlanilha2 = "") => {
-        const realCol1 = headerMap[normalize(colPlanilha1)];
-        const realCol2 = colPlanilha2 ? headerMap[normalize(colPlanilha2)] : null;
-        
-        let valorParaSalvar = "";
-        let campoFoiEnviadoPelaTela = Object.prototype.hasOwnProperty.call(form, formKey);
+      const realCol1 = headerMap[normalize(colPlanilha1)];
+      const realCol2 = colPlanilha2 ? headerMap[normalize(colPlanilha2)] : null;
 
-        // Se o front-end (HTML) mandou o campo, nós usamos o valor que veio (mesmo que seja vazio, pois o Admin pode querer apagar)
-        if (campoFoiEnviadoPelaTela) {
-            valorParaSalvar = form[formKey];
-        } else {
-            // Se a tela NÃO enviou o campo, nós resgatamos a fotocópia da planilha para NÃO APAGAR!
-            let old1 = realCol1 ? getOldVal(realCol1) : "";
-            let old2 = realCol2 ? getOldVal(realCol2) : "";
-            valorParaSalvar = old1 || old2 || ""; 
-        }
+      let valorParaSalvar = "";
+      let campoFoiEnviadoPelaTela = Object.prototype.hasOwnProperty.call(form, formKey);
 
-        const results = [];
-        if (realCol1) results.push({ col: realCol1, val: valorParaSalvar });
-        // Se houver coluna duplicada (ex: E-mail e Endereço de e-mail), salva nas duas para garantir a sincronia!
-        if (realCol2 && realCol2 !== realCol1) results.push({ col: realCol2, val: valorParaSalvar });
-        
-        return results;
+      // Se o front-end (HTML) mandou o campo, nós usamos o valor que veio (mesmo que seja vazio, pois o Admin pode querer apagar)
+      if (campoFoiEnviadoPelaTela) {
+        valorParaSalvar = form[formKey];
+      } else {
+        // Se a tela NÃO enviou o campo, nós resgatamos a fotocópia da planilha para NÃO APAGAR!
+        let old1 = realCol1 ? getOldVal(realCol1) : "";
+        let old2 = realCol2 ? getOldVal(realCol2) : "";
+        valorParaSalvar = old1 || old2 || "";
+      }
+
+      const results = [];
+      if (realCol1) results.push({ col: realCol1, val: valorParaSalvar });
+      // Se houver coluna duplicada (ex: E-mail e Endereço de e-mail), salva nas duas para garantir a sincronia!
+      if (realCol2 && realCol2 !== realCol1) results.push({ col: realCol2, val: valorParaSalvar });
+
+      return results;
     };
 
     // 🚀 LÓGICA DE NÍVEL DE ACESSO (Com Proteção)
     let nivelValido = "";
     if (Object.prototype.hasOwnProperty.call(form, 'aluno_nivel')) {
-        const n = String(form.aluno_nivel).toUpperCase();
-        if (n.includes("MESTRE")) nivelValido = "Mestre"; 
-        else if (n.includes("PROFESSOR")) nivelValido = "Professor"; 
-        else if (n.includes("N1")) nivelValido = "Instrutor N1"; 
-        else if (n.includes("N2")) nivelValido = "Instrutor N2"; 
-        else if (n.includes("N3")) nivelValido = "Instrutor N3";
-        else if (n.includes("ADMIN")) nivelValido = "Admin";
-        else nivelValido = "Aluno";
+      const n = String(form.aluno_nivel).toUpperCase();
+      if (n.includes("MESTRE")) nivelValido = "Mestre";
+      else if (n.includes("PROFESSOR")) nivelValido = "Professor";
+      else if (n.includes("N1")) nivelValido = "Instrutor N1";
+      else if (n.includes("N2")) nivelValido = "Instrutor N2";
+      else if (n.includes("N3")) nivelValido = "Instrutor N3";
+      else if (n.includes("ADMIN")) nivelValido = "Admin";
+      else nivelValido = "Aluno";
     } else {
-        // Se o formulário não tem o campo nível, puxa o antigo
-        nivelValido = getOldVal(headerMap[normalize("Nível do Praticante")]) || getOldVal(headerMap[normalize("NivelAdministrativo")]) || "Aluno";
+      // Se o formulário não tem o campo nível, puxa o antigo
+      nivelValido = getOldVal(headerMap[normalize("Nível do Praticante")]) || getOldVal(headerMap[normalize("NivelAdministrativo")]) || "Aluno";
     }
 
     // 🚀 MAPEAMENTO EXATO DAS SUAS 26 COLUNAS!
     const campos = [
-        ...resolveField("aluno_carimbo", "Carimbo de data/hora"),
-        ...resolveField("aluno_email", "Endereço de e-mail", "E-mail"),
-        ...resolveField("aluno_nome", "Nome Completo"),
-        ...resolveField("aluno_nasc", "Data de Nascimento"),
-        ...resolveField("aluno_peso", "Peso"),
-        ...resolveField("aluno_altura", "Altura"),
-        ...resolveField("aluno_tel", "Telefone"),
-        ...resolveField("aluno_cpf", "CPF"),
-        ...resolveField("aluno_pai", "Nome do Pai"),
-        ...resolveField("aluno_mae", "Nome da Mãe"),
-        ...resolveField("aluno_end", "Endereço"),
-        ...resolveField("aluno_turma", "Turma Vinculada"),
-        ...resolveField("aluno_acad", "Academia Vinculada"),
-        ...resolveField("aluno_login", "LOGIN"),
-        ...resolveField("aluno_senha", "Senha"),
-        ...resolveField("aluno_grad", "Graduação", "GRADUACAO_ATUAL"),
-        ...resolveField("aluno_foto", "Foto 3x4 (para a carteirinha)"),
-        ...resolveField("aluno_data_cart", "Data Ultima Carteirinha"),
-        ...resolveField("aluno_status", "STATUS"),
-        ...resolveField("aluno_prox_grad", "PROX_GRADUACAO"),
-        ...resolveField("aluno_modalidade", "Modalidade"),
-        ...resolveField("aluno_exame", "Data Próximo Exame")
+      ...resolveField("aluno_carimbo", "Carimbo de data/hora"),
+      ...resolveField("aluno_email", "Endereço de e-mail", "E-mail"),
+      ...resolveField("aluno_nome", "Nome Completo"),
+      ...resolveField("aluno_nasc", "Data de Nascimento"),
+      ...resolveField("aluno_peso", "Peso"),
+      ...resolveField("aluno_altura", "Altura"),
+      ...resolveField("aluno_tel", "Telefone"),
+      ...resolveField("aluno_cpf", "CPF"),
+      ...resolveField("aluno_pai", "Nome do Pai"),
+      ...resolveField("aluno_mae", "Nome da Mãe"),
+      ...resolveField("aluno_end", "Endereço"),
+      ...resolveField("aluno_turma", "Turma Vinculada"),
+      ...resolveField("aluno_acad", "Academia Vinculada"),
+      ...resolveField("aluno_login", "LOGIN"),
+      ...resolveField("aluno_senha", "Senha"),
+      ...resolveField("aluno_grad", "Graduação", "GRADUACAO_ATUAL"),
+      ...resolveField("aluno_foto", "Foto 3x4 (para a carteirinha)"),
+      ...resolveField("aluno_data_cart", "Data Ultima Carteirinha"),
+      ...resolveField("aluno_status", "STATUS"),
+      ...resolveField("aluno_prox_grad", "PROX_GRADUACAO"),
+      ...resolveField("aluno_modalidade", "Modalidade"),
+      ...resolveField("aluno_exame", "Data Próximo Exame")
     ];
 
     const dadosFinais = {};
     campos.forEach(item => {
-        dadosFinais[item.col] = item.val;
+      dadosFinais[item.col] = item.val;
     });
 
     // Injeta os níveis nas duas colunas administrativas (Retrocompatibilidade)
@@ -1208,7 +1208,7 @@ function salvarAluno(form) {
     // Se for aluno novo (sem carimbo), cria a data de ingresso
     const colCarimbo = headerMap[normalize("Carimbo de data/hora")];
     if (colCarimbo && (!dadosFinais[colCarimbo] || dadosFinais[colCarimbo] === "")) {
-        dadosFinais[colCarimbo] = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
+      dadosFinais[colCarimbo] = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
     }
 
     // DISPARO SEGURO PRO BANCO DE DADOS
@@ -1217,11 +1217,11 @@ function salvarAluno(form) {
     // Sincronização de Pacote Financeiro (Protegida)
     if (Object.prototype.hasOwnProperty.call(form, 'aluno_pacote')) {
       let loginFinanceiro = dadosFinais[headerMap[normalize("LOGIN")]] || form.aluno_login;
-      const dadosAssin = { 
-          "Login_Aluno": loginFinanceiro, 
-          "Pacote_Atual": form.aluno_pacote, 
-          "Data_Fim": form.aluno_vencimento, 
-          "Status_Assinatura": form.aluno_status_assinatura 
+      const dadosAssin = {
+        "Login_Aluno": loginFinanceiro,
+        "Pacote_Atual": form.aluno_pacote,
+        "Data_Fim": form.aluno_vencimento,
+        "Status_Assinatura": form.aluno_status_assinatura
       };
       const assinaturas = lerTabelaDinamica("Fin_Assinaturas");
       const aAtual = assinaturas.find(a => String(a.login_aluno).toLowerCase() === String(loginFinanceiro).toLowerCase());
@@ -1230,7 +1230,7 @@ function salvarAluno(form) {
 
     return "✅ Aluno salvo com Sucesso! (Blindagem contra apagão ativada)";
   } catch (e) {
-      return "❌ Erro ao salvar: " + e.message;
+    return "❌ Erro ao salvar: " + e.message;
   }
 }
 
@@ -1273,20 +1273,51 @@ function getMapaGraduacoes() {
   }
 }
 
-// --- GESTÃO DE LOCAIS ---
+// ============================================================================
+// 🌍 CRUD ADMIN DE LOCAIS (Removido Dias e Horas)
+// ============================================================================
+
 function listarLocaisAdmin() {
-  const locais = getLocaisTreino();
-  return locais.map((l, i) => ({ ...l, id: i + 2 }));
+  try {
+    const data = lerTabelaDinamica("Locais_de_treino");
+    return data.map(row => ({
+      id: row._linha,
+      nome: row.nome_do_local || "",
+      endereco: row['endereço'] || "",
+      cidade: row['cidade/estado'] || "",
+      contato: row.contato || "",
+      linkMaps: row.link_google_maps || "",
+      iframeHtml: row.html_mapa_off_lline || "",
+      responsavel: row.responsavel || "",
+      status: row.status || "Ativo",
+      pixChave: row.pix_chave || "",
+      pixNome: row.pix_nome || "",
+      pixCidade: row.pix_cidade || ""
+    })).filter(l => l.nome !== "");
+  } catch (e) { return []; }
 }
 
 function salvarLocal(form) {
   try {
-    const dados = { "Nome do Local": form.loc_nome, "Responsavel": form.loc_resp, "Status": form.loc_status, "Cidade/Estado": form.loc_cidade, "Endereço": form.loc_end, "Contato": form.loc_contato, "Dias": form.loc_dias, "Horários": form.loc_horas, "Link_Google_Maps": form.loc_maps, "html_mapa_off_lline": form.loc_iframe };
+    // Foco apenas no Prédio/Infraestrutura (Sem dias e horas da turma)
+    const dados = {
+      "Nome do Local": form.loc_nome,
+      "Responsavel": form.loc_resp,
+      "Status": form.loc_status,
+      "Cidade/Estado": form.loc_cidade,
+      "Endereço": form.loc_end,
+      "Contato": form.loc_contato,
+      "Link_Google_Maps": form.loc_maps,
+      "html_mapa_off_lline": form.loc_iframe,
+      "Pix_Chave": form.loc_pix_chave,
+      "Pix_Nome": form.loc_pix_nome,
+      "Pix_Cidade": form.loc_pix_cidade
+    };
     const idLinha = parseInt(form.loc_id);
     salvarDadosSeguro(NOME_ABA_LOCAIS, dados, isNaN(idLinha) ? null : idLinha);
     registrarLogAuditoria(form.editor_login || "Admin", isNaN(idLinha) ? "CRIAR_LOCAL" : "EDITAR_LOCAL", form.loc_nome, "");
-    return isNaN(idLinha) ? "✅ Local criado!" : "✅ Local atualizado!";
-  } catch (e) { return "❌ Erro: " + e.message; }
+    return isNaN(idLinha) ? "✅ Local criado com sucesso!" : "✅ Local atualizado com sucesso!";
+  } catch (e) { return "❌ Erro ao salvar local: " + e.message; }
 }
 
 // --- GESTÃO DE CURSOS ---
@@ -1578,9 +1609,14 @@ function salvarTicketSuporte(form) {
 // 6. AUTENTICAÇÃO E A BALA DE PRATA (COM DADOS FISIOLÓGICOS E AULAS)
 // ============================================================================
 
+// ============================================================================
+// 🔒 MÓDULO DE AUTENTICAÇÃO E RBAC (Role-Based Access Control)
+// ============================================================================
+
 function verificarCredenciais(formObject) {
   const loginInput = String(formObject.login).trim().toLowerCase();
   const isCheckOnly = formObject.checkOnly || false;
+
   try {
     const sheet = getSheet(NOME_ABA_ALUNOS);
     const data = sheet.getDataRange().getDisplayValues();
@@ -1590,7 +1626,10 @@ function verificarCredenciais(formObject) {
       login: headers.indexOf("login"),
       senha: headers.indexOf("senha"),
       nome: headers.indexOf("nome completo"),
-      nivel: headers.indexOf("nível do praticante") !== -1 ? headers.indexOf("nível do praticante") : headers.indexOf("nivel do praticante"),
+      // 🥋 Poder do Tatame (Quem dá aula)
+      nivelTatame: headers.indexOf("nível do praticante") !== -1 ? headers.indexOf("nível do praticante") : headers.indexOf("nivel do praticante"),
+      // 🏢 Poder do Escritório (RBAC - ADM)
+      nivelAdm: headers.indexOf("niveladministrativo") !== -1 ? headers.indexOf("niveladministrativo") : headers.indexOf("nivel administrativo"),
       foto: headers.indexOf("foto 3x4 (para a carteirinha)"),
       grad: headers.indexOf("graduacao_atual") !== -1 ? headers.indexOf("graduacao_atual") : headers.indexOf("graduação_atual"),
       acad: headers.indexOf("academia vinculada"),
@@ -1600,63 +1639,56 @@ function verificarCredenciais(formObject) {
       nasc: headers.indexOf("data de nascimento"),
       peso: headers.indexOf("peso"),
       altura: headers.indexOf("altura"),
-      // BUSCANDO A DATA DE INGRESSO (CARIMBO)
       carimbo: headers.findIndex(h => h.includes("carimbo"))
     };
 
-    if (col.login === -1) throw new Error("Coluna LOGIN não encontrada.");
+    if (col.login === -1) throw new Error("Erro Crítico: Coluna LOGIN não encontrada.");
 
-    // Prepara a leitura de chamadas para contar as aulas do aluno
     let chamadas = [];
-    try {
-      chamadas = getSheet("Registro_Chamada").getDataRange().getDisplayValues();
-    } catch (e) {
-      console.warn("Aba Registro_Chamada ainda não existe ou está vazia.");
-    }
+    try { chamadas = getSheet("Registro_Chamada").getDataRange().getDisplayValues(); } catch (e) { }
 
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
       if (String(row[col.login]).trim().toLowerCase() === loginInput) {
-        const statusUser = (col.status > -1) ? String(row[col.status]).trim().toLowerCase() : "ativo";
-        if (statusUser !== "ativo") return { success: false, message: "Cadastro inativo." };
-        if (!isCheckOnly) { if (String(formObject.senha).trim() !== String(row[col.senha]).trim()) return { success: false, message: "Senha incorreta." }; }
+        if (String(row[col.status] || "ativo").trim().toLowerCase() !== "ativo") return { success: false, message: "Cadastro inativo." };
+        if (!isCheckOnly && String(formObject.senha).trim() !== String(row[col.senha]).trim()) return { success: false, message: "Senha incorreta." };
 
         const mapaGrad = getMapaGraduacoes();
         const gradStr = (col.grad > -1 && row[col.grad]) ? String(row[col.grad]).trim().toLowerCase() : "iniciante";
         const gradInfo = mapaGrad[gradStr] || { id: 0, nivel: "ALUNO", modalidade: "Geral" };
 
         const userModalidade = (col.modalidade > -1 && row[col.modalidade]) ? String(row[col.modalidade]).trim() : gradInfo.modalidade;
-        const nivelOficial = String((col.nivel > -1 && row[col.nivel]) ? row[col.nivel] : gradInfo.nivel).toUpperCase();
 
-        const isInstrutor = nivelOficial.includes("INSTRUTOR") || nivelOficial.includes("PROFESSOR") || nivelOficial.includes("MESTRE");
-        const isMestre = nivelOficial.includes("MESTRE");
-        const isAdmin = nivelOficial.includes("ADMIN") || nivelOficial.includes("MESTRE");
+        // 🛡️ RBAC: SEPARAÇÃO DE PODERES
+        const roleTatame = String((col.nivelTatame > -1 && row[col.nivelTatame]) ? row[col.nivelTatame] : gradInfo.nivel).toUpperCase();
+        const roleOffice = String(col.nivelAdm > -1 ? row[col.nivelAdm] : "").toUpperCase();
+
+        const isInstrutor = roleTatame.includes("INSTRUTOR") || roleTatame.includes("PROFESSOR") || roleTatame.includes("MESTRE");
+        const isMestre = roleTatame.includes("MESTRE");
+
+        // 🚨 A MÁGICA DO RBAC: Só é Admin do sistema se a coluna NivelAdministrativo disser "ADMIN" ou "ADM"
+        const isAdmin = (roleOffice === "ADMIN" || roleOffice === "ADM");
 
         const dataNascimento = (col.nasc > -1) ? row[col.nasc] : "";
         const idadeCalculada = calcularIdadeExata(dataNascimento);
 
-        // 🧠 CÁLCULO DE AULAS TOTAIS
         let totalAulas = 0;
         if (chamadas.length > 1) {
           const colIdsChamada = chamadas[0].map(h => String(h).trim().toLowerCase()).indexOf("lista_alunos_ids");
           if (colIdsChamada !== -1) {
             for (let c = 1; c < chamadas.length; c++) {
-              // Se o login do aluno estiver na lista de IDs da aula, soma 1
-              if (String(chamadas[c][colIdsChamada]).toLowerCase().includes(loginInput)) {
-                totalAulas++;
-              }
+              if (String(chamadas[c][colIdsChamada]).toLowerCase().includes(loginInput)) totalAulas++;
             }
           }
         }
 
-        // 🧠 FORMATANDO DATA DE INGRESSO
         let dataIngresso = (col.carimbo > -1 && row[col.carimbo]) ? String(row[col.carimbo]).split(" ")[0] : "--/--/----";
 
         const userPayload = {
           LOGIN: loginInput,
           nomeCompleto: row[col.nome],
           graduacao: (col.grad > -1) ? row[col.grad] : "Iniciante",
-          nivel: (col.nivel > -1 && row[col.nivel]) ? row[col.nivel] : gradInfo.nivel,
+          nivel: roleTatame,
           fotoUrl: padronizarLinkDrive(row[col.foto]),
           academia: (col.acad > -1) ? row[col.acad] : "---",
           proximoExame: (col.exame > -1) ? row[col.exame] : "A definir",
@@ -1664,11 +1696,11 @@ function verificarCredenciais(formObject) {
           peso: (col.peso > -1) ? row[col.peso] : "",
           altura: (col.altura > -1) ? row[col.altura] : "",
           idadeExata: idadeCalculada,
-          totalAulas: totalAulas, // <-- ENVIANDO PRO FRONTEND
-          carimbo: dataIngresso,  // <-- ENVIANDO PRO FRONTEND
+          totalAulas: totalAulas,
+          carimbo: dataIngresso,
           isInstrutor: isInstrutor,
           isMestre: isMestre,
-          isAdmin: isAdmin
+          isAdmin: isAdmin // <-- Variável que trava o Financeiro e Admin no Frontend
         };
 
         if (!isCheckOnly) registrarLogLogin(loginInput, "SUCESSO");
@@ -1843,19 +1875,28 @@ function buscarAlunosParaManual(termo) {
 }
 
 /**
- * Adiciona um aluno diretamente à aula.
- * Se o ID começar com "VISITANTE_", cria um registro temporário.
+ * 📝 QA Note: God Mode. O Mestre adiciona o aluno na mão, furando a trava de idade,
+ * mas mantendo a TAG de idade para controle visual. Mapeamento dinâmico incluso.
  */
 function adicionarAlunoManual(idAula, loginOuNome) {
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(10000);
-    const sheet = getSheet(NOME_ABA_AULAS);
+    const sheet = getSheet("Aulas_Em_Andamento");
     const data = sheet.getDataRange().getValues();
-    let linhaAlvo = -1; let checkinsAtuais = []; let dadosAula = {};
+    if (data.length < 2) return { success: false, msg: "Nenhuma aula ativa." };
+
+    // 🧠 MAPEAMENTO DINÂMICO DE COLUNAS
+    const headers = data[0].map(h => String(h).trim().toLowerCase());
+    const colId = headers.indexOf("id_aula");
+    const colJson = headers.indexOf("checkins_json");
+
+    let linhaAlvo = -1; let checkinsAtuais = [];
 
     for (let i = data.length - 1; i >= 1; i--) {
-      if (String(data[i][0]) === idAula) { linhaAlvo = i + 1; checkinsAtuais = JSON.parse(data[i][8] || "[]"); dadosAula = { academia: data[i][4] }; break; }
+      if (String(data[i][colId]) === idAula) {
+        linhaAlvo = i + 1; checkinsAtuais = JSON.parse(data[i][colJson] || "[]"); break;
+      }
     }
     if (linhaAlvo === -1) return { success: false, msg: "Aula não encontrada." };
 
@@ -1863,82 +1904,121 @@ function adicionarAlunoManual(idAula, loginOuNome) {
     if (String(loginOuNome).startsWith("VISITANTE_")) {
       const nomeLimpo = loginOuNome.replace("VISITANTE_", "");
       if (checkinsAtuais.some(c => c.nome.toLowerCase() === nomeLimpo.toLowerCase())) return { success: false, msg: "Nome já está na lista." };
-      novoCheckin = { login: "GUEST-" + Date.now(), nome: nomeLimpo, foto: "https://via.placeholder.com/150?text=VIS", graduacao: "Visitante", academia_origem: "Externo", status: "Confirmado", tipo: "Visitante", hora: new Date().toLocaleTimeString() };
+      novoCheckin = {
+        login: "GUEST-" + Date.now(), nome: nomeLimpo, foto: "https://via.placeholder.com/150?text=VIS",
+        graduacao: "Visitante", academia_origem: "Externo", status: "Confirmado",
+        tipo: "Visitante", idade: "?", categoria: "Visitante", hora: new Date().toLocaleTimeString()
+      };
     } else {
       if (checkinsAtuais.some(c => c.login === loginOuNome)) return { success: false, msg: "Aluno já está na lista." };
+
       const aluno = buscarAlunoPorLogin(loginOuNome);
       if (!aluno) return { success: false, msg: "Aluno não encontrado no banco." };
 
-      // --- 🚀 BLINDAGEM AGRESSIVA DO BUG DE VISITANTE [VIS] ---
-      const turmas = lerTabelaDinamica("Config_Turmas");
-      const turmaInfo = turmas.find(t => String(t.nome_da_turma).trim().toLowerCase() === String(dadosAula.academia).trim().toLowerCase());
-      const localDaTurma = turmaInfo ? String(turmaInfo.local_vinculado) : String(dadosAula.academia);
-      const acadAluno = String(aluno.academia || aluno["Academia Vinculada"]);
+      let idadeAnos = 0;
+      if (aluno.idadeExata && aluno.idadeExata !== "N/A") { idadeAnos = parseInt(aluno.idadeExata.split('a')[0]) || 0; }
 
-      const loc1 = localDaTurma.replace(/\s+/g, '').toUpperCase();
-      const loc2 = acadAluno.replace(/\s+/g, '').toUpperCase();
-      const tipoAluno = (loc1 !== loc2) ? "Visitante" : "Regular";
-      // --------------------------------------------------------
+      const IDADE_CORTE_ADULTO = 15;
+      const categoriaIdadeAluno = idadeAnos >= IDADE_CORTE_ADULTO ? "Adulto" : "Infantil";
 
-      novoCheckin = { login: aluno.LOGIN || aluno.login, nome: aluno["Nome Completo"] || aluno.nomeCompleto, foto: padronizarLinkDrive(aluno["Foto 3x4 (para a carteirinha)"] || aluno.fotoUrl), graduacao: aluno["GRADUACAO_ATUAL"] || aluno.graduacao, academia_origem: aluno.academia || aluno["Academia Vinculada"], status: "Confirmado", tipo: tipoAluno, hora: new Date().toLocaleTimeString() };
+      novoCheckin = {
+        login: aluno.LOGIN || loginOuNome, nome: aluno.nomeCompleto, foto: aluno.fotoUrl,
+        graduacao: aluno.graduacao, academia_origem: String(aluno.academia), status: "Confirmado",
+        tipo: "Regular", idade: idadeAnos, categoria: categoriaIdadeAluno, hora: new Date().toLocaleTimeString()
+      };
     }
+
     checkinsAtuais.push(novoCheckin);
-    sheet.getRange(linhaAlvo, 9).setValue(JSON.stringify(checkinsAtuais));
-    return { success: true, msg: "Adicionado com sucesso!" };
+    sheet.getRange(linhaAlvo, colJson + 1).setValue(JSON.stringify(checkinsAtuais));
+    return { success: true, msg: "Adicionado com sucesso (Modo Mestre)!" };
   } catch (e) { return { success: false, msg: "Erro: " + e.message }; } finally { lock.releaseLock(); }
 }
 
-function formatarHoraSimples(dado) {
-  if (!dado) return "--:--";
-  if (dado instanceof Date) return Utilities.formatDate(dado, Session.getScriptTimeZone(), "HH:mm");
-  return String(dado).substring(0, 5);
+// ============================================================================
+// ⚙️ HELPER DE FORMATAÇÃO DE HORA
+// ============================================================================
+function formatarHoraSimples(hora) {
+  if (!hora) return "--:--";
+  if (hora instanceof Date) return Utilities.formatDate(hora, Session.getScriptTimeZone(), "HH:mm");
+  let str = String(hora).trim();
+  if (str.length >= 5 && str.includes(":")) return str.substring(0, 5); // Ex: "20:30:00" vira "20:30"
+  return str;
 }
 
+// ============================================================================
+// 🏫 MOTOR DE AULAS DINÂMICAS E CHECK-IN (ARQUITETURA DE 10 COLUNAS)
+// ============================================================================
+
+/**
+ * 📝 QA Note: Cria uma nova aula. Utiliza a função 'salvarDadosSeguro' que 
+ * internamente procura as colunas pelo nome exato, tornando a gravação blindada
+ * contra mudanças na ordem das colunas da planilha.
+ */
 function iniciarAulaDinamica(dados) {
   limparAulasExpiradas();
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(10000);
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = ss.getSheetByName(NOME_ABA_AULAS);
-    if (!sheet) {
-      sheet = ss.insertSheet(NOME_ABA_AULAS);
-      sheet.appendRow(["ID_Aula", "Data_Aula", "Hora_Inicio", "Hora_Fim", "Academia", "Instrutor", "PIN", "Status", "Checkins_JSON"]);
-    }
+    let sheet = ss.getSheetByName("Aulas_Em_Andamento");
+
     const idAula = "AULA-" + Date.now();
     const pin = Math.floor(1000 + Math.random() * 9000);
 
-    // Data sempre como string YYYY-MM-DD
     let dataStr = dados.data;
     if (dados.data instanceof Date) dataStr = Utilities.formatDate(dados.data, Session.getScriptTimeZone(), "yyyy-MM-dd");
 
-    sheet.appendRow([idAula, dataStr, String(dados.inicio), String(dados.fim), dados.academia, dados.instrutor, pin, "ABERTA", "[]"]);
+    const novaAula = {
+      "ID_Aula": idAula,
+      "Data_Aula": dataStr,
+      "Hora_Inicio": String(dados.inicio),
+      "Hora_Fim": String(dados.fim),
+      "Academia": dados.local,
+      "Turma": dados.turma,
+      "Instrutor": dados.instrutor,
+      "PIN": pin,
+      "Status": "ABERTA",
+      "Checkins_JSON": "[]" // AQUI ESTAVA O SEGREDO DO JSON INVALIDO
+    };
+
+    salvarDadosSeguro("Aulas_Em_Andamento", novaAula);
     return { success: true, idAula: idAula, pin: pin };
   } catch (e) { return { success: false, erro: e.message }; } finally { lock.releaseLock(); }
 }
-
 /**
- * [ALUNO] Busca aulas disponíveis
- * Se academiaAluno == "TODOS", retorna todas as aulas ativas do dia (para o Dashboard).
+ * 📝 QA Note: Busca as aulas ativas para o aluno fazer check-in.
+ * Mapeia dinamicamente os cabeçalhos para ler as posições corretas.
  */
 function buscarAulasDisponiveisAluno(academiaAluno) {
   try {
-    const sheet = getSheet(NOME_ABA_AULAS);
+    const sheet = getSheet("Aulas_Em_Andamento");
     const data = sheet.getDataRange().getValues();
+    if (data.length < 2) return [];
+
     const agora = new Date();
     const aulas = [];
     const minhaAcademia = String(academiaAluno).trim().toUpperCase();
-    const buscarTudo = (minhaAcademia === "TODOS"); // Flag nova
+    const buscarTudo = (minhaAcademia === "TODOS");
     const hojeStr = Utilities.formatDate(agora, Session.getScriptTimeZone(), "yyyy-MM-dd");
 
+    // 🧠 MAPEAMENTO DINÂMICO DE COLUNAS
+    const headers = data[0].map(h => String(h).trim().toLowerCase());
+    const colId = headers.indexOf("id_aula");
+    const colData = headers.indexOf("data_aula");
+    const colInicio = headers.indexOf("hora_inicio");
+    const colFim = headers.indexOf("hora_fim");
+    const colAcad = headers.indexOf("academia");
+    const colTurma = headers.indexOf("turma");
+    const colInst = headers.indexOf("instrutor");
+    const colPin = headers.indexOf("pin");
+    const colStatus = headers.indexOf("status");
+
     for (let i = 1; i < data.length; i++) {
-      const status = String(data[i][7]);
-      const acadAula = String(data[i][4]).trim().toUpperCase();
+      const status = String(data[i][colStatus]);
+      const acadAula = String(data[i][colAcad]).trim().toUpperCase();
 
-      // Lógica atualizada: Aceita se for a academia do aluno OU se estiver buscando tudo
       if (status === "ABERTA" && (buscarTudo || acadAula === minhaAcademia)) {
-
-        let diaPlanilha = data[i][1];
+        let diaPlanilha = data[i][colData];
         let diaStr = "";
         if (diaPlanilha instanceof Date) {
           diaStr = Utilities.formatDate(diaPlanilha, Session.getScriptTimeZone(), "yyyy-MM-dd");
@@ -1948,93 +2028,12 @@ function buscarAulasDisponiveisAluno(academiaAluno) {
 
         if (diaStr === hojeStr) {
           aulas.push({
-            id: data[i][0],
-            instrutor: data[i][5],
-            academia: data[i][4], // Importante retornar o nome para o Dashboard
-            horario: `${formatarHoraSimples(data[i][2])} às ${formatarHoraSimples(data[i][3])}`,
-            pin: data[i][6]
-          });
-        }
-      }
-    }
-    return aulas;
-  } catch (e) {
-    console.error("Erro busca aluno: " + e.message);
-    return [];
-  }
-}
-
-function realizarCheckinAluno(login, pinDigitado) {
-  const lock = LockService.getScriptLock();
-  try {
-    lock.waitLock(10000);
-    const sheet = getSheet(NOME_ABA_AULAS);
-    const data = sheet.getDataRange().getValues();
-    let linhaAlvo = -1; let checkinsAtuais = []; let dadosAula = {};
-    for (let i = data.length - 1; i >= 1; i--) {
-      if (String(data[i][6]).trim() == String(pinDigitado).trim() && data[i][7] == "ABERTA") {
-        linhaAlvo = i + 1;
-        checkinsAtuais = JSON.parse(data[i][8] || "[]");
-        dadosAula = { academia: data[i][4] }; // Aqui está a TURMA
-        break;
-      }
-    }
-    if (linhaAlvo === -1) return { success: false, msg: "PIN inválido ou aula encerrada." };
-    if (checkinsAtuais.some(c => c.login === login)) return { success: false, msg: "Você já realizou check-in." };
-
-    const aluno = buscarAlunoPorLogin(login);
-    if (!aluno) return { success: false, msg: "Aluno não identificado." };
-
-    // --- 🚀 BLINDAGEM AGRESSIVA DO BUG DE VISITANTE [VIS] ---
-    const turmas = lerTabelaDinamica("Config_Turmas");
-    const turmaInfo = turmas.find(t => String(t.nome_da_turma).trim().toLowerCase() === String(dadosAula.academia).trim().toLowerCase());
-    const localDaTurma = turmaInfo ? String(turmaInfo.local_vinculado) : String(dadosAula.academia);
-    const acadAluno = String(aluno.academia || aluno["Academia Vinculada"]);
-
-    // Arranca todos os espaços e compara as raízes das palavras
-    const loc1 = localDaTurma.replace(/\s+/g, '').toUpperCase();
-    const loc2 = acadAluno.replace(/\s+/g, '').toUpperCase();
-    const tipoAluno = (loc1 !== loc2) ? "Visitante" : "Regular";
-    // --------------------------------------------------------
-
-    checkinsAtuais.push({
-      login: login,
-      nome: aluno["Nome Completo"] || aluno.nomeCompleto || aluno.nome || "Aluno",
-      foto: padronizarLinkDrive(aluno["Foto 3x4 (para a carteirinha)"] || aluno.fotoUrl || ""),
-      graduacao: aluno["GRADUACAO_ATUAL"] || aluno.graduacao || "Iniciante",
-      academia_origem: aluno.academia || aluno["Academia Vinculada"],
-      status: "Pendente",
-      tipo: tipoAluno,
-      hora: new Date().toLocaleTimeString()
-    });
-
-    sheet.getRange(linhaAlvo, 9).setValue(JSON.stringify(checkinsAtuais));
-    return { success: true, msg: "Check-in realizado! Aguarde o instrutor." };
-  } catch (e) { return { success: false, msg: "Erro: " + e.message }; } finally { lock.releaseLock(); }
-}
-function buscarAulasAtivasInstrutor(loginInstrutor) {
-  console.log("incia funçõa buscarAulasAtivasInstrutor")
-  try {
-    const sheet = getSheet(NOME_ABA_AULAS);
-    const data = sheet.getDataRange().getValues();
-    const aulas = [];
-    const nomeInst = String(loginInstrutor).trim().toLowerCase();
-
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][7] === "ABERTA") {
-        const donoAula = String(data[i][5]).trim().toLowerCase();
-        // Permite se o nome bater ou se for admin
-        if (donoAula.includes(nomeInst.split(' ')[0].toLowerCase()) || true) {
-          let dataVisual = data[i][1];
-          if (dataVisual instanceof Date) dataVisual = Utilities.formatDate(dataVisual, Session.getScriptTimeZone(), "dd/MM/yyyy");
-          else if (typeof dataVisual === 'string' && dataVisual.includes('-')) {
-            const p = dataVisual.split('-'); dataVisual = `${p[2]}/${p[1]}/${p[0]}`;
-          }
-
-          aulas.push({
-            id: data[i][0], data: dataVisual, academia: data[i][4],
-            horario: `${formatarHoraSimples(data[i][2])} - ${formatarHoraSimples(data[i][3])}`,
-            pin: data[i][6], qtd: JSON.parse(data[i][8] || "[]").length
+            id: data[i][colId],
+            instrutor: data[i][colInst],
+            academia: data[i][colAcad],
+            turma: data[i][colTurma],
+            horario: `${formatarHoraSimples(data[i][colInicio])} às ${formatarHoraSimples(data[i][colFim])}`,
+            pin: data[i][colPin]
           });
         }
       }
@@ -2043,60 +2042,215 @@ function buscarAulasAtivasInstrutor(loginInstrutor) {
   } catch (e) { return []; }
 }
 
-function buscarCheckinsAula(idAula) {
-  console.log("incia funçõa buscarCheckinsAula")
+// ============================================================================
+// 🥋 MOTOR DE CHECK-IN E CONTROLE DE TATAME (COM TRAVA DE IDADE V3 - FINAL)
+// ============================================================================
+
+/**
+ * 📝 QA Note: O aluno tenta fazer check-in. O sistema busca dinamicamente as colunas
+ * para evitar quebra de índice, calcula a idade e barra se a turma não permitir.
+ */
+function realizarCheckinAluno(login, pinDigitado) {
+  const lock = LockService.getScriptLock();
   try {
-    const sheet = getSheet(NOME_ABA_AULAS);
+    lock.waitLock(10000);
+    const sheetAulas = getSheet("Aulas_Em_Andamento");
+    const dataAulas = sheetAulas.getDataRange().getValues();
+    if (dataAulas.length < 2) return { success: false, msg: "Nenhuma aula ativa encontrada." };
+
+    // 🧠 MAPEAMENTO DINÂMICO DE COLUNAS
+    const headers = dataAulas[0].map(h => String(h).trim().toLowerCase());
+    const colPin = headers.indexOf("pin");
+    const colStatus = headers.indexOf("status");
+    const colLocal = headers.indexOf("academia");
+    const colTurma = headers.indexOf("turma");
+    const colJson = headers.indexOf("checkins_json");
+
+    let linhaAlvo = -1; let checkinsAtuais = []; let dadosAula = {};
+
+    for (let i = dataAulas.length - 1; i >= 1; i--) {
+      if (String(dataAulas[i][colPin]).trim() === String(pinDigitado).trim() && dataAulas[i][colStatus] === "ABERTA") {
+        linhaAlvo = i + 1;
+        checkinsAtuais = JSON.parse(dataAulas[i][colJson] || "[]");
+        dadosAula = { local: dataAulas[i][colLocal], turma: dataAulas[i][colTurma] };
+        break;
+      }
+    }
+
+    if (linhaAlvo === -1) return { success: false, msg: "PIN inválido ou aula encerrada." };
+    if (checkinsAtuais.some(c => c.login === login)) return { success: false, msg: "Você já realizou check-in." };
+
+    const aluno = buscarAlunoPorLogin(login);
+    if (!aluno) return { success: false, msg: "Aluno não identificado." };
+
+    const turmas = lerTabelaDinamica("Config_Turmas");
+    const turmaInfo = turmas.find(t => String(t.nome_da_turma).trim().toLowerCase() === String(dadosAula.turma).trim().toLowerCase());
+
+    const faixaEtariaTurma = turmaInfo ? String(turmaInfo["faixa_etária"] || turmaInfo.faixa_etaria || "Misto").trim() : "Misto";
+    const localDaTurma = dadosAula.local || "Matriz";
+
+    let idadeAnos = 0;
+    if (aluno.idadeExata && aluno.idadeExata !== "N/A") {
+      idadeAnos = parseInt(aluno.idadeExata.split('a')[0]) || 0;
+    }
+
+    const IDADE_CORTE_ADULTO = 15;
+    const categoriaIdadeAluno = idadeAnos >= IDADE_CORTE_ADULTO ? "Adulto" : "Infantil";
+
+    // 🛑 A TRAVA DE IDADE BLINDADA
+    if (faixaEtariaTurma.toLowerCase() === "infantil" && idadeAnos >= IDADE_CORTE_ADULTO) {
+      return { success: false, msg: `🚫 Turma Infantil. Sua idade (${idadeAnos} anos) requer aprovação manual do Mestre.` };
+    }
+    if (faixaEtariaTurma.toLowerCase() === "adulto" && idadeAnos > 0 && idadeAnos < IDADE_CORTE_ADULTO) {
+      return { success: false, msg: `🚫 Turma Adulto. Sua idade (${idadeAnos} anos) requer aprovação manual do Mestre.` };
+    }
+
+    const acadAluno = String(aluno.academia || "");
+    const loc1 = String(localDaTurma).replace(/\s+/g, '').toUpperCase();
+    const loc2 = acadAluno.replace(/\s+/g, '').toUpperCase();
+    const tipoAluno = (loc1 !== loc2) ? "Visitante" : "Regular";
+
+    checkinsAtuais.push({
+      login: login, nome: aluno.nomeCompleto || "Aluno", foto: aluno.fotoUrl || "",
+      graduacao: aluno.graduacao || "Iniciante", academia_origem: acadAluno,
+      status: "Pendente", tipo: tipoAluno, idade: idadeAnos, categoria: categoriaIdadeAluno,
+      hora: new Date().toLocaleTimeString()
+    });
+
+    sheetAulas.getRange(linhaAlvo, colJson + 1).setValue(JSON.stringify(checkinsAtuais));
+    return { success: true, msg: "Check-in realizado! Aguarde o instrutor." };
+  } catch (e) { return { success: false, msg: "Erro Crítico: " + e.message }; } finally { lock.releaseLock(); }
+}
+
+
+// ============================================================================
+// 🔍 BUSCA DE AULAS PARA O INSTRUTOR E ALUNO
+// ============================================================================
+
+/**
+ * 📝 QA Note: Retorna as aulas em andamento para o painel do instrutor.
+ * Totalmente desacoplada de colunas engessadas.
+ */
+function buscarAulasAtivasInstrutor(loginInstrutor) {
+  try {
+    const sheet = getSheet("Aulas_Em_Andamento");
     const data = sheet.getDataRange().getValues();
+    if (data.length < 2) return [];
+
+    const aulas = [];
+    const nomeInst = String(loginInstrutor).trim().toLowerCase();
+
+    // 🧠 MAPEAMENTO DINÂMICO DE COLUNAS
+    const headers = data[0].map(h => String(h).trim().toLowerCase());
+    const colId = headers.indexOf("id_aula");
+    const colData = headers.indexOf("data_aula");
+    const colInicio = headers.indexOf("hora_inicio");
+    const colFim = headers.indexOf("hora_fim");
+    const colAcad = headers.indexOf("academia");
+    const colTurma = headers.indexOf("turma");
+    const colInst = headers.indexOf("instrutor");
+    const colPin = headers.indexOf("pin");
+    const colStatus = headers.indexOf("status");
+    const colJson = headers.indexOf("checkins_json");
+
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][colStatus] === "ABERTA") {
+        const donoAula = String(data[i][colInst]).trim().toLowerCase();
+        if (donoAula.includes(nomeInst.split(' ')[0].toLowerCase()) || true) {
+          let dataVisual = data[i][colData];
+          if (dataVisual instanceof Date) dataVisual = Utilities.formatDate(dataVisual, Session.getScriptTimeZone(), "dd/MM/yyyy");
+          else if (typeof dataVisual === 'string' && dataVisual.includes('-')) {
+            const p = dataVisual.split('-'); dataVisual = `${p[2]}/${p[1]}/${p[0]}`;
+          }
+
+          aulas.push({
+            id: data[i][colId],
+            data: dataVisual,
+            academia: data[i][colAcad],
+            turma: data[i][colTurma],
+            horario: `${formatarHoraSimples(data[i][colInicio])} - ${formatarHoraSimples(data[i][colFim])}`,
+            pin: data[i][colPin],
+            qtd: JSON.parse(data[i][colJson] || "[]").length
+          });
+        }
+      }
+    }
+    return aulas;
+  } catch (e) { return []; }
+}
+
+/**
+ * 📝 QA Note: Lê os check-ins ao vivo (Polling) via mapeamento dinâmico.
+ */
+function buscarCheckinsAula(idAula) {
+  try {
+    const sheet = getSheet("Aulas_Em_Andamento");
+    const data = sheet.getDataRange().getValues();
+    if (data.length < 2) return { success: false };
+
+    const headers = data[0].map(h => String(h).trim().toLowerCase());
+    const colId = headers.indexOf("id_aula");
+    const colStatus = headers.indexOf("status");
+    const colJson = headers.indexOf("checkins_json");
+
     for (let i = data.length - 1; i >= 1; i--) {
-      if (String(data[i][0]) === idAula) {
-        return { success: true, status: data[i][7], checkins: JSON.parse(data[i][8] || "[]") };
+      if (String(data[i][colId]) === idAula) {
+        return { success: true, status: data[i][colStatus], checkins: JSON.parse(data[i][colJson] || "[]") };
       }
     }
     return { success: false };
   } catch (e) { return { success: false }; }
 }
 
+/**
+ * 📝 QA Note: Transforma a aula provisória em um Histórico Oficial.
+ * Mapeia os cabeçalhos para evitar reescrever o Status na coluna errada.
+ */
 function finalizarAulaDinamica(idAula, listaFinalAlunos) {
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(20000);
-    const sheetTemp = getSheet(NOME_ABA_AULAS);
+    const sheetTemp = getSheet("Aulas_Em_Andamento");
     const dataTemp = sheetTemp.getDataRange().getValues();
+    if (dataTemp.length < 2) return { success: false, msg: "Tabela de aulas vazia." };
+
+    // 🧠 MAPEAMENTO DINÂMICO DE COLUNAS
+    const headers = dataTemp[0].map(h => String(h).trim().toLowerCase());
+    const colId = headers.indexOf("id_aula");
+    const colData = headers.indexOf("data_aula");
+    const colAcad = headers.indexOf("academia");
+    const colTurma = headers.indexOf("turma");
+    const colInst = headers.indexOf("instrutor");
+    const colStatus = headers.indexOf("status");
+
     let linhaAlvo = -1;
     let dadosAula = null;
 
     for (let i = dataTemp.length - 1; i >= 1; i--) {
-      if (String(dataTemp[i][0]) === idAula) {
+      if (String(dataTemp[i][colId]) === idAula) {
         linhaAlvo = i + 1;
-        let dataF = dataTemp[i][1];
+        let dataF = dataTemp[i][colData];
         if (dataF instanceof Date) dataF = Utilities.formatDate(dataF, Session.getScriptTimeZone(), "yyyy-MM-dd");
         else if (typeof dataF === 'string' && dataF.includes('/')) { const p = dataF.split('/'); dataF = `${p[2]}-${p[1]}-${p[0]}`; }
 
-        // Na arquitetura nova, a coluna [4] guarda o NOME DA TURMA
-        dadosAula = { data: dataF, instrutor: dataTemp[i][5], turma: dataTemp[i][4] };
+        dadosAula = { data: dataF, instrutor: dataTemp[i][colInst], turma: dataTemp[i][colTurma], local: dataTemp[i][colAcad] };
         break;
       }
     }
 
     if (!dadosAula) return { success: false, msg: "Aula não encontrada." };
 
-    // --- 🚀 MÁGICA DO RELATÓRIO (DCU): Combina Local e Turma ---
-    const turmas = lerTabelaDinamica("Config_Turmas");
-    const tInfo = turmas.find(t => String(t.nome_da_turma).trim() === String(dadosAula.turma).trim());
-    // Se achou, escreve: "CT Matriz | Muay Thai Adulto". Se não, escreve só a Turma.
-    const localRelatorio = tInfo ? (tInfo.local_vinculado + " | " + tInfo.nome_da_turma) : dadosAula.turma;
-
+    const localRelatorio = dadosAula.local + " | " + dadosAula.turma;
     const presentes = listaFinalAlunos.filter(a => a.status === "Confirmado");
 
     if (presentes.length > 0) {
       salvarDadosSeguro("Registro_Chamada", {
         "ID_Chamada": idAula,
-        "Data_Registro": new Date(),
+        "Data_Registro": Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss"),
         "Data_Treino": dadosAula.data,
         "Hora_Treino": new Date().toLocaleTimeString(),
         "Instrutor_Logado": dadosAula.instrutor,
-        "Local_Treino": localRelatorio, // <--- Aqui está o segredo do Relatório Bonito
+        "Local_Treino": localRelatorio,
         "Qtd_Presentes": presentes.length,
         "Lista_Alunos_IDs": presentes.map(a => a.login).join(", "),
         "Lista_Nomes": presentes.map(a => a.nome + (a.tipo === 'Visitante' ? ' [VIS]' : '')).join(", "),
@@ -2104,21 +2258,33 @@ function finalizarAulaDinamica(idAula, listaFinalAlunos) {
       });
     }
 
-    sheetTemp.getRange(linhaAlvo, 8).setValue("ENCERRADA");
-    return { success: true, msg: "Aula finalizada e Ranking atualizado!" };
-
+    // Atualiza a célula exata do Status, não importa onde ela esteja (+1 porque array começa no 0 e getRange no 1)
+    sheetTemp.getRange(linhaAlvo, colStatus + 1).setValue("ENCERRADA");
+    return { success: true, msg: "Aula finalizada e Histórico atualizado!" };
   } catch (e) { return { success: false, msg: "Erro: " + e.message }; } finally { lock.releaseLock(); }
 }
 
+/**
+ * 📝 QA Note: Rotina de limpeza. Encontra colunas de data e status dinamicamente.
+ */
 function limparAulasExpiradas() {
   try {
-    const sheet = getSheet(NOME_ABA_AULAS);
+    const sheet = getSheet("Aulas_Em_Andamento");
     if (!sheet) return;
     const data = sheet.getDataRange().getValues();
+    if (data.length < 2) return;
+
+    const headers = data[0].map(h => String(h).trim().toLowerCase());
+    const colData = headers.indexOf("data_aula");
+    const colStatus = headers.indexOf("status");
+
     const agora = new Date();
+    // Apaga de baixo para cima para não quebrar os índices
     for (let i = data.length - 1; i >= 1; i--) {
-      let d = new Date(data[i][1]);
-      if ((agora - d) > (24 * 3600 * 1000) && data[i][7] === "ABERTA") { sheet.deleteRow(i + 1); }
+      let d = new Date(data[i][colData]);
+      if ((agora - d) > (24 * 3600 * 1000) && data[i][colStatus] === "ABERTA") {
+        sheet.deleteRow(i + 1);
+      }
     }
   } catch (e) { }
 }
@@ -2297,18 +2463,18 @@ function getPixDataFromServer(login) {
       chave: configApp.pix_chave,
       beneficiario: configApp.pix_nome || "Dojo Manager",
       cidade: configApp.pix_cidade || "RECIFE",
-      valor: pacote ? pacote.valor_padrao : 150.00, // Fallback de valor
+      banco: configApp.banco || "Instituição Bancária", // <-- LINHA INJETADA
+      valor: pacote ? pacote.valor_padrao : 150.00,
       contatoWhatsApp: ""
     };
 
-    // Lógica PIX Local (Coluna Ativo Sim/Não)
     if (configApp.pix_global_ativo !== "Sim") {
       const local = locais.find(l => l.nome_do_local === aluno.academia_vinculada);
-      // Blindagem: Verifica se a coluna 'Ativo' do PIX no local está como 'Sim'
       if (local && local.ativo === "Sim") {
         info.chave = local.pix_chave;
         info.beneficiario = local.pix_nome;
         info.cidade = local.pix_cidade;
+        info.banco = local.banco || info.banco; // <-- LINHA INJETADA
       }
     }
 
@@ -2445,18 +2611,19 @@ function excluirGraduacaoAdmin(linha) {
 function listarTurmasAdmin() {
   try {
     const data = lerTabelaDinamica("Config_Turmas");
-
     return data.map(t => ({
       idLinha: t._linha,
       idTurma: t.id_turma || "",
       nome: t.nome_da_turma || "Sem Nome",
       modalidade: t.modalidade || "Geral",
-      faixaEtaria: t["faixa_etária"] || t.faixa_etaria || "Misto", // Trata acentos
+      faixaEtaria: t["faixa_etária"] || t.faixa_etaria || "Misto",
       local: t.local_vinculado || "Matriz",
       dias: t.dias_da_semana || "",
       inicio: t["horário_início"] || t.horario_inicio || "",
       fim: t["horário_fim"] || t.horario_fim || "",
-      status: t.status || "Ativa"
+      status: t.status || "Ativa",
+      responsavel: t.responsavel || t['responsável'] || "",
+      telefone: t.telefone || ""
     }));
   } catch (e) {
     console.error("Erro ao listar turmas: " + e.message);
@@ -2465,30 +2632,62 @@ function listarTurmasAdmin() {
 }
 
 /**
- * Salva ou edita uma turma no banco de dados
+ * ============================================================================
+ * 🛡️ FIX: ANTI-APAGÃO PARA TURMAS (HYDRATION)
+ * Garante que a edição de uma turma não apague colunas extras que o cliente 
+ * possa adicionar no futuro na aba 'Config_Turmas'.
+ * ============================================================================
  */
 function salvarTurma(form) {
   try {
+    const nomeAba = "Config_Turmas";
+    const sheet = getSheet(nomeAba);
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+    const normalize = (str) => String(str).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "");
+    const headerMap = {};
+    headers.forEach(h => { if (h) headerMap[normalize(h)] = h; });
+
     const idLinha = parseInt(form.turma_linha_id);
+    let linhaExistente = [];
 
-    // Se for uma turma nova, gera um ID único, senão usa o que veio do formulário
-    const idTurmaGerado = form.turma_id || ("TUR-" + Date.now());
+    if (!isNaN(idLinha) && idLinha > 1 && idLinha <= sheet.getLastRow()) {
+      linhaExistente = sheet.getRange(idLinha, 1, 1, headers.length).getValues()[0];
+    }
 
-    const dados = {
-      "ID_Turma": idTurmaGerado,
-      "Nome da Turma": form.turma_nome,
-      "Modalidade": form.turma_mod,
-      "Faixa Etária": form.turma_idade,
-      "Local Vinculado": form.turma_local,
-      "Dias da Semana": form.turma_dias,
-      "Horário Início": form.turma_inicio,
-      "Horário Fim": form.turma_fim,
-      "Status": form.turma_status
+    const getOldVal = (nomeRealColuna) => {
+      if (linhaExistente.length === 0) return "";
+      const idx = headers.indexOf(nomeRealColuna);
+      return idx !== -1 ? linhaExistente[idx] : "";
     };
 
-    salvarDadosSeguro("Config_Turmas", dados, isNaN(idLinha) ? null : idLinha);
+    const resolveField = (formKey, colPlanilha) => {
+      const realCol = headerMap[normalize(colPlanilha)];
+      if (!realCol) return null;
+      let valorParaSalvar = Object.prototype.hasOwnProperty.call(form, formKey) ? form[formKey] : getOldVal(realCol);
+      return { col: realCol, val: valorParaSalvar };
+    };
+
+    const idTurmaGerado = form.turma_id || getOldVal(headerMap[normalize("ID_Turma")]) || ("TUR-" + Date.now());
+
+    const campos = [
+      { col: headerMap[normalize("ID_Turma")], val: idTurmaGerado },
+      resolveField("turma_nome", "Nome da Turma"),
+      resolveField("turma_mod", "Modalidade"),
+      resolveField("turma_idade", "Faixa Etária"),
+      resolveField("turma_local", "Local Vinculado"),
+      resolveField("turma_dias", "Dias da Semana"),
+      resolveField("turma_inicio", "Horário Início"),
+      resolveField("turma_fim", "Horário Fim"),
+      resolveField("turma_status", "Status"),
+      resolveField("turma_resp", "Responsável"),
+      resolveField("turma_tel", "Telefone")
+    ];
+
+    const dadosFinais = {};
+    campos.forEach(item => { if (item && item.col) dadosFinais[item.col] = item.val; });
+
+    salvarDadosSeguro(nomeAba, dadosFinais, isNaN(idLinha) ? null : idLinha);
     return isNaN(idLinha) ? "✅ Turma criada com sucesso!" : "✅ Turma atualizada com sucesso!";
-  } catch (e) {
-    return "❌ Erro ao salvar turma: " + e.message;
-  }
+  } catch (e) { return "❌ Erro ao salvar turma: " + e.message; }
 }

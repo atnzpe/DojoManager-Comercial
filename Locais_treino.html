@@ -23,9 +23,11 @@
   /* GRID DE LOCAIS */
   .locais-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 25px;
     padding: 20px;
+    align-items: stretch;
+    /* 🚨 Isto força os cartões a terem a mesma altura */
   }
 
   .local-card {
@@ -35,6 +37,10 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    /* 🚨 Isto empurra os botões para o fundo */
+    height: 100%;
+    /* 🚨 Isto garante o preenchimento total */
     transition: transform 0.3s, filter 0.3s, box-shadow 0.3s;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
   }
@@ -268,7 +274,7 @@
 </div>
 
 <script>
-  console.log("✅ [SAFE MODE] Locais_treino.html carregado (White-Label Integrado)");
+  console.log("✅ [SAFE MODE] Locais_treino.html atualizado");
 
   function abrirLocaisTreino() {
     document.getElementById('dashboard-grid').style.display = 'none';
@@ -278,94 +284,94 @@
     document.getElementById('loading-locais-treino').style.display = 'block';
     document.getElementById('locais-treino-grid').innerHTML = '';
     
-    // 1. Busca Aulas Live
     google.script.run.withSuccessHandler(aulasLive => {
-        // 2. Busca Locais Fixos
         google.script.run.withSuccessHandler(locaisFixos => {
-            renderizarLocaisTreino(locaisFixos, aulasLive);
-        }).withFailureHandler(err => {
-            console.error(err);
-            document.getElementById('loading-locais-treino').style.display = 'none';
+            google.script.run.withSuccessHandler(todasTurmas => {
+                renderizarLocaisTreino(locaisFixos, aulasLive, todasTurmas);
+            }).listarTurmasAdmin();
         }).getLocaisTreino();
     }).buscarAulasDisponiveisAluno("TODOS");
   }
 
-  function renderizarLocaisTreino(locais, aulasLive = []) {
+  function renderizarLocaisTreino(locais, aulasLive = [], turmas = []) {
     document.getElementById('loading-locais-treino').style.display = 'none';
     var grid = document.getElementById('locais-treino-grid');
     grid.innerHTML = '';
 
-    if (!locais || locais.length === 0) {
-       grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--dynamic-text); opacity:0.5;"><span class="material-icons" style="font-size:48px;">location_off</span><p>Nenhuma academia ativa encontrada.</p></div>';
-       return;
-    }
+    // 🗓️ MAGIA DCU: Descobrir o dia de hoje
+    const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+    const diaHojeStr = diasSemana[new Date().getDay()].toLowerCase().slice(0, 3);
     
-    const mapLive = {};
-    if(aulasLive && aulasLive.length > 0) {
-        aulasLive.forEach(a => mapLive[String(a.academia).trim().toLowerCase()] = a);
-    }
+    const turmasHoje = turmas.filter(t => {
+        const d = String(t.dias).toLowerCase();
+        return d.includes(diaHojeStr) || d.includes("todos") || d.includes("diario");
+    });
 
-    var contadorAtivos = 0;
+    const mapLive = {};
+    if(aulasLive && aulasLive.length > 0) aulasLive.forEach(a => mapLive[String(a.academia).trim().toLowerCase()] = a);
+
+    let locaisRenderizados = 0;
 
     locais.forEach(function(local) {
        var status = local.status ? String(local.status).toLowerCase().trim() : 'ativo';
        if (status !== 'ativo') return;
-       contadorAtivos++;
        
        const nomeNorm = String(local.nome).trim().toLowerCase();
        const aulaAtiva = mapLive[nomeNorm];
        
+       const turmasDesteLocalHoje = turmasHoje.filter(t => t.local === local.nome && t.status === "Ativa");
+
+       // Oculta se não tem turma hoje e nem aula live
+       if (turmasDesteLocalHoje.length === 0 && !aulaAtiva) return; 
+
+       locaisRenderizados++;
        var card = document.createElement('div');
        card.className = 'local-card';
-       if(aulaAtiva) {
-           card.style.borderColor = "#4caf50";
-       }
+       if(aulaAtiva) card.style.borderColor = "#4caf50";
 
-       // --- 1. MAPA (IFRAME CLEAN) ---
        var mapHtml = '';
        if (local.iframeHtml && local.iframeHtml.includes('<iframe')) {
-           var cleanIframe = local.iframeHtml
-               .replace(/width="[^"]*"/gi, 'width="100%"')
-               .replace(/height="[^"]*"/gi, 'height="100%"')
-               .replace(/style="[^"]*"/gi, '') 
-               .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, ""); 
-
+           var cleanIframe = local.iframeHtml.replace(/width="[^"]*"/gi, 'width="100%"').replace(/height="[^"]*"/gi, 'height="100%"'); 
            mapHtml = '<div class="map-container">' + cleanIframe + '</div>';
        } else {
            mapHtml = '<div class="map-container no-map"><span class="material-icons" style="font-size:48px;">map</span><span>Mapa não configurado</span></div>';
        }
 
-       // --- 2. CONTEÚDO ---
        var contentHtml = '<div class="local-content">';
-       if(aulaAtiva) {
-           contentHtml += '<div style="background:#4caf50; color:#fff; font-size:0.7rem; font-weight:900; padding:4px 10px; border-radius:4px; align-self:flex-start; text-transform:uppercase;">🔴 Treino agora</div>';
-       }
+       if(aulaAtiva) contentHtml += '<div style="background:#4caf50; color:#fff; font-size:0.7rem; font-weight:900; padding:4px 10px; border-radius:4px; align-self:flex-start; text-transform:uppercase; margin-bottom:5px;">🔴 Aula ao Vivo</div>';
        
        contentHtml += '<div class="local-title">' + (local.nome || 'Unidade') + '</div>';
        contentHtml += '<div class="local-info-group">';
-       if (local.responsavel) contentHtml += '<div class="local-info"><span class="material-icons">person</span> ' + local.responsavel + '</div>';
-       if(local.endereco) contentHtml += '<div class="local-info"><span class="material-icons">place</span> ' + local.endereco + '</div>';
-       if(local.horarios) contentHtml += '<div class="local-info"><span class="material-icons">schedule</span> ' + local.horarios + '</div>';
-       contentHtml += '</div></div>';
+       if (local.endereco) contentHtml += '<div class="local-info"><span class="material-icons">place</span> ' + local.endereco + '</div>';
+       
+       // Renderiza os Chips
+       contentHtml += '<div class="turmas-chips" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px;">';
+       turmasDesteLocalHoje.forEach(t => {
+           contentHtml += `<div class="chip-turma" style="background:rgba(0,0,0,0.3); border:1px solid var(--dynamic-prim); border-radius:6px; padding:6px 10px; font-size:0.75rem; color:var(--dynamic-text);"><strong style="color:var(--dynamic-prim); display:block;">${t.nome}</strong>⏰ ${t.inicio} às ${t.fim}</div>`;
+       });
+       contentHtml += '</div></div></div>';
 
-       // --- 3. AÇÕES ---
        var actionsHtml = '<div class="local-actions">';
        if (aulaAtiva) {
            actionsHtml += `<button onclick="irParaCheckinLocal('${aulaAtiva.pin}')" class="btn-action btn-checkin-live"><span class="material-icons">qr_code</span> CHECK-IN</button>`;
        }
-       if(local.linkMaps) actionsHtml += '<a href="' + local.linkMaps + '" target="_blank" class="btn-action btn-maps"><span class="material-icons">near_me</span> Rota</a>';
+       if(local.linkMaps) actionsHtml += '<a href="' + local.linkMaps + '" target="_blank" class="btn-action btn-maps"><span class="material-icons">near_me</span> ROTA</a>';
        
        var whatsNum = local.contato ? String(local.contato).replace(/\D/g, '') : '';
        if(whatsNum.length >= 10) {
            if (!whatsNum.startsWith('55') && whatsNum.length <= 11) whatsNum = '55' + whatsNum;
-           var urlWhats = "https://wa.me/" + whatsNum + "?text=" + encodeURIComponent("Kídá! Gostaria de informações sobre os treinos na unidade " + local.nome);
-           actionsHtml += '<a href="' + urlWhats + '" target="_blank" class="btn-action btn-whats" style="flex:0; padding:0 15px;"><span class="material-icons">chat</span></a>';
+           var txtWhats = encodeURIComponent(`Olá! Gostaria de informações sobre as turmas na unidade ${local.nome}.`);
+           actionsHtml += `<a href="https://wa.me/${whatsNum}?text=${txtWhats}" target="_blank" class="btn-action btn-whats" style="flex:0; padding:0 15px;"><span class="material-icons">chat</span></a>`;
        }
        actionsHtml += '</div>';
 
        card.innerHTML = mapHtml + contentHtml + actionsHtml;
        grid.appendChild(card);
     });
+
+    if(locaisRenderizados === 0) {
+       grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--dynamic-text); opacity:0.5;"><span class="material-icons" style="font-size:48px;">event_busy</span><p>Nenhum treino agendado para hoje.</p></div>';
+    }
   }
 
   function fecharLocaisTreino() {
@@ -378,13 +384,7 @@
       if(typeof initChamadaDinamica === 'function') {
           fecharLocaisTreino();
           initChamadaDinamica('aluno');
-          setTimeout(() => {
-              const input = document.getElementById('input-pin-aluno');
-              if(input && pin) {
-                  input.value = pin;
-                  input.focus();
-              }
-          }, 600);
+          setTimeout(() => { const input = document.getElementById('input-pin-aluno'); if(input && pin) { input.value = pin; input.focus(); } }, 600);
       }
   }
 </script>
