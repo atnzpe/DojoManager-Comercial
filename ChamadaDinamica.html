@@ -628,7 +628,7 @@
           aulas.forEach(function(a) {
               const txtAlunos = a.qtd === 1 ? "aluno" : "alunos";
               div.innerHTML += "<div class='aula-card-aux' onclick=\"iniciarMonitoramentoFinal('" + a.id + "','" + a.pin + "', '" + a.data + "')\">" +
-                               "<div style='text-align:left;'><h4 style='color:var(--dynamic-prim); margin:0 0 5px 0; font-weight:900;'>" + a.academia + "</h4><small style='color:var(--dynamic-text); opacity:0.7; font-size:0.85rem; display:block;'>📅 " + a.data + " &nbsp;|&nbsp; ⏰ " + a.horario + "</small><div style='margin-top:8px; font-size:0.85rem; color:#4caf50; font-weight:bold;'><span class='material-icons' style='font-size:14px; vertical-align:middle;'>groups</span> " + a.qtd + " " + txtAlunos + " na sala</div></div>" +
+                               "<div style='text-align:left;'><h4 style='color:var(--dynamic-prim); margin:0 0 5px 0; font-weight:900;'>" + a.turma + "</h4><small style='color:var(--dynamic-text); opacity:0.7; font-size:0.85rem; display:block;'>📍 " + a.academia + " <br>📅 " + a.data + "  |  ⏰ " + a.horario + "</small><div style='margin-top:8px; font-size:0.85rem; color:#4caf50; font-weight:bold;'><span class='material-icons' style='font-size:14px; vertical-align:middle;'>groups</span> " + a.qtd + " " + txtAlunos + " na sala</div></div>" +
                                "<div style='text-align:center; background:var(--dynamic-prim); padding:10px 15px; border-radius:8px; color:var(--dynamic-btn-text);'><div style='font-weight:900; font-size:1.4rem; letter-spacing:2px;'>" + a.pin + "</div><div style='font-size:0.6rem; text-transform:uppercase; font-weight:bold;'>Acessar</div></div>" +
                                "</div>";
           });
@@ -681,6 +681,10 @@
       });
   }
 
+  /**
+   * 📝 QA Note: O Frontend já trabalha com manipulação segura de objetos JSON,
+   * sem contato com índices de planilhas.
+   */
   function salvarAulaFinal() {
       const user = JSON.parse(localStorage.getItem('userSession'));
       const localSel = document.getElementById('sel-local-final').value;
@@ -697,9 +701,11 @@
       btn.innerText = "CRIANDO SALA..."; btn.disabled = true;
       let dataFormatada = dataRaw.split('-').reverse().join('/');
 
+      // Cria o Payload com chaves fixas que serão mapeadas no Backend dinamicamente
       const dados = { 
           instrutor: user.nomeCompleto, 
-          academia: turmaSel, // Enviamos o nome exato da Turma para o Backend buscar o local correto
+          local: localSel, 
+          turma: turmaSel, 
           data: dataRaw, 
           inicio: document.getElementById('txt-inicio-final').value, 
           fim: document.getElementById('txt-fim-final').value 
@@ -720,7 +726,7 @@
           div.innerHTML = "";
           if(aulas.length === 0) div.innerHTML = "<div style='padding:20px; border:1px dashed rgba(255,255,255,0.2); border-radius:8px; color:var(--dynamic-text); opacity:0.6; text-align:center;'>Nenhuma sala aberta. Aguarde o instrutor.</div>";
           aulas.forEach(function(a) {
-              div.innerHTML += "<div class='aula-card-aux' onclick=\"preencherPinFinal('" + a.pin + "')\"><div><h4 style='color:var(--dynamic-prim); margin:0 0 5px 0; font-weight:900;'>" + a.instrutor + "</h4><small style='color:var(--dynamic-text); opacity:0.7;'>📍 Turma: " + a.academia + " | ⏰ " + a.horario + "</small></div><div style='background:var(--dynamic-sec); border:1px solid var(--dynamic-prim); color:var(--dynamic-prim); padding:8px 12px; border-radius:6px; font-size:0.75rem; font-weight:bold;'>Tocar</div></div>";
+              div.innerHTML += "<div class='aula-card-aux' onclick=\"preencherPinFinal('" + a.pin + "')\"><div><h4 style='color:var(--dynamic-prim); margin:0 0 5px 0; font-weight:900;'>" + a.instrutor + "</h4><small style='color:var(--dynamic-text); opacity:0.7;'>📍 " + a.academia + " | 🥋 " + a.turma + " | ⏰ " + a.horario + "</small></div><div style='background:var(--dynamic-sec); border:1px solid var(--dynamic-prim); color:var(--dynamic-prim); padding:8px 12px; border-radius:6px; font-size:0.75rem; font-weight:bold;'>Tocar</div></div>";
           });
       }).buscarAulasDisponiveisAluno("TODOS");
   }

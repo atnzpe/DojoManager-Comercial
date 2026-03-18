@@ -297,7 +297,7 @@
     backdrop-filter: blur(5px);
   }
 
-  
+
 
   .print-controls {
     position: fixed;
@@ -765,6 +765,17 @@
                              "</div>";
         });
     }).getHistoricoFiltrado(filtros);
+  }
+
+  // ============================================================================
+// ⚙️ HELPER DE FORMATAÇÃO DE HORA
+// ============================================================================
+  function formatarHoraSimples(hora) {
+    if (!hora) return "--:--";
+    if (hora instanceof Date) return Utilities.formatDate(hora, Session.getScriptTimeZone(), "HH:mm");
+    let str = String(hora).trim();
+    if (str.length >= 5 && str.includes(":")) return str.substring(0, 5); // Ex: "20:30:00" vira "20:30"
+    return str;
   }
 
   function gerarRelatorioPDF(idChamada) {

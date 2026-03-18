@@ -1862,6 +1862,8 @@ function adicionarAlunoManual(idAula, loginOuNome) {
     if (linhaAlvo === -1) return { success: false, msg: "Aula não encontrada." };
 
     let novoCheckin = null;
+
+    // Visitante Externo (Mestre digitou nome livre)
     if (String(loginOuNome).startsWith("VISITANTE_")) {
       const nomeLimpo = loginOuNome.replace("VISITANTE_", "");
       if (checkinsAtuais.some(c => c.nome.toLowerCase() === nomeLimpo.toLowerCase())) return { success: false, msg: "Nome já está na lista." };
@@ -1870,31 +1872,33 @@ function adicionarAlunoManual(idAula, loginOuNome) {
         graduacao: "Visitante", academia_origem: "Externo", status: "Confirmado",
         tipo: "Visitante", idade: "?", categoria: "Visitante", hora: new Date().toLocaleTimeString()
       };
-    } else {
+    }
+    // Aluno do Banco (God Mode: Ignora a Trava de Idade)
+    else {
       if (checkinsAtuais.some(c => c.login === loginOuNome)) return { success: false, msg: "Aluno já está na lista." };
+
       const aluno = buscarAlunoPorLogin(loginOuNome);
       if (!aluno) return { success: false, msg: "Aluno não encontrado no banco." };
 
-      const turmas = lerTabelaDinamica("Config_Turmas");
-      const turmaInfo = turmas.find(t => String(t.nome_da_turma).trim().toLowerCase() === String(dadosAula.academia).trim().toLowerCase());
-      const localDaTurma = turmaInfo ? String(turmaInfo.local_vinculado) : String(dadosAula.academia);
-      const acadAluno = String(aluno.academia || aluno["Academia Vinculada"]);
+      let idadeAnos = 0;
+      if (aluno.idadeExata && aluno.idadeExata !== "N/A") {
+        idadeAnos = parseInt(aluno.idadeExata.split('a')[0]) || 0;
+      }
 
-      const loc1 = localDaTurma.replace(/\s+/g, '').toUpperCase();
-      const loc2 = acadAluno.replace(/\s+/g, '').toUpperCase();
-      const tipoAluno = (loc1 !== loc2) ? "Visitante" : "Regular";
-
-      const dataNascRaw = aluno["Data de Nascimento"] || aluno.data_de_nascimento_ || aluno.data_de_nascimento || "";
-      const idadeAnos = calcularIdadeApenasAnos(dataNascRaw);
       const IDADE_CORTE_ADULTO = 15;
       const categoriaIdadeAluno = idadeAnos >= IDADE_CORTE_ADULTO ? "Adulto" : "Infantil";
 
       novoCheckin = {
-        login: aluno.LOGIN || aluno.login, nome: aluno["Nome Completo"] || aluno.nomeCompleto,
-        foto: padronizarLinkDrive(aluno["Foto 3x4 (para a carteirinha)"] || aluno.fotoUrl),
-        graduacao: aluno["GRADUACAO_ATUAL"] || aluno.graduacao,
-        academia_origem: acadAluno, status: "Confirmado", tipo: tipoAluno,
-        idade: idadeAnos, categoria: categoriaIdadeAluno, hora: new Date().toLocaleTimeString()
+        login: aluno.LOGIN || loginOuNome,
+        nome: aluno.nomeCompleto,
+        foto: aluno.fotoUrl,
+        graduacao: aluno.graduacao,
+        academia_origem: String(aluno.academia),
+        status: "Confirmado",
+        tipo: "Regular",
+        idade: idadeAnos,
+        categoria: categoriaIdadeAluno,
+        hora: new Date().toLocaleTimeString()
       };
     }
 
@@ -1904,51 +1908,94 @@ function adicionarAlunoManual(idAula, loginOuNome) {
   } catch (e) { return { success: false, msg: "Erro: " + e.message }; } finally { lock.releaseLock(); }
 }
 
+// ============================================================================
+// ⚙️ HELPER DE FORMATAÇÃO DE HORA
+// ============================================================================
+function formatarHoraSimples(hora) {
+  if (!hora) return "--:--";
+  if (hora instanceof Date) return Utilities.formatDate(hora, Session.getScriptTimeZone(), "HH:mm");
+  let str = String(hora).trim();
+  if (str.length >= 5 && str.includes(":")) return str.substring(0, 5); // Ex: "20:30:00" vira "20:30"
+  return str;
+}
+
+// ============================================================================
+// 🏫 MOTOR DE AULAS DINÂMICAS E CHECK-IN (ARQUITETURA DE 10 COLUNAS)
+// ============================================================================
+
+/**
+ * 📝 QA Note: Cria uma nova aula. Utiliza a função 'salvarDadosSeguro' que 
+ * internamente procura as colunas pelo nome exato, tornando a gravação blindada
+ * contra mudanças na ordem das colunas da planilha.
+ */
 function iniciarAulaDinamica(dados) {
   limparAulasExpiradas();
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(10000);
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = ss.getSheetByName(NOME_ABA_AULAS);
-    if (!sheet) {
-      sheet = ss.insertSheet(NOME_ABA_AULAS);
-      sheet.appendRow(["ID_Aula", "Data_Aula", "Hora_Inicio", "Hora_Fim", "Academia", "Instrutor", "PIN", "Status", "Checkins_JSON"]);
-    }
+    let sheet = ss.getSheetByName("Aulas_Em_Andamento");
+
     const idAula = "AULA-" + Date.now();
     const pin = Math.floor(1000 + Math.random() * 9000);
 
-    // Data sempre como string YYYY-MM-DD
     let dataStr = dados.data;
     if (dados.data instanceof Date) dataStr = Utilities.formatDate(dados.data, Session.getScriptTimeZone(), "yyyy-MM-dd");
 
-    sheet.appendRow([idAula, dataStr, String(dados.inicio), String(dados.fim), dados.academia, dados.instrutor, pin, "ABERTA", "[]"]);
+    // 🧠 GRAVAÇÃO DINÂMICA: Em vez de array fixo, passamos um objeto.
+    // O motor vai procurar a coluna "ID_Aula", "Data_Aula", etc., e inserir no lugar certo.
+    const novaAula = {
+      "ID_Aula": idAula,
+      "Data_Aula": dataStr,
+      "Hora_Inicio": String(dados.inicio),
+      "Hora_Fim": String(dados.fim),
+      "Academia": dados.local,
+      "Turma": dados.turma,
+      "Instrutor": dados.instrutor,
+      "PIN": pin,
+      "Status": "ABERTA",
+      "Checkins_JSON": "[]"
+    };
+
+    salvarDadosSeguro("Aulas_Em_Andamento", novaAula);
     return { success: true, idAula: idAula, pin: pin };
   } catch (e) { return { success: false, erro: e.message }; } finally { lock.releaseLock(); }
 }
 
 /**
- * [ALUNO] Busca aulas disponíveis
- * Se academiaAluno == "TODOS", retorna todas as aulas ativas do dia (para o Dashboard).
+ * 📝 QA Note: Busca as aulas ativas para o aluno fazer check-in.
+ * Mapeia dinamicamente os cabeçalhos para ler as posições corretas.
  */
 function buscarAulasDisponiveisAluno(academiaAluno) {
   try {
-    const sheet = getSheet(NOME_ABA_AULAS);
+    const sheet = getSheet("Aulas_Em_Andamento");
     const data = sheet.getDataRange().getValues();
+    if (data.length < 2) return [];
+
     const agora = new Date();
     const aulas = [];
     const minhaAcademia = String(academiaAluno).trim().toUpperCase();
-    const buscarTudo = (minhaAcademia === "TODOS"); // Flag nova
+    const buscarTudo = (minhaAcademia === "TODOS");
     const hojeStr = Utilities.formatDate(agora, Session.getScriptTimeZone(), "yyyy-MM-dd");
 
+    // 🧠 MAPEAMENTO DINÂMICO DE COLUNAS
+    const headers = data[0].map(h => String(h).trim().toLowerCase());
+    const colId = headers.indexOf("id_aula");
+    const colData = headers.indexOf("data_aula");
+    const colInicio = headers.indexOf("hora_inicio");
+    const colFim = headers.indexOf("hora_fim");
+    const colAcad = headers.indexOf("academia");
+    const colTurma = headers.indexOf("turma");
+    const colInst = headers.indexOf("instrutor");
+    const colPin = headers.indexOf("pin");
+    const colStatus = headers.indexOf("status");
+
     for (let i = 1; i < data.length; i++) {
-      const status = String(data[i][7]);
-      const acadAula = String(data[i][4]).trim().toUpperCase();
+      const status = String(data[i][colStatus]);
+      const acadAula = String(data[i][colAcad]).trim().toUpperCase();
 
-      // Lógica atualizada: Aceita se for a academia do aluno OU se estiver buscando tudo
       if (status === "ABERTA" && (buscarTudo || acadAula === minhaAcademia)) {
-
-        let diaPlanilha = data[i][1];
+        let diaPlanilha = data[i][colData];
         let diaStr = "";
         if (diaPlanilha instanceof Date) {
           diaStr = Utilities.formatDate(diaPlanilha, Session.getScriptTimeZone(), "yyyy-MM-dd");
@@ -1958,105 +2005,12 @@ function buscarAulasDisponiveisAluno(academiaAluno) {
 
         if (diaStr === hojeStr) {
           aulas.push({
-            id: data[i][0],
-            instrutor: data[i][5],
-            academia: data[i][4], // Importante retornar o nome para o Dashboard
-            horario: `${formatarHoraSimples(data[i][2])} às ${formatarHoraSimples(data[i][3])}`,
-            pin: data[i][6]
-          });
-        }
-      }
-    }
-    return aulas;
-  } catch (e) {
-    console.error("Erro busca aluno: " + e.message);
-    return [];
-  }
-}
-
-function realizarCheckinAluno(login, pinDigitado) {
-  const lock = LockService.getScriptLock();
-  try {
-    lock.waitLock(10000);
-    const sheet = getSheet(NOME_ABA_AULAS);
-    const data = sheet.getDataRange().getValues();
-    let linhaAlvo = -1; let checkinsAtuais = []; let dadosAula = {};
-
-    for (let i = data.length - 1; i >= 1; i--) {
-      if (String(data[i][6]).trim() == String(pinDigitado).trim() && data[i][7] == "ABERTA") {
-        linhaAlvo = i + 1;
-        checkinsAtuais = JSON.parse(data[i][8] || "[]");
-        dadosAula = { academia: data[i][4] };
-        break;
-      }
-    }
-
-    if (linhaAlvo === -1) return { success: false, msg: "PIN inválido ou aula encerrada." };
-    if (checkinsAtuais.some(c => c.login === login)) return { success: false, msg: "Você já realizou check-in." };
-
-    const aluno = buscarAlunoPorLogin(login);
-    if (!aluno) return { success: false, msg: "Aluno não identificado." };
-
-    const turmas = lerTabelaDinamica("Config_Turmas");
-    const turmaInfo = turmas.find(t => String(t.nome_da_turma).trim().toLowerCase() === String(dadosAula.academia).trim().toLowerCase());
-
-    const localDaTurma = turmaInfo ? String(turmaInfo.local_vinculado) : String(dadosAula.academia);
-    const faixaEtariaTurma = turmaInfo ? String(turmaInfo["faixa_etária"] || turmaInfo.faixa_etaria).trim() : "Misto";
-    const acadAluno = String(aluno.academia || aluno["Academia Vinculada"]);
-
-    const dataNascRaw = aluno["Data de Nascimento"] || aluno.data_de_nascimento_ || aluno.data_de_nascimento || "";
-    const idadeAnos = calcularIdadeApenasAnos(dataNascRaw);
-    const IDADE_CORTE_ADULTO = 15;
-    const categoriaIdadeAluno = idadeAnos >= IDADE_CORTE_ADULTO ? "Adulto" : "Infantil";
-
-    if (faixaEtariaTurma.toLowerCase() === "infantil" && idadeAnos >= IDADE_CORTE_ADULTO) {
-      return { success: false, msg: `🚫 Turma Infantil. Sua idade (${idadeAnos} anos) requer aprovação manual do Mestre.` };
-    }
-    if (faixaEtariaTurma.toLowerCase() === "adulto" && idadeAnos > 0 && idadeAnos < IDADE_CORTE_ADULTO) {
-      return { success: false, msg: `🚫 Turma Adulto. Sua idade (${idadeAnos} anos) requer aprovação manual do Mestre.` };
-    }
-
-    const loc1 = localDaTurma.replace(/\s+/g, '').toUpperCase();
-    const loc2 = acadAluno.replace(/\s+/g, '').toUpperCase();
-    const tipoAluno = (loc1 !== loc2) ? "Visitante" : "Regular";
-
-    checkinsAtuais.push({
-      login: login, nome: aluno["Nome Completo"] || aluno.nomeCompleto || aluno.nome || "Aluno",
-      foto: padronizarLinkDrive(aluno["Foto 3x4 (para a carteirinha)"] || aluno.fotoUrl || ""),
-      graduacao: aluno["GRADUACAO_ATUAL"] || aluno.graduacao || "Iniciante",
-      academia_origem: acadAluno, status: "Pendente", tipo: tipoAluno,
-      idade: idadeAnos, categoria: categoriaIdadeAluno, hora: new Date().toLocaleTimeString()
-    });
-
-    sheet.getRange(linhaAlvo, 9).setValue(JSON.stringify(checkinsAtuais));
-    return { success: true, msg: "Check-in realizado! Aguarde o instrutor." };
-  } catch (e) { return { success: false, msg: "Erro: " + e.message }; } finally { lock.releaseLock(); }
-}
-
-
-function buscarAulasAtivasInstrutor(loginInstrutor) {
-  console.log("incia funçõa buscarAulasAtivasInstrutor")
-  try {
-    const sheet = getSheet(NOME_ABA_AULAS);
-    const data = sheet.getDataRange().getValues();
-    const aulas = [];
-    const nomeInst = String(loginInstrutor).trim().toLowerCase();
-
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][7] === "ABERTA") {
-        const donoAula = String(data[i][5]).trim().toLowerCase();
-        // Permite se o nome bater ou se for admin
-        if (donoAula.includes(nomeInst.split(' ')[0].toLowerCase()) || true) {
-          let dataVisual = data[i][1];
-          if (dataVisual instanceof Date) dataVisual = Utilities.formatDate(dataVisual, Session.getScriptTimeZone(), "dd/MM/yyyy");
-          else if (typeof dataVisual === 'string' && dataVisual.includes('-')) {
-            const p = dataVisual.split('-'); dataVisual = `${p[2]}/${p[1]}/${p[0]}`;
-          }
-
-          aulas.push({
-            id: data[i][0], data: dataVisual, academia: data[i][4],
-            horario: `${formatarHoraSimples(data[i][2])} - ${formatarHoraSimples(data[i][3])}`,
-            pin: data[i][6], qtd: JSON.parse(data[i][8] || "[]").length
+            id: data[i][colId],
+            instrutor: data[i][colInst],
+            academia: data[i][colAcad],
+            turma: data[i][colTurma],
+            horario: `${formatarHoraSimples(data[i][colInicio])} às ${formatarHoraSimples(data[i][colFim])}`,
+            pin: data[i][colPin]
           });
         }
       }
@@ -2065,60 +2019,212 @@ function buscarAulasAtivasInstrutor(loginInstrutor) {
   } catch (e) { return []; }
 }
 
-function buscarCheckinsAula(idAula) {
-  console.log("incia funçõa buscarCheckinsAula")
+// ============================================================================
+// 🥋 MOTOR DE CHECK-IN E CONTROLE DE TATAME (COM TRAVA DE IDADE V3 - FINAL)
+// ============================================================================
+
+function realizarCheckinAluno(login, pinDigitado) {
+  const lock = LockService.getScriptLock();
   try {
-    const sheet = getSheet(NOME_ABA_AULAS);
+    lock.waitLock(10000);
+    const sheetAulas = getSheet(NOME_ABA_AULAS);
+    const dataAulas = sheetAulas.getDataRange().getValues();
+    let linhaAlvo = -1; let checkinsAtuais = []; let dadosAula = {};
+
+    // 1. Busca a Aula Ativa
+    for (let i = dataAulas.length - 1; i >= 1; i--) {
+      if (String(dataAulas[i][6]).trim() === String(pinDigitado).trim() && dataAulas[i][7] === "ABERTA") {
+        linhaAlvo = i + 1;
+        checkinsAtuais = JSON.parse(dataAulas[i][8] || "[]");
+        dadosAula = { academia: dataAulas[i][4] };
+        break;
+      }
+    }
+
+    if (linhaAlvo === -1) return { success: false, msg: "PIN inválido ou aula encerrada." };
+    if (checkinsAtuais.some(c => c.login === login)) return { success: false, msg: "Você já realizou check-in." };
+
+    // 2. Busca Dados do Aluno (Payload do Frontend)
+    const aluno = buscarAlunoPorLogin(login);
+    if (!aluno) return { success: false, msg: "Aluno não identificado." };
+
+    // 3. Lê as Regras da Turma
+    const turmas = lerTabelaDinamica("Config_Turmas");
+    const turmaInfo = turmas.find(t => String(t.nome_da_turma).trim().toLowerCase() === String(dadosAula.academia).trim().toLowerCase());
+    const faixaEtariaTurma = turmaInfo ? String(turmaInfo["faixa_etária"] || turmaInfo.faixa_etaria || "Misto").trim() : "Misto";
+    const localDaTurma = turmaInfo ? String(turmaInfo.local_vinculado) : String(dadosAula.academia);
+
+    // 🧠 4. MOTOR DE IDADE HIGIENIZADO (Puxa o número antes do "a" de "10a, 2m, 0d")
+    let idadeAnos = 0;
+    if (aluno.idadeExata && aluno.idadeExata !== "N/A") {
+      idadeAnos = parseInt(aluno.idadeExata.split('a')[0]) || 0;
+    }
+
+    const IDADE_CORTE_ADULTO = 15;
+    const categoriaIdadeAluno = idadeAnos >= IDADE_CORTE_ADULTO ? "Adulto" : "Infantil";
+
+    // 🛑 5. A TRAVA DE IDADE BLINDADA
+    if (faixaEtariaTurma.toLowerCase() === "infantil" && idadeAnos >= IDADE_CORTE_ADULTO) {
+      return { success: false, msg: `🚫 Turma Infantil. Sua idade (${idadeAnos} anos) requer aprovação manual do Mestre.` };
+    }
+    if (faixaEtariaTurma.toLowerCase() === "adulto" && idadeAnos > 0 && idadeAnos < IDADE_CORTE_ADULTO) {
+      return { success: false, msg: `🚫 Turma Adulto. Sua idade (${idadeAnos} anos) requer aprovação manual do Mestre.` };
+    }
+
+    // 6. Define Visitante vs Regular
+    const acadAluno = String(aluno.academia);
+    const loc1 = localDaTurma.replace(/\s+/g, '').toUpperCase();
+    const loc2 = acadAluno.replace(/\s+/g, '').toUpperCase();
+    const tipoAluno = (loc1 !== loc2) ? "Visitante" : "Regular";
+
+    // 7. Efetiva o Check-in
+    checkinsAtuais.push({
+      login: login,
+      nome: aluno.nomeCompleto || "Aluno",
+      foto: aluno.fotoUrl || "",
+      graduacao: aluno.graduacao || "Iniciante",
+      academia_origem: acadAluno,
+      status: "Pendente",
+      tipo: tipoAluno,
+      idade: idadeAnos,
+      categoria: categoriaIdadeAluno,
+      hora: new Date().toLocaleTimeString()
+    });
+
+    sheetAulas.getRange(linhaAlvo, 9).setValue(JSON.stringify(checkinsAtuais));
+    return { success: true, msg: "Check-in realizado! Aguarde o instrutor." };
+  } catch (e) { return { success: false, msg: "Erro: " + e.message }; } finally { lock.releaseLock(); }
+}
+
+
+// ============================================================================
+// 🔍 BUSCA DE AULAS PARA O INSTRUTOR E ALUNO
+// ============================================================================
+
+/**
+ * 📝 QA Note: Retorna as aulas em andamento para o painel do instrutor.
+ * Totalmente desacoplada de colunas engessadas.
+ */
+function buscarAulasAtivasInstrutor(loginInstrutor) {
+  try {
+    const sheet = getSheet("Aulas_Em_Andamento");
     const data = sheet.getDataRange().getValues();
+    if (data.length < 2) return [];
+
+    const aulas = [];
+    const nomeInst = String(loginInstrutor).trim().toLowerCase();
+
+    // 🧠 MAPEAMENTO DINÂMICO DE COLUNAS
+    const headers = data[0].map(h => String(h).trim().toLowerCase());
+    const colId = headers.indexOf("id_aula");
+    const colData = headers.indexOf("data_aula");
+    const colInicio = headers.indexOf("hora_inicio");
+    const colFim = headers.indexOf("hora_fim");
+    const colAcad = headers.indexOf("academia");
+    const colTurma = headers.indexOf("turma");
+    const colInst = headers.indexOf("instrutor");
+    const colPin = headers.indexOf("pin");
+    const colStatus = headers.indexOf("status");
+    const colJson = headers.indexOf("checkins_json");
+
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][colStatus] === "ABERTA") {
+        const donoAula = String(data[i][colInst]).trim().toLowerCase();
+        if (donoAula.includes(nomeInst.split(' ')[0].toLowerCase()) || true) {
+          let dataVisual = data[i][colData];
+          if (dataVisual instanceof Date) dataVisual = Utilities.formatDate(dataVisual, Session.getScriptTimeZone(), "dd/MM/yyyy");
+          else if (typeof dataVisual === 'string' && dataVisual.includes('-')) {
+            const p = dataVisual.split('-'); dataVisual = `${p[2]}/${p[1]}/${p[0]}`;
+          }
+
+          aulas.push({
+            id: data[i][colId],
+            data: dataVisual,
+            academia: data[i][colAcad],
+            turma: data[i][colTurma],
+            horario: `${formatarHoraSimples(data[i][colInicio])} - ${formatarHoraSimples(data[i][colFim])}`,
+            pin: data[i][colPin],
+            qtd: JSON.parse(data[i][colJson] || "[]").length
+          });
+        }
+      }
+    }
+    return aulas;
+  } catch (e) { return []; }
+}
+
+/**
+ * 📝 QA Note: Lê os check-ins ao vivo (Polling) via mapeamento dinâmico.
+ */
+function buscarCheckinsAula(idAula) {
+  try {
+    const sheet = getSheet("Aulas_Em_Andamento");
+    const data = sheet.getDataRange().getValues();
+    if (data.length < 2) return { success: false };
+
+    const headers = data[0].map(h => String(h).trim().toLowerCase());
+    const colId = headers.indexOf("id_aula");
+    const colStatus = headers.indexOf("status");
+    const colJson = headers.indexOf("checkins_json");
+
     for (let i = data.length - 1; i >= 1; i--) {
-      if (String(data[i][0]) === idAula) {
-        return { success: true, status: data[i][7], checkins: JSON.parse(data[i][8] || "[]") };
+      if (String(data[i][colId]) === idAula) {
+        return { success: true, status: data[i][colStatus], checkins: JSON.parse(data[i][colJson] || "[]") };
       }
     }
     return { success: false };
   } catch (e) { return { success: false }; }
 }
 
+/**
+ * 📝 QA Note: Transforma a aula provisória em um Histórico Oficial.
+ * Mapeia os cabeçalhos para evitar reescrever o Status na coluna errada.
+ */
 function finalizarAulaDinamica(idAula, listaFinalAlunos) {
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(20000);
-    const sheetTemp = getSheet(NOME_ABA_AULAS);
+    const sheetTemp = getSheet("Aulas_Em_Andamento");
     const dataTemp = sheetTemp.getDataRange().getValues();
+    if (dataTemp.length < 2) return { success: false, msg: "Tabela de aulas vazia." };
+
+    // 🧠 MAPEAMENTO DINÂMICO DE COLUNAS
+    const headers = dataTemp[0].map(h => String(h).trim().toLowerCase());
+    const colId = headers.indexOf("id_aula");
+    const colData = headers.indexOf("data_aula");
+    const colAcad = headers.indexOf("academia");
+    const colTurma = headers.indexOf("turma");
+    const colInst = headers.indexOf("instrutor");
+    const colStatus = headers.indexOf("status");
+
     let linhaAlvo = -1;
     let dadosAula = null;
 
     for (let i = dataTemp.length - 1; i >= 1; i--) {
-      if (String(dataTemp[i][0]) === idAula) {
+      if (String(dataTemp[i][colId]) === idAula) {
         linhaAlvo = i + 1;
-        let dataF = dataTemp[i][1];
+        let dataF = dataTemp[i][colData];
         if (dataF instanceof Date) dataF = Utilities.formatDate(dataF, Session.getScriptTimeZone(), "yyyy-MM-dd");
         else if (typeof dataF === 'string' && dataF.includes('/')) { const p = dataF.split('/'); dataF = `${p[2]}-${p[1]}-${p[0]}`; }
 
-        // Na arquitetura nova, a coluna [4] guarda o NOME DA TURMA
-        dadosAula = { data: dataF, instrutor: dataTemp[i][5], turma: dataTemp[i][4] };
+        dadosAula = { data: dataF, instrutor: dataTemp[i][colInst], turma: dataTemp[i][colTurma], local: dataTemp[i][colAcad] };
         break;
       }
     }
 
     if (!dadosAula) return { success: false, msg: "Aula não encontrada." };
 
-    // --- 🚀 MÁGICA DO RELATÓRIO (DCU): Combina Local e Turma ---
-    const turmas = lerTabelaDinamica("Config_Turmas");
-    const tInfo = turmas.find(t => String(t.nome_da_turma).trim() === String(dadosAula.turma).trim());
-    // Se achou, escreve: "CT Matriz | Muay Thai Adulto". Se não, escreve só a Turma.
-    const localRelatorio = tInfo ? (tInfo.local_vinculado + " | " + tInfo.nome_da_turma) : dadosAula.turma;
-
+    const localRelatorio = dadosAula.local + " | " + dadosAula.turma;
     const presentes = listaFinalAlunos.filter(a => a.status === "Confirmado");
 
     if (presentes.length > 0) {
       salvarDadosSeguro("Registro_Chamada", {
         "ID_Chamada": idAula,
-        "Data_Registro": new Date(),
+        "Data_Registro": Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss"),
         "Data_Treino": dadosAula.data,
         "Hora_Treino": new Date().toLocaleTimeString(),
         "Instrutor_Logado": dadosAula.instrutor,
-        "Local_Treino": localRelatorio, // <--- Aqui está o segredo do Relatório Bonito
+        "Local_Treino": localRelatorio,
         "Qtd_Presentes": presentes.length,
         "Lista_Alunos_IDs": presentes.map(a => a.login).join(", "),
         "Lista_Nomes": presentes.map(a => a.nome + (a.tipo === 'Visitante' ? ' [VIS]' : '')).join(", "),
@@ -2126,21 +2232,33 @@ function finalizarAulaDinamica(idAula, listaFinalAlunos) {
       });
     }
 
-    sheetTemp.getRange(linhaAlvo, 8).setValue("ENCERRADA");
-    return { success: true, msg: "Aula finalizada e Ranking atualizado!" };
-
+    // Atualiza a célula exata do Status, não importa onde ela esteja (+1 porque array começa no 0 e getRange no 1)
+    sheetTemp.getRange(linhaAlvo, colStatus + 1).setValue("ENCERRADA"); 
+    return { success: true, msg: "Aula finalizada e Histórico atualizado!" };
   } catch (e) { return { success: false, msg: "Erro: " + e.message }; } finally { lock.releaseLock(); }
 }
 
+/**
+ * 📝 QA Note: Rotina de limpeza. Encontra colunas de data e status dinamicamente.
+ */
 function limparAulasExpiradas() {
   try {
-    const sheet = getSheet(NOME_ABA_AULAS);
+    const sheet = getSheet("Aulas_Em_Andamento");
     if (!sheet) return;
     const data = sheet.getDataRange().getValues();
+    if (data.length < 2) return;
+
+    const headers = data[0].map(h => String(h).trim().toLowerCase());
+    const colData = headers.indexOf("data_aula");
+    const colStatus = headers.indexOf("status");
+
     const agora = new Date();
+    // Apaga de baixo para cima para não quebrar os índices
     for (let i = data.length - 1; i >= 1; i--) {
-      let d = new Date(data[i][1]);
-      if ((agora - d) > (24 * 3600 * 1000) && data[i][7] === "ABERTA") { sheet.deleteRow(i + 1); }
+      let d = new Date(data[i][colData]);
+      if ((agora - d) > (24 * 3600 * 1000) && data[i][colStatus] === "ABERTA") { 
+        sheet.deleteRow(i + 1); 
+      }
     }
   } catch (e) { }
 }
