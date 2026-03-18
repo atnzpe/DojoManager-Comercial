@@ -3,18 +3,15 @@
 
 <head>
   <base target="_top">
-  
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  
   <meta name="theme-color" content="<?= primaryColor ?>">
 
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
   <link rel="icon" href="<?= logoUrl ?>" type="image/x-icon">
 
   <style>
     /* --- INJEÇÃO DE VARIÁVEIS DO BACKEND (WHITE-LABEL) --- */
-    /* Estas variáveis sobrescrevem o :root base para refletir a marca da academia atual */
     :root {
       --primary-color: <?=primaryColor ?> !important;
       --secondary-color: <?=secondaryColor ?> !important;
@@ -26,148 +23,189 @@
   <?!= include('Style'); ?>
 
   <style>
-    /* --- ESTILOS EXCLUSIVOS DESTE MÓDULO (SCOPED CSS) --- */
-    
-    /* Fundo transparente para permitir a visualização da imagem de fundo (bg-layer) */
-    body { background-color: transparent !important; }
-
-    /* Imagem de Fundo (Branding da Academia) */
-    .bg-layer {
-      position: fixed;               /* Fica fixo durante o scroll */
-      top: 0; left: 0; width: 100%; height: 100%; /* Cobre toda a tela */
-      background-image: url('<?= bgUrl ?>');      /* URL injetada via backend */
-      background-size: cover;        /* Preenche a tela mantendo proporção */
-      background-position: center;   /* Centraliza o foco da imagem */
-      z-index: -2;                   /* Fica na camada mais profunda */
+    /* --- ESTILOS EXCLUSIVOS DESTE MÓDULO (LEAD CONVERSION) --- */
+    body {
+      background-color: transparent !important;
     }
 
-    /* Película de escurecimento para garantir a leitura do texto sobre a imagem */
+    .bg-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('<?= bgUrl ?>');
+      background-size: cover;
+      background-position: center;
+      z-index: -2;
+    }
+
     .overlay {
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background-color: rgba(0, 0, 0, 0.85); /* 85% de preto (bem escuro para destaque do form) */
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
       z-index: -1;
     }
 
-    /* Container principal do formulário de agendamento */
     .agendar-container {
       width: 100%;
-      max-width: 500px;              /* Um pouco mais largo que o login para acomodar o mapa */
-      margin: 0 auto;                /* Centraliza na tela do PC */
+      max-width: 500px;
+      margin: 0 auto;
       padding: 20px;
       box-sizing: border-box;
-      display: flex;                 /* Flexbox para empilhar elementos */
+      display: flex;
       flex-direction: column;
       position: relative;
-      z-index: 1;                    /* Fica acima da overlay */
-      min-height: 100vh;             /* Garante que ocupe a tela toda */
+      z-index: 1;
+      min-height: 100vh;
+      animation: fadeIn 0.4s ease-out;
     }
 
-    /* Cabeçalho de Navegação (Voltar + Título) */
     .header-nav {
-      display: flex;                 /* Alinha botão e título na mesma linha */
+      display: flex;
       align-items: center;
       margin-bottom: 20px;
       padding-bottom: 15px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Linha sutil de separação */
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Título da página */
     .header-title {
-      flex: 1;                       /* Ocupa o espaço restante */
-      text-align: center;            /* Centraliza o texto */
+      flex: 1;
+      text-align: center;
       font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--primary-color);   /* Usa a cor da academia */
-      margin-right: 32px;            /* Compensa o botão de voltar para centralizar perfeitamente */
+      font-weight: 900;
+      color: var(--primary-color);
+      margin-right: 32px;
+      text-transform: uppercase;
     }
 
-    /* Texto de introdução/instrução */
     .intro-text {
       text-align: center;
       color: var(--text-color);
-      opacity: 0.8;                  /* Leve transparência para hierarquia visual */
+      opacity: 0.8;
       margin-bottom: 25px;
       font-size: 1rem;
-      line-height: 1.5;              /* Melhora a leitura em blocos de texto */
+      line-height: 1.5;
     }
 
-    /* Área de Detalhes da Academia (Escondida por padrão, aparece ao selecionar) */
     #details-area {
-      display: none;                 /* Oculto até a seleção via JS */
-      background: var(--secondary-color); /* Fundo do card */
-      border: 1px solid rgba(255, 255, 255, 0.1); /* Borda de vidro */
-      border-radius: 12px;           /* Arredondamento padrão */
+      display: none;
+      background: var(--secondary-color);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
       padding: 20px;
       margin-top: 10px;
-      animation: slideUp 0.4s ease-out; /* Animação suave ao aparecer */
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Sombra pesada de elevação */
+      animation: slideUp 0.4s ease-out;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
 
-    /* Nome da Academia no Card de Detalhes */
     .academy-name {
       margin-top: 0;
       color: var(--primary-color);
       font-size: 1.3rem;
       margin-bottom: 15px;
+      text-transform: uppercase;
+      font-weight: 900;
     }
 
-    /* Linha de informação (Ícone + Texto) */
     .detail-row {
       display: flex;
-      gap: 12px;                     /* Espaço entre ícone e texto */
+      gap: 12px;
       margin-bottom: 12px;
-      align-items: flex-start;       /* Alinha no topo caso o texto quebre linha */
+      align-items: flex-start;
     }
 
-    /* Ícone de detalhe (Localização, Relógio) */
     .d-icon {
       color: var(--primary-color);
       opacity: 0.8;
       font-size: 20px;
-      margin-top: 2px;               /* Ajuste fino de alinhamento vertical */
+      margin-top: 2px;
     }
 
-    /* Texto do detalhe */
     .d-text {
       color: var(--text-color);
       opacity: 0.9;
       font-size: 0.95rem;
       line-height: 1.4;
-      flex: 1;                       /* Ocupa o restante do espaço */
+      flex: 1;
     }
 
-    /* Container do Mapa (Google Maps Iframe) */
     .map-embed {
       width: 100%;
-      height: 180px;                 /* Altura fixa para não quebrar layout mobile */
-      background: #000;              /* Fundo escuro enquanto carrega */
+      height: 180px;
+      background: #000;
       border-radius: 8px;
       margin: 15px 0;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      overflow: hidden;              /* Esconde bordas quadradas do iframe interno */
+      overflow: hidden;
     }
 
-    /* Força o iframe injetado pelo usuário a respeitar o container */
     .map-embed iframe {
       width: 100% !important;
       height: 100% !important;
       border: 0;
     }
 
-    /* BOTÃO WHATSAPP EXCLUSIVO: Quebra o design system propositalmente 
-       para focar em conversão de leads usando a cor de confiança do WhatsApp */
+    /* 🚨 ESTILOS DOS CHIPS DE TURMAS (NOVIDADE) */
+    .turmas-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
+
+    .chip-turma {
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .chip-turma:hover {
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .chip-turma.selected {
+      border-color: var(--primary-color);
+      background: rgba(255, 215, 0, 0.1);
+      /* Um brilho subtil da cor principal */
+    }
+
+    .chip-title {
+      font-weight: 900;
+      color: var(--primary-color);
+      font-size: 1rem;
+    }
+
+    .chip-details {
+      font-size: 0.8rem;
+      color: var(--text-color);
+      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
     .btn-whatsapp {
-      background-color: var(--whatsapp-color, #25D366); /* Variável global com fallback */
-      color: #ffffff;                /* Sempre branco, independente da marca */
+      background-color: #25D366;
+      color: #ffffff;
       width: 100%;
       margin-top: 10px;
       font-size: 1.1rem;
       padding: 16px;
       border: none;
-      border-radius: 50px;           /* Pílula para destacar de botões normais */
+      border-radius: 50px;
       cursor: pointer;
-      font-weight: bold;
+      font-weight: 900;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -177,13 +215,35 @@
       box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2);
     }
 
-    .btn-whatsapp:hover { background-color: var(--whatsapp-hover, #1ebe57); transform: translateY(-2px); }
-    .btn-whatsapp:active { transform: scale(0.98); }
+    .btn-whatsapp:hover {
+      background-color: #1ebe57;
+      transform: translateY(-2px);
+    }
 
-    /* Animação para entrada do Card de Detalhes */
+    .btn-whatsapp:active {
+      transform: scale(0.98);
+    }
+
     @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
     }
   </style>
 </head>
@@ -202,7 +262,7 @@
     </div>
 
     <p class="intro-text">
-      Informe seu nome e escolha a unidade para iniciar seu treino gratuito.
+      Informe o seu nome e escolha a unidade para iniciar o seu treino gratuito.
     </p>
 
     <div class="form-field">
@@ -214,7 +274,7 @@
       <label>Onde deseja treinar?</label>
 
       <div id="loading-locais" style="text-align:center; color:var(--text-color); opacity: 0.7; padding: 10px;">
-        <span class="material-icons spinner" style="display:inline-block; width:auto; height:auto; border:none; color: var(--primary-color);">refresh</span><br>Carregando unidades...
+        <span class="material-icons spinner" style="display:inline-block; animation: spin 1s linear infinite; color: var(--primary-color);">refresh</span><br>Carregando unidades...
       </div>
 
       <select id="location-select" class="input-field" style="display:none" onchange="selecionarLocal()">
@@ -229,13 +289,13 @@
         <span class="material-icons d-icon">place</span>
         <span id="sel-end" class="d-text">Endereço...</span>
       </div>
-      
-      <div class="detail-row">
-        <span class="material-icons d-icon">schedule</span>
-        <span id="sel-hora" class="d-text">Horários...</span>
-      </div>
 
       <div id="map-box" class="map-embed" style="display:none;"></div>
+
+      <div id="area-turmas" style="margin-top:20px; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px;">
+        <label class="d-text" style="font-weight:900; color:var(--text-color); text-transform:uppercase; font-size:0.85rem;">Selecione a Turma de Interesse:</label>
+        <div id="chips-turmas" class="turmas-container"></div>
+      </div>
 
       <button id="btn-finalizar" class="btn-whatsapp" onclick="enviarWhatsApp()">
         <span class="material-icons">chat</span> Agendar Agora
@@ -247,162 +307,158 @@
   <script>
     /**
      * ============================================================================
-     * CONTROLLER JAVASCRIPT: Lógica de Negócio e Integração com Backend
+     * CONTROLLER JAVASCRIPT: Lógica de Agendamento Inteligente (Multi-Tabelas)
      * ============================================================================
      */
 
-    // Variáveis Globais de Estado
-    var locaisCache = [];      // Armazena a lista de locais para não consultar o servidor duas vezes
-    var localSelecionado = null; // Guarda o objeto da academia escolhida no select
+    var locaisCache = [];
+    var turmasCache = [];
+    var localSelecionado = null;
+    var turmaSelecionadaObj = null;
 
-    /**
-     * Evento de Inicialização: Disparado quando a tela termina de carregar
-     */
     window.onload = function() {
-      console.log("🛠️ [QA/Debug] Módulo Agendamento inicializado. Solicitando locais ao backend...");
-      
-      // Chamada assíncrona para o Apps Script (Codigo.gs)
-      google.script.run
-        .withSuccessHandler(popularLista) // Se der certo, chama popularLista
-        .withFailureHandler(err => {      // Se a conexão cair ou houver erro
-          console.error("❌ [QA/Debug] Falha ao buscar locais no Apps Script:", err);
-          document.getElementById('loading-locais').innerHTML = "<span style='color:#cf6679'>Erro ao carregar locais de treino. Tente recarregar a página.</span>";
-        })
-        .getLocaisTreino();
+      // Dispara a busca das duas tabelas em simultâneo!
+      google.script.run.withSuccessHandler(locais => {
+          locaisCache = locais;
+          verificarCarregamentoPronto();
+      }).getLocaisTreino();
+
+      google.script.run.withSuccessHandler(turmas => {
+          turmasCache = turmas;
+          verificarCarregamentoPronto();
+      }).listarTurmasAdmin();
     };
 
-    /**
-     * Processa o Array de locais vindo da planilha e preenche o elemento <select>
-     * @param {Array} locais - Array de objetos retornados do backend
-     */
-    function popularLista(locais) {
-      console.log("✅ [QA/Debug] Locais recebidos do backend:", locais.length, "unidades.");
-      
-      locaisCache = locais; // Salva em memória cache
+    function verificarCarregamentoPronto() {
+        // Só constrói a tela quando ambas as tabelas chegarem do servidor
+        if (locaisCache.length > 0 && turmasCache.length > 0) {
+            popularListaLocais();
+        }
+    }
+
+    function popularListaLocais() {
       var select = document.getElementById('location-select');
-      
-      // Troca a UI de carregamento pelo formulário real
       document.getElementById('loading-locais').style.display = 'none';
       select.style.display = 'block';
 
-      // Tratamento de segurança: Se a tabela estiver vazia
-      if(!locais || locais.length === 0) {
-         console.warn("⚠️ [QA/Debug] O retorno veio vazio. Verifique a aba 'Locais_de_treino' no banco de dados.");
-         var opt = document.createElement('option');
-         opt.text = "Nenhuma academia disponível no momento";
-         select.add(opt);
-         select.disabled = true; // Bloqueia o formulário
+      if(!locaisCache || locaisCache.length === 0) {
+         select.add(new Option("Nenhuma academia disponível no momento", ""));
+         select.disabled = true;
          return;
       }
 
-      // Itera o array montando as <option> do select
-      locais.forEach(function(l) {
-         var opt = document.createElement('option');
-         opt.value = l.nome; // Usamos o nome como chave primária de busca na memória
-         opt.text = l.nome + (l.cidade ? " (" + l.cidade + ")" : ""); // UX: Mostra a cidade ao lado do nome
-         select.add(opt);
+      locaisCache.forEach(function(l) {
+         if (String(l.status).toLowerCase() === 'ativo') {
+             select.add(new Option(l.nome + (l.cidade ? " (" + l.cidade + ")" : ""), l.nome));
+         }
       });
     }
 
-    /**
-     * Acionado no onchange do <select>. Renderiza os dados do local escolhido.
-     */
     function selecionarLocal() {
       var nome = document.getElementById('location-select').value;
-      console.log("📍 [QA/Debug] Usuário selecionou a unidade:", nome);
-
-      // Busca no cache da memória o objeto completo
       localSelecionado = locaisCache.find(function(l) { return l.nome === nome; });
+      turmaSelecionadaObj = null; // Reseta a turma escolhida caso ele mude de academia
 
       if (localSelecionado) {
-        // Preenche o DOM com os dados
         document.getElementById('sel-nome').textContent = localSelecionado.nome;
         document.getElementById('sel-end').textContent = localSelecionado.endereco || "Endereço sob consulta";
-        document.getElementById('sel-hora').textContent = (localSelecionado.dias || "") + " " + (localSelecionado.horarios || "");
         
         var mapBox = document.getElementById('map-box');
         mapBox.innerHTML = '';
         mapBox.style.display = 'none';
 
-        // LÓGICA DO MAPA: O dono da academia cola um iframe do Google Maps. Precisamos higienizar.
         if (localSelecionado.iframeHtml && localSelecionado.iframeHtml.includes('<iframe')) {
             try {
-                // Regex para forçar width e height 100%, garantindo que o mapa fique responsivo
                 var cleanHtml = localSelecionado.iframeHtml
                     .replace(/width\s*=\s*["']?[^"']*["']?/gi, 'width="100%"')
                     .replace(/height\s*=\s*["']?[^"']*["']?/gi, 'height="100%"')
-                    .replace(/""/g, '"'); // Corrige aspas duplicadas vindas do CSV/Planilha
-                
+                    .replace(/""/g, '"');
                 mapBox.innerHTML = cleanHtml;
                 mapBox.style.display = 'block';
-                console.log("🗺️ [QA/Debug] Iframe do mapa renderizado com sucesso.");
-            } catch(e) {
-                console.error("❌ [QA/Debug] Erro ao processar o iframe do mapa:", e);
-            }
-        } else {
-            console.log("ℹ️ [QA/Debug] Academia não possui iframe de mapa configurado.");
+            } catch(e) {}
         }
 
-        // Mostra o card
+        // 🚨 RENDERIZAÇÃO DAS TURMAS DO LOCAL
+        const turmasDoLocal = turmasCache.filter(t => String(t.local).toLowerCase() === String(localSelecionado.nome).toLowerCase() && t.status === "Ativa");
+        const containerTurmas = document.getElementById('chips-turmas');
+        containerTurmas.innerHTML = "";
+
+        if (turmasDoLocal.length > 0) {
+            turmasDoLocal.forEach(t => {
+                const div = document.createElement('div');
+                div.className = 'chip-turma';
+                div.innerHTML = `
+                    <span class="chip-title">${t.nome}</span>
+                    <span class="chip-details"><span class="material-icons" style="font-size:14px;">calendar_month</span> ${t.dias}</span>
+                    <span class="chip-details"><span class="material-icons" style="font-size:14px;">schedule</span> ${t.inicio} às ${t.fim}</span>
+                `;
+                
+                div.onclick = function() {
+                    // Remove seleção visual dos outros botões
+                    document.querySelectorAll('.chip-turma').forEach(el => el.classList.remove('selected'));
+                    // Adiciona brilho a este botão
+                    this.classList.add('selected');
+                    turmaSelecionadaObj = t; // Salva o objeto inteiro para usarmos no WhatsApp
+                };
+                containerTurmas.appendChild(div);
+            });
+        } else {
+            containerTurmas.innerHTML = "<p style='font-size:0.85rem; color:var(--text-color); opacity:0.6; margin:0;'>Nenhuma turma cadastrada. Fale conosco para informações.</p>";
+        }
+
         document.getElementById('details-area').style.display = 'block';
         
-        // UX: Rola a tela suavemente para mostrar o botão do WhatsApp
         setTimeout(function() {
-            document.getElementById('btn-finalizar').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            document.getElementById('area-turmas').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 150);
       }
     }
 
-    /**
-     * Valida os dados e abre a API do WhatsApp para fechar o agendamento
-     */
     function enviarWhatsApp() {
       var nomeUser = document.getElementById('user-name').value.trim();
       
-      // Validação de Frontend Básica
       if (!nomeUser) {
-        console.warn("⚠️ [QA/Debug] Tentativa de envio sem nome bloqueada.");
-        alert("Por favor, informe seu nome para continuarmos.");
+        alert("Por favor, diga-nos o seu nome primeiro.");
         document.getElementById('user-name').focus();
         return;
       }
 
-      // Validação de telefone da Academia
+      // Se a academia tem turmas cadastradas, obriga a selecionar uma
+      const temTurmasNoLocal = document.querySelectorAll('.chip-turma').length > 0;
+      if (temTurmasNoLocal && !turmaSelecionadaObj) {
+        alert("Por favor, selecione qual turma você tem interesse tocando em uma das opções acima!");
+        return;
+      }
+
       if (localSelecionado && localSelecionado.contato) {
-        // HIGIENIZAÇÃO: Remove tudo que não for número (ex: parênteses, traços, espaços)
-        var num = localSelecionado.contato.replace(/\D/g, '');
-        console.log("📞 [QA/Debug] Número higienizado para a API do WhatsApp:", num);
+        var num = String(localSelecionado.contato).replace(/\D/g, '');
 
         if (num.length >= 10) {
-           // Insere o DDI do Brasil (55) se o dono da academia não tiver colocado na planilha
            if (num.substring(0,2) !== '55') num = '55' + num;
            
-           // Montagem da mensagem formatada (usando * para negrito no WA)
-           var msg = "Olá! Me chamo *" + nomeUser + "*. Gostaria de agendar uma aula experimental na *" + localSelecionado.nome + "*.";
+           // Constrói a mensagem dinâmica
+           var msg = `Olá! Me chamo *${nomeUser}*. Gostaria de agendar uma aula experimental na *${localSelecionado.nome}*.`;
            
-           console.log("🚀 [QA/Debug] Abrindo URL do WhatsApp Web/App...");
-           // Codifica a URL (evita quebra de links por espaços)
+           if (turmaSelecionadaObj) {
+               msg += `\n\nTenho interesse na turma:\n🥋 *${turmaSelecionadaObj.nome}*\n📅 ${turmaSelecionadaObj.dias}\n⏰ ${turmaSelecionadaObj.inicio} às ${turmaSelecionadaObj.fim}`;
+           }
+           
            var url = "https://wa.me/" + num + "?text=" + encodeURIComponent(msg);
-           window.open(url, '_blank'); // Abre em nova aba
+           window.open(url, '_blank');
         } else {
-           console.error("❌ [QA/Debug] Número inválido detectado:", num);
-           alert("Erro no sistema: O número de WhatsApp da academia parece estar incompleto no banco de dados.");
+           alert("O número de WhatsApp desta academia está incorreto no sistema.");
         }
       } else {
-        console.error("❌ [QA/Debug] Academia selecionada não possui contato.");
-        alert("Desculpe, esta unidade não possui um telefone de contato cadastrado para agendamento automático.");
+        alert("Desculpe, esta unidade não possui telefone de contato cadastrado.");
       }
     }
 
-    /**
-     * Roteamento SPA: Volta para a tela de Login
-     */
     function voltarLogin() {
-      console.log("🔄 [QA/Debug] Retornando para a tela de Login...");
       google.script.run
         .withSuccessHandler(function(url) { window.top.location.href = url + "?page=login"; })
         .getScriptUrl();
     }
   </script>
 </body>
+
 </html>

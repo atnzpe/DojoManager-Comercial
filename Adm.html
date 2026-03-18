@@ -662,18 +662,33 @@
         </div>
       </div>
       <hr style="border:0; border-top:1px solid #ccc; margin:30px 0;">
-      <div class="adm-h3">💸 Pagamentos PIX (Conta Central)</div>
+
+      <div class="adm-h3">💸 Pagamentos PIX (Conta Central Global)</div>
       <p style="font-size: 12px; color: #666; margin-top: -15px; margin-bottom:20px;">Ative isto para forçar que todas
-        as academias paguem para uma única conta da Federação.</p>
+        as academias paguem para uma única conta matriz.</p>
       <div class="form-grid" style="background:#e8f5e9; padding:15px; border-radius:8px; border:1px solid #c8e6c9;">
         <div>
-          <label class="adm-label">Forçar PIX Global?</label><select name="cfg_pix_global" id="cfg_pix_global" class="adm-input"><option value="Nao">Não (Cada academia tem o seu)</option><option value="Sim">Sim (Todas pagam para esta conta)</option></select>
+          <label class="adm-label">Forçar PIX Global?</label>
+          <select name="cfg_pix_global" id="cfg_pix_global" class="adm-input">
+            <option value="Nao">Não (Cada academia recebe o seu)</option>
+            <option value="Sim">Sim (Todas pagam para esta matriz)</option>
+          </select>
         </div>
-        <div><label class="adm-label">Chave PIX (CPF/Email/Tel)*</label><input type="text" name="cfg_pix_chave" id="cfg_pix_chave" class="adm-input" placeholder="Ex: 12345678900">
+        <div>
+          <label class="adm-label">Chave PIX Global*</label>
+          <input type="text" name="cfg_pix_chave" id="cfg_pix_chave" class="adm-input" placeholder="Ex: 12345678900">
         </div>
-        <div><label class="adm-label">Nome Completo do Titular*</label><input type="text" name="cfg_pix_nome" id="cfg_pix_nome" class="adm-input" maxlength="25">
+        <div>
+          <label class="adm-label">Nome do Titular Global*</label>
+          <input type="text" name="cfg_pix_nome" id="cfg_pix_nome" class="adm-input" maxlength="25">
         </div>
-        <div><label class="adm-label">Cidade da Conta*</label><input type="text" name="cfg_pix_cidade" id="cfg_pix_cidade" class="adm-input" maxlength="15">
+        <div>
+          <label class="adm-label">Nome do Banco Global</label>
+          <input type="text" name="cfg_pix_banco" id="cfg_pix_banco" class="adm-input" placeholder="Ex: Nubank">
+        </div>
+        <div class="form-full">
+          <label class="adm-label">Cidade da Conta Global*</label>
+          <input type="text" name="cfg_pix_cidade" id="cfg_pix_cidade" class="adm-input" maxlength="15">
         </div>
       </div>
       <button type="submit" class="adm-btn" style="margin-top:35px; background:#4caf50; color:white; width: 100%; padding: 18px; font-size: 14px;"><span class="material-icons" style="font-size:18px;">save</span> Salvar e Reiniciar App</button>
@@ -1056,17 +1071,27 @@
       </div>
 
       <div style="background:#e3f2fd; padding:15px; border-radius:8px; border:1px solid #bbdefb; margin-top: 20px;">
-        <h4 style="margin:0 0 10px 0; color:#1565c0;">💰 Dados de Recebimento (PIX Independente)</h4>
-        <label class="adm-label">Chave PIX da Unidade</label>
-        <input type="text" name="loc_pix_chave" id="loc_pix_chave" class="adm-input" placeholder="Campo vazio na base de dados">
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <h4 style="margin:0 0 10px 0; color:#1565c0;">💰 Dados de Recebimento (PIX do Local)</h4>
+
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px;">
+          <div>
+            <label class="adm-label">Chave PIX da Unidade</label>
+            <input type="text" name="loc_pix_chave" id="loc_pix_chave" class="adm-input" placeholder="Campo vazio na base de dados">
+          </div>
+          <div>
+            <label class="adm-label">Nome do Banco</label>
+            <input type="text" name="loc_pix_banco" id="loc_pix_banco" class="adm-input" placeholder="Campo vazio">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 10px;">
           <div>
             <label class="adm-label">Nome do Titular</label>
-            <input type="text" name="loc_pix_nome" id="loc_pix_nome" class="adm-input" maxlength="25" placeholder="Campo vazio na base de dados">
+            <input type="text" name="loc_pix_nome" id="loc_pix_nome" class="adm-input" maxlength="25" placeholder="Campo vazio">
           </div>
           <div>
             <label class="adm-label">Cidade da Conta</label>
-            <input type="text" name="loc_pix_cidade" id="loc_pix_cidade" class="adm-input" maxlength="15" placeholder="Campo vazio na base de dados">
+            <input type="text" name="loc_pix_cidade" id="loc_pix_cidade" class="adm-input" maxlength="15" placeholder="Campo vazio">
           </div>
         </div>
       </div>
@@ -1359,16 +1384,30 @@
     // =========================================================
     function popularAcademiasCheckboxAluno(acadAtuais = "") {
         const container = document.getElementById('container-acad-aluno');
-        if(!container) return;
+        if (!container) return; 
         container.innerHTML = '<span style="font-size:11px;">Carregando...</span>';
+        
         google.script.run.withSuccessHandler(locais => {
             container.innerHTML = "";
             const acadDoAluno = acadAtuais.split(',').map(m => m.trim().toLowerCase());
+            
+            const isGod = userSessionLocal.isAdmin === true;
+            const myAcads = userSessionLocal.academia ? userSessionLocal.academia.split(',').map(a => a.trim().toLowerCase()) : [];
+
             locais.forEach(local => {
-                const isChecked = acadDoAluno.includes(local.toLowerCase()) ? "checked" : "";
-                container.innerHTML += `<label class='mod-check-label'><input type="checkbox" name="aluno_acad_chk" value="${local}" ${isChecked} class="mod-check-input" onchange="atualizarAcademiasHidden()"> ${local}</label>`;
+                const localNorm = local.toLowerCase();
+                // O Instrutor só pode marcar academias a que ele próprio pertence (O Admin vê todas)
+                if (isGod || myAcads.includes(localNorm)) {
+                    const isChecked = acadDoAluno.includes(localNorm) ? "checked" : "";
+                    container.innerHTML += `
+                        <label class='mod-check-label'>
+                            <input type="checkbox" name="aluno_acad_chk" value="${local}" ${isChecked} class="mod-check-input" onchange="atualizarAcademiasHidden()"> 
+                            ${local}
+                        </label>
+                    `;
+                }
             });
-            atualizarAcademiasHidden();
+            atualizarAcademiasHidden(); 
         }).getListaAcademias();
     }
 
@@ -1376,7 +1415,10 @@
         const checkboxes = document.querySelectorAll('input[name="aluno_acad_chk"]:checked');
         const selecionadas = Array.from(checkboxes).map(cb => cb.value).join(", ");
         document.getElementById('aluno_acad').value = selecionadas;
-        carregarTurmasSelectParaAlunos(selecionadas, document.getElementById('aluno_turma').value);
+        
+        // Dispara a busca das turmas vinculadas aos locais escolhidos
+        const turmaAtual = document.getElementById('aluno_turma').value;
+        carregarTurmasSelectParaAlunos(selecionadas, turmaAtual);
     }
 
     function abrirModalNovoAluno() {
@@ -1721,7 +1763,6 @@
     function prepEditLocal(l) { 
         openModalLocal(); 
         
-        // Helper interno para UX: Se vier em branco, deixar no placeholder (Campo vazio), mas garantir que o input fique limpo
         const setValOrEmpty = (id, val) => {
            const el = document.getElementById(id);
            if(!el) return;
@@ -1739,6 +1780,7 @@
         setValOrEmpty('loc_iframe', l.iframeHtml); 
         setValOrEmpty('loc_pix_chave', l.pixChave); 
         setValOrEmpty('loc_pix_nome', l.pixNome); 
+        setValOrEmpty('loc_pix_banco', l.pixBanco); // <-- Adicionado População do Banco
         setValOrEmpty('loc_pix_cidade', l.pixCidade); 
     }
 
@@ -1756,7 +1798,29 @@
     function abrirModalCert() { document.getElementById('adm-modal-cert').style.display='flex'; document.querySelector('#adm-modal-cert form').reset(); document.getElementById('cert_id').value = ""; document.getElementById('cert_data').valueAsDate = new Date(); }
     function prepEditCert(c) { abrirModalCert(); document.getElementById('cert_id').value = c.id; document.getElementById('cert_cpf').value = c.cpf; document.getElementById('cert_curso').value = c.curso; setTimeout(()=>{document.getElementById('cert_mod_form').value = c.modalidade || 'Geral';},500); let d = c.data; if(d && d.includes('/')) { const p = d.split('/'); d = `${p[2]}-${p[1]}-${p[0]}`; } document.getElementById('cert_data').value = d; document.getElementById('cert_link').value = c.link; }
 
-    function carregarConfig() { google.script.run.withSuccessHandler(cfg => { document.getElementById('cfg_icon').value = cfg.iconId || ''; document.getElementById('cfg_bg').value = cfg.bgId || ''; document.getElementById('cfg_color').value = cfg.primaryColor || '#FFD700'; document.getElementById('cfg_color_sec').value = cfg.secondaryColor || '#1e1e1e'; document.getElementById('cfg_color_text').value = cfg.textColor || '#ffffff'; document.getElementById('cfg_color_btn_text').value = cfg.btnTextColor || '#000000'; document.getElementById('cfg_color_bg').value = cfg.bgColor || '#121212'; document.getElementById('cfg_link_loja').value = cfg.linkLoja || ''; document.getElementById('cfg_link_insta').value = cfg.linkInstagram || ''; document.getElementById('cfg_link_yt').value = cfg.linkYouTube || ''; document.getElementById('cfg_link_cad').value = cfg.linkCadastro || ''; document.getElementById('cfg_nome_acad').value = cfg.nomeAcademia || ''; document.getElementById('cfg_pix_global').value = cfg.pixGlobal || 'Nao'; document.getElementById('cfg_pix_chave').value = cfg.pixChave || ''; document.getElementById('cfg_pix_nome').value = cfg.pixNome || ''; document.getElementById('cfg_pix_cidade').value = cfg.pixCidade || ''; }).getAppConfig(); }
+    function carregarConfig() { 
+        google.script.run.withSuccessHandler(cfg => { 
+            document.getElementById('cfg_icon').value = cfg.iconId || ''; 
+            document.getElementById('cfg_bg').value = cfg.bgId || ''; 
+            document.getElementById('cfg_color').value = cfg.primaryColor || '#FFD700'; 
+            document.getElementById('cfg_color_sec').value = cfg.secondaryColor || '#1e1e1e'; 
+            document.getElementById('cfg_color_text').value = cfg.textColor || '#ffffff'; 
+            document.getElementById('cfg_color_btn_text').value = cfg.btnTextColor || '#000000'; 
+            document.getElementById('cfg_color_bg').value = cfg.bgColor || '#121212'; 
+            document.getElementById('cfg_link_loja').value = cfg.linkLoja || ''; 
+            document.getElementById('cfg_link_insta').value = cfg.linkInstagram || ''; 
+            document.getElementById('cfg_link_yt').value = cfg.linkYouTube || ''; 
+            document.getElementById('cfg_link_cad').value = cfg.linkCadastro || ''; 
+            document.getElementById('cfg_nome_acad').value = cfg.nomeAcademia || ''; 
+            
+            // Dados PIX Global
+            document.getElementById('cfg_pix_global').value = cfg.pixGlobal || 'Nao'; 
+            document.getElementById('cfg_pix_chave').value = cfg.pixChave || ''; 
+            document.getElementById('cfg_pix_nome').value = cfg.pixNome || ''; 
+            document.getElementById('cfg_pix_banco').value = cfg.pixBanco || ''; 
+            document.getElementById('cfg_pix_cidade').value = cfg.pixCidade || ''; 
+        }).getAppConfig(); 
+    }
 
     function aplicarTema(primaria, secundaria, texto, textoBotao, fundo) { document.getElementById('cfg_color').value = primaria; document.getElementById('cfg_color_sec').value = secundaria; document.getElementById('cfg_color_text').value = texto; document.getElementById('cfg_color_btn_text').value = textoBotao; document.getElementById('cfg_color_bg').value = fundo; }
     
