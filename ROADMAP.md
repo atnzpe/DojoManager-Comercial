@@ -30,9 +30,10 @@ Acompanhe a evolução, as metas e as próximas entregas do nosso sistema.
 - [x] Modularizar a tela de Dashboard (Escolher quem vê qual card via níveis de acesso RBAC).
 - [x] Aluno Multimodalidade (Filtrar vídeos e programas baseados nas modalidades cruzadas).
 
-## 🎯 Fase 2.5: Máquina de Vendas e Conversão (FOCO ATUAL)
-- [ ] **[🔥 ALTO ROI] Agendamento Dinâmico (Leads):** Criar página externa para Visitantes agendarem Aulas Experimentais.
-- [ ] **[🚀 QUICK WIN] Integração WhatsApp (Leads):** O agendamento da aula experimental deve disparar uma mensagem pré-formatada para o WhatsApp da unidade correspondente.
+## 🎯 Fase 2.5: Máquina de Vendas e Automação de Base (FOCO ATUAL)
+- [x] **[🔥 ALTO ROI] Agendamento Dinâmico (Leads):** Criar página externa para Visitantes agendarem Aulas Experimentais com Chips de Turmas.
+- [x] **[🚀 QUICK WIN] Integração WhatsApp (Leads):** O agendamento da aula experimental dispara uma mensagem pré-formatada para o WhatsApp da unidade.
+- [ ] **[🛡️ HIGH VALUE] Função Auto-Setup e Verificação de Banco de Dados:** Criar uma função para validar e corrigir todas as abas e colunas, criando-as automaticamente caso não existam na base de dados. *(Próxima Tarefa)*
 - [ ] **Check-in Antecipado:** Permitir que o aluno agende a sua presença na grade de aulas com antecedência.
 - [ ] Incluir em todas as páginas o atalho para a página do desenvolvedor (Rodapé White-Label).
 
