@@ -172,7 +172,6 @@
       transform: rotate(180deg);
     }
 
-    /* DESTAQUES NO TEXTO */
     strong {
       color: var(--dynamic-text);
       font-weight: 600;
@@ -228,7 +227,8 @@
         <li><strong>Usuário:</strong> Seu Login oficial. O sistema não diferencia letras maiúsculas de minúsculas.</li>
         <li><strong>Senha:</strong> Sua senha pessoal cadastrada.</li>
       </ul>
-      <p>Caso tenha esquecido, clique no link <strong>"Esqueci a senha"</strong> na tela inicial para iniciar a recuperação.</p>
+      <p>Caso tenha esquecido, clique no link <strong>"Esqueci a senha"</strong> na tela inicial para iniciar a
+        recuperação.</p>
     </div>
 
     <button class="accordion">
@@ -239,47 +239,67 @@
       <p>Se você ainda não possui acesso ao aplicativo:</p>
       <ol>
         <li>Na tela de login, clique no botão <strong>"Agendar / Cadastrar"</strong>.</li>
-        <li>Siga as instruções indicadas para registrar seus dados na sua unidade.</li>
-        <li>Aguarde a validação do seu instrutor ou administrador para que seu acesso seja liberado.</li>
+        <li>Siga as instruções indicadas para agendar uma aula experimental ou registrar seus dados.</li>
+        <li>Aguarde a validação do seu instrutor para que o seu acesso completo seja liberado.</li>
       </ol>
     </div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">badge</span> Como acessar minha Carteirinha Digital? <span class="highlight">NOVO</span></span>
+      <span><span class="material-icons icon-topic">badge</span> Como acessar minha Carteirinha?</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
       <p>Sua identidade oficial do tatame está sempre com você!</p>
       <ol>
-        <li>No painel principal, clique no botão <strong>"Carteirinha"</strong> ou acesse o menu do seu perfil.</li>
-        <li>Sua carteirinha digital com foto, graduação, validade e QR Code (se aplicável) será exibida na tela.</li>
+        <li>No painel principal, clique no botão <strong>"Perfil do Aluno"</strong>.</li>
+        <li>Sua carteirinha digital com foto, graduação e QR Code será exibida na tela.</li>
         <li>Você pode apresentá-la na recepção de eventos oficiais ou na entrada da academia.</li>
       </ol>
     </div>
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">ondemand_video</span> Videoteca e Programas Técnicos <span class="highlight">NOVO</span></span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>O sistema possui inteligência de <strong>Multimodalidade</strong> para o seu aprendizado em casa.</p>
-      <ul>
-        <li>Acesse os cards <strong>"Vídeos"</strong> ou <strong>"Programas/PDFs"</strong> no seu dashboard.</li>
-        <li>O aplicativo <strong>filtra automaticamente</strong> os conteúdos que você tem permissão para ver, baseando-se na sua Modalidade atual e no seu nível de Graduação.</li>
-        <li>Se você treina mais de uma arte marcial, verá os conteúdos liberados para ambas simultaneamente!</li>
-      </ul>
-    </div>
-    <div class="chapter-title">2. Treinos e Check-in</div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">event_available</span> Como saber se tem treino hoje?</span>
+      <span><span class="material-icons icon-topic">ondemand_video</span> Videoteca e Programas Técnicos</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>O acompanhamento das aulas é automático! Ao abrir o App, observe o topo da tela principal:</p>
+      <p>O sistema possui inteligência de <strong>Multimodalidade</strong> para o seu aprendizado.</p>
       <ul>
-        <li>O quadro <strong>"TREINOS ATIVOS"</strong> mostra automaticamente todas as turmas abertas para o dia de hoje.</li>
-        <li>Ele exibe tanto as aulas da grade fixa da academia quanto aulas/eventos extras criados na hora.</li>
-        <li>Você pode clicar no botão <strong>"ROTA"</strong> para abrir o GPS do seu celular direto com a localização do treino.</li>
+        <li>Acesse os cards <strong>"Vídeos"</strong> ou <strong>"Programa Técnico"</strong> no dashboard.</li>
+        <li>O aplicativo <strong>filtra automaticamente</strong> os conteúdos que você tem permissão para ver,
+          baseando-se na(s) sua(s) Modalidade(s) atual(is) e no seu nível de Graduação.</li>
+      </ul>
+    </div>
+
+    <div class="chapter-title">2. Treinos, Locais e Check-in</div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">place</span> Como consultar os Locais de Treino? <span class="highlight">NOVO</span></span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>O painel "Locais de Treino" é inteligente e facilita a sua rotina:</p>
+      <ul>
+        <li>Ao clicar em <strong>"Locais de Treino"</strong>, você verá a lista das academias da rede.</li>
+        <li><strong>Filtro Automático:</strong> O sistema exibe apenas as academias que possuem turmas abertas
+          <strong>no dia de hoje</strong>.</li>
+        <li>Você verá botões ("Chips") informando o nome da turma, o horário de início e fim.</li>
+        <li>Se uma aula estiver a acontecer neste exato momento, o painel destacará a academia com a etiqueta
+          <strong style="color:#4caf50">🔴 AULA AO VIVO</strong> e libertará um atalho direto para você marcar presença!
+        </li>
+      </ul>
+    </div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">event_available</span> Como saber os treinos do dia?</span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>No topo da tela inicial do App, você encontrará o widget <strong>"TREINOS ATIVOS"</strong>:</p>
+      <ul>
+        <li>Ele mostra automaticamente todas as turmas programadas para o dia atual.</li>
+        <li>Enquanto o professor não abrir a sala, a turma ficará marcada como "Aguarde o instrutor abrir".</li>
+        <li>Assim que o professor iniciar a aula (gerando o PIN), o card mudará para
+          <strong style="color:#4caf50">VERDE (Ao Vivo)</strong> e aparecerá o botão de "Check-in".</li>
       </ul>
     </div>
 
@@ -288,166 +308,112 @@
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>Existem duas formas de registrar sua presença para contagem no ranking:</p>
+      <p>Você pode registrar sua presença de duas formas:</p>
       <p><strong>1. Pelo Atalho (Rápido):</strong><br>
-      Assim que o instrutor abrir a aula, um botão verde <strong>"CHECK-IN"</strong> aparecerá no quadro "Treinos Ativos". Basta clicar nele!</p>
+      Clique no botão verde <strong>"CHECK-IN"</strong> que aparece no quadro de "Treinos Ativos" do painel inicial assim
+        que o instrutor abre a aula.</p>
       <p><strong>2. Pelo Menu Completo:</strong><br>
-      Clique no card "Check-in Aula" no painel principal. Em seguida, digite o <strong>PIN</strong> numérico (código de 4 dígitos) que o instrutor disponibilizar.</p>
+      Clique no card "Check-in Aula". Digite o <strong>PIN numérico de 4 dígitos</strong> informado pelo instrutor.</p>
+      <p>
+        <em>Atenção: O sistema possui uma <strong>Trava de Idade</strong>. Se você tentar entrar numa turma que não corresponde à sua idade (ex: Adulto tentando entrar na Kids), o sistema bloqueará. Peça ao instrutor para o adicionar manualmente caso seja uma exceção.</em>
+      </p>
     </div>
 
+    <div class="chapter-title">3. Mensalidades e Pagamentos PIX</div>
+
     <button class="accordion">
-      <span><span class="material-icons icon-topic">gpp_bad</span> O App bloqueou meu Check-in (Trava de Idade). E agora? <span class="highlight">NOVO</span></span>
+      <span><span class="material-icons icon-topic">payments</span> Como pagar meu plano com o novo PIX? <span class="highlight">NOVO</span></span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>O sistema possui uma <strong>Trava de Segurança Inteligente</strong> para separar turmas (ex: Infantil vs Adulto).</p>
-      <p>Se você tentar fazer check-in pelo seu celular em uma turma que não corresponde à sua faixa etária, o aplicativo bloqueará o acesso por segurança.</p>
-      <p><strong>A Solução:</strong> Caso você esteja autorizado a participar daquela aula como exceção, basta avisar o seu Instrutor. Ele possui autorização para forçar a sua entrada na lista de presença através da <strong>Chamada Manual</strong> no painel dele.</p>
-    </div>
-    <div class="chapter-title">3. Financeiro & Planos</div>
-
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">attach_money</span> Como consultar meu plano?</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>Acesse o card <strong>"Financeiro"</strong> no painel principal.</p>
-      <ul>
-        <li>Você verá o nome do seu pacote ativo e a data exata de vencimento.</li>
-        <li><strong>Status Verde:</strong> Pagamento em dia. Seu check-in nas aulas está liberado.</li>
-        <li><strong>Status Vermelho:</strong> Plano vencido ou inativo. O acesso ao check-in de aulas será bloqueado administrativamente.</li>
-      </ul>
-    </div>
-
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">whatsapp</span> Como regularizar minha assinatura?</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>Se a sua mensalidade estiver vencida (ou faltarem poucos dias para o vencimento), um botão verde <strong>"Regularizar / Renovar"</strong> ficará visível na sua tela Financeira.</p>
-      <p>Clique neste botão para abrir uma conversa direta no <strong>WhatsApp</strong> da secretaria da sua unidade e enviar seu comprovante de renovação.</p>
+      <p>Pagar a sua mensalidade agora é 100% digital e sem erros:</p>
+      <ol>
+        <li>Acesse o card <strong>"Financeiro"</strong> no painel principal.</li>
+        <li>Se o seu plano estiver vencido ou próximo do vencimento, o sistema exibirá automaticamente a opção de
+          pagamento.</li>
+        <li>Você verá o <strong>QR Code</strong>, o Valor, a Instituição Bancária e a Chave da Academia.</li>
+        <li><strong>Para pagar pelo mesmo telemóvel:</strong> Clique no botão verde <strong>"PIX COPIA E COLA"</strong>.
+          O código oficial do Banco Central será copiado. Abra o App do seu banco, escolha "Pix Copia e Cola" e confirme
+          o pagamento.</li>
+        <li>Por fim, clique em <strong>"Enviar Comprovante"</strong> para encaminhar o recibo diretamente para o
+          WhatsApp da secretaria da sua unidade.</li>
+      </ol>
     </div>
 
     <div class="chapter-title">4. Para Instrutores e Gestores</div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">groups</span> Gestão de Turmas e Filtros <span class="highlight">NOVO</span></span>
+      <span><span class="material-icons icon-topic">admin_panel_settings</span> Permissões (O que o Instrutor pode ver?) <span class="highlight">NOVO</span></span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>O painel de Gestão de Alunos (CRM) agora possui um <strong>Filtro Triplo Dinâmico</strong>:</p>
+      <p>O sistema possui um rigoroso controle de acesso (RBAC):</p>
       <ul>
-        <li>Você pode combinar <strong>Academia + Modalidade + Turma</strong> para enxugar a lista e visualizar apenas os alunos exatos de um determinado horário.</li>
-        <li>No Painel Administrativo, ao criar uma nova Turma, você pode vincular um <strong>Professor Responsável</strong> (buscando diretamente do banco de dados de alunos/instrutores) e o telefone dele será auto-preenchido para os relatórios.</li>
-      </ul>
-    </div>
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">add_location_alt</span> Criar Aula e Vincular Turmas</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>A abertura de aulas agora está conectada às turmas oficiais:</p>
-      <ul>
-        <li>Acesse <strong>"Fazer Chamada"</strong> e clique em <strong>"CRIAR NOVA AULA"</strong>.</li>
-        <li>Selecione o Local de Treino. Automaticamente, o sistema carregará apenas as <strong>Turmas Ativas</strong> vinculadas àquela unidade.</li>
-        <li>Ao gerar o PIN, esta aula aparecerá imediatamente no App de todos os seus alunos.</li>
+        <li><strong>Admin/Mestre:</strong> Vê o módulo Financeiro completo, configura regras globais e visualiza
+          alunos/turmas de todas as franquias.</li>
+        <li><strong>Instrutor/Professor:</strong> Não tem acesso ao módulo Financeiro da gestão nem ao "Painel Admin".
+          Ele visualiza <strong>apenas</strong> os alunos das Academias em que está vinculado.</li>
       </ul>
     </div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">visibility</span> Controle de Idade no Tatame (Tags Visuais) <span class="highlight">NOVO</span></span>
+      <span><span class="material-icons icon-topic">rule</span> Gestão Multi-Academias de Alunos <span class="highlight">NOVO</span></span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>Durante a chamada ao vivo (Tela de Aguardando Confirmação), o sistema ajuda o instrutor a identificar o perfil da turma rapidamente:</p>
+      <p>Ao cadastrar ou editar um aluno, o painel agora permite vinculá-lo a múltiplas unidades:</p>
       <ul>
-        <li>Ao lado do nome de cada aluno que digitar o PIN, aparecerá uma etiqueta colorida brilhante (Ex: <strong style="color:#ff9800;">[INFANTIL - 12 ANOS]</strong> ou <strong style="color:#2196f3;">[ADULTO - 25 ANOS]</strong>).</li>
-        <li>Se o aplicativo bloquear um aluno pela Trava de Idade, você pode usar o botão cinza <strong>"Manual"</strong> para autorizar a entrada dele. A tag de idade indicará a categoria real do aluno na tela, garantindo que você tem ciência da exceção.</li>
+        <li>Na seção "Academias Vinculadas", você pode marcar várias caixinhas (ex: CT Matriz e CT Zona Sul).</li>
+        <li>O menu dropdown de "Turma Oficial" atualizará automaticamente, exibindo apenas as turmas pertencentes às
+          academias selecionadas.</li>
       </ul>
-    </div>
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">person_add_alt</span> Adicionar Aluno Manual / Visitante</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>Caso um aluno esteja sem internet, esqueça o celular, ou seja uma aula experimental de visitante:</p>
-      <ol>
-        <li>Na tela de gestão da aula (onde o PIN é exibido), clique no botão cinza <strong>"Manual"</strong> (ícone com o sinal de +).</li>
-        <li>Digite o nome do aluno no campo de busca. O sistema sugerirá os nomes cadastrados em tempo real.</li>
-        <li><strong>Aluno da casa:</strong> Clique no nome dele para registrar o check-in imediatamente.</li>
-        <li><strong>Visitante / Aula Experimental:</strong> Se o nome não constar no banco de dados, digite o nome completo e clique na opção azul <strong>"Adicionar [Nome] como Visitante"</strong> no final da lista.</li>
-      </ol>
-      <p><em>Isso garante que o treino nunca pare por problemas técnicos!</em></p>
     </div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">analytics</span> Super Relatório de Atletas (Filtros Avançados) <span class="highlight">NOVO</span></span>
+      <span><span class="material-icons icon-topic">date_range</span> Nova Gestão de Turmas e Dias da Semana <span class="highlight">NOVO</span></span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>Ferramenta ideal para organizar competições ou exames de faixa:</p>
+      <p>A criação de aulas agora é guiada por <strong>Turmas Fixas</strong>:</p>
       <ol>
-        <li>No painel Administrativo, vá na aba <strong>"Alunos"</strong>.</li>
-        <li>Clique no botão amarelo <strong>"Super Relatório"</strong>.</li>
-        <li>Cruze dados como: Idade Mínima/Máxima, Peso (Kg), Faixa, Modalidade e Academia.</li>
-        <li>O sistema entrega a lista exata e permite <strong>Imprimir em PDF</strong> (Formato A4) para levar na prancheta.</li>
-      </ol>
-    </div>
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">account_balance_wallet</span> Lançamentos Financeiros</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>Para registrar Receitas (Mensalidades, Vendas) ou Despesas (Contas, Aluguel):</p>
-      <ol>
-        <li>Acesse o menu <strong>Financeiro</strong> e vá em <strong>Novo Lançamento</strong>.</li>
-        <li>Selecione o Tipo (Receita ou Despesa) e a Categoria adequada.</li>
-        <li><strong>Atenção:</strong> Ao registrar uma "Mensalidade", selecione o nome do aluno e o plano correspondente. O sistema atualizará a data de vencimento daquele aluno automaticamente.</li>
-        <li>Preencha o valor e a forma de pagamento e salve. A transação refletirá imediatamente no fluxo de caixa da unidade.</li>
+        <li>No Painel Administrativo, ao criar uma Nova Turma, você escolhe os dias exatos da semana utilizando
+          <strong>caixas de seleção (Checkboxes)</strong>.</li>
+        <li>Essa turma alimentará automaticamente o widget de "Onde Treinar" dos alunos, exibindo essa academia como
+          aberta apenas nos dias marcados.</li>
       </ol>
     </div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">filter_alt</span> Visualizar Caixa</span>
+      <span><span class="material-icons icon-topic">group_add</span> Adicionar Aluno Manual / Visitante na Aula</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p><strong>Instrutores:</strong> Veem apenas o caixa e as transações da sua própria unidade vinculada.</p>
-      <p><strong>Gestores/Admins:</strong> Podem usar o filtro no topo da tela para ver "Todas as Academias" ou selecionar uma unidade específica para auditoria.</p>
+      <p>Caso um aluno esteja sem celular no tatame ou seja uma aula experimental:</p>
+      <ol>
+        <li>Na tela da aula aberta (onde o PIN é exibido), clique no botão <strong>"Adicionar Aluno"</strong> (ícone com
+          sinal de +).</li>
+        <li>Digite o nome. O sistema listará alunos matriculados para check-in rápido.</li>
+        <li>Se for um não-aluno, digite o nome completo e selecione a opção azul
+          <strong>"Adicionar como Visitante"</strong> no final da lista.</li>
+      </ol>
     </div>
 
-    <div class="chapter-title">5. Performance e Suporte</div>
+    <div class="chapter-title">5. Suporte</div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">emoji_events</span> Entendendo o Ranking e Pontuação</span>
+      <span><span class="material-icons icon-topic">help_outline</span> Preciso de Ajuda Técnica</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>O Ranking gamificado contabiliza suas presenças confirmadas nas aulas:</p>
-      <ul>
-        <li><strong>Aba "Minha Academia":</strong> Mostra sua posição comparada apenas aos colegas da sua própria unidade.</li>
-        <li><strong>Aba "Ranking Geral":</strong> Mostra sua posição em relação a toda a rede de academias utilizando o sistema.</li>
-        <li>Em caso de empate no número de aulas, os alunos dividem a mesma colocação no pódio de forma justa.</li>
-      </ul>
-    </div>
-
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">help_outline</span> Dúvidas Frequentes</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p><strong>Esqueci de registrar presença no dia da aula, e agora?</strong><br>
-      O sistema funciona em tempo real. Se a aula já foi encerrada pelo instrutor, não é possível fazer o check-in retroativo pelo aplicativo. Comunique o seu instrutor ou a administração para ajustes manuais na próxima aula.
-      </p>
-      <p><strong>Meu nome está duplicado ou errado no Ranking?</strong><br>
-      O sistema corrige letras maiúsculas automaticamente. Se o problema de duplicidade persistir, utilize o botão flutuante de suporte (ícone de Headset) na tela principal para solicitar o ajuste.
-      </p>
+      <p>Se você encontrou um erro no aplicativo ou tem uma dúvida que não está neste manual, utilize o botão flutuante
+        de suporte (ícone de Headset) no canto inferior direito da tela inicial do Dashboard para enviar um chamado
+        direto à equipe de gestão.</p>
     </div>
 
   </div>
 
   <script>
-    // Lógica do Acordeão (Expande/Recolhe Tópicos)
+    // Lógica do Acordeão
     var acc = document.getElementsByClassName("accordion");
     for (var i = 0; i < acc.length; i++) {
       acc[i].addEventListener("click", function() {
@@ -456,17 +422,14 @@
         if (panel.style.maxHeight) {
           panel.style.maxHeight = null;
         } else {
-          // Ajusta altura automaticamente conforme o conteúdo
           panel.style.maxHeight = panel.scrollHeight + "px";
         } 
       });
     }
 
-    // Função de Voltar para o Dashboard
     function voltarAoDash() {
        const btn = document.querySelector('.btn-back');
        btn.innerHTML = `<span class="material-icons" style="animation: spin 1s linear infinite;">sync</span>`;
-       
        google.script.run
          .withSuccessHandler(function(url) { window.top.location.href = url + "?page=dashboard"; })
          .getScriptUrl();
@@ -480,7 +443,6 @@
       }
     }
   </style>
-
 </body>
 
 </html>
