@@ -1290,16 +1290,16 @@ function listarLocaisAdmin() {
       iframeHtml: row.html_mapa_off_lline || "",
       responsavel: row.responsavel || "",
       status: row.status || "Ativo",
-      pixChave: row.pix_chave || "",
-      pixNome: row.pix_nome || "",
-      pixCidade: row.pix_cidade || ""
+      pixChave: row.pix_chave_local_de_treino || "",
+      pixNome: row.pix_nome_local_de_treino || "",
+      pixBanco: row.banco_local_de_treino || "",
+      pixCidade: row.pix_cidade_local_de_treino || ""
     })).filter(l => l.nome !== "");
   } catch (e) { return []; }
 }
 
 function salvarLocal(form) {
   try {
-    // Foco apenas no Prédio/Infraestrutura (Sem dias e horas da turma)
     const dados = {
       "Nome do Local": form.loc_nome,
       "Responsavel": form.loc_resp,
@@ -1309,9 +1309,10 @@ function salvarLocal(form) {
       "Contato": form.loc_contato,
       "Link_Google_Maps": form.loc_maps,
       "html_mapa_off_lline": form.loc_iframe,
-      "Pix_Chave": form.loc_pix_chave,
-      "Pix_Nome": form.loc_pix_nome,
-      "Pix_Cidade": form.loc_pix_cidade
+      "Pix_Chave_Local_de_Treino": form.loc_pix_chave, // <-- Mapeado Novo Cabeçalho
+      "Pix_Nome_Local_de_Treino": form.loc_pix_nome,   // <-- Mapeado Novo Cabeçalho
+      "Banco_Local_de_Treino": form.loc_pix_banco,     // <-- Mapeado Novo Cabeçalho
+      "Pix_Cidade_Local_de_Treino": form.loc_pix_cidade // <-- Mapeado Novo Cabeçalho
     };
     const idLinha = parseInt(form.loc_id);
     salvarDadosSeguro(NOME_ABA_LOCAIS, dados, isNaN(idLinha) ? null : idLinha);
@@ -1522,15 +1523,11 @@ function getAppConfig() {
   }
 }
 
+// --- ATUALIZAÇÃO NO SETUP DO APP (Aba Config_App para o PIX Global) ---
 function salvarConfig(form) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = ss.getSheetByName("Config_App");
-
-    if (!sheet) {
-      verificarCriarAbasFinanceiras();
-      sheet = ss.getSheetByName("Config_App");
-    }
 
     const configsToSave = {
       "Logo_URL": padronizarLinkDrive(form.cfg_icon) || "",
@@ -1544,7 +1541,12 @@ function salvarConfig(form) {
       "Link_Instagram": form.cfg_link_insta || "",
       "Link_YouTube": form.cfg_link_yt || "",
       "Link_Cadastro": form.cfg_link_cad || "",
-      "Nome_Academia": form.cfg_nome_acad || "DojoManager SaaS" // <-- SALVANDO O NOVO NOME
+      "Nome_Academia": form.cfg_nome_acad || "DojoManager SaaS",
+      "Pix_Global_Ativo": form.cfg_pix_global || "Nao",
+      "Pix_Chave_Global": form.cfg_pix_chave,       // <-- Mapeado Novo Cabeçalho
+      "Pix_Nome": form.cfg_pix_nome,
+      "Nome_Banco_PIX_Global": form.cfg_pix_banco,  // <-- Mapeado Novo Cabeçalho
+      "Pix_Cidade": form.cfg_pix_cidade
     };
 
     if (sheet.getLastRow() < 2) {
@@ -2442,8 +2444,7 @@ function getAlunoFullData(loginInput) {
 }
 
 /**
- * 🛠️ BACKEND: BUSCA DADOS PIX (Renomeada para evitar conflito)
- * Localização: Código.gs
+ * 🛠️ BACKEND: BUSCA DADOS PIX (Lógica Global vs Local)
  */
 function getPixDataFromServer(login) {
   try {
@@ -2459,31 +2460,36 @@ function getPixDataFromServer(login) {
     const assinatura = assinaturas.find(as => String(as.login_aluno).toLowerCase() === String(login).toLowerCase());
     const pacote = pacotes.find(p => p.nome_pacote === assinatura?.pacote_atual);
 
+    // 1. Inicia o payload puxando as colunas da CONTA GLOBAL (Aba Config_App)
     let info = {
-      chave: configApp.pix_chave,
+      chave: configApp.pix_chave_global || "",
       beneficiario: configApp.pix_nome || "Dojo Manager",
       cidade: configApp.pix_cidade || "RECIFE",
-      banco: configApp.banco || "Instituição Bancária", // <-- LINHA INJETADA
-      valor: pacote ? pacote.valor_padrao : 150.00,
+      banco: configApp.nome_banco_pix_global || "Instituição Bancária",
+      valor: pacote ? pacote.valor_padrao : 0, // Zera se não tiver pacote
       contatoWhatsApp: ""
     };
 
-    if (configApp.pix_global_ativo !== "Sim") {
-      const local = locais.find(l => l.nome_do_local === aluno.academia_vinculada);
-      if (local && local.ativo === "Sim") {
-        info.chave = local.pix_chave;
-        info.beneficiario = local.pix_nome;
-        info.cidade = local.pix_cidade;
-        info.banco = local.banco || info.banco; // <-- LINHA INJETADA
+    // 2. 🛡️ A MÁGICA: Se o PIX Global estiver DESATIVADO, sobrepõe com a CONTA LOCAL
+    if (String(configApp.pix_global_ativo).toLowerCase() !== "sim") {
+      const local = locais.find(l => String(l.nome_do_local).toLowerCase() === String(aluno.academia_vinculada).toLowerCase());
+
+      // Só substitui se o local existir e a aba status do local estiver 'Ativo'
+      if (local && String(local.status).toLowerCase() === "ativo") {
+        info.chave = local.pix_chave_local_de_treino || info.chave;
+        info.beneficiario = local.pix_nome_local_de_treino || info.beneficiario;
+        info.cidade = local.pix_cidade_local_de_treino || info.cidade;
+        info.banco = local.banco_local_de_treino || info.banco;
       }
     }
 
-    const localResp = locais.find(l => l.nome_do_local === aluno.academia_vinculada);
+    // Pega o contato WhatsApp do local de qualquer forma para o aluno enviar o comprovante
+    const localResp = locais.find(l => String(l.nome_do_local).toLowerCase() === String(aluno.academia_vinculada).toLowerCase());
     info.contatoWhatsApp = localResp?.contato ? String(localResp.contato).replace(/\D/g, "") : "5581997629232";
 
     return info;
   } catch (e) {
-    console.error("Erro no Servidor PIX: " + e.message);
+    console.error("Erro fatal no servidor ao buscar PIX: " + e.message);
     return null;
   }
 }
