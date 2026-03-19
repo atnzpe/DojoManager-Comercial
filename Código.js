@@ -2728,3 +2728,106 @@ function salvarTurma(form) {
     return isNaN(idLinha) ? "✅ Turma criada com sucesso!" : "✅ Turma atualizada com sucesso!";
   } catch (e) { return "❌ Erro ao salvar turma: " + e.message; }
 }
+
+/**
+ * ============================================================================
+ * 📊 DASHBOARD DE INTELIGÊNCIA E RELATÓRIOS (ADMIN/GESTOR)
+ * Branch: feature/admin-dashboard-analytics
+ * ============================================================================
+ * QA/ESTAGIÁRIO: Processamento pesado de Data-Mining. Cruza Alunos, Turmas, 
+ * Assinaturas, Pacotes e Transações Financeiras para gerar o Dashboard do CEO.
+ */
+function getEstatisticasRelatorio() {
+  try {
+    const alunos = lerTabelaDinamica("cadastro_de_alunos");
+    const assinaturas = lerTabelaDinamica("Fin_Assinaturas");
+    const turmas = lerTabelaDinamica("Config_Turmas");
+    const pacotes = lerTabelaDinamica("Fin_Pacotes");
+    const transacoes = lerTabelaDinamica("Fin_Transacoes");
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const mesAtual = hoje.getMonth();
+    const anoAtual = hoje.getFullYear();
+
+    let totalAtivos = 0;
+    let inadimplentes = [];
+    let receitaPrevista = 0;
+    let receitasRealizadas = 0;
+    let despesasRealizadas = 0;
+    let estatisticasTurmas = {};
+
+    // 1. Mapeia Turmas Ativas
+    turmas.forEach(t => {
+      if (String(t.status).toLowerCase() === "ativa") {
+        estatisticasTurmas[t.nome_da_turma] = { nome: t.nome_da_turma, local: t.local_vinculado, count: 0 };
+      }
+    });
+
+    // 2. Varre Alunos (Inadimplência e Lotação)
+    alunos.forEach(a => {
+      if (String(a.status).toLowerCase() !== "ativo") return;
+      totalAtivos++;
+
+      const tVinculada = String(a.turma_vinculada || "Sem Turma").trim();
+      if (estatisticasTurmas[tVinculada]) {
+        estatisticasTurmas[tVinculada].count++;
+      } else {
+        estatisticasTurmas[tVinculada] = { nome: tVinculada, local: a.academia_vinculada, count: 1 };
+      }
+
+      const loginBusca = String(a.login).toLowerCase().trim();
+      const ass = assinaturas.find(as => String(as.login_aluno).toLowerCase().trim() === loginBusca);
+
+      let isInadimplente = true;
+      let vencimentoFormatado = "Sem Plano";
+
+      if (ass) {
+        const dataFim = parseDataSegura(ass.data_fim);
+        if (dataFim) vencimentoFormatado = formatDate(dataFim);
+
+        if (String(ass.status_assinatura).toLowerCase() === "ativo" && dataFim && dataFim >= hoje) {
+          isInadimplente = false;
+          const pacote = pacotes.find(p => String(p.nome_pacote).toLowerCase() === String(ass.pacote_atual).toLowerCase());
+          if (pacote) {
+            receitaPrevista += parseFloat(String(pacote.valor_padrao).replace(',', '.')) || 0;
+          }
+        }
+      }
+
+      if (isInadimplente) {
+        inadimplentes.push({
+          nome: a.nome_completo || a.nome || "Sem Nome",
+          telefone: a.telefone || "",
+          academia: a.academia_vinculada || "Sem Local",
+          vencimento: vencimentoFormatado
+        });
+      }
+    });
+
+    // 3. Varre Transações para o Gráfico de Barras (Mês Atual)
+    transacoes.forEach(trx => {
+      const dataTrx = parseDataSegura(trx.data_registro);
+      if (dataTrx && dataTrx.getMonth() === mesAtual && dataTrx.getFullYear() === anoAtual) {
+        let val = parseFloat(String(trx.valor).replace(',', '.')) || 0;
+        const tipo = String(trx.tipo).toLowerCase();
+        const status = String(trx.status).toLowerCase();
+
+        if (tipo === 'receita' && status === 'concluido') receitasRealizadas += val;
+        if (tipo === 'despesa' && status === 'concluido') despesasRealizadas += val;
+      }
+    });
+
+    return {
+      totalAtivos: totalAtivos,
+      totalInadimplentes: inadimplentes.length,
+      receitaPrevista: receitaPrevista,
+      receitasRealizadas: receitasRealizadas,
+      despesasRealizadas: despesasRealizadas,
+      inadimplentes: inadimplentes,
+      turmas: Object.values(estatisticasTurmas).sort((a, b) => b.count - a.count)
+    };
+  } catch (e) {
+    return { erro: e.message };
+  }
+}
