@@ -33,10 +33,9 @@ Acompanhe a evolução, as metas e as próximas entregas do nosso sistema.
 ## 🎯 Fase 2.5: Máquina de Vendas e Automação de Base (FOCO ATUAL)
 - [x] **[🔥 ALTO ROI] Agendamento Dinâmico (Leads):** Criar página externa para Visitantes agendarem Aulas Experimentais com Chips de Turmas.
 - [x] **[🚀 QUICK WIN] Integração WhatsApp (Leads):** O agendamento da aula experimental dispara uma mensagem pré-formatada para o WhatsApp da unidade.
-
-- [ ] **[🛡️ HIGH VALUE] Função Auto-Setup e Verificação de Banco de Dados:** Criar uma função para validar e corrigir todas as abas e colunas, criando-as automaticamente caso não existam na base de dados. *(Próxima Tarefa)*
+- [x] **[🛡️ HIGH VALUE] Função Auto-Setup e Verificação de Banco de Dados:** Criar uma função para validar e corrigir todas as abas e colunas, criando-as automaticamente caso não existam na base de dados.
+- [ ] **Rodapé White-Label e Direitos:** Incluir em todas as páginas o atalho para a página do desenvolvedor. *(Próxima Tarefa - Quick Win)*
 - [ ] **Check-in Antecipado:** Permitir que o aluno agende a sua presença na grade de aulas com antecedência.
-- [ ] Incluir em todas as páginas o atalho para a página do desenvolvedor (Rodapé White-Label).
 
 ## 🔮 Fase 3: Automação, CRM e Compliance (Próximos Passos)
 - [ ] Replicar blindagem Anti-Apagão (*Hydration*) para os demais CRUDs menores (Cursos, Locais, Vídeos).

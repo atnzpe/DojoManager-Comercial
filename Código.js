@@ -108,39 +108,70 @@ function salvarFinanceiroSeguro(nomeAba, dadosObjeto, linha = null) {
 // ============================================================================
 
 /**
- * 🏗️ MÓDULO DE AUTO-SETUP (BANCO DE DADOS DINÂMICO)
- * Verifica se as abas do sistema existem. Se não existirem (ex: planilha clonada),
- * o próprio código cria a aba, injeta os cabeçalhos, congela a primeira linha e pinta de azul escuro.
+ * 🏗️ MÓDULO DE AUTO-SETUP E SELF-HEALING (BANCO DE DADOS DINÂMICO)
+ * Verifica todas as 16 abas do sistema e TODAS as suas respectivas colunas. 
+ * Se alguém apagar uma coluna ou aba sem querer, o sistema recria automaticamente.
  */
-function verificarCriarAbasFinanceiras() {
+function verificarCriarAbasSistema() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-  // Matriz de arquitetura do banco de dados
+  // 🗺️ O Dicionário da Verdade (Single Source of Truth)
   const estrutura = [
+    { nome: "cadastro_de_alunos", colunas: ["Carimbo de data/hora", "Endereço de e-mail", "Nome Completo", "Data de Nascimento", "Peso", "Altura", "Telefone", "CPF", "Nome do Pai", "Nome da Mãe", "Endereço", "Turma Vinculada", "Academia Vinculada", "LOGIN", "Senha", "GRADUACAO_ATUAL", "Foto 3x4 (para a carteirinha)", "Data Ultima Carteirinha", "STATUS", "PROX_GRADUACAO", "Nível do Praticante", "NivelAdministrativo", "Modalidade", "Data Próximo Exame"] },
+    { nome: "Locais_de_treino", colunas: ["Nome do Local", "Endereço", "Cidade/Estado", "Contato", "Link_Google_Maps", "html_mapa_off_lline", "Responsavel", "Status", "Pix_Chave_Local_de_Treino", "Pix_Nome_Local_de_Treino", "Banco_Local_de_Treino", "btn_pix_copia_e_cola_Local_de_Treino", "Ativo", "Pix_Cidade_Local_de_Treino"] },
+    { nome: "Config_Turmas", colunas: ["ID_Turma", "Nome da Turma", "Modalidade", "Faixa Etária", "Local Vinculado", "Dias da Semana", "Horário Início", "Horário Fim", "Status", "Responsável", "Telefone"] },
+    { nome: "Config_App", colunas: ["Logo_URL", "Fundo_URL", "Cor_Fundo", "Cor_Primaria", "Cor_Secundaria", "Cor_Texto", "Cor_Texto_Botao", "Link_Loja", "Link_Instagram", "Link_YouTube", "Link_Cadastro", "Nome_Academia", "Pix_Global_Ativo", "Pix_Chave_Global", "Pix_Nome", "Nome_Banco_PIX_Global", "Pix_Cidade"] },
     { nome: "Fin_Transacoes", colunas: ["ID_Transacao", "Data_Registro", "Tipo", "Categoria", "Descricao", "Valor", "Forma_Pagto", "Responsavel", "Login_Aluno", "Academia_Ref", "Status", "Comprovante_Url", "Modalidade"] },
     { nome: "Fin_Pacotes", colunas: ["Nome_Pacote", "Valor_Padrao", "Duracao_Dias", "Academias_Permitidas", "Status_Pacote", "Descricao"] },
     { nome: "Fin_Assinaturas", colunas: ["Login_Aluno", "Pacote_Atual", "Data_Inicio", "Data_Fim", "Status_Assinatura", "ID_Ultima_Transacao"] },
-    { nome: "Config_App", colunas: ["Logo_URL", "Fundo_URL", "Cor_Primaria", "Cor_Secundaria", "Cor_Texto", "Cor_Texto_Botao", "Cor_Fundo", "Link_Loja", "Link_Instagram", "Link_YouTube", "Link_Cadastro", "Nome_Academia", "Pix_Global_Ativo", "Pix_Chave", "Pix_Nome", "Pix_Cidade"] },
-
-    // 🔥 NOVA ABA DE TURMAS INJETADA NO AUTO-SETUP 🔥
-    { nome: "Config_Turmas", colunas: ["ID_Turma", "Nome da Turma", "Modalidade", "Faixa Etária", "Local Vinculado", "Dias da Semana", "Horário Início", "Horário Fim", "Status"] }
+    { nome: "Aulas_Em_Andamento", colunas: ["ID_Aula", "Data_Aula", "Hora_Inicio", "Hora_Fim", "Academia", "Turma", "Instrutor", "PIN", "Status", "Checkins_JSON"] },
+    { nome: "Registro_Chamada", colunas: ["ID_Chamada", "Data_Registro", "Data_Treino", "Hora_Treino", "Instrutor_Logado", "Local_Treino", "Qtd_Presentes", "Lista_Alunos_IDs", "Lista_Nomes", "Observacoes"] },
+    { nome: "Certificados", colunas: ["CPF", "Curso", "Modalidade", "Data_Emissao", "Link_PDF"] },
+    { nome: "Suporte", colunas: ["Data/Hora", "Login", "Nome", "Tipo", "Assunto", "Mensagem", "Status"] },
+    { nome: "Config_Programas", colunas: ["Faixa", "Modalidade", "ID_Arquivo", "Link_Original", "Descricao"] },
+    { nome: "Cursos", colunas: ["Nome do Curso", "Data", "Descrição", "Número de Vagas", "Imagem", "Status", "Link da Inscrição"] },
+    { nome: "Config_Biblioteca", colunas: ["Titulo", "Descricao", "Link_Arquivo", "Link_Capa"] },
+    { nome: "Config_Videoteca", colunas: ["Faixa", "Modalidade", "Titulo", "Youtube_Link", "Status", "Descricao"] },
+    { nome: "GRADUACAO", colunas: ["Faixa / Nivel", "Observacao", "ID", "Modalidade", "Nivel"] }
   ];
 
   estrutura.forEach(aba => {
     let sheet = ss.getSheetByName(aba.nome);
-    if (!sheet) {
-      // Cria a aba do zero
-      sheet = ss.insertSheet(aba.nome);
-      // Injeta os cabeçalhos na linha 1
-      sheet.appendRow(aba.colunas);
-      // Formatação UX/UI (Deixa bonito estilo banco de dados)
-      sheet.getRange(1, 1, 1, aba.colunas.length).setFontWeight("bold").setBackground("#2c3e50").setFontColor("#ffffff");
-      sheet.setFrozenRows(1); // Congela o cabeçalho
+    let isNewSheet = false;
 
-      // Se for a aba de configurações, já cria uma linha padrão para o App não quebrar
+    // 1. Se a aba não existir no Google Sheets, o sistema CRIA a aba e as colunas do zero
+    if (!sheet) {
+      sheet = ss.insertSheet(aba.nome);
+      sheet.appendRow(aba.colunas);
+      isNewSheet = true;
+
+      // Injeta valores de segurança padrão no Config_App se a aba for recém-criada
       if (aba.nome === "Config_App") {
-        sheet.appendRow(["", "", "#121212", "#FFD700", "#1e1e1e", "#ffffff", "#000000", "", "", "", "", "DojoManager SaaS", "Nao", "", "", ""]);
+        sheet.appendRow(["", "", "#121212", "#FFD700", "#1e1e1e", "#ffffff", "#000000", "", "", "", "", "DojoManager SaaS", "Nao", "", "", "", ""]);
       }
+    }
+
+    // 2. 🛡️ MOTOR SELF-HEALING: Se a aba já existe, confere se alguém apagou alguma coluna
+    const headersAtuais = sheet.getRange(1, 1, 1, Math.max(1, sheet.getLastColumn())).getValues()[0].map(h => String(h).trim().toLowerCase());
+    let precisaAtualizarHeader = false;
+
+    aba.colunas.forEach(colunaEsperada => {
+      // Se a coluna esperada não estiver na planilha...
+      if (!headersAtuais.includes(String(colunaEsperada).trim().toLowerCase())) {
+        // Encontrou uma coluna em falta! Vai adicioná-la na última posição disponível.
+        const ultimaCol = sheet.getLastColumn();
+        sheet.getRange(1, ultimaCol + 1).setValue(colunaEsperada);
+        precisaAtualizarHeader = true;
+      }
+    });
+
+    // 3. Aplica o UI Style "Banco de Dados" (Negrito, Fundo Escuro, Congelar Linha 1)
+    if (isNewSheet || precisaAtualizarHeader) {
+      sheet.getRange(1, 1, 1, sheet.getLastColumn())
+        .setFontWeight("bold")
+        .setBackground("#2c3e50")
+        .setFontColor("#ffffff");
+      sheet.setFrozenRows(1);
     }
   });
 }
@@ -317,12 +348,32 @@ function getFinanceiroPessoal(login) {
   }
 }
 
-/**
- * 4. LISTA DE PACOTES DISPONÍVEIS (Para venda)
- */
-function getPacotesDisponiveis() {
-  const pacotes = lerTabelaDinamica("Fin_Pacotes");
-  return pacotes.filter(p => String(p.status_pacote).toLowerCase() === "ativo");
+// ============================================================================
+// 💰 CRUD ADMIN DE PACOTES / PLANOS FINANCEIROS E RBAC
+// ============================================================================
+
+function getPacotesDisponiveis(userAcademies = "", isAdmin = false) {
+  try {
+    const pacotes = lerTabelaDinamica("Fin_Pacotes");
+    let visiveis = pacotes;
+
+    // Se NÃO for Admin, só vê os planos "Ativos"
+    if (!isAdmin) {
+      visiveis = visiveis.filter(p => String(p.status_pacote).toLowerCase() === "ativo");
+    }
+
+    if (isAdmin) return visiveis;
+
+    if (userAcademies) {
+      const myAcads = String(userAcademies).split(',').map(a => a.trim().toLowerCase());
+      visiveis = visiveis.filter(p => {
+        const permitidas = String(p.academias_permitidas || "TODAS").toLowerCase();
+        if (permitidas.includes("todas")) return true;
+        return myAcads.some(myAcad => permitidas.includes(myAcad));
+      });
+    }
+    return visiveis;
+  } catch (e) { return []; }
 }
 
 /**
@@ -601,7 +652,7 @@ function parseDataSegura(input) {
 // ============================================================================
 
 function doGet(e) {
-  verificarCriarAbasFinanceiras();
+  verificarCriarAbasSistema();
   const page = e.parameter.page || 'login';
   let htmlFile;
 
@@ -997,6 +1048,7 @@ function listarAlunosAdmin() {
   try {
     const alunos = lerTabelaDinamica(NOME_ABA_ALUNOS);
     const chamadas = lerTabelaDinamica("Registro_Chamada");
+    const assinaturas = lerTabelaDinamica("Fin_Assinaturas"); // <-- ADICIONADO AQUI
 
     return alunos.map(a => {
       const dataNasc = a.data_de_nascimento_ || a.data_de_nascimento;
@@ -1004,6 +1056,7 @@ function listarAlunosAdmin() {
       const loginBusca = String(a.login || "").toLowerCase().trim();
 
       const totalAulas = chamadas.filter(c => String(c.lista_alunos_ids || "").toLowerCase().includes(loginBusca)).length;
+      const assAluno = assinaturas.find(as => String(as.login_aluno).toLowerCase().trim() === loginBusca); // <-- ADICIONADO AQUI
 
       return {
         id: a._linha,
@@ -1018,7 +1071,7 @@ function listarAlunosAdmin() {
         endereco: a.endereço || "",
         foto: a["foto_3x4_(para_a_carteirinha)"] || "",
         academia: a.academia_vinculada || "",
-        turma: a.turma_vinculada || "Sem Turma", // <-- 🚀 NOVA PROPRIEDADE DE TURMA
+        turma: a.turma_vinculada || "Sem Turma",
         graduacao: a.graduacao_atual || "Iniciante",
         proxGrad: a.prox_graduacao || "",
         modalidade: a.modalidade || "Geral",
@@ -1032,7 +1085,12 @@ function listarAlunosAdmin() {
         idadeExata: idadeCalculada,
         totalAulas: totalAulas,
         carimbo: a.carimbo_de_data_hora || a["carimbo_de_data/hora"] || "",
-        statusAssinatura: a.status_assinatura || "Inativo"
+
+        // DADOS FINANCEIROS PUXADOS DA ABA DE ASSINATURAS
+        pacote: assAluno ? assAluno.pacote_atual : "",
+        dataInicioPlano: assAluno ? assAluno.data_inicio : "",
+        vencimento: assAluno ? assAluno.data_fim : "",
+        statusAssinatura: assAluno ? assAluno.status_assinatura : "Inativo"
       };
     });
   } catch (e) { console.error("ERRO LISTAR ALUNOS: " + e.message); return []; }
@@ -1143,6 +1201,7 @@ function salvarAluno(form) {
         let old2 = realCol2 ? getOldVal(realCol2) : "";
         valorParaSalvar = old1 || old2 || "";
       }
+      
 
       const results = [];
       if (realCol1) results.push({ col: realCol1, val: valorParaSalvar });
@@ -1214,12 +1273,12 @@ function salvarAluno(form) {
     // DISPARO SEGURO PRO BANCO DE DADOS
     salvarDadosSeguro(NOME_ABA_ALUNOS, dadosFinais, isNaN(idLinha) ? null : idLinha);
 
-    // Sincronização de Pacote Financeiro (Protegida)
     if (Object.prototype.hasOwnProperty.call(form, 'aluno_pacote')) {
       let loginFinanceiro = dadosFinais[headerMap[normalize("LOGIN")]] || form.aluno_login;
       const dadosAssin = {
         "Login_Aluno": loginFinanceiro,
         "Pacote_Atual": form.aluno_pacote,
+        "Data_Inicio": form.aluno_data_inicio, // <-- GRAVA A DATA DE INÍCIO
         "Data_Fim": form.aluno_vencimento,
         "Status_Assinatura": form.aluno_status_assinatura
       };
@@ -2696,4 +2755,27 @@ function salvarTurma(form) {
     salvarDadosSeguro(nomeAba, dadosFinais, isNaN(idLinha) ? null : idLinha);
     return isNaN(idLinha) ? "✅ Turma criada com sucesso!" : "✅ Turma atualizada com sucesso!";
   } catch (e) { return "❌ Erro ao salvar turma: " + e.message; }
+}
+
+// ============================================================================
+// 💰 CRUD ADMIN DE PACOTES / PLANOS FINANCEIROS
+// ============================================================================
+
+function salvarPacote(form) {
+  try {
+    const dados = {
+      "Nome_Pacote": form.pac_nome,
+      "Valor_Padrao": form.pac_valor,
+      "Duracao_Dias": form.pac_dias,
+      "Academias_Permitidas": form.pac_academias || "TODAS",
+      "Status_Pacote": form.pac_status || "Ativo", // <-- AGORA INCLUI STATUS
+      "Descricao": form.pac_desc || ""             // <-- AGORA INCLUI DESCRIÇÃO
+    };
+
+    const idLinha = parseInt(form.linha_id);
+    salvarDadosSeguro("Fin_Pacotes", dados, isNaN(idLinha) ? null : idLinha);
+    registrarLogAuditoria("Admin", isNaN(idLinha) ? "CRIAR_PLANO" : "EDITAR_PLANO", form.pac_nome, `Valor: R$ ${form.pac_valor}`);
+
+    return isNaN(idLinha) ? "✅ Plano criado com sucesso!" : "✅ Plano atualizado com sucesso!";
+  } catch (e) { return "❌ Erro ao salvar plano: " + e.message; }
 }
