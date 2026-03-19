@@ -348,12 +348,32 @@ function getFinanceiroPessoal(login) {
   }
 }
 
-/**
- * 4. LISTA DE PACOTES DISPONÍVEIS (Para venda)
- */
-function getPacotesDisponiveis() {
-  const pacotes = lerTabelaDinamica("Fin_Pacotes");
-  return pacotes.filter(p => String(p.status_pacote).toLowerCase() === "ativo");
+// ============================================================================
+// 💰 CRUD ADMIN DE PACOTES / PLANOS FINANCEIROS E RBAC
+// ============================================================================
+
+function getPacotesDisponiveis(userAcademies = "", isAdmin = false) {
+  try {
+    const pacotes = lerTabelaDinamica("Fin_Pacotes");
+    let visiveis = pacotes;
+
+    // Se NÃO for Admin, só vê os planos "Ativos"
+    if (!isAdmin) {
+      visiveis = visiveis.filter(p => String(p.status_pacote).toLowerCase() === "ativo");
+    }
+
+    if (isAdmin) return visiveis;
+
+    if (userAcademies) {
+      const myAcads = String(userAcademies).split(',').map(a => a.trim().toLowerCase());
+      visiveis = visiveis.filter(p => {
+        const permitidas = String(p.academias_permitidas || "TODAS").toLowerCase();
+        if (permitidas.includes("todas")) return true;
+        return myAcads.some(myAcad => permitidas.includes(myAcad));
+      });
+    }
+    return visiveis;
+  } catch (e) { return []; }
 }
 
 /**
@@ -1028,6 +1048,7 @@ function listarAlunosAdmin() {
   try {
     const alunos = lerTabelaDinamica(NOME_ABA_ALUNOS);
     const chamadas = lerTabelaDinamica("Registro_Chamada");
+    const assinaturas = lerTabelaDinamica("Fin_Assinaturas"); // <-- ADICIONADO AQUI
 
     return alunos.map(a => {
       const dataNasc = a.data_de_nascimento_ || a.data_de_nascimento;
@@ -1035,6 +1056,7 @@ function listarAlunosAdmin() {
       const loginBusca = String(a.login || "").toLowerCase().trim();
 
       const totalAulas = chamadas.filter(c => String(c.lista_alunos_ids || "").toLowerCase().includes(loginBusca)).length;
+      const assAluno = assinaturas.find(as => String(as.login_aluno).toLowerCase().trim() === loginBusca); // <-- ADICIONADO AQUI
 
       return {
         id: a._linha,
@@ -1049,7 +1071,7 @@ function listarAlunosAdmin() {
         endereco: a.endereço || "",
         foto: a["foto_3x4_(para_a_carteirinha)"] || "",
         academia: a.academia_vinculada || "",
-        turma: a.turma_vinculada || "Sem Turma", // <-- 🚀 NOVA PROPRIEDADE DE TURMA
+        turma: a.turma_vinculada || "Sem Turma",
         graduacao: a.graduacao_atual || "Iniciante",
         proxGrad: a.prox_graduacao || "",
         modalidade: a.modalidade || "Geral",
@@ -1063,7 +1085,12 @@ function listarAlunosAdmin() {
         idadeExata: idadeCalculada,
         totalAulas: totalAulas,
         carimbo: a.carimbo_de_data_hora || a["carimbo_de_data/hora"] || "",
-        statusAssinatura: a.status_assinatura || "Inativo"
+
+        // DADOS FINANCEIROS PUXADOS DA ABA DE ASSINATURAS
+        pacote: assAluno ? assAluno.pacote_atual : "",
+        dataInicioPlano: assAluno ? assAluno.data_inicio : "",
+        vencimento: assAluno ? assAluno.data_fim : "",
+        statusAssinatura: assAluno ? assAluno.status_assinatura : "Inativo"
       };
     });
   } catch (e) { console.error("ERRO LISTAR ALUNOS: " + e.message); return []; }
@@ -1174,6 +1201,7 @@ function salvarAluno(form) {
         let old2 = realCol2 ? getOldVal(realCol2) : "";
         valorParaSalvar = old1 || old2 || "";
       }
+      
 
       const results = [];
       if (realCol1) results.push({ col: realCol1, val: valorParaSalvar });
@@ -1245,12 +1273,12 @@ function salvarAluno(form) {
     // DISPARO SEGURO PRO BANCO DE DADOS
     salvarDadosSeguro(NOME_ABA_ALUNOS, dadosFinais, isNaN(idLinha) ? null : idLinha);
 
-    // Sincronização de Pacote Financeiro (Protegida)
     if (Object.prototype.hasOwnProperty.call(form, 'aluno_pacote')) {
       let loginFinanceiro = dadosFinais[headerMap[normalize("LOGIN")]] || form.aluno_login;
       const dadosAssin = {
         "Login_Aluno": loginFinanceiro,
         "Pacote_Atual": form.aluno_pacote,
+        "Data_Inicio": form.aluno_data_inicio, // <-- GRAVA A DATA DE INÍCIO
         "Data_Fim": form.aluno_vencimento,
         "Status_Assinatura": form.aluno_status_assinatura
       };
@@ -2727,4 +2755,27 @@ function salvarTurma(form) {
     salvarDadosSeguro(nomeAba, dadosFinais, isNaN(idLinha) ? null : idLinha);
     return isNaN(idLinha) ? "✅ Turma criada com sucesso!" : "✅ Turma atualizada com sucesso!";
   } catch (e) { return "❌ Erro ao salvar turma: " + e.message; }
+}
+
+// ============================================================================
+// 💰 CRUD ADMIN DE PACOTES / PLANOS FINANCEIROS
+// ============================================================================
+
+function salvarPacote(form) {
+  try {
+    const dados = {
+      "Nome_Pacote": form.pac_nome,
+      "Valor_Padrao": form.pac_valor,
+      "Duracao_Dias": form.pac_dias,
+      "Academias_Permitidas": form.pac_academias || "TODAS",
+      "Status_Pacote": form.pac_status || "Ativo", // <-- AGORA INCLUI STATUS
+      "Descricao": form.pac_desc || ""             // <-- AGORA INCLUI DESCRIÇÃO
+    };
+
+    const idLinha = parseInt(form.linha_id);
+    salvarDadosSeguro("Fin_Pacotes", dados, isNaN(idLinha) ? null : idLinha);
+    registrarLogAuditoria("Admin", isNaN(idLinha) ? "CRIAR_PLANO" : "EDITAR_PLANO", form.pac_nome, `Valor: R$ ${form.pac_valor}`);
+
+    return isNaN(idLinha) ? "✅ Plano criado com sucesso!" : "✅ Plano atualizado com sucesso!";
+  } catch (e) { return "❌ Erro ao salvar plano: " + e.message; }
 }

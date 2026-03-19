@@ -390,15 +390,20 @@
       </div>
 
       <div style="background:#e8f5e9; padding:15px; border-radius:8px; border-left: 4px solid #4caf50;">
-        <h4 style="margin:0 0 10px 0; color:#2e7d32; text-transform:uppercase; font-size:12px;">💳 Plano Financeiro</h4>
-        <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr;">
+        <h4 style="margin:0 0 10px 0; color:#2e7d32; text-transform:uppercase; font-size:12px;">💳 Plano Financeiro
+          (Assinatura)</h4>
+        <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr 1fr;">
           <div>
-            <label class="form-label">Pacote / Plano</label><select id="ga-pacote" class="gestao-input"><option value="">Sem Pacote</option></select>
+            <label class="form-label">Pacote Atual</label>
+            <select id="ga-pacote" class="gestao-input"><option value="">Sem Pacote</option></select>
           </div>
-          <div><label class="form-label">Vencimento</label><input type="date" id="ga-vencimento" class="gestao-input">
+          <div><label class="form-label">Data Início</label><input type="date" id="ga-data-inicio" class="gestao-input">
+          </div>
+          <div><label class="form-label">Data Venc.</label><input type="date" id="ga-vencimento" class="gestao-input">
           </div>
           <div>
-            <label class="form-label">Status Pagto</label><select id="ga-status-assinatura" class="gestao-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select>
+            <label class="form-label">Status Pagto</label>
+            <select id="ga-status-assinatura" class="gestao-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select>
           </div>
         </div>
       </div>
@@ -424,6 +429,8 @@
               this.cacheAcademias = ac; 
               const sAcad = document.getElementById('filter-acad-instrutor');
               const sessionUser = JSON.parse(localStorage.getItem('userSession'));
+              google.script.run.withSuccessHandler(pac => { this.cachePacotes = pac || []; })
+                .getPacotesDisponiveis(sessionUser.academia, sessionUser.isAdmin);
               
               if(sessionUser && sessionUser.isAdmin) {
                   sAcad.innerHTML = '<option value="">Todas as Academias</option>' + ac.map(x => `<option value="${x}">${x}</option>`).join('');
@@ -540,7 +547,7 @@
           document.getElementById('ga-nivel').value = "Aluno";
           document.getElementById('ga-status').value = "Ativo";
           document.getElementById('titulo-modal-gestao').innerText = "Novo Aluno";
-
+          document.getElementById('ga-data-inicio').value = "";
           // Monta as academias vazias
           this.popularAcademiasCheckboxAluno("");
           
@@ -584,7 +591,7 @@
           setVal('ga-altura', String(a.altura || "").replace(',','.'));
           setVal('ga-exame', dF(a.proxExame));
           setVal('ga-data-cart', dF(a.dataCarteira));
-          
+          setVal('ga-data-inicio', dF(a.dataInicioPlano));
           document.getElementById('ga-status').value = a.status || "Ativo";
           
           let n = String(a.nivel || "Aluno").toUpperCase();
@@ -728,6 +735,7 @@
               aluno_exame: document.getElementById('ga-exame').value,
               aluno_data_cart: document.getElementById('ga-data-cart').value,
               aluno_pacote: document.getElementById('ga-pacote').value,
+              aluno_data_inicio: document.getElementById('ga-data-inicio').value, // <-- SALVA AQUI
               aluno_vencimento: document.getElementById('ga-vencimento').value,
               aluno_status_assinatura: document.getElementById('ga-status-assinatura').value
           };
