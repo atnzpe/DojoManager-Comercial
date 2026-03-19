@@ -31,14 +31,19 @@ Acompanhe a evolução, as metas e as próximas entregas do nosso sistema.
 - [x] Aluno Multimodalidade (Filtrar vídeos e programas baseados nas modalidades cruzadas).
 
 ## 🎯 Fase 2.5: Máquina de Vendas e Automação de Base (FOCO ATUAL)
-- [x] **[🔥 ALTO ROI] Agendamento Dinâmico (Leads):** Criar página externa para Visitantes agendarem Aulas Experimentais com Chips de Turmas.
-- [x] **[🚀 QUICK WIN] Integração WhatsApp (Leads):** O agendamento da aula experimental dispara uma mensagem pré-formatada para o WhatsApp da unidade.
-- [x] **[🛡️ HIGH VALUE] Função Auto-Setup e Verificação de Banco de Dados:** Criar uma função para validar e corrigir todas as abas e colunas, criando-as automaticamente caso não existam na base de dados.
-- [ ] **Rodapé White-Label e Direitos:** Incluir em todas as páginas o atalho para a página do desenvolvedor. *(Próxima Tarefa - Quick Win)*
-- [ ] **Check-in Antecipado:** Permitir que o aluno agende a sua presença na grade de aulas com antecedência.
+- [x] **Agendamento Dinâmico (Leads):** Criar página externa para Visitantes agendarem Aulas Experimentais com Chips de Turmas.
+- [x] **Integração WhatsApp (Leads):** O agendamento da aula experimental dispara uma mensagem pré-formatada para o WhatsApp da unidade.
+- [x] **Função Auto-Setup e Verificação de Banco de Dados:** Criar uma função para validar e corrigir todas as abas e colunas.
+- [x] **[🚀 QUICK WIN] Rodapé White-Label e Direitos:** Incluir em todas as páginas o atalho para a página do desenvolvedor. *(Tarefa Atual)*
+- [ ] **[🛡️ HIGH VALUE] Expandir Hydration:** Aplicar blindagem anti-apagão nos CRUDs menores (Cursos, Locais, Vídeos).
 
-## 🔮 Fase 3: Automação, CRM e Compliance (Próximos Passos)
-- [ ] Replicar blindagem Anti-Apagão (*Hydration*) para os demais CRUDs menores (Cursos, Locais, Vídeos).
+## 💰 Fase 3: Inteligência Financeira e Relatórios (Próximos Passos - Foco Emilly)
+- [ ] **[🔥 ALTO ROI] Nova Aba "Relatórios" no Adm.html:** Central de Inteligência com relatórios de Cadastros, Inadimplência e Lotação de Turmas.
+- [ ] **[💰 HIGH VALUE] Contas a Pagar e Receber:** Lançamento de despesas (aluguel, repasse de professores) e receitas cruzadas.
+- [ ] **[📊 HIGH VALUE] Dashboard de Previsões (Financeiro.html):** Visão de Faturamento Previsto vs. Realizado.
+
+## 🔮 Fase 4: Automação, CRM e Compliance
+- [ ] Check-in Antecipado: Permitir que o aluno agende a sua presença na grade de aulas com antecedência.
 - [ ] Histórico do Aluno (tempo na turma, aulas assistidas, conteúdo visualizado).
 - [ ] **Compliance:** Controle de Anuidade (Bloqueio em caso de inadimplência).
 - [ ] **Compliance:** Trava de inatividade por falta de presença no Congresso Oficial.

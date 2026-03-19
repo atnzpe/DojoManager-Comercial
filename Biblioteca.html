@@ -122,6 +122,38 @@
     color: var(--dynamic-prim);
   }
 
+  /* ============================================================================
+       RODAPÉ DO DESENVOLVEDOR (WHITE-LABEL SAAS)
+       ============================================================================ */
+  .developer-footer {
+    text-align: center;
+    padding: 20px 10px;
+    font-size: 11px;
+    color: var(--dynamic-text, #ffffff);
+    opacity: 0.5;
+    /* Discreto para não roubar a atenção do App */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: auto;
+    /* Empurra para o fundo */
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 10;
+    position: relative;
+  }
+
+  .developer-footer a {
+    color: var(--dynamic-prim, #FFD700);
+    text-decoration: none;
+    font-weight: 900;
+    transition: opacity 0.2s;
+  }
+
+  .developer-footer a:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+  }
+
   @keyframes spin {
     0% {
       transform: rotate(0deg);
@@ -160,6 +192,7 @@
 
   <div id="library-container" class="library-grid"></div>
 </div>
+
 
 <script>
   console.log("✅ [SAFE MODE] Biblioteca.html carregado e blindado (White-Label Integrado)!");

@@ -795,20 +795,15 @@
       </div>
 
       <div style="background:#e8f5e9; padding:15px; border-radius:8px; border-left: 4px solid #4caf50;">
-        <h4 style="margin:0 0 10px 0; color:#2e7d32; text-transform:uppercase; font-size:12px;">💳 Plano Financeiro
-          (Assinatura)</h4>
-        <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr 1fr;">
+        <h4 style="margin:0 0 10px 0; color:#2e7d32; text-transform:uppercase; font-size:12px;">💳 Plano Financeiro</h4>
+        <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr;">
           <div>
-            <label class="adm-label">Pacote Atual</label>
-            <select id="aluno_pacote" name="aluno_pacote" class="adm-input"><option value="">Sem Pacote</option></select>
+            <label class="adm-label">Pacote / Plano</label><select id="aluno_pacote" name="aluno_pacote" class="adm-input"><option value="">Sem Pacote</option></select>
           </div>
-          <div><label class="adm-label">Data Início</label><input type="date" id="aluno_data_inicio" name="aluno_data_inicio" class="adm-input">
-          </div>
-          <div><label class="adm-label">Data Vencimento</label><input type="date" id="aluno_vencimento" name="aluno_vencimento" class="adm-input">
+          <div><label class="adm-label">Vencimento</label><input type="date" id="aluno_vencimento" name="aluno_vencimento" class="adm-input">
           </div>
           <div>
-            <label class="adm-label">Status Pagto</label>
-            <select id="aluno_status_assinatura" name="aluno_status_assinatura" class="adm-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select>
+            <label class="adm-label">Status Pagto</label><select id="aluno_status_assinatura" name="aluno_status_assinatura" class="adm-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select>
           </div>
         </div>
       </div>
@@ -877,47 +872,19 @@
 <div id="adm-modal-pacote" class="adm-modal">
   <div class="adm-modal-box">
     <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
-      <span id="titulo-modal-pacote">Novo Plano/Pacote</span>
-      <button type="button" onclick="closeModal('adm-modal-pacote')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+      <span id="titulo-modal-pacote">Novo Plano/Pacote</span><button type="button" onclick="closeModal('adm-modal-pacote')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
     </div>
-
-    <form id="form-pacote" onsubmit="interceptarSalvarPacote(event)">
-      <input type="hidden" name="linha_id" id="pac_linha_id">
-
-      <label class="adm-label">Nome do Plano*</label>
-      <input type="text" name="pac_nome" id="pac_nome" class="adm-input" required>
-
+    <form onsubmit="handleAdmForm(event, 'salvarPacote')">
+      <input type="hidden" name="linha_id" id="pac_linha_id"><label class="adm-label">Nome do Plano*</label><input type="text" name="pac_nome" id="pac_nome" class="adm-input" required>
       <div class="form-grid">
         <div><label class="adm-label">Valor Padrão (R$)*</label><input type="number" step="0.01" name="pac_valor" id="pac_valor" class="adm-input" required>
         </div>
         <div><label class="adm-label">Duração (Dias)*</label><input type="number" name="pac_dias" id="pac_dias" class="adm-input" required>
         </div>
       </div>
-
-      <div class="form-grid">
-        <div>
-          <label class="adm-label">Status do Plano</label>
-          <select name="pac_status" id="pac_status" class="adm-input">
-            <option value="Ativo">✅ Ativo</option>
-            <option value="Inativo">❌ Inativo</option>
-          </select>
-        </div>
-        <div class="form-full">
-          <label class="adm-label">Descrição / Benefícios</label>
-          <textarea name="pac_desc" id="pac_desc" class="adm-input" rows="2" placeholder="Ex: Acesso livre a todas as turmas"></textarea>
-        </div>
-      </div>
-
-      <input type="hidden" name="pac_academias" id="pac_academias">
-      <div class="form-full" style="margin-top: 15px;">
-        <label class="adm-label">Disponível para quais Academias?</label>
-        <div id="container-acad-pacote" class="checkbox-grid"></div>
-      </div>
-
       <div
         style="display:flex; justify-content:flex-end; gap:10px; margin-top:25px; border-top: 1px solid #ddd; padding-top: 15px;">
-        <button type="button" onclick="closeModal('adm-modal-pacote')" class="adm-btn adm-btn-outline">Cancelar</button>
-        <button type="submit" class="adm-btn">Salvar Plano</button>
+        <button type="button" onclick="closeModal('adm-modal-pacote')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar Plano</button>
       </div>
     </form>
   </div>
@@ -1222,6 +1189,10 @@
       </div>
     </form>
   </div>
+  <div class="developer-footer">
+    ⚡ Powered by <a href="https://wa.me/5581992467787?text=Olá! Gostaria de saber mais sobre o sistema DojoManager."
+      target="_blank">DojoManager SaaS</a>
+  </div>
 </div>
 
 <script>
@@ -1284,86 +1255,23 @@
         }).withFailureHandler(err => { alert("Erro: "+err.message); btn.disabled=false; btn.innerHTML=original; })[func](formData); 
     }
 
-    // =========================================================
-    // 💰 LÓGICA DE PACOTES E MULTI-ACADEMIAS (COM RBAC E CORREÇÕES)
-    // =========================================================
     function carregarPacotes() {
         const tb = document.getElementById('lista-pacotes-body');
         if(!tb) return;
-        tb.innerHTML = '<tr><td colspan="5" style="text-align:center;">Sincronizando...</td></tr>';
-        
-        // 🛡️ Filtra o que volta do backend usando os dados de sessão do usuário!
+        tb.innerHTML = '<tr><td colspan="4" style="text-align:center;">Sincronizando...</td></tr>';
         google.script.run.withSuccessHandler(lista => { 
             cache.pacotes = lista; tb.innerHTML = "";
-            if(!lista || lista.length === 0) { tb.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum plano.</td></tr>'; return; }
-            
+            if(!lista || lista.length === 0) { tb.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nenhum plano.</td></tr>'; return; }
             lista.forEach(p => { 
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><b>${esc(p.nome_pacote)}</b><br><small style="color:#666;">📍 ${esc(p.academias_permitidas || 'TODAS')}</small></td>
-                    <td>R$ ${esc(p.valor_padrao)}</td>
-                    <td>${esc(p.duracao_dias)} dias</td>
-                    <td><span class="adm-badge ${String(p.status_pacote).toLowerCase() === 'inativo' ? 'bg-red' : 'bg-green'}">${esc(p.status_pacote || 'Ativo')}</span></td>
-                    <td><button class="adm-btn" onclick='prepEditPacote(${JSON.stringify(p)})'><span class="material-icons" style="font-size:14px">edit</span></button></td>
-                `; 
+                tr.innerHTML = `<td><b>${esc(p.nome_pacote)}</b></td><td>R$ ${esc(p.valor_padrao)}</td><td>${esc(p.duracao_dias)} dias</td><td><button class="adm-btn" onclick='prepEditPacote(${JSON.stringify(p)})'>EDITAR</button></td>`; 
                 tb.appendChild(tr);
             });
-        }).getPacotesDisponiveis(userSessionLocal.academia, userSessionLocal.isAdmin);
+        }).getPacotesDisponiveis();
     }
 
-    function popularAcademiasCheckboxPacote(acadAtuais = "") {
-        const container = document.getElementById('container-acad-pacote');
-        if(!container) return;
-        container.innerHTML = '<span style="font-size:11px;">Carregando...</span>';
-        
-        google.script.run.withSuccessHandler(locais => {
-            // Checkbox coringa para liberar em toda a rede
-            container.innerHTML = `<label class='mod-check-label'><input type="checkbox" value="TODAS" class="mod-check-input pac-acad-chk" onchange="atualizarAcademiasPacoteHidden()"> 🌐 TODAS UNIDADES</label>`;
-            
-            const acadsDoPacote = acadAtuais.split(',').map(m => m.trim().toLowerCase());
-            const isTodas = acadsDoPacote.includes("todas");
-
-            locais.forEach(local => {
-                const isChecked = isTodas || acadsDoPacote.includes(local.toLowerCase()) ? "checked" : "";
-                container.innerHTML += `<label class='mod-check-label'><input type="checkbox" value="${local}" ${isChecked} class="mod-check-input pac-acad-chk" onchange="atualizarAcademiasPacoteHidden()"> ${local}</label>`;
-            });
-            
-            if(isTodas) {
-                const chkTodas = container.querySelector('input[value="TODAS"]');
-                if(chkTodas) chkTodas.checked = true;
-            }
-            atualizarAcademiasPacoteHidden();
-        }).getListaAcademias();
-    }
-
-    function atualizarAcademiasPacoteHidden() {
-        const checkboxes = document.querySelectorAll('.pac-acad-chk:checked');
-        const selecionadas = Array.from(checkboxes).map(cb => cb.value);
-        
-        if (selecionadas.includes("TODAS")) {
-            document.getElementById('pac_academias').value = "TODAS";
-        } else {
-            document.getElementById('pac_academias').value = selecionadas.join(", ");
-        }
-    }
-
-    function abrirModalPacote() { 
-        document.getElementById('adm-modal-pacote').style.display = 'flex'; 
-        document.getElementById('pac_linha_id').value = ""; 
-        document.getElementById('form-pacote').reset(); 
-        popularAcademiasCheckboxPacote("TODAS"); 
-    }
-
-    function prepEditPacote(p) { 
-        document.getElementById('adm-modal-pacote').style.display = 'flex'; 
-        document.getElementById('pac_linha_id').value = p._linha; 
-        document.getElementById('pac_nome').value = p.nome_pacote; 
-        document.getElementById('pac_valor').value = String(p.valor_padrao).replace(',','.'); 
-        document.getElementById('pac_dias').value = p.duracao_dias; 
-        document.getElementById('pac_status').value = p.status_pacote || "Ativo"; 
-        document.getElementById('pac_desc').value = p.descricao || ""; 
-        popularAcademiasCheckboxPacote(p.academias_permitidas || "TODAS");
-    }
+    function abrirModalPacote() { document.getElementById('adm-modal-pacote').style.display = 'flex'; document.getElementById('pac_linha_id').value = ""; document.querySelector('#adm-modal-pacote form').reset(); }
+    function prepEditPacote(p) { document.getElementById('adm-modal-pacote').style.display = 'flex'; document.getElementById('pac_linha_id').value = p._linha; document.getElementById('pac_nome').value = p.nome_pacote; document.getElementById('pac_valor').value = String(p.valor_padrao).replace(',','.'); document.getElementById('pac_dias').value = p.duracao_dias; }
 
     function carregarAlunos() {
         const tbody = document.getElementById('lista-alunos-body');
@@ -1524,13 +1432,13 @@
         document.getElementById('aluno_carimbo').value = "";
         document.getElementById('aluno_nivel').value = "Aluno";
         document.getElementById('titulo-modal-aluno').innerText = "Novo Aluno (CRM)";
-        document.getElementById('aluno_data_inicio').value = ""; // ou ga-data-inicio no GestaoAlunos
+        
         popularAcademiasCheckboxAluno(""); // 🚨 Chama as caixinhas vazias
         
         google.script.run.withSuccessHandler(pacotes => { 
             const sel = document.getElementById('aluno_pacote'); sel.innerHTML = '<option value="">Nenhum / Sem Pacote</option>'; 
             pacotes.forEach(p => sel.add(new Option(p.nome_pacote, p.nome_pacote))); 
-        }).getPacotesDisponiveis(userSessionLocal.academia, userSessionLocal.isAdmin);
+        }).getPacotesDisponiveis();
 
         popularFaixasSelect('aluno_grad', '');
         popularFaixasSelect('aluno_prox_grad', '');
@@ -1573,7 +1481,7 @@
         setVal('aluno_altura', String(d.altura || "").replace(',','.'));
         setVal('aluno_exame', dF(d.proxExame));
         setVal('aluno_data_cart', dF(d.dataCarteira));
-        setVal('aluno_data_inicio', dF(d.dataInicioPlano));
+        
         document.getElementById('aluno_status').value = d.status || "Ativo";
         
         let n = String(d.nivel || "Aluno").toUpperCase();
@@ -1587,12 +1495,12 @@
         google.script.run.withSuccessHandler(pac => { 
             const sel = document.getElementById('aluno_pacote'); sel.innerHTML = '<option value="">Sem Pacote</option>'; 
             pac.forEach(p => { const opt = new Option(p.nome_pacote, p.nome_pacote); if(p.nome_pacote === d.pacote) opt.selected = true; sel.add(opt); }); 
-        }).getPacotesDisponiveis(userSessionLocal.academia, userSessionLocal.isAdmin);
+        }).getPacotesDisponiveis();
         
         popularFaixasSelect('aluno_grad', d.graduacao);
         popularFaixasSelect('aluno_prox_grad', d.proxGrad);
         popularModalidadesCheckbox(d.modalidade);
-        document.getElementById('aluno_data_inicio').value = ""; // ou ga-data-inicio no GestaoAlunos
+
         document.getElementById('adm-modal-aluno').style.display = 'flex';
     }
 
@@ -2037,19 +1945,6 @@
     function closeModal(id) { const modal = document.getElementById(id); if(modal) modal.style.display = 'none'; }
     function esc(t) { if(!t) return ""; return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
     
-    function interceptarSalvarPacote(e) {
-        e.preventDefault();
-        atualizarAcademiasPacoteHidden(); 
-        const acads = document.getElementById('pac_academias').value;
-        if (acads === "") {
-            alert("⚠️ Selecione pelo menos uma academia onde este plano será vendido (ou marque TODAS)!");
-            return;
-        }
-        handleAdmForm(e, 'salvarPacote');
-    }
-
-    
-
     // --- LÓGICA DE TURMAS NO CRM ADMIN (MANTÉM SELECT ANTIGO AQUI, POIS É SÓ FILTRO) ---
     function carregarTurmasSelectParaAlunos(localSelecionado, turmaAtual) {
         const selTurma = document.getElementById('aluno_turma');
