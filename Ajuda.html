@@ -196,6 +196,38 @@
       margin: 25px 0 10px 5px;
       font-weight: bold;
     }
+
+    /* ============================================================================
+       RODAPÉ DO DESENVOLVEDOR (WHITE-LABEL SAAS)
+       ============================================================================ */
+  .developer-footer {
+    text-align: center;
+    padding: 20px 10px;
+    font-size: 11px;
+    color: var(--dynamic-text, #ffffff);
+    opacity: 0.5;
+    /* Discreto para não roubar a atenção do App */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: auto;
+    /* Empurra para o fundo */
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 10;
+    position: relative;
+  }
+
+  .developer-footer a {
+    color: var(--dynamic-prim, #FFD700);
+    text-decoration: none;
+    font-weight: 900;
+    transition: opacity 0.2s;
+  }
+
+  .developer-footer a:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+  }
   </style>
 </head>
 
@@ -281,7 +313,8 @@
       <ul>
         <li>Ao clicar em <strong>"Locais de Treino"</strong>, você verá a lista das academias da rede.</li>
         <li><strong>Filtro Automático:</strong> O sistema exibe apenas as academias que possuem turmas abertas
-          <strong>no dia de hoje</strong>.</li>
+          <strong>no dia de hoje</strong>.
+        </li>
         <li>Você verá botões ("Chips") informando o nome da turma, o horário de início e fim.</li>
         <li>Se uma aula estiver a acontecer neste exato momento, o painel destacará a academia com a etiqueta
           <strong style="color:#4caf50">🔴 AULA AO VIVO</strong> e libertará um atalho direto para você marcar presença!
@@ -299,7 +332,8 @@
         <li>Ele mostra automaticamente todas as turmas programadas para o dia atual.</li>
         <li>Enquanto o professor não abrir a sala, a turma ficará marcada como "Aguarde o instrutor abrir".</li>
         <li>Assim que o professor iniciar a aula (gerando o PIN), o card mudará para
-          <strong style="color:#4caf50">VERDE (Ao Vivo)</strong> e aparecerá o botão de "Check-in".</li>
+          <strong style="color:#4caf50">VERDE (Ao Vivo)</strong> e aparecerá o botão de "Check-in".
+        </li>
       </ul>
     </div>
 
@@ -377,7 +411,8 @@
       <p>A criação de aulas agora é guiada por <strong>Turmas Fixas</strong>:</p>
       <ol>
         <li>No Painel Administrativo, ao criar uma Nova Turma, você escolhe os dias exatos da semana utilizando
-          <strong>caixas de seleção (Checkboxes)</strong>.</li>
+          <strong>caixas de seleção (Checkboxes)</strong>.
+        </li>
         <li>Essa turma alimentará automaticamente o widget de "Onde Treinar" dos alunos, exibindo essa academia como
           aberta apenas nos dias marcados.</li>
       </ol>
@@ -394,7 +429,8 @@
           sinal de +).</li>
         <li>Digite o nome. O sistema listará alunos matriculados para check-in rápido.</li>
         <li>Se for um não-aluno, digite o nome completo e selecione a opção azul
-          <strong>"Adicionar como Visitante"</strong> no final da lista.</li>
+          <strong>"Adicionar como Visitante"</strong> no final da lista.
+        </li>
       </ol>
     </div>
 
@@ -425,23 +461,10 @@
       </p>
     </div>
 
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">health_and_safety</span> Prevenção de Erros (Auto-Cura) <span class="highlight">NOVO</span></span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>O DojoManager possui uma arquitetura de <strong>Self-Healing (Auto-Cura) do Banco de Dados</strong>.</p>
-      <p>Se, por acidente, um administrador apagar uma coluna crucial ou até mesmo uma aba inteira diretamente no Google
-        Sheets, não entre em pânico! O sistema monitora a estrutura em tempo real.</p>
-      <p><strong>Como resolver:</strong> Basta fechar o aplicativo e abri-lo novamente. O sistema detectará a falha e
-        recriará as abas e colunas necessárias automaticamente na última posição disponível, garantindo que o seu
-        sistema nunca pare de funcionar.</p>
-    </div>
-
     <div class="chapter-title">6. Captação de Novos Alunos (Leads)</div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">campaign</span> Link de Aula Experimental</span>
+      <span><span class="material-icons icon-topic">campaign</span> Link de Aula Experimental <span class="highlight">NOVO</span></span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
@@ -457,6 +480,7 @@
       <p><strong>Dica de Ouro:</strong> Coloque o link do seu sistema seguido de <code>?page=agendar</code> na bio do
         Instagram da academia!</p>
     </div>
+
 
   </div>
 
@@ -491,6 +515,7 @@
       }
     }
   </style>
+  
 </body>
 
 </html>

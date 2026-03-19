@@ -14,215 +14,356 @@
     /* CORES DINÂMICAS (INJETADAS PELO BACKEND)                               */
     /* Estrutura: var(--variavel-injetada, #cor-padrao-de-seguranca)          */
     /* ---------------------------------------------------------------------- */
-    
+
     /* Cor de fundo principal da página (A 5ª cor adicionada na Issue #2) */
-    --bg-color: var(--dynamic-bg, #121212);           
-    
+    --bg-color: var(--dynamic-bg, #121212);
+
     /* Cor da Marca (Ex: Dourado da academia, usado em botões e destaques) */
-    --primary-color: var(--dynamic-prim, #FFD700);    
-    
+    --primary-color: var(--dynamic-prim, #FFD700);
+
     /* Cor de contraste secundária (Usada em menus e modais) */
-    --secondary-color: var(--dynamic-sec, #1e1e1e);   
-    
+    --secondary-color: var(--dynamic-sec, #1e1e1e);
+
     /* Cor das superfícies (Cards, painéis). Herda a secundária por padrão */
-    --surface-color: var(--dynamic-sec, #1e1e1e);     
-    
+    --surface-color: var(--dynamic-sec, #1e1e1e);
+
     /* Cor principal do texto (Garante leitura sobre o fundo) */
-    --text-color: var(--dynamic-text, #ffffff);       
-    
+    --text-color: var(--dynamic-text, #ffffff);
+
     /* Cor do texto DENTRO do botão primário (Garante contraste com a cor da marca) */
-    --btn-text-color: var(--dynamic-btn-text, #000000); 
+    --btn-text-color: var(--dynamic-btn-text, #000000);
 
     /* ---------------------------------------------------------------------- */
     /* CORES FIXAS E TOKENS VISUAIS (NÃO MUDAM POR CLIENTE)                   */
     /* ---------------------------------------------------------------------- */
-    
+
     /* Fundo translúcido específico para campos de digitação (Inputs) */
-    --input-bg: rgba(0, 0, 0, 0.2);               
-    
+    --input-bg: rgba(0, 0, 0, 0.2);
+
     /* Tom para efeito de mouse/toque (hover) nos botões */
-    --primary-hover: brightness(1.1); /* Usando brightness ao invés de cor fixa para funcionar com qualquer cor primária */
-    
+    --primary-hover: brightness(1.1);
+    /* Usando brightness ao invés de cor fixa para funcionar com qualquer cor primária */
+
     /* Cores oficias do WhatsApp para botões de contato */
-    --whatsapp-color: #25D366;     
-    --whatsapp-hover: #128C7E;     
-    
+    --whatsapp-color: #25D366;
+    --whatsapp-hover: #128C7E;
+
     /* Alias (apelido) para a cor de texto base */
-    --text-primary: var(--text-color);       
-    
+    --text-primary: var(--text-color);
+
     /* Cinza padrão para textos de apoio, descrições menores e placeholders */
-    --text-secondary: rgba(255, 255, 255, 0.6); 
-    
+    --text-secondary: rgba(255, 255, 255, 0.6);
+
     /* Cores semânticas de sistema (Feedback para o usuário) */
-    --error-color: #cf6679;        /* Vermelho suave para mensagens de erro */
-    --success-color: #00e676;      /* Verde vibrante para mensagens de sucesso */
-    
+    --error-color: #cf6679;
+    /* Vermelho suave para mensagens de erro */
+    --success-color: #00e676;
+    /* Verde vibrante para mensagens de sucesso */
+
     /* Arredondamento padrão de todos os elementos (Botões, Inputs, Cards) */
-    --border-radius: 12px;         
+    --border-radius: 12px;
   }
 
   /* RESET E ESTRUTURA BASE: Garante comportamento idêntico em Android, iOS e PC */
-  html, body {
-    margin: 0;                     /* Remove margens padrão que o navegador coloca */
-    padding: 0;                    /* Remove preenchimentos padrão */
-    width: 100%;                   /* Força a largura a ocupar 100% da tela */
-    min-height: 100vh;             /* Garante que a altura seja pelo menos 100% da tela (Viewport Height) */
-    background-color: var(--bg-color); /* Aplica a cor de fundo lida do :root */
-    color: var(--text-color);      /* Aplica a cor do texto lida do :root */
-    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif; /* Fontes otimizadas para cada SO */
-    overflow-y: auto;              /* Permite rolagem vertical apenas se o conteúdo passar da tela */
-    overflow-x: hidden;            /* Bloqueia rolagem horizontal (Evita aquele "balanço" na tela do celular) */
-    -webkit-tap-highlight-color: transparent; /* Tira aquele quadrado azul feio ao tocar na tela em celulares Android/iOS */
+  html,
+  body {
+    margin: 0;
+    /* Remove margens padrão que o navegador coloca */
+    padding: 0;
+    /* Remove preenchimentos padrão */
+    width: 100%;
+    /* Força a largura a ocupar 100% da tela */
+    min-height: 100vh;
+    /* Garante que a altura seja pelo menos 100% da tela (Viewport Height) */
+    background-color: var(--bg-color);
+    /* Aplica a cor de fundo lida do :root */
+    color: var(--text-color);
+    /* Aplica a cor do texto lida do :root */
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+    /* Fontes otimizadas para cada SO */
+    overflow-y: auto;
+    /* Permite rolagem vertical apenas se o conteúdo passar da tela */
+    overflow-x: hidden;
+    /* Bloqueia rolagem horizontal (Evita aquele "balanço" na tela do celular) */
+    -webkit-tap-highlight-color: transparent;
+    /* Tira aquele quadrado azul feio ao tocar na tela em celulares Android/iOS */
   }
 
   /* CONTAINER: Centraliza o conteúdo e cria aspecto de "App" mesmo no Computador */
   .container {
-    width: 100%;                   /* Ocupa todo o espaço disponível... */
-    max-width: 600px;              /* ...mas nunca ultrapassa 600px de largura */
-    margin: 0 auto;                /* "0" em cima/baixo, "auto" nas laterais (Centraliza a div na tela) */
-    padding: 20px;                 /* Dá um "respiro" de 20px por dentro, para o conteúdo não colar na borda */
-    box-sizing: border-box;        /* Garante que os 20px de padding não aumentem os 600px de largura total */
-    padding-bottom: 40px;          /* Espaço extra no final da tela para o usuário conseguir rolar até o fim confortavelmente */
+    width: 100%;
+    /* Ocupa todo o espaço disponível... */
+    max-width: 600px;
+    /* ...mas nunca ultrapassa 600px de largura */
+    margin: 0 auto;
+    /* "0" em cima/baixo, "auto" nas laterais (Centraliza a div na tela) */
+    padding: 20px;
+    /* Dá um "respiro" de 20px por dentro, para o conteúdo não colar na borda */
+    box-sizing: border-box;
+    /* Garante que os 20px de padding não aumentem os 600px de largura total */
+    padding-bottom: 40px;
+    /* Espaço extra no final da tela para o usuário conseguir rolar até o fim confortavelmente */
   }
 
   /* --- COMPONENTES ATÔMICOS (Elementos base reutilizáveis em qualquer tela) --- */
 
   /* PRIMARY BUTTON: O botão de ação principal (Salvar, Entrar, etc) */
   .primary-button {
-    width: 100%;                   /* Botão ocupa 100% da largura do pai */
-    padding: 16px;                 /* Área de toque grande (Melhora acessibilidade no mobile) */
-    border: none;                  /* Remove a borda feia nativa do navegador */
-    border-radius: var(--border-radius); /* Puxa os 12px de arredondamento do :root */
-    font-size: 1.1rem;             /* Tamanho da fonte levemente maior que o normal */
-    font-weight: bold;             /* Texto em negrito para destacar */
-    text-transform: uppercase;     /* Força o texto a ficar todo em MAIÚSCULO */
-    cursor: pointer;               /* Transforma o mouse numa "mãozinha" no PC */
-    display: flex;                 /* Ativa o Flexbox para organizar elementos internos do botão (Ex: Ícone + Texto) */
-    align-items: center;           /* Centraliza ícone e texto verticalmente */
-    justify-content: center;       /* Centraliza ícone e texto horizontalmente */
-    gap: 10px;                     /* Dá um espaço de 10px entre o ícone e o texto */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Cria uma sombra preta com 30% de opacidade para dar profundidade */
-    transition: transform 0.1s, filter 0.2s, opacity 0.2s; /* Deixa as animações de clique e hover macias */
-    background-color: var(--primary-color); /* Puxa a cor da marca */
-    color: var(--btn-text-color);  /* Puxa a cor de texto do botão configurada no painel */
+    width: 100%;
+    /* Botão ocupa 100% da largura do pai */
+    padding: 16px;
+    /* Área de toque grande (Melhora acessibilidade no mobile) */
+    border: none;
+    /* Remove a borda feia nativa do navegador */
+    border-radius: var(--border-radius);
+    /* Puxa os 12px de arredondamento do :root */
+    font-size: 1.1rem;
+    /* Tamanho da fonte levemente maior que o normal */
+    font-weight: bold;
+    /* Texto em negrito para destacar */
+    text-transform: uppercase;
+    /* Força o texto a ficar todo em MAIÚSCULO */
+    cursor: pointer;
+    /* Transforma o mouse numa "mãozinha" no PC */
+    display: flex;
+    /* Ativa o Flexbox para organizar elementos internos do botão (Ex: Ícone + Texto) */
+    align-items: center;
+    /* Centraliza ícone e texto verticalmente */
+    justify-content: center;
+    /* Centraliza ícone e texto horizontalmente */
+    gap: 10px;
+    /* Dá um espaço de 10px entre o ícone e o texto */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    /* Cria uma sombra preta com 30% de opacidade para dar profundidade */
+    transition: transform 0.1s, filter 0.2s, opacity 0.2s;
+    /* Deixa as animações de clique e hover macias */
+    background-color: var(--primary-color);
+    /* Puxa a cor da marca */
+    color: var(--btn-text-color);
+    /* Puxa a cor de texto do botão configurada no painel */
   }
 
   /* Efeito quando o usuário aperta o botão (Mouse click ou Touch) */
-  .primary-button:active { 
-    transform: scale(0.98);        /* Dá uma leve "encolhida" de 2% no botão para simular o afundamento */
+  .primary-button:active {
+    transform: scale(0.98);
+    /* Dá uma leve "encolhida" de 2% no botão para simular o afundamento */
   }
-  
+
   /* Efeito quando o usuário passa o mouse por cima (Hover - Funciona mais em PC) */
-  .primary-button:hover { 
-    filter: brightness(1.1);       /* Aumenta o brilho da cor original em 10% */
-    transform: translateY(-1px);   /* Levanta o botão 1 pixel pra cima */
+  .primary-button:hover {
+    filter: brightness(1.1);
+    /* Aumenta o brilho da cor original em 10% */
+    transform: translateY(-1px);
+    /* Levanta o botão 1 pixel pra cima */
   }
 
   /* Estado Desabilitado: Usado quando o sistema está carregando ou processando algo */
   .primary-button:disabled {
-    background-color: #444 !important; /* Força cor cinza de fundo (!important ignora o hover) */
-    color: #888 !important;            /* Força texto cinza escuro */
-    cursor: not-allowed;               /* Muda o mouse para aquele símbolo de "proibido" */
-    box-shadow: none;                  /* Remove a sombra de profundidade (Deixa o botão "chapado") */
+    background-color: #444 !important;
+    /* Força cor cinza de fundo (!important ignora o hover) */
+    color: #888 !important;
+    /* Força texto cinza escuro */
+    cursor: not-allowed;
+    /* Muda o mouse para aquele símbolo de "proibido" */
+    box-shadow: none;
+    /* Remove a sombra de profundidade (Deixa o botão "chapado") */
   }
 
   /* TEXT BUTTON: Botão "invisível" usado para ações secundárias (Ex: "Esqueci a senha", "Voltar") */
   .text-button {
-    background: transparent;       /* Fundo totalmente transparente */
-    border: 1px solid var(--text-color); /* Borda fina da cor do texto */
-    color: var(--text-color);      /* Cor da fonte igual a cor padrão de texto */
-    opacity: 0.8;                  /* Deixa o botão 20% transparente para mostrar que é secundário */
-    padding: 12px;                 /* Preenchimento interno */
-    border-radius: 6px;            /* Curvatura mais suave que o botão principal (6px) */
-    cursor: pointer;               /* Mouse de mãozinha */
-    display: flex;                 /* Flexbox para alinhar conteúdo interno */
-    align-items: center;           /* Centraliza verticalmente */
-    justify-content: center;       /* Centraliza horizontalmente */
-    gap: 8px;                      /* Espaço entre ícone e texto */
-    font-size: 0.95rem;            /* Fonte levemente menor que o normal */
-    width: 100%;                   /* Ocupa 100% da tela */
-    transition: 0.2s;              /* Transição rápida de 0.2 segundos para efeitos */
+    background: transparent;
+    /* Fundo totalmente transparente */
+    border: 1px solid var(--text-color);
+    /* Borda fina da cor do texto */
+    color: var(--text-color);
+    /* Cor da fonte igual a cor padrão de texto */
+    opacity: 0.8;
+    /* Deixa o botão 20% transparente para mostrar que é secundário */
+    padding: 12px;
+    /* Preenchimento interno */
+    border-radius: 6px;
+    /* Curvatura mais suave que o botão principal (6px) */
+    cursor: pointer;
+    /* Mouse de mãozinha */
+    display: flex;
+    /* Flexbox para alinhar conteúdo interno */
+    align-items: center;
+    /* Centraliza verticalmente */
+    justify-content: center;
+    /* Centraliza horizontalmente */
+    gap: 8px;
+    /* Espaço entre ícone e texto */
+    font-size: 0.95rem;
+    /* Fonte levemente menor que o normal */
+    width: 100%;
+    /* Ocupa 100% da tela */
+    transition: 0.2s;
+    /* Transição rápida de 0.2 segundos para efeitos */
   }
 
   /* Efeito ao passar o mouse no botão secundário */
   .text-button:hover {
-    opacity: 1;                    /* Fica 100% visível (tira a transparência) */
-    border-color: var(--primary-color); /* A borda ganha a cor da marca */
-    color: var(--primary-color);   /* O texto ganha a cor da marca */
-    background-color: rgba(255, 255, 255, 0.05); /* Ganha um fundo branco super transparente */
+    opacity: 1;
+    /* Fica 100% visível (tira a transparência) */
+    border-color: var(--primary-color);
+    /* A borda ganha a cor da marca */
+    color: var(--primary-color);
+    /* O texto ganha a cor da marca */
+    background-color: rgba(255, 255, 255, 0.05);
+    /* Ganha um fundo branco super transparente */
   }
 
   /* FORM FIELDS: O "Pai" que guarda a Label e o Input juntos */
-  .form-field { 
-    margin-bottom: 20px;           /* Distância de 20px para o próximo campo debaixo */
-    text-align: left;              /* Força o texto a alinhar na esquerda (Padrão de leitura ocidental) */
-  } 
-  
+  .form-field {
+    margin-bottom: 20px;
+    /* Distância de 20px para o próximo campo debaixo */
+    text-align: left;
+    /* Força o texto a alinhar na esquerda (Padrão de leitura ocidental) */
+  }
+
   /* LABEL: O textinho que fica em cima da caixa de digitar (Ex: "Nome Completo:") */
   .form-field label {
-    display: block;                /* Força a Label a quebrar de linha, ficando sempre em cima do Input */
-    margin-bottom: 8px;            /* Distância entre a Label e o Input */
-    color: var(--text-color);      /* Cor principal do texto */
-    opacity: 0.9;                  /* Levemente opaco para não competir atenção com o que é digitado */
-    font-size: 0.85rem;            /* Fonte menorzinha para ficar elegante */
+    display: block;
+    /* Força a Label a quebrar de linha, ficando sempre em cima do Input */
+    margin-bottom: 8px;
+    /* Distância entre a Label e o Input */
+    color: var(--text-color);
+    /* Cor principal do texto */
+    opacity: 0.9;
+    /* Levemente opaco para não competir atenção com o que é digitado */
+    font-size: 0.85rem;
+    /* Fonte menorzinha para ficar elegante */
   }
 
   /* INPUT FIELDS & SELECTS: As caixas onde o usuário digita ou escolhe opções */
-  .input-field, select {
-    width: 100%;                   /* Caixa ocupa a linha inteira */
-    background-color: var(--input-bg); /* Fundo lido do :root (rgba translúcido) */
-    border: 1px solid var(--text-color); /* Borda padrão acompanha a cor do texto */
-    color: var(--text-color);      /* A letra que o usuário digita usa a cor principal */
-    padding: 14px;                 /* Espaço interno para o texto não colar na borda da caixa */
-    border-radius: 6px;            /* Arredondamento da caixinha */
-    font-size: 1rem;               /* Tamanho de fonte padrão (geralmente 16px) */
-    outline: none;                 /* Remove a borda azul grossa nativa do Google Chrome ao clicar */
-    box-sizing: border-box;        /* Garante que o padding não faça o input estourar a tela */
-    transition: 0.3s;              /* Animação suave na troca de cor ao clicar */
-    opacity: 0.7;                  /* Quando não está clicado, fica um pouco "apagado" */
+  .input-field,
+  select {
+    width: 100%;
+    /* Caixa ocupa a linha inteira */
+    background-color: var(--input-bg);
+    /* Fundo lido do :root (rgba translúcido) */
+    border: 1px solid var(--text-color);
+    /* Borda padrão acompanha a cor do texto */
+    color: var(--text-color);
+    /* A letra que o usuário digita usa a cor principal */
+    padding: 14px;
+    /* Espaço interno para o texto não colar na borda da caixa */
+    border-radius: 6px;
+    /* Arredondamento da caixinha */
+    font-size: 1rem;
+    /* Tamanho de fonte padrão (geralmente 16px) */
+    outline: none;
+    /* Remove a borda azul grossa nativa do Google Chrome ao clicar */
+    box-sizing: border-box;
+    /* Garante que o padding não faça o input estourar a tela */
+    transition: 0.3s;
+    /* Animação suave na troca de cor ao clicar */
+    opacity: 0.7;
+    /* Quando não está clicado, fica um pouco "apagado" */
   }
 
   /* FOCUS: Efeito acionado no exato momento que o usuário clica dentro da caixa para digitar */
-  .input-field:focus, select:focus {
-    border-color: var(--primary-color); /* A borda muda para a cor da marca */
-    background-color: rgba(0, 0, 0, 0.4); /* O fundo fica mais escuro para destacar o texto */
-    opacity: 1;                    /* Fica 100% visível, chamando atenção do usuário */
+  .input-field:focus,
+  select:focus {
+    border-color: var(--primary-color);
+    /* A borda muda para a cor da marca */
+    background-color: rgba(0, 0, 0, 0.4);
+    /* O fundo fica mais escuro para destacar o texto */
+    opacity: 1;
+    /* Fica 100% visível, chamando atenção do usuário */
   }
 
   /* SPINNER: A bolinha que fica girando enquanto o backend processa o login/salvamento */
   .spinner {
-    display: none;                 /* Oculto por padrão. Só aparece via JavaScript (style.display = 'block') */
-    margin: 0 auto;                /* Centraliza a bolinha no meio do botão ou da tela */
-    border: 3px solid transparent; /* Cria uma borda grossa (3px) invisível base... */
-    border-top: 3px solid var(--primary-color); /* ...mas a parte de cima da borda ganha a cor da marca! */
-    border-radius: 50%;            /* Transforma o elemento quadrado em um círculo perfeito */
-    width: 24px;                   /* Largura da bolinha */
-    height: 24px;                  /* Altura da bolinha */
-    animation: spin 0.8s linear infinite; /* Roda a animação "spin" (definida abaixo) de forma infinita */
+    display: none;
+    /* Oculto por padrão. Só aparece via JavaScript (style.display = 'block') */
+    margin: 0 auto;
+    /* Centraliza a bolinha no meio do botão ou da tela */
+    border: 3px solid transparent;
+    /* Cria uma borda grossa (3px) invisível base... */
+    border-top: 3px solid var(--primary-color);
+    /* ...mas a parte de cima da borda ganha a cor da marca! */
+    border-radius: 50%;
+    /* Transforma o elemento quadrado em um círculo perfeito */
+    width: 24px;
+    /* Largura da bolinha */
+    height: 24px;
+    /* Altura da bolinha */
+    animation: spin 0.8s linear infinite;
+    /* Roda a animação "spin" (definida abaixo) de forma infinita */
   }
 
   /* Keyframes: Define o movimento de rotação do Spinner */
-  @keyframes spin { 
-    0% { transform: rotate(0deg); }    /* No início da animação, rotação é zero */
-    100% { transform: rotate(360deg); } /* No final de 0.8s, deu um giro completo (360 graus) */
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    /* No início da animação, rotação é zero */
+    100% {
+      transform: rotate(360deg);
+    }
+
+    /* No final de 0.8s, deu um giro completo (360 graus) */
   }
 
   /* ---------------------------------------------------------------------- */
   /* CLASSES UTILITÁRIAS (Helpers)                                          */
   /* Pequenas classes prontas para facilitar o alinhamento no HTML direto   */
   /* ---------------------------------------------------------------------- */
-  
+
   /* Adicione class="hidden" em qualquer div para escondê-la com segurança */
-  .hidden { display: none !important; } 
-  
+  .hidden {
+    display: none !important;
+  }
+
   /* Adicione class="text-center" para centralizar um texto rapidamente */
-  .text-center { text-align: center; } 
-  
+  .text-center {
+    text-align: center;
+  }
+
   /* Usado em divs que retornam mensagens de erro (ex: Senha incorreta) */
-  .error-message { 
-    color: var(--error-color);     /* Vermelho de erro */
-    font-size: 0.9rem;             /* Fonte menorzinha */
-    font-weight: bold;             /* Negrito */
-    text-align: center;            /* Centralizado */
+  .error-message {
+    color: var(--error-color);
+    /* Vermelho de erro */
+    font-size: 0.9rem;
+    /* Fonte menorzinha */
+    font-weight: bold;
+    /* Negrito */
+    text-align: center;
+    /* Centralizado */
+  }
+
+
+  /* ============================================================================
+       RODAPÉ DO DESENVOLVEDOR (WHITE-LABEL SAAS)
+       ============================================================================ */
+  .developer-footer {
+    text-align: center;
+    padding: 20px 10px;
+    font-size: 11px;
+    color: var(--dynamic-text, #ffffff);
+    opacity: 0.5;
+    /* Discreto para não roubar a atenção do App */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: auto;
+    /* Empurra para o fundo */
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 10;
+    position: relative;
+  }
+
+  .developer-footer a {
+    color: var(--dynamic-prim, #FFD700);
+    text-decoration: none;
+    font-weight: 900;
+    transition: opacity 0.2s;
+  }
+
+  .developer-footer a:hover {
+    opacity: 0.8;
+    text-decoration: underline;
   }
 </style>

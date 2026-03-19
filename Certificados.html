@@ -143,6 +143,38 @@
     animation: spin 1s linear infinite;
     margin: 0 auto;
   }
+
+  /* ============================================================================
+       RODAPÉ DO DESENVOLVEDOR (WHITE-LABEL SAAS)
+       ============================================================================ */
+  .developer-footer {
+    text-align: center;
+    padding: 20px 10px;
+    font-size: 11px;
+    color: var(--dynamic-text, #ffffff);
+    opacity: 0.5;
+    /* Discreto para não roubar a atenção do App */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: auto;
+    /* Empurra para o fundo */
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 10;
+    position: relative;
+  }
+
+  .developer-footer a {
+    color: var(--dynamic-prim, #FFD700);
+    text-decoration: none;
+    font-weight: 900;
+    transition: opacity 0.2s;
+  }
+
+  .developer-footer a:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+  }
 </style>
 
 <div id="certificados-screen" class="cert-view">
@@ -161,9 +193,11 @@
   </div>
 
   <div id="lista-certificados">
-    <p style="color:var(--dynamic-text); opacity:0.6; text-align:center; font-weight:bold;">Digite seu CPF acima para buscar.</p>
+    <p style="color:var(--dynamic-text); opacity:0.6; text-align:center; font-weight:bold;">Digite seu CPF acima para
+      buscar.</p>
   </div>
 </div>
+
 
 <script>
   function abrirCertificados() {
