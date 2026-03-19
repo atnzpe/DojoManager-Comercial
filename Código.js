@@ -108,39 +108,70 @@ function salvarFinanceiroSeguro(nomeAba, dadosObjeto, linha = null) {
 // ============================================================================
 
 /**
- * 🏗️ MÓDULO DE AUTO-SETUP (BANCO DE DADOS DINÂMICO)
- * Verifica se as abas do sistema existem. Se não existirem (ex: planilha clonada),
- * o próprio código cria a aba, injeta os cabeçalhos, congela a primeira linha e pinta de azul escuro.
+ * 🏗️ MÓDULO DE AUTO-SETUP E SELF-HEALING (BANCO DE DADOS DINÂMICO)
+ * Verifica todas as 16 abas do sistema e TODAS as suas respectivas colunas. 
+ * Se alguém apagar uma coluna ou aba sem querer, o sistema recria automaticamente.
  */
-function verificarCriarAbasFinanceiras() {
+function verificarCriarAbasSistema() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-  // Matriz de arquitetura do banco de dados
+  // 🗺️ O Dicionário da Verdade (Single Source of Truth)
   const estrutura = [
+    { nome: "cadastro_de_alunos", colunas: ["Carimbo de data/hora", "Endereço de e-mail", "Nome Completo", "Data de Nascimento", "Peso", "Altura", "Telefone", "CPF", "Nome do Pai", "Nome da Mãe", "Endereço", "Turma Vinculada", "Academia Vinculada", "LOGIN", "Senha", "GRADUACAO_ATUAL", "Foto 3x4 (para a carteirinha)", "Data Ultima Carteirinha", "STATUS", "PROX_GRADUACAO", "Nível do Praticante", "NivelAdministrativo", "Modalidade", "Data Próximo Exame"] },
+    { nome: "Locais_de_treino", colunas: ["Nome do Local", "Endereço", "Cidade/Estado", "Contato", "Link_Google_Maps", "html_mapa_off_lline", "Responsavel", "Status", "Pix_Chave_Local_de_Treino", "Pix_Nome_Local_de_Treino", "Banco_Local_de_Treino", "btn_pix_copia_e_cola_Local_de_Treino", "Ativo", "Pix_Cidade_Local_de_Treino"] },
+    { nome: "Config_Turmas", colunas: ["ID_Turma", "Nome da Turma", "Modalidade", "Faixa Etária", "Local Vinculado", "Dias da Semana", "Horário Início", "Horário Fim", "Status", "Responsável", "Telefone"] },
+    { nome: "Config_App", colunas: ["Logo_URL", "Fundo_URL", "Cor_Fundo", "Cor_Primaria", "Cor_Secundaria", "Cor_Texto", "Cor_Texto_Botao", "Link_Loja", "Link_Instagram", "Link_YouTube", "Link_Cadastro", "Nome_Academia", "Pix_Global_Ativo", "Pix_Chave_Global", "Pix_Nome", "Nome_Banco_PIX_Global", "Pix_Cidade"] },
     { nome: "Fin_Transacoes", colunas: ["ID_Transacao", "Data_Registro", "Tipo", "Categoria", "Descricao", "Valor", "Forma_Pagto", "Responsavel", "Login_Aluno", "Academia_Ref", "Status", "Comprovante_Url", "Modalidade"] },
     { nome: "Fin_Pacotes", colunas: ["Nome_Pacote", "Valor_Padrao", "Duracao_Dias", "Academias_Permitidas", "Status_Pacote", "Descricao"] },
     { nome: "Fin_Assinaturas", colunas: ["Login_Aluno", "Pacote_Atual", "Data_Inicio", "Data_Fim", "Status_Assinatura", "ID_Ultima_Transacao"] },
-    { nome: "Config_App", colunas: ["Logo_URL", "Fundo_URL", "Cor_Primaria", "Cor_Secundaria", "Cor_Texto", "Cor_Texto_Botao", "Cor_Fundo", "Link_Loja", "Link_Instagram", "Link_YouTube", "Link_Cadastro", "Nome_Academia", "Pix_Global_Ativo", "Pix_Chave", "Pix_Nome", "Pix_Cidade"] },
-
-    // 🔥 NOVA ABA DE TURMAS INJETADA NO AUTO-SETUP 🔥
-    { nome: "Config_Turmas", colunas: ["ID_Turma", "Nome da Turma", "Modalidade", "Faixa Etária", "Local Vinculado", "Dias da Semana", "Horário Início", "Horário Fim", "Status"] }
+    { nome: "Aulas_Em_Andamento", colunas: ["ID_Aula", "Data_Aula", "Hora_Inicio", "Hora_Fim", "Academia", "Turma", "Instrutor", "PIN", "Status", "Checkins_JSON"] },
+    { nome: "Registro_Chamada", colunas: ["ID_Chamada", "Data_Registro", "Data_Treino", "Hora_Treino", "Instrutor_Logado", "Local_Treino", "Qtd_Presentes", "Lista_Alunos_IDs", "Lista_Nomes", "Observacoes"] },
+    { nome: "Certificados", colunas: ["CPF", "Curso", "Modalidade", "Data_Emissao", "Link_PDF"] },
+    { nome: "Suporte", colunas: ["Data/Hora", "Login", "Nome", "Tipo", "Assunto", "Mensagem", "Status"] },
+    { nome: "Config_Programas", colunas: ["Faixa", "Modalidade", "ID_Arquivo", "Link_Original", "Descricao"] },
+    { nome: "Cursos", colunas: ["Nome do Curso", "Data", "Descrição", "Número de Vagas", "Imagem", "Status", "Link da Inscrição"] },
+    { nome: "Config_Biblioteca", colunas: ["Titulo", "Descricao", "Link_Arquivo", "Link_Capa"] },
+    { nome: "Config_Videoteca", colunas: ["Faixa", "Modalidade", "Titulo", "Youtube_Link", "Status", "Descricao"] },
+    { nome: "GRADUACAO", colunas: ["Faixa / Nivel", "Observacao", "ID", "Modalidade", "Nivel"] }
   ];
 
   estrutura.forEach(aba => {
     let sheet = ss.getSheetByName(aba.nome);
-    if (!sheet) {
-      // Cria a aba do zero
-      sheet = ss.insertSheet(aba.nome);
-      // Injeta os cabeçalhos na linha 1
-      sheet.appendRow(aba.colunas);
-      // Formatação UX/UI (Deixa bonito estilo banco de dados)
-      sheet.getRange(1, 1, 1, aba.colunas.length).setFontWeight("bold").setBackground("#2c3e50").setFontColor("#ffffff");
-      sheet.setFrozenRows(1); // Congela o cabeçalho
+    let isNewSheet = false;
 
-      // Se for a aba de configurações, já cria uma linha padrão para o App não quebrar
+    // 1. Se a aba não existir no Google Sheets, o sistema CRIA a aba e as colunas do zero
+    if (!sheet) {
+      sheet = ss.insertSheet(aba.nome);
+      sheet.appendRow(aba.colunas);
+      isNewSheet = true;
+
+      // Injeta valores de segurança padrão no Config_App se a aba for recém-criada
       if (aba.nome === "Config_App") {
-        sheet.appendRow(["", "", "#121212", "#FFD700", "#1e1e1e", "#ffffff", "#000000", "", "", "", "", "DojoManager SaaS", "Nao", "", "", ""]);
+        sheet.appendRow(["", "", "#121212", "#FFD700", "#1e1e1e", "#ffffff", "#000000", "", "", "", "", "DojoManager SaaS", "Nao", "", "", "", ""]);
       }
+    }
+
+    // 2. 🛡️ MOTOR SELF-HEALING: Se a aba já existe, confere se alguém apagou alguma coluna
+    const headersAtuais = sheet.getRange(1, 1, 1, Math.max(1, sheet.getLastColumn())).getValues()[0].map(h => String(h).trim().toLowerCase());
+    let precisaAtualizarHeader = false;
+
+    aba.colunas.forEach(colunaEsperada => {
+      // Se a coluna esperada não estiver na planilha...
+      if (!headersAtuais.includes(String(colunaEsperada).trim().toLowerCase())) {
+        // Encontrou uma coluna em falta! Vai adicioná-la na última posição disponível.
+        const ultimaCol = sheet.getLastColumn();
+        sheet.getRange(1, ultimaCol + 1).setValue(colunaEsperada);
+        precisaAtualizarHeader = true;
+      }
+    });
+
+    // 3. Aplica o UI Style "Banco de Dados" (Negrito, Fundo Escuro, Congelar Linha 1)
+    if (isNewSheet || precisaAtualizarHeader) {
+      sheet.getRange(1, 1, 1, sheet.getLastColumn())
+        .setFontWeight("bold")
+        .setBackground("#2c3e50")
+        .setFontColor("#ffffff");
+      sheet.setFrozenRows(1);
     }
   });
 }
@@ -601,7 +632,7 @@ function parseDataSegura(input) {
 // ============================================================================
 
 function doGet(e) {
-  verificarCriarAbasFinanceiras();
+  verificarCriarAbasSistema();
   const page = e.parameter.page || 'login';
   let htmlFile;
 
