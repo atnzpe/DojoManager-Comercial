@@ -1,0 +1,560 @@
+<div id="adm-modal-aluno" class="adm-modal">
+  <div class="adm-modal-box large" style="max-width: 900px; border: 3px solid #FFD700;">
+    <div
+      style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #FFD700; padding-bottom:10px; margin-bottom:15px;">
+      <h3 style="margin:0; color:#333; font-weight:900;" id="titulo-modal-aluno">Ficha do Aluno</h3>
+      <button type="button" onclick="closeModal('adm-modal-aluno')" style="background:none; border:none; cursor:pointer; font-size:24px; color:#ff5252;">✕</button>
+    </div>
+
+    <form id="form-edit-aluno" onsubmit="handleAdmForm(event, 'salvarAluno')">
+      <input type="hidden" name="aluno_id" id="aluno_id">
+      <input type="hidden" name="aluno_carimbo" id="aluno_carimbo">
+
+      <div
+        style="background:#f4f4f4; padding:15px; border-radius:8px; border-left: 4px solid #FFD700; margin-bottom: 15px;">
+        <h4 style="margin:0 0 10px 0; color:#333; text-transform:uppercase; font-size:12px;">👤 Dados Pessoais &
+          Localização</h4>
+        <div class="form-grid">
+          <div><label class="adm-label">Nome Completo</label><input type="text" id="aluno_nome" name="aluno_nome" class="adm-input" required>
+          </div>
+          <div><label class="adm-label">CPF</label><input type="text" id="aluno_cpf" name="aluno_cpf" class="adm-input">
+          </div>
+        </div>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+          <div><label class="adm-label">Nascimento</label><input type="date" id="aluno_nasc" name="aluno_nasc" class="adm-input">
+          </div>
+          <div><label class="adm-label">Telefone</label><input type="text" id="aluno_tel" name="aluno_tel" class="adm-input">
+          </div>
+          <div><label class="adm-label">Peso (kg)</label><input type="number" step="0.1" id="aluno_peso" name="aluno_peso" class="adm-input">
+          </div>
+          <div><label class="adm-label">Altura (m)</label><input type="number" step="0.01" id="aluno_altura" name="aluno_altura" class="adm-input">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div><label class="adm-label">E-mail</label><input type="email" id="aluno_email" name="aluno_email" class="adm-input">
+          </div>
+          <div><label class="adm-label">Endereço Completo</label><input type="text" id="aluno_end" name="aluno_end" class="adm-input">
+          </div>
+          <div><label class="adm-label">Nome da Mãe</label><input type="text" id="aluno_mae" name="aluno_mae" class="adm-input">
+          </div>
+          <div><label class="adm-label">Nome do Pai</label><input type="text" id="aluno_pai" name="aluno_pai" class="adm-input">
+          </div>
+        </div>
+        <label class="adm-label">Link Foto 3x4 (Drive)</label><input type="text" id="aluno_foto" name="aluno_foto" class="adm-input">
+      </div>
+
+      <div
+        style="background:#f9f9f9; padding:15px; border-radius:8px; border-left: 4px solid #2196f3; margin-bottom: 15px;">
+        <h4 style="margin:0 0 10px 0; color:#333; text-transform:uppercase; font-size:12px;">🥋 Dados de Tatame &
+          Sistema</h4>
+        <div class="form-grid">
+          <div><label class="adm-label">Login (App)*</label><input type="text" id="aluno_login" name="aluno_login" class="adm-input" required style="background:#fffdf5 !important; font-weight:bold;">
+          </div>
+          <div><label class="adm-label">Senha*</label><input type="text" id="aluno_senha" name="aluno_senha" class="adm-input" required>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-full">
+            <label class="adm-label">Academias Vinculadas (Múltiplas)</label>
+            <div id="container-acad-aluno" class="checkbox-grid"></div>
+            <input type="hidden" name="aluno_acad" id="aluno_acad">
+          </div>
+          <div class="form-full">
+            <label class="adm-label" style="color:#2196f3;">Turma Oficial</label>
+            <select id="aluno_turma" name="aluno_turma" class="adm-input" style="border: 1px solid #2196f3;"><option value="">Sem Turma</option></select>
+          </div>
+        </div>
+
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+          <div>
+            <label class="adm-label">Status Acesso</label>
+            <select id="aluno_status" name="aluno_status" class="adm-input" style="font-weight:bold;"><option value="Ativo" style="color:green;">Ativo</option><option value="Inativo" style="color:red;">Inativo</option><option value="Bloqueado" style="color:blue;">Bloqueado</option></select>
+          </div>
+          <div>
+            <label class="adm-label">Nível Sistema</label>
+            <select id="aluno_nivel" name="aluno_nivel" class="adm-input"><option value="Aluno">Aluno</option><option value="Instrutor N1">Instrutor N1</option><option value="Instrutor N2">Instrutor N2</option><option value="Instrutor N3">Instrutor N3</option><option value="Professor">Professor</option><option value="Mestre">Mestre</option><option value="Admin">Admin</option></select>
+          </div>
+        </div>
+
+        <label class="adm-label" style="color:#1e90ff;">🏅 Modalidades Praticadas</label>
+        <div id="container-modalidades-aluno" class="checkbox-grid"></div>
+        <input type="hidden" name="aluno_modalidade" id="aluno_modalidade">
+
+        <div class="form-grid">
+          <div>
+            <label class="adm-label">Graduação Atual</label><select id="aluno_grad" name="aluno_grad" class="adm-input"></select>
+          </div>
+          <div>
+            <label class="adm-label">Próxima Graduação</label><select id="aluno_prox_grad" name="aluno_prox_grad" class="adm-input"></select>
+          </div>
+          <div><label class="adm-label">Data Próx. Exame</label><input type="date" id="aluno_exame" name="aluno_exame" class="adm-input">
+          </div>
+          <div><label class="adm-label">Venc. Carteirinha</label><input type="date" id="aluno_data_cart" name="aluno_data_cart" class="adm-input">
+          </div>
+        </div>
+      </div>
+
+      <div style="background:#e8f5e9; padding:15px; border-radius:8px; border-left: 4px solid #4caf50;">
+        <h4 style="margin:0 0 10px 0; color:#2e7d32; text-transform:uppercase; font-size:12px;">💳 Plano Financeiro</h4>
+        <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr;">
+          <div>
+            <label class="adm-label">Pacote / Plano</label><select id="aluno_pacote" name="aluno_pacote" class="adm-input"><option value="">Sem Pacote</option></select>
+          </div>
+          <div><label class="adm-label">Vencimento</label><input type="date" id="aluno_vencimento" name="aluno_vencimento" class="adm-input">
+          </div>
+          <div>
+            <label class="adm-label">Status Pagto</label><select id="aluno_status_assinatura" name="aluno_status_assinatura" class="adm-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="adm-btn" style="width:100%; padding:15px; margin-top:20px; font-size:14px;"><span class="material-icons">save</span> SALVAR FICHA DO ALUNO</button>
+    </form>
+  </div>
+</div>
+
+<div id="adm-modal-categoria" class="adm-modal">
+  <div class="adm-modal-box">
+    <div class="adm-h3">Categoria Financeira
+      <button onclick="closeModal('adm-modal-categoria')" style="background:none;border:none;color:red;cursor:pointer;">✕</button>
+    </div>
+    <form onsubmit="handleAdmForm(event, 'salvarCategoriaFinanceira')">
+      <input type="hidden" name="cat_id" id="cat_id">
+      <label class="adm-label">Nome da Categoria</label>
+      <input type="text" name="cat_nome" id="cat_nome" class="adm-input" required>
+      <div class="form-grid">
+        <div>
+          <label class="adm-label">Tipo</label><select name="cat_tipo" id="cat_tipo" class="adm-input"><option value="Receita">Receita</option><option value="Despesa">Despesa</option></select>
+        </div>
+        <div>
+          <label class="adm-label">Status</label><select name="cat_status" id="cat_status" class="adm-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select>
+        </div>
+      </div>
+      <label class="adm-label">Unidade (Local)</label>
+      <input type="text" name="cat_local" id="cat_local" class="adm-input" placeholder="Todas ou nomes separados por vírgula">
+      <label class="adm-label">Exibir campo Aluno?</label>
+      <select name="cat_exibe" id="cat_exibe" class="adm-input"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+      <button type="submit" class="adm-btn" style="width:100%; margin-top:20px;">SALVAR CATEGORIA</button>
+    </form>
+  </div>
+</div>
+
+<div id="adm-modal-pagamento" class="adm-modal">
+  <div class="adm-modal-box">
+    <div class="adm-h3">Forma de Pagamento
+      <button type="button" onclick="window.closeModal('adm-modal-pagamento')" style="background:none;border:none;color:red;cursor:pointer;">✕</button>
+    </div>
+    <form onsubmit="window.handleAdmForm(event, 'salvarFormaPagamento')">
+      <input type="hidden" name="pag_id" id="pag_id">
+      <label class="adm-label">Nome (Ex: Pix, Dinheiro, Cartão)</label>
+      <input type="text" name="pag_nome" id="pag_nome" class="adm-input" required>
+      <div class="form-grid">
+        <div>
+          <label class="adm-label">Unidades Permitidas</label>
+          <input type="text" name="pag_local" id="pag_local" class="adm-input" placeholder="Ex: TODAS ou Matriz">
+        </div>
+        <div>
+          <label class="adm-label">Status</label>
+          <select name="pag_status" id="pag_status" class="adm-input">
+                <option value="Ativo">Ativo</option>
+                <option value="Inativo">Inativo</option>
+            </select>
+        </div>
+      </div>
+      <button type="submit" class="adm-btn" style="width:100%; margin-top:20px;">SALVAR FORMA DE PAGAMENTO</button>
+    </form>
+  </div>
+</div>
+
+<div id="adm-modal-pacote" class="adm-modal">
+  <div class="adm-modal-box">
+    <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
+      <span id="titulo-modal-pacote">Novo Plano/Pacote</span><button type="button" onclick="closeModal('adm-modal-pacote')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+    </div>
+    <form onsubmit="handleAdmForm(event, 'salvarPacote')">
+      <input type="hidden" name="linha_id" id="pac_linha_id">
+      <label class="adm-label">Nome do Plano*</label><input type="text" name="pac_nome" id="pac_nome" class="adm-input" required>
+      <div class="form-grid">
+        <div><label class="adm-label">Valor Padrão (R$)*</label><input type="number" step="0.01" name="pac_valor" id="pac_valor" class="adm-input" required>
+        </div>
+        <div><label class="adm-label">Duração (Dias)*</label><input type="number" name="pac_dias" id="pac_dias" class="adm-input" required>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div><label class="adm-label">Academias Permitidas</label><input type="text" name="pac_academias" id="pac_academias" class="adm-input" placeholder="Ex: TODAS ou Matriz">
+        </div>
+        <div>
+          <label class="adm-label">Status do Plano</label><select name="pac_status" id="pac_status" class="adm-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select>
+        </div>
+      </div>
+      <label class="adm-label">Descrição / Regras</label><textarea name="pac_desc" id="pac_desc" class="adm-input" rows="2" placeholder="O que este plano oferece?"></textarea>
+
+      <div
+        style="display:flex; justify-content:flex-end; gap:10px; margin-top:25px; border-top: 1px solid #ddd; padding-top: 15px;">
+        <button type="button" onclick="closeModal('adm-modal-pacote')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar Plano</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="adm-modal-turma" class="adm-modal">
+  <div class="adm-modal-box">
+    <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
+      <span id="titulo-modal-turma">Nova Turma</span>
+      <button type="button" onclick="closeModal('adm-modal-turma')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+    </div>
+    <form onsubmit="interceptarSalvarTurma(event)">
+      <input type="hidden" name="turma_linha_id" id="turma_linha_id"><input type="hidden" name="turma_id" id="turma_id">
+      <label class="adm-label">Nome da Turma*</label><input type="text" name="turma_nome" id="turma_nome" class="adm-input" placeholder="Ex: Muay Thai - Adulto Noite" required>
+      <div class="form-grid">
+        <div>
+          <label class="adm-label">Modalidade*</label><select name="turma_mod" id="turma_mod" class="adm-input" required></select>
+        </div>
+        <div><label class="adm-label" style="display: flex; align-items: center;">Faixa Etária (Livre)*
+            <div class="tooltip"><span class="material-icons" style="font-size:14px; vertical-align:middle;">info</span>
+              <span class="tooltiptext"><b style="color:var(--dynamic-prim)">Trava do App:</b><br>Digite <b>"Infantil"</b> para bloquear menores.<br>Textos como "Misto" deixam a sala livre.</span>
+            </div></label><input type="text" name="turma_idade" id="turma_idade" class="adm-input" placeholder="Ex: Adulto, Infantil, Misto" required>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div>
+          <label class="adm-label">Prof. Responsável</label><select name="turma_resp" id="turma_resp" class="adm-input" onchange="atualizarTelefoneRespTurma()"><option value="">Selecione...</option></select>
+        </div>
+        <div><label class="adm-label">Telefone da Turma</label><input type="text" name="turma_tel" id="turma_tel" class="adm-input" placeholder="Autopreenchido..." readonly style="background:#f4f4f4 !important; color:#555 !important;">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div>
+          <label class="adm-label">Local Vinculado*</label><select name="turma_local" id="turma_local" class="adm-input" required></select>
+        </div>
+        <input type="hidden" name="turma_dias" id="turma_dias">
+        <div class="form-full"><label class="adm-label">Dias da Semana*</label>
+          <div id="container-dias-turma" class="checkbox-grid">
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Segunda"> Seg</label>
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Terça"> Ter</label>
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Quarta"> Qua</label>
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Quinta"> Qui</label>
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Sexta"> Sex</label>
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Sábado"> Sáb</label>
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Domingo"> Dom</label>
+            <label class="mod-check-label"><input type="checkbox" name="turma_dias_chk" value="Todos"> Todos</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+        <div><label class="adm-label">Início*</label><input type="time" name="turma_inicio" id="turma_inicio" class="adm-input" required>
+        </div>
+        <div><label class="adm-label">Fim*</label><input type="time" name="turma_fim" id="turma_fim" class="adm-input" required>
+        </div>
+        <div>
+          <label class="adm-label">Status</label><select name="turma_status" id="turma_status" class="adm-input"><option value="Ativa">Ativa</option><option value="Inativa">Inativa</option></select>
+        </div>
+      </div>
+      <div
+        style="display:flex; justify-content:flex-end; gap:10px; margin-top:25px; border-top: 1px solid #ddd; padding-top: 15px;">
+        <button type="button" onclick="closeModal('adm-modal-turma')" class="adm-btn adm-btn-outline">Cancelar</button>
+        <button type="submit" class="adm-btn">Salvar Turma</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="adm-modal-grad" class="adm-modal">
+  <div class="adm-modal-box">
+    <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
+      <span id="titulo-modal-grad">Nova Graduação</span><button type="button" onclick="closeModal('adm-modal-grad')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+    </div>
+    <form onsubmit="handleAdmForm(event, 'salvarGraduacaoDefinitiva')">
+      <input type="hidden" name="linha_id" id="grad_linha_id"><label class="adm-label">Modalidade*</label><input type="text" name="grad_mod" id="grad_mod" class="adm-input" list="datalist-modalidades-grad" autocomplete="off" required><datalist
+        id="datalist-modalidades-grad"></datalist><label class="adm-label">Nome da Faixa / Nível*</label><input type="text" name="grad_nome" id="grad_nome" class="adm-input" required>
+      <div class="form-grid">
+        <div><label class="adm-label">ID Hierarquia Numérica*</label><input type="number" name="grad_id" id="grad_id" class="adm-input" required min="0">
+        </div>
+        <div>
+          <label class="adm-label">Nível no Sistema</label><select name="grad_nivel" id="grad_nivel" class="adm-input"><option value="Aluno">Aluno</option><option value="INSTRUTOR NÍVEL 1">Instrutor</option><option value="Professor">Professor</option><option value="Mestre">Mestre</option><option value="Admin">Admin</option></select>
+        </div>
+      </div><label class="adm-label">Observações</label><input type="text" name="grad_obs" id="grad_obs" class="adm-input">
+      <div
+        style="display:flex; justify-content:flex-end; gap:10px; margin-top:25px; border-top: 1px solid #ddd; padding-top: 15px;">
+        <button type="button" onclick="closeModal('adm-modal-grad')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="adm-modal-local" class="adm-modal">
+  <div class="adm-modal-box">
+    <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
+      <span>Infraestrutura / Prédio</span><button type="button" onclick="closeModal('adm-modal-local')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+    </div>
+    <div
+      style="font-size: 11px; color:#666; margin-bottom: 15px; border-left: 3px solid var(--dynamic-prim); padding-left: 10px;">
+      <b>Dica do Sistema:</b> Não é necessário inserir dias ou horários aqui. A agenda é gerada automaticamente baseada
+      nas <b>Turmas</b> vinculadas a este local.
+    </div>
+    <form id="form-locais" onsubmit="handleAdmForm(event, 'salvarLocal')">
+      <input type="hidden" name="loc_id" id="loc_id"><input type="hidden" name="editor_login" id="loc_editor_login">
+      <label class="adm-label">Nome Oficial do Local*</label><input type="text" name="loc_nome" id="loc_nome" class="adm-input" required placeholder="Ex: CT Matriz - Absolute">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <div><label class="adm-label">Responsável / Diretor</label><input type="text" name="loc_resp" id="loc_resp" class="adm-input" placeholder="Campo vazio">
+        </div>
+        <div>
+          <label class="adm-label">Status da Unidade</label><select name="loc_status" id="loc_status" class="adm-input"><option value="Ativo">✅ Ativo (Aberto)</option><option value="Inativo">❌ Inativo (Fechado)</option></select>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 2fr; gap:10px; margin-top: 10px;">
+        <div><label class="adm-label">Cidade / Estado</label><input type="text" name="loc_cidade" id="loc_cidade" class="adm-input" placeholder="Ex: Recife - PE">
+        </div>
+        <div><label class="adm-label">Endereço Completo</label><input type="text" name="loc_end" id="loc_end" class="adm-input" placeholder="Rua, Número, Bairro">
+        </div>
+      </div>
+      <label class="adm-label">Telefone da Recepção (WhatsApp)</label><input type="text" name="loc_contato" id="loc_contato" class="adm-input" placeholder="Campo vazio">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 10px;">
+        <div><label class="adm-label">Link Maps</label><input type="text" name="loc_maps" id="loc_maps" class="adm-input" placeholder="Campo vazio">
+        </div>
+        <div><label class="adm-label">IFrame do Maps</label><input type="text" name="loc_iframe" id="loc_iframe" class="adm-input" placeholder="<iframe src='...'>">
+        </div>
+      </div>
+      <div style="background:#e3f2fd; padding:15px; border-radius:8px; border:1px solid #bbdefb; margin-top: 20px;">
+        <h4 style="margin:0 0 10px 0; color:#1565c0;">💰 Dados de Recebimento (PIX do Local)</h4>
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px;">
+          <div><label class="adm-label">Chave PIX da Unidade</label><input type="text" name="loc_pix_chave" id="loc_pix_chave" class="adm-input" placeholder="Campo vazio">
+          </div>
+          <div><label class="adm-label">Nome do Banco</label><input type="text" name="loc_pix_banco" id="loc_pix_banco" class="adm-input" placeholder="Campo vazio">
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top: 10px;">
+          <div><label class="adm-label">Nome do Titular</label><input type="text" name="loc_pix_nome" id="loc_pix_nome" class="adm-input" maxlength="25" placeholder="Campo vazio">
+          </div>
+          <div><label class="adm-label">Cidade da Conta</label><input type="text" name="loc_pix_cidade" id="loc_pix_cidade" class="adm-input" maxlength="15" placeholder="Campo vazio">
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button type="button" onclick="closeModal('adm-modal-local')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar Unidade</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="adm-modal-video" class="adm-modal">
+  <div class="adm-modal-box">
+    <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
+      <span>Vídeo</span><button type="button" onclick="closeModal('adm-modal-video')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+    </div>
+    <form onsubmit="handleAdmForm(event, 'salvarVideo')"><input type="hidden" name="vid_id" id="vid_id">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div><label class="adm-label">Faixa</label><select name="vid_faixa" id="vid_faixa" class="adm-input"></select>
+        </div>
+        <div><label class="adm-label">Modalidade</label><select name="vid_mod" id="vid_mod" class="adm-input"></select>
+        </div>
+      </div>
+      <label class="adm-label">Título</label><input type="text" name="vid_titulo" id="vid_titulo" class="adm-input" required><label class="adm-label">Link YouTube</label><input type="text" name="vid_link" id="vid_link" class="adm-input" required><label class="adm-label">Descrição</label><textarea name="vid_desc" id="vid_desc" class="adm-input" rows="3"></textarea><label class="adm-label">Status</label><select name="vid_status" id="vid_status" class="adm-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button type="button" onclick="closeModal('adm-modal-video')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="adm-modal-curso" class="adm-modal">
+  <div class="adm-modal-box">
+    <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
+      <span id="titulo-modal-curso">Evento/Curso</span><button type="button" onclick="closeModal('adm-modal-curso')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+    </div>
+    <form onsubmit="handleAdmForm(event, 'salvarCurso')">
+      <input type="hidden" name="curso_id" id="curso_id"><input type="hidden" name="editor_login" id="editor_curso_login">
+      <label class="adm-label">Nome do Curso*</label><input type="text" name="curso_nome" id="curso_nome" class="adm-input" required>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <div><label class="adm-label">Data</label><input type="date" name="curso_data" id="curso_data" class="adm-input">
+        </div>
+        <div><label class="adm-label">Vagas</label><input type="text" name="curso_vagas" id="curso_vagas" class="adm-input">
+        </div>
+      </div>
+      <label class="adm-label">Descrição</label><textarea name="curso_desc" id="curso_desc" class="adm-input" rows="3"></textarea><label class="adm-label">Link Imagem</label><input type="text" name="curso_img" id="curso_img" class="adm-input"><label class="adm-label">Link Inscrição</label><input type="text" name="curso_link" id="curso_link" class="adm-input"><label class="adm-label">Status</label><select name="curso_status" id="curso_status" class="adm-input"><option value="Abertas">Inscrições Abertas</option><option value="Em Breve">Em Breve</option><option value="Encerradas">Encerradas</option></select>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button type="button" onclick="closeModal('adm-modal-curso')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="adm-modal-lib" class="adm-modal">
+  <div class="adm-modal-box">
+    <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
+      <span>Livro da Biblioteca</span><button type="button" onclick="closeModal('adm-modal-lib')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+    </div>
+    <form onsubmit="handleAdmForm(event, 'salvarLivroBiblioteca')">
+      <input type="hidden" name="lib_id" id="lib_id"><label class="adm-label">Título do Livro</label><input type="text" name="lib_titulo" id="lib_titulo" class="adm-input" required><label class="adm-label">Descrição</label><textarea name="lib_desc" id="lib_desc" class="adm-input" rows="3"></textarea><label class="adm-label">Link do Arquivo (PDF Drive)</label><input type="text" name="lib_link" id="lib_link" class="adm-input" required><label class="adm-label">Link da Capa (Imagem Drive)</label><input type="text" name="lib_capa" id="lib_capa" class="adm-input">
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button type="button" onclick="closeModal('adm-modal-lib')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="adm-modal-prog" class="adm-modal">
+  <div class="adm-modal-box">
+    <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
+      <span>Programa Técnico</span><button type="button" onclick="closeModal('adm-modal-prog')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+    </div>
+    <form onsubmit="handleAdmForm(event, 'salvarProgramaTecnico')"><input type="hidden" name="prog_id" id="prog_id">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div><label class="adm-label">Faixa</label><select name="prog_faixa" id="prog_faixa" class="adm-input"></select>
+        </div>
+        <div>
+          <label class="adm-label">Modalidade</label><select name="prog_mod" id="prog_mod" class="adm-input"></select>
+        </div>
+      </div>
+      <label class="adm-label">Link do Arquivo (PDF Drive)</label><input type="text" name="prog_link" id="prog_link" class="adm-input"><label class="adm-label">Descrição</label><input type="text" name="prog_desc" id="prog_desc" class="adm-input">
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button type="button" onclick="closeModal('adm-modal-prog')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="adm-modal-cert" class="adm-modal">
+  <div class="adm-modal-box">
+    <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
+      <span>Certificado</span><button type="button" onclick="closeModal('adm-modal-cert')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+    </div>
+    <form onsubmit="handleAdmForm(event, 'salvarCertificado')">
+      <input type="hidden" name="cert_id" id="cert_id"><label class="adm-label">CPF ou Login do Aluno*</label><input type="text" name="cert_cpf" id="cert_cpf" class="adm-input" required placeholder="Digite o CPF/Login exato"><label class="adm-label">Nome do Curso/Evento*</label><input type="text" name="cert_curso" id="cert_curso" class="adm-input" required><label class="adm-label">Modalidade de Referência</label><select name="cert_mod" id="cert_mod_form" class="adm-input"></select><label class="adm-label">Data Emissão</label><input type="date" name="cert_data" id="cert_data" class="adm-input" required><label class="adm-label">Link do PDF (Google Drive)*</label><input type="text" name="cert_link" id="cert_link" class="adm-input" required>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button type="button" onclick="closeModal('adm-modal-cert')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="adm-modal-financeiro" class="adm-modal">
+  <div class="adm-modal-box">
+    <div class="adm-h3">Fluxo de Caixa Inteligente
+      <button type="button" onclick="closeModal('adm-modal-financeiro')" style="background:none;border:none;color:red;cursor:pointer;font-size:20px;">✕</button>
+    </div>
+    <form onsubmit="handleAdmForm(event, 'registrarMovimentacao')">
+      <input type="hidden" name="responsavel" id="fin_resp">
+      <div class="form-grid">
+        <div>
+          <label class="adm-label">1. Selecione a Unidade</label>
+          <select name="academia" id="fin_acad" class="adm-input" onchange="if(typeof carregarConfiguracoesUnidade === 'function') carregarConfiguracoesUnidade()" required></select>
+        </div>
+        <div>
+          <label class="adm-label">2. Tipo</label>
+          <select name="tipo" id="fin_tipo" class="adm-input" onchange="if(typeof carregarCategoriasFinanceiras === 'function') carregarCategoriasFinanceiras()" required>
+            <option value="Receita">Receita (Entrada +)</option>
+            <option value="Despesa">Despesa (Saída -)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div>
+          <label class="adm-label">3. Categoria</label>
+          <select name="categoria" id="fin_cat" class="adm-input" onchange="if(typeof detectarNecessidadeAluno === 'function') detectarNecessidadeAluno()" required>
+            <option value="">Escolha Unidade/Tipo...</option>
+          </select>
+        </div>
+        <div>
+          <label class="adm-label">4. Pagamento</label>
+          <select name="forma" id="fin_forma" class="adm-input" required></select>
+        </div>
+      </div>
+
+      <div id="div-cascata-aluno"
+        style="display:none; background: #fffdf5; padding: 10px; border-radius: 8px; border: 1px solid #ffeaa7; margin-top: 10px;">
+        <label class="adm-label" style="color:#d63031; margin-top:0;">👤 Vincular ao Aluno (Nome Completo)</label>
+        <select name="alunoLogin" id="fin_aluno_nome" class="adm-input"></select>
+      </div>
+
+      <label class="adm-label">Descrição</label>
+      <input type="text" name="descricao" class="adm-input" placeholder="Ex: Mensalidade de Março" required>
+
+      <div class="form-grid">
+        <div><label class="adm-label">Valor (R$)</label><input type="number" step="0.01" name="valor" class="adm-input" required>
+        </div>
+        <div><label class="adm-label">Data</label><input type="date" name="data_registro" id="fin_data_manual" class="adm-input">
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-top:15px; padding-top:15px; border-top: 1px dashed #ccc;">
+        <div><label class="adm-label">Link Comprovante</label><input type="text" name="comprovante_url" id="fin_comprovante" class="adm-input" placeholder="URL do Drive/Imagem">
+        </div>
+        <div>
+          <label class="adm-label">Modalidade Ref.</label>
+          <select name="modalidade" id="fin_mod_form" class="adm-input">
+                <option value="Geral">Geral (Padrão)</option>
+                <option value="Krav Maga">Krav Maga</option>
+                <option value="Muay Thai">Muay Thai</option>
+                <option value="Karate">Karate</option>
+            </select>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <button type="submit" class="adm-btn" style="width:100%; padding:15px; font-size:14px;">EFETIVAR LANÇAMENTO</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="adm-modal-relatorio" class="adm-modal">
+  <div class="adm-modal-box large">
+    <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
+      <span><span class="material-icons" style="color:#2196F3; vertical-align:middle;">analytics</span> Super Relatório
+      de Atletas</span>
+      <button type="button" onclick="closeModal('adm-modal-relatorio')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+    </div>
+    <form id="form-super-relatorio"
+      onsubmit="if(typeof gerarSuperRelatorio === 'function') gerarSuperRelatorio(event); else { event.preventDefault(); alert('Erro no módulo de relatórios'); }">
+      <input type="hidden" id="rel_fin" value="">
+      <div class="form-grid" style="background:#f4f4f4; padding:15px; border-radius:8px; border:1px solid #ddd;">
+        <div><label class="adm-label">Idade Min e Max (Anos)</label>
+          <div style="display:flex; gap:10px;">
+            <input type="number" id="rel_idade_min" class="adm-input" placeholder="Min" min="0"><input type="number" id="rel_idade_max" class="adm-input" placeholder="Max" min="0">
+          </div>
+        </div>
+        <div><label class="adm-label">Peso Min e Max (Kg)</label>
+          <div style="display:flex; gap:10px;">
+            <input type="number" step="0.1" id="rel_peso_min" class="adm-input" placeholder="Min"><input type="number" step="0.1" id="rel_peso_max" class="adm-input" placeholder="Max">
+          </div>
+        </div>
+        <div><label class="adm-label">Modalidade</label><select id="rel_mod" class="adm-input"></select></div>
+        <div><label class="adm-label">Faixa / Graduação</label><select id="rel_grad" class="adm-input"></select></div>
+        <div>
+          <label class="adm-label">Academia / Local de Treino</label>
+          <select id="rel_acad" class="adm-input" onchange="if(typeof atualizarTurmasRelatorio === 'function') atualizarTurmasRelatorio()"></select>
+        </div>
+        <div>
+          <label class="adm-label">Turma Específica</label><select id="rel_turma" class="adm-input"><option value="">Todas as Turmas</option></select>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:center; margin-top:20px;">
+        <button type="submit" class="adm-btn" style="background:#2196F3; color:white; width:100%; padding:12px;">GERAR RESULTADOS</button>
+      </div>
+    </form>
+    <div id="resultado-relatorio"
+      style="margin-top:20px; max-height:400px; overflow-y:auto; border-top:1px solid #ccc; padding-top:20px; display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+        <h4 style="margin:0; color:#333;">Resultados:
+          <span id="qtd-resultados" style="color:var(--dynamic-prim);">0</span> atleta(s)
+        </h4>
+        <button class="adm-btn" style="background:#ff5252; color:white; font-size:11px;" onclick="if(typeof imprimirSuperRelatorio === 'function') imprimirSuperRelatorio()"><span class="material-icons" style="font-size:14px;">picture_as_pdf</span> Imprimir PDF</button>
+      </div>
+      <table class="adm-table" id="tabela-resultados-rel">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Idade Exata</th>
+            <th>Peso / Alt.</th>
+            <th>Faixa e Modalidade</th>
+            <th>Status Fin.</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-resultados-rel"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
