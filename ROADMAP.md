@@ -34,15 +34,20 @@ Acompanhe a evolução, as metas e as próximas entregas do nosso sistema.
 - [x] **Agendamento Dinâmico (Leads):** Criar página externa para Visitantes agendarem Aulas Experimentais com Chips de Turmas.
 - [x] **Integração WhatsApp (Leads):** O agendamento da aula experimental dispara uma mensagem pré-formatada para o WhatsApp da unidade.
 - [x] **Função Auto-Setup e Verificação de Banco de Dados:** Criar uma função para validar e corrigir todas as abas e colunas.
-- [x] **[🚀 QUICK WIN] Rodapé White-Label e Direitos:** Incluir em todas as páginas o atalho para a página do desenvolvedor. *(Tarefa Atual)*
-- [ ] **[🛡️ HIGH VALUE] Expandir Hydration:** Aplicar blindagem anti-apagão nos CRUDs menores (Cursos, Locais, Vídeos).
+- [x] **Rodapé White-Label e Direitos:** Incluir em todas as páginas o atalho para a página do desenvolvedor. *
+- [ ] **[🔥 ALTO ROI]Blindagem Ultra Militar para registea cada passo do código e erros por menor que sejam** Nenhum erro ou porcedimento pode ser silenciosos. A pagina Adm.html deve ter blindagem miltar desde de seu acesso a sua saida. 
+- [ ] **[🔥 ALTO ROI]Implementar Controle MultiAcademia e mono Academia para ADm (Estilo Franquia):** Um usuario ADM só podera acessar a academia que estiver vinclulada ano seu cadastro dentro da coluna academia_vinclulada. Assimum franqueador podera ver todoas as acedemias se no seu cadastro estiver escrito 'todas' e seus franqueados so poderam ver duas ou mais acadeoias se estiver escrito o nome dela na coluna 'academias_vinclualdas'. (revisar Código.gs, Adm.html e GestãoAlunos.html)
+- [ ] **[🔥 ALTO ROI] Crud Formas de pagamento:** Cada acedemia deve ter as suas forma de pagamento cadastrada . Nenhuma forma de pagamento pode ser hardcode (revisar Código.gs, Adm.html e Finaiceiro.html)
+- [ ] **[🔥 ALTO ROI] Crud Categoria Finaiceira:** Tipo (Se mensalidade, aluguel, pacote procional, curso, despesa propoganda, etc) e dizer se é um despsa ou receita, de qual academia esta vinculda, se uma ou todas, a data de vencimento ou recimento  e o status se esta paga /  recebida ou pendente. Criar um relatori analitivo fiultardo por data, academia, tipo e status. Revisar (Código,gs, Financeiro.html, Adm.html)
+
 
 ## 💰 Fase 3: Inteligência Financeira e Relatórios (Próximos Passos - Foco Emilly)
-- [ ] **[🔥 ALTO ROI] Nova Aba "Relatórios" no Adm.html:** Central de Inteligência com relatórios de Cadastros, Inadimplência e Lotação de Turmas.
-- [ ] **[💰 HIGH VALUE] Contas a Pagar e Receber:** Lançamento de despesas (aluguel, repasse de professores) e receitas cruzadas.
-- [ ] **[📊 HIGH VALUE] Dashboard de Previsões (Financeiro.html):** Visão de Faturamento Previsto vs. Realizado.
+- [ ]Nova Aba "Relatórios" no Adm.html:** Central de Inteligência com relatórios de Cadastros, Inadimplência e Lotação de Turmas.
+- [ ] Contas a Pagar e Receber:** Lançamento de despesas (aluguel, repasse de professores) e receitas cruzadas.
+- [ ] Dashboard de Previsões (Financeiro.html):** Visão de Faturamento Previsto vs. Realizado.
 
 ## 🔮 Fase 4: Automação, CRM e Compliance
+- [ ] Expandir Hydration:** Aplicar blindagem anti-apagão nos CRUDs menores (Alunos, financeiros, Cursos, Locais, Vídeos, etc).
 - [ ] Check-in Antecipado: Permitir que o aluno agende a sua presença na grade de aulas com antecedência.
 - [ ] Histórico do Aluno (tempo na turma, aulas assistidas, conteúdo visualizado).
 - [ ] **Compliance:** Controle de Anuidade (Bloqueio em caso de inadimplência).
