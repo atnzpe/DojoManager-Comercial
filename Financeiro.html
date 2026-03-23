@@ -104,6 +104,8 @@
     border-radius: 10px;
     overflow: hidden;
     margin-top: 10px;
+    max-height: 400px;
+    overflow-y: auto;
   }
 
   .trx-item {
@@ -341,8 +343,8 @@
         </div>
         <div id="aluno-status-badge" class="badge-plano">...</div>
       </div>
-      <div id="area-pagamento-aluno"></div> <a id="btn-cobranca-wpp" href="#" target="_blank" class="btn-whatsapp"
-        style="display:none;">
+      <div id="area-pagamento-aluno"></div>
+      <a id="btn-cobranca-wpp" href="#" target="_blank" class="btn-whatsapp" style="display:none;">
         <span class="material-icons">whatsapp</span> Falar com Secretaria
       </a>
     </div>
@@ -368,13 +370,13 @@
       <div class="filter-full">
         <label style="font-size:0.7rem; color:var(--dynamic-text); opacity:0.7; font-weight:bold;">Filtrar por Unidade</label>
         <select id="filtro-academia" class="input-fin" style="padding:10px;">
-                <option value="TODAS">Todas as Academias</option>
-            </select>
+            <option value="TODAS">Todas as Academias</option>
+        </select>
       </div>
       <div class="filter-full">
         <button onclick="carregarDadosAdmin()" class="btn-filtrar">
-                <span class="material-icons" style="font-size:18px; vertical-align:middle;">filter_alt</span> APLICAR FILTRO
-            </button>
+            <span class="material-icons" style="font-size:18px; vertical-align:middle;">filter_alt</span> APLICAR FILTRO
+        </button>
       </div>
     </div>
 
@@ -402,358 +404,560 @@
       <h3 style="color:var(--dynamic-prim); margin-top:0; font-weight:900;">Registrar Movimentação</h3>
 
       <div class="form-group">
-        <label style="font-size:0.8rem; color:var(--dynamic-text); opacity:0.7; font-weight:bold;">Unidade / Caixa</label>
-        <select id="fin-academia" class="input-fin">
-           <option value="Matriz">Carregando...</option>
+        <label class="adm-label" style="color:var(--dynamic-text);">Unidade / Caixa</label>
+        <select id="fin-academia" class="input-fin" onchange="carregarDependenciasFinanceiras()"></select>
+      </div>
+
+      <div class="form-group">
+        <label class="adm-label" style="color:var(--dynamic-text);">Tipo</label>
+        <select id="fin-tipo" class="input-fin" onchange="carregarCategoriasFinanceiras()">
+          <option value="Receita">🟢 Entrada (Receita)</option>
+          <option value="Despesa">🔴 Saída (Despesa)</option>
         </select>
       </div>
 
       <div class="form-group">
-        <select id="fin-tipo" class="input-fin" onchange="ajustarFormulario()">
-          <option value="Receita">🟢 Entrada de Caixa (Receita)</option>
-          <option value="Despesa">🔴 Saída de Caixa (Despesa)</option>
-        </select>
+        <label class="adm-label" style="color:var(--dynamic-text);">Categoria</label>
+        <select id="fin-categoria" class="input-fin" onchange="detectarNecessidadeAluno()"></select>
+      </div>
+
+      <div id="area-aluno-cascata" class="form-group"
+        style="display:none; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px;">
+        <label class="adm-label" style="color:var(--dynamic-prim)">👤 Vincular ao Aluno</label>
+        <select id="fin-aluno-select" class="input-fin"></select>
+      </div>
+
+      <div id="area-pacote-cascata" class="form-group"
+        style="display:none; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-top:-10px;">
+        <label class="adm-label" style="color:var(--dynamic-prim)">📦 Qual o Plano/Pacote?</label>
+        <select id="fin-pacote" class="input-fin"></select>
       </div>
 
       <div class="form-group">
-        <select id="fin-categoria" class="input-fin">
-          <option value="Mensalidade">Mensalidade de Aluno</option>
-          <option value="Venda Produto">Venda de Produto/Equipamento</option>
-          <option value="Aula Avulsa">Aula Avulsa / Visitante</option>
-          <option value="Outros">Outros Lançamentos</option>
-        </select>
-      </div>
-
-      <div id="area-aluno-input" class="form-group">
-        <label style="font-size:0.8rem; color:var(--dynamic-text); opacity:0.7; font-weight:bold;">Vincular a um Aluno</label>
-        <select id="fin-aluno-select" class="input-fin"><option value="">Carregando...</option></select>
-        <select id="fin-pacote" class="input-fin" style="margin-top:10px; display:none;"><option value="">Selecione o Pacote</option></select>
+        <label class="adm-label" style="color:var(--dynamic-text);">Forma de Pagamento</label>
+        <select id="fin-forma" class="input-fin"></select>
       </div>
 
       <div class="form-group">
-        <label style="font-size:0.8rem; color:var(--dynamic-text); opacity:0.7; font-weight:bold;">Forma de Pagamento</label>
-        <select id="fin-forma" class="input-fin">
-          <option value="Pix">Pix (Transferência)</option>
-          <option value="Dinheiro">Dinheiro Espécie</option>
-          <option value="Cartão">Cartão Crédito/Débito</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <input type="text" id="fin-desc" placeholder="Descrição ou Detalhes da transação" class="input-fin">
+        <label class="adm-label" style="color:var(--dynamic-text);">Descrição</label>
+        <input type="text" id="fin-desc" placeholder="Ex: Pagamento Mensalidade Março" class="input-fin">
       </div>
       <div class="form-group">
-        <input type="number" id="fin-valor" placeholder="Valor Exato (R$)" class="input-fin">
+        <label class="adm-label" style="color:var(--dynamic-text);">Valor (R$)</label>
+        <input type="number" step="0.01" id="fin-valor" placeholder="150.00" class="input-fin">
       </div>
 
       <button onclick="salvarMovimentacao()" class="btn-lancar">CONFIRMAR LANÇAMENTO</button>
     </div>
 
-    <h3 style="color:var(--dynamic-text); font-size:1.1rem; margin-bottom:10px; font-weight:900;">Histórico (Filtrado)
-    </h3>
+    <div class="adm-h3"
+      style="font-size: 1.2rem; margin-top: 30px; border-left: 5px solid var(--dynamic-prim); padding-left:10px;">
+      Histórico de Transações
+    </div>
     <div id="lista-transacoes" class="trx-list">
-      <div style="padding:20px; text-align:center; color:var(--dynamic-text); opacity:0.5;">Carregando transações...
+      <div style='padding:20px;text-align:center; color:var(--dynamic-text); opacity:0.5;'>Nenhuma transação carregada.
       </div>
     </div>
+
   </div>
 
-</div>
-
-<script>
-  // BLINDAGEM DE ESCOPO GLOBAL - Módulo Financeiro
-  // Evita conflitos com outros arquivos HTML injetados
-  
-  var usuarioAtual = null;
-
-  function abrirFinanceiro() {
-    try {
-      document.getElementById('dashboard-grid').style.display = 'none';
-      var header = document.querySelector('.dashboard-header');
-      if(header) header.style.display = 'none';
-      document.getElementById('financeiro-screen').style.display = 'block';
-
-      var session = localStorage.getItem('userSession');
-      if(!session) { alert("Sessão expirada."); return; }
-      
-      usuarioAtual = JSON.parse(session);
-
-      // Hierarquia: Mestre e Admin veem caixa total. Instrutor vê sua academia.
-      if (usuarioAtual.isInstrutor || usuarioAtual.nivel === 'Admin' || usuarioAtual.nivel === 'Mestre') {
-        document.getElementById('view-admin').style.display = 'block';
-        document.getElementById('view-aluno').style.display = 'none';
-        carregarListasFormulario();
-        carregarDadosAdmin();
-      } else {
-        document.getElementById('view-admin').style.display = 'none';
-        document.getElementById('view-aluno').style.display = 'block';
-        carregarDadosAluno();
-      }
-    } catch(e) { console.error("Erro abrirFinanceiro:", e); }
-  }
-
-  function fecharFinanceiro() {
-    document.getElementById('financeiro-screen').style.display = 'none';
-    var header = document.querySelector('.dashboard-header');
-    if(header) header.style.display = 'flex';
-    document.getElementById('dashboard-grid').style.display = 'grid';
-  }
-
-  function toggleForm() {
-    var form = document.getElementById('form-lancamento');
-    form.style.display = form.style.display === 'none' ? 'block' : 'none';
-  }
-
-  // --- ALUNO VIEW (Front-end PIX) ---
-  function carregarDadosAluno() {
-    google.script.run.withSuccessHandler(function(dadosTexto) {
-      try {
-          const dados = JSON.parse(dadosTexto);
-          const isAtivo = String(dados.status).toLowerCase() === "ativo";
-          
-          document.getElementById('aluno-plano').innerText = dados.plano || "Nenhum";
-          document.getElementById('aluno-vencimento').innerText = "Vencimento: " + (dados.vencimento || "--");
-          
-          const badge = document.getElementById('aluno-status-badge');
-          badge.innerText = dados.status || "Pendente";
-          badge.className = isAtivo ? "badge-plano" : "badge-plano badge-vencido";
-
-          document.getElementById('area-pagamento-aluno').innerHTML = ""; // Limpa tentativas anteriores
-          
-          if (!isAtivo || dados.diasRestantes <= 0) {
-            gerarFluxoPix(usuarioAtual.LOGIN);
-          }
-      } catch (err) {
-          console.error("Erro ao processar dados do aluno:", err);
-      }
-    }).getFinanceiroPessoal(usuarioAtual.LOGIN);
-  }
-
-  /**
-   * 💸 GERADOR DE PIX BLINDADO (Sem document.write ou strings soltas)
+  <script>
+    /**
+   * 🛡️ BLINDAGEM DE ESCOPO GLOBAL - Módulo Financeiro
+   * Evita conflitos com outros arquivos HTML injetados.
    */
-  function gerarFluxoPix(login) {
-    google.script.run.withSuccessHandler(function(info) {
-      const container = document.getElementById('area-pagamento-aluno');
-      
-      if (!info || !info.chave || info.chave.trim() === "") {
-        document.getElementById('btn-cobranca-wpp').style.display = "flex";
-        return;
+  if (!window.financeiroScriptBlindado) {
+    window.financeiroScriptBlindado = true;
+
+    // 🛡️ Sentinela de Logs Locais
+    function sentinelaFin(acao, nivel, detalhes) {
+      console.log(`[FINANCEIRO - ${nivel}] ${acao}:`, detalhes);
+      if(nivel === 'CRÍTICO' || nivel === 'ERRO') {
+        try { google.script.run.registrarLogBlindado(nivel, "Fin_" + acao, String(detalhes)); } catch(e){}
       }
-
-      try {
-        const chave = String(info.chave).trim();
-        const tamChave = chave.length.toString().padStart(2, '0');
-        const valorStr = parseFloat(info.valor || 0).toFixed(2);
-        const beneficiario = (info.beneficiario || "Academia").substring(0, 25); 
-        const cidade = (info.cidade || "Cidade").substring(0, 15); 
-        const banco = info.banco || "Instituição Bancária";
-        
-        // Payload Seguro BCB (Este é o código Copia e Cola!)
-        let payload = "00020101021126"; 
-        let merchantInfo = "0014br.gov.bcb.pix01" + tamChave + chave;
-        payload += merchantInfo.length.toString().padStart(2, '0') + merchantInfo;
-        payload += "52040000530398654" + valorStr.length.toString().padStart(2, '0') + valorStr;
-        payload += "5802BR59" + beneficiario.length.toString().padStart(2, '0') + beneficiario; 
-        payload += "60" + cidade.length.toString().padStart(2, '0') + cidade; 
-        payload += "62070503***6304"; 
-
-        const pixBox = document.createElement('div');
-        pixBox.className = 'pix-box';
-        pixBox.style = 'border: 2px solid var(--dynamic-prim); background: rgba(0,0,0,0.2);';
-        
-        const infoTitle = document.createElement('p');
-        infoTitle.className = 'pix-info';
-        infoTitle.style.color = 'var(--dynamic-text)';
-        infoTitle.innerText = 'Escaneie ou Copie o Código PIX:';
-        
-        const img = document.createElement('img');
-        img.src = "https://quickchart.io/qr?text=" + encodeURIComponent(payload) + "&size=250&margin=1";
-        img.className = "qr-code-img";
-        img.style.borderRadius = "12px";
-        
-        const details = document.createElement('div');
-        details.style = "font-size:0.8rem; color:var(--dynamic-text); opacity:0.8; margin:10px 0; line-height:1.5;";
-        details.innerHTML = `<b>Valor:</b> R$ ${valorStr}<br><b>Recebedor:</b> ${beneficiario}<br><b>Chave:</b> ${chave}<br><b>Banco:</b> ${banco}`;
-        
-        // 🚀 BOTÃO COPIA E COLA
-        const btnCopy = document.createElement('button');
-        btnCopy.className = "btn-whatsapp"; // Aproveita o estilo bonito do botão
-        btnCopy.style.backgroundColor = "var(--dynamic-prim)";
-        btnCopy.style.color = "var(--dynamic-btn-text)";
-        btnCopy.innerHTML = '<span class="material-icons">content_copy</span> PIX COPIA E COLA';
-        btnCopy.onclick = function() {
-            navigator.clipboard.writeText(payload).then(() => {
-                alert("✅ Código PIX Copiado! Abra o app do seu banco e cole.");
-            }).catch(err => alert("Erro ao copiar. Tente selecionar o código manualmente."));
-        };
-
-        const btnWpp = document.createElement('button');
-        btnWpp.className = "btn-whatsapp";
-        btnWpp.style.marginTop = "10px";
-        btnWpp.innerHTML = '<span class="material-icons">send</span> ENVIAR COMPROVANTE';
-        btnWpp.onclick = function() {
-            window.open("https://wa.me/" + info.contatoWhatsApp + "?text=Ol%C3%A1!%20Segue%20meu%20comprovante%20de%20pagamento%20PIX%20de%20R$%20" + valorStr);
-        };
-
-        pixBox.appendChild(infoTitle);
-        pixBox.appendChild(img);
-        pixBox.appendChild(details);
-        pixBox.appendChild(btnCopy);
-        pixBox.appendChild(btnWpp);
-        
-        container.appendChild(pixBox);
-      } catch (err) { console.error("Erro na montagem do PIX:", err.message); }
-    }).getPixDataFromServer(login);
-  }
-
-  // --- ADMIN VIEW ---
-  function carregarListasFormulario() {
-    google.script.run.withSuccessHandler(function(dados) {
-        if (!dados) return;
-
-        var selAcad = document.getElementById('fin-academia');
-        selAcad.innerHTML = "";
-        
-        var selFiltro = document.getElementById('filtro-academia');
-        selFiltro.innerHTML = '<option value="TODAS">Todas as Unidades</option>';
-
-        if(dados.locais) {
-            dados.locais.forEach(function(local) {
-                var opt1 = document.createElement("option");
-                opt1.value = local; opt1.text = local;
-                if(usuarioAtual.academia && String(local).indexOf(usuarioAtual.academia) !== -1) opt1.selected = true;
-                selAcad.appendChild(opt1);
-
-                var opt2 = document.createElement("option");
-                opt2.value = local; opt2.text = local;
-                selFiltro.appendChild(opt2);
-            });
-        }
-
-        var selAluno = document.getElementById('fin-aluno-select');
-        selAluno.innerHTML = '<option value="">-- Selecione o Aluno --</option>';
-        if(dados.alunos) {
-            dados.alunos.forEach(function(aluno) {
-                var opt = document.createElement("option");
-                opt.value = aluno.login; opt.text = aluno.nome;
-                selAluno.appendChild(opt);
-            });
-        }
-
-        carregarPacotesSelect();
-    }).getDadosParaLancamento();
-  }
-
-  function carregarDadosAdmin() {
-    var filtros = {
-        dataInicio: document.getElementById('filtro-ini').value,
-        dataFim: document.getElementById('filtro-fim').value,
-        academia: document.getElementById('filtro-academia').value
-    };
-
-    document.getElementById('lista-transacoes').innerHTML = "<div style='padding:20px;text-align:center; color:var(--dynamic-text); opacity:0.5;'>Sincronizando Caixa...</div>";
-
-    google.script.run.withSuccessHandler(function(resTexto) {
-        var dados = JSON.parse(resTexto);
-        
-        var selFiltro = document.getElementById('filtro-academia');
-        if (!dados.isSuperAdmin) {
-            selFiltro.disabled = true;
-            selFiltro.style.opacity = "0.5";
-            if(selFiltro.options.length > 0) selFiltro.innerHTML = "<option>" + (usuarioAtual.academia || "Sua Academia") + "</option>";
-        }
-
-        document.getElementById('adm-entradas').innerText = "R$ " + (dados.entradas || 0).toFixed(2);
-        document.getElementById('adm-saidas').innerText = "R$ " + (dados.saidas || 0).toFixed(2);
-        document.getElementById('adm-saldo').innerText = "R$ " + (dados.saldo || 0).toFixed(2);
-        
-        renderizarLista(dados.historico || []);
-    }).getRelatorioFinanceiroAdmin(usuarioAtual.LOGIN, filtros);
-  }
-
-  function renderizarLista(lista) {
-    var container = document.getElementById('lista-transacoes');
-    container.innerHTML = "";
-    if (!lista || lista.length === 0) {
-      container.innerHTML = "<div style='padding:20px; text-align:center; color:var(--dynamic-text); opacity:0.5;'>Sem movimentação no período.</div>";
-      return;
     }
-    lista.forEach(function(t) {
-      var dataF = t.data_registro || "--";
-      try { if(String(dataF).indexOf("T") !== -1) dataF = dataF.split("T")[0]; } catch(e){}
-      
-      var tipo = String(t.tipo).toLowerCase();
-      var isReceita = tipo.indexOf('receita') !== -1;
-      var cor = isReceita ? 'cor-verde' : 'cor-vermelho';
-      var sinal = isReceita ? '+ ' : '- ';
-      
-      var div = document.createElement('div');
-      div.className = 'trx-item';
-      div.innerHTML = 
-        '<div class="trx-info">' +
-          '<h4>' + (t.descricao || t.categoria) + '</h4>' +
-          '<span>' + dataF + ' • ' + (t.login_aluno || t.academia_ref) + '</span>' +
-        '</div>' +
-        '<div class="trx-valor ' + cor + '">' + sinal + ' R$ ' + parseFloat(t.valor).toFixed(2) + '</div>';
-      container.appendChild(div);
-    });
-  }
 
-  function ajustarFormulario() {
-    var tipo = document.getElementById('fin-tipo').value;
-    var areaAluno = document.getElementById('area-aluno-input');
-    areaAluno.style.display = (tipo === 'Despesa') ? 'none' : 'block';
-  }
+    var usuarioAtual = null;
 
-  function carregarPacotesSelect() {
-    google.script.run.withSuccessHandler(function(pacotes) {
-      var sel = document.getElementById('fin-pacote');
-      sel.innerHTML = '<option value="">Selecione o Pacote</option>';
-      if(pacotes) {
-          pacotes.forEach(function(p) { 
-              var opt = document.createElement("option");
-              opt.value = p.nome_pacote;
-              opt.text = p.nome_pacote + " - R$ " + p.valor_padrao;
-              sel.appendChild(opt);
+    function abrirFinanceiro() {
+      try {
+        sentinelaFin("abrirFinanceiro", "INFO", "Abrindo módulo financeiro...");
+        
+        // Esconde o Dashboard Base
+        var grid = document.getElementById('dashboard-grid');
+        if(grid) grid.style.display = 'none';
+        var header = document.querySelector('.dashboard-header');
+        if(header) header.style.display = 'none';
+        
+        // Exibe o Financeiro
+        var screen = document.getElementById('financeiro-screen');
+        if(screen) screen.style.display = 'block';
+
+        var session = localStorage.getItem('userSession');
+        if(!session) { alert("Sessão expirada."); return; }
+        
+        usuarioAtual = JSON.parse(session);
+
+        // Separação de Regras (Mestre/Admin vs Aluno)
+        if (usuarioAtual.isInstrutor || usuarioAtual.nivel === 'Admin' || usuarioAtual.nivel === 'Mestre') {
+          var viewAdmin = document.getElementById('view-admin');
+          var viewAluno = document.getElementById('view-aluno');
+          if(viewAdmin) viewAdmin.style.display = 'block';
+          if(viewAluno) viewAluno.style.display = 'none';
+          
+          carregarListasFormulario();
+          // Configura Datas Padrão (Mês Atual)
+          const hoje = new Date();
+          const dIni = document.getElementById('filtro-ini');
+          const dFim = document.getElementById('filtro-fim');
+          if(dIni) dIni.value = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0];
+          if(dFim) dFim.value = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).toISOString().split('T')[0];
+          
+          carregarDadosAdmin();
+        } else {
+          var viewAdmin = document.getElementById('view-admin');
+          var viewAluno = document.getElementById('view-aluno');
+          if(viewAdmin) viewAdmin.style.display = 'none';
+          if(viewAluno) viewAluno.style.display = 'block';
+          
+          carregarDadosAluno();
+        }
+      } catch(e) { sentinelaFin("abrirFinanceiro", "ERRO", e.message); }
+    }
+
+    function fecharFinanceiro() {
+      try {
+        var screen = document.getElementById('financeiro-screen');
+        if(screen) screen.style.display = 'none';
+        
+        var header = document.querySelector('.dashboard-header');
+        if(header) header.style.display = 'flex';
+        
+        var grid = document.getElementById('dashboard-grid');
+        if(grid) grid.style.display = 'grid';
+      } catch(e) { sentinelaFin("fecharFinanceiro", "ERRO", e.message); }
+    }
+
+    function toggleForm() {
+      try {
+        var form = document.getElementById('form-lancamento');
+        if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+      } catch(e) { sentinelaFin("toggleForm", "ERRO", e.message); }
+    }
+
+    // ==========================================
+    // --- ALUNO VIEW (Front-end PIX) ---
+    // ==========================================
+    function carregarDadosAluno() {
+      try {
+        google.script.run
+          .withFailureHandler(err => sentinelaFin("getFinanceiroPessoal", "ERRO", err.message))
+          .withSuccessHandler(function(dadosTexto) {
+          try {
+              const dados = JSON.parse(dadosTexto);
+              const isAtivo = String(dados.status).toLowerCase() === "ativo";
+              
+              const elPlano = document.getElementById('aluno-plano');
+              if(elPlano) elPlano.innerText = dados.plano || "Nenhum";
+              
+              const elVenc = document.getElementById('aluno-vencimento');
+              if(elVenc) elVenc.innerText = "Vencimento: " + (dados.vencimento || "--");
+              
+              const badge = document.getElementById('aluno-status-badge');
+              if(badge) {
+                  badge.innerText = dados.status || "Pendente";
+                  badge.className = isAtivo ? "badge-plano" : "badge-plano badge-vencido";
+              }
+
+              const areaPagto = document.getElementById('area-pagamento-aluno');
+              if(areaPagto) areaPagto.innerHTML = ""; 
+              
+              if (!isAtivo || dados.diasRestantes <= 0) {
+                gerarFluxoPixInterno(usuarioAtual.LOGIN);
+              }
+          } catch (errParse) { sentinelaFin("ParseDadosAluno", "ERRO", errParse.message); }
+        }).getFinanceiroPessoal(usuarioAtual.LOGIN);
+      } catch(e) { sentinelaFin("carregarDadosAluno", "ERRO", e.message); }
+    }
+
+    function gerarFluxoPixInterno(login) {
+      try {
+        google.script.run
+          .withFailureHandler(err => sentinelaFin("getPixDataFromServer", "ERRO", err.message))
+          .withSuccessHandler(function(info) {
+          const container = document.getElementById('area-pagamento-aluno');
+          if(!container) return;
+          
+          if (!info || !info.chave || info.chave.trim() === "") {
+            const btnWpp = document.getElementById('btn-cobranca-wpp');
+            if(btnWpp) btnWpp.style.display = "flex";
+            return;
+          }
+
+          try {
+            const chave = String(info.chave).trim();
+            const tamChave = chave.length.toString().padStart(2, '0');
+            const valorStr = parseFloat(info.valor || 0).toFixed(2);
+            const beneficiario = (info.beneficiario || "Academia").substring(0, 25); 
+            const cidade = (info.cidade || "Cidade").substring(0, 15); 
+            const banco = info.banco || "Instituição Bancária";
+            
+            // Payload Seguro BCB (PIX Copia e Cola)
+            let payload = "00020101021126"; 
+            let merchantInfo = "0014br.gov.bcb.pix01" + tamChave + chave;
+            payload += merchantInfo.length.toString().padStart(2, '0') + merchantInfo;
+            payload += "52040000530398654" + valorStr.length.toString().padStart(2, '0') + valorStr;
+            payload += "5802BR59" + beneficiario.length.toString().padStart(2, '0') + beneficiario; 
+            payload += "60" + cidade.length.toString().padStart(2, '0') + cidade; 
+            payload += "62070503***6304"; 
+
+            const pixBox = document.createElement('div');
+            pixBox.className = 'pix-box';
+            pixBox.style = 'border: 2px solid var(--dynamic-prim); background: rgba(0,0,0,0.2);';
+            
+            const infoTitle = document.createElement('p');
+            infoTitle.className = 'pix-info';
+            infoTitle.style.color = 'var(--dynamic-text)';
+            infoTitle.innerText = 'Escaneie ou Copie o Código PIX:';
+            
+            const img = document.createElement('img');
+            img.src = "https://quickchart.io/qr?text=" + encodeURIComponent(payload) + "&size=250&margin=1";
+            img.className = "qr-code-img";
+            img.style.borderRadius = "12px";
+            
+            const details = document.createElement('div');
+            details.style = "font-size:0.8rem; color:var(--dynamic-text); opacity:0.8; margin:10px 0; line-height:1.5;";
+            details.innerHTML = `<b>Valor:</b> R$ ${valorStr}<br><b>Recebedor:</b> ${beneficiario}<br><b>Chave:</b> ${chave}<br><b>Banco:</b> ${banco}`;
+            
+            const btnCopy = document.createElement('button');
+            btnCopy.className = "btn-whatsapp"; 
+            btnCopy.style.backgroundColor = "var(--dynamic-prim)";
+            btnCopy.style.color = "var(--dynamic-btn-text)";
+            btnCopy.innerHTML = '<span class="material-icons">content_copy</span> PIX COPIA E COLA';
+            btnCopy.onclick = function() {
+                try {
+                    navigator.clipboard.writeText(payload).then(() => {
+                        alert("✅ Código PIX Copiado! Abra o app do seu banco e cole.");
+                    }).catch(e => alert("Erro ao copiar. Selecione o código manualmente."));
+                } catch(eClip) { sentinelaFin("Clipboard", "ERRO", eClip.message); }
+            };
+
+            const btnWpp = document.createElement('button');
+            btnWpp.className = "btn-whatsapp";
+            btnWpp.style.marginTop = "10px";
+            btnWpp.innerHTML = '<span class="material-icons">send</span> ENVIAR COMPROVANTE';
+            btnWpp.onclick = function() {
+                window.open("https://wa.me/" + info.contatoWhatsApp + "?text=Ol%C3%A1!%20Segue%20meu%20comprovante%20de%20pagamento%20PIX%20de%20R$%20" + valorStr);
+            };
+
+            pixBox.appendChild(infoTitle);
+            pixBox.appendChild(img);
+            pixBox.appendChild(details);
+            pixBox.appendChild(btnCopy);
+            pixBox.appendChild(btnWpp);
+            
+            container.appendChild(pixBox);
+          } catch (errDOM) { sentinelaFin("RenderizarPIX", "ERRO", errDOM.message); }
+        }).getPixDataFromServer(login);
+      } catch(e) { sentinelaFin("gerarFluxoPixInterno", "ERRO", e.message); }
+    }
+
+    // ==========================================
+    // --- ADMIN VIEW (Lançamentos e Extrato) ---
+    // ==========================================
+    function carregarListasFormulario() {
+      try {
+        google.script.run
+          .withFailureHandler(err => sentinelaFin("getDadosParaLancamento", "ERRO", err.message))
+          .withSuccessHandler(function(dados) {
+            if (!dados) return;
+
+            var selAcad = document.getElementById('fin-academia');
+            var selFiltro = document.getElementById('filtro-academia');
+            
+            if(selAcad) selAcad.innerHTML = "";
+            if(selFiltro) selFiltro.innerHTML = '<option value="TODAS">Todas as Unidades</option>';
+
+            if(dados.locais) {
+                dados.locais.forEach(function(local) {
+                    if(selAcad) {
+                        var opt1 = document.createElement("option");
+                        opt1.value = local; opt1.text = local;
+                        if(usuarioAtual.academia && String(local).indexOf(usuarioAtual.academia) !== -1) opt1.selected = true;
+                        selAcad.appendChild(opt1);
+                    }
+                    if(selFiltro) {
+                        var opt2 = document.createElement("option");
+                        opt2.value = local; opt2.text = local;
+                        selFiltro.appendChild(opt2);
+                    }
+                });
+            }
+
+            var selAluno = document.getElementById('fin-aluno-select');
+            if(selAluno) {
+                selAluno.innerHTML = '<option value="">-- Selecione o Aluno --</option>';
+                if(dados.alunos) {
+                    dados.alunos.forEach(function(aluno) {
+                        var opt = document.createElement("option");
+                        opt.value = aluno.login; opt.text = aluno.nome;
+                        selAluno.appendChild(opt);
+                    });
+                }
+            }
+
+            carregarPacotesSelect();
+        }).getDadosParaLancamento();
+      } catch(e) { sentinelaFin("carregarListasFormulario", "ERRO", e.message); }
+    }
+
+    function carregarDadosAdmin() {
+      try {
+        var elIni = document.getElementById('filtro-ini');
+        var elFim = document.getElementById('filtro-fim');
+        var elAcad = document.getElementById('filtro-academia');
+
+        var filtros = {
+            dataInicio: elIni ? elIni.value : "",
+            dataFim: elFim ? elFim.value : "",
+            academia: elAcad ? elAcad.value : ""
+        };
+
+        var container = document.getElementById('lista-transacoes');
+        if(container) container.innerHTML = "<div style='padding:20px;text-align:center; color:var(--dynamic-text); opacity:0.5;'>Sincronizando Caixa...</div>";
+
+        google.script.run
+          .withFailureHandler(err => sentinelaFin("getRelatorioFinanceiroAdmin", "ERRO", err.message))
+          .withSuccessHandler(function(resTexto) {
+            try {
+                var dados = JSON.parse(resTexto);
+                
+                if (elAcad && !dados.isSuperAdmin) {
+                    elAcad.disabled = true;
+                    elAcad.style.opacity = "0.5";
+                    if(elAcad.options.length > 0) elAcad.innerHTML = "<option>" + (usuarioAtual.academia || "Sua Academia") + "</option>";
+                }
+
+                const safeSetText = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = "R$ " + (val || 0).toFixed(2); };
+                safeSetText('adm-entradas', dados.entradas);
+                safeSetText('adm-saidas', dados.saidas);
+                safeSetText('adm-saldo', dados.saldo);
+                
+                renderizarLista(dados.historico || []);
+            } catch(eParse) { sentinelaFin("ParseRelatorioAdmin", "ERRO", eParse.message); }
+        }).getRelatorioFinanceiroAdmin(usuarioAtual.LOGIN, filtros);
+      } catch(e) { sentinelaFin("carregarDadosAdmin", "ERRO", e.message); }
+    }
+
+    function renderizarLista(lista) {
+      try {
+        var container = document.getElementById('lista-transacoes');
+        if(!container) return; // Se a div não existir, não quebra a tela
+
+        container.innerHTML = "";
+        if (!lista || lista.length === 0) {
+          container.innerHTML = "<div style='padding:20px; text-align:center; color:var(--dynamic-text); opacity:0.5;'>Sem movimentação no período.</div>";
+          return;
+        }
+
+        lista.forEach(function(t) {
+          var dataF = t.Data_Registro || t.data_registro || "--";
+          try { if(String(dataF).indexOf("T") !== -1) dataF = dataF.split("T")[0]; } catch(e){}
+          if(dataF.includes('-')) { const p = dataF.split('-'); dataF = `${p[2]}/${p[1]}/${p[0]}`; } // Formato BR
+          
+          var tipo = String(t.Tipo || t.tipo || "").toLowerCase();
+          var isReceita = tipo.indexOf('receita') !== -1;
+          var cor = isReceita ? 'cor-verde' : 'cor-vermelho';
+          var sinal = isReceita ? '+ ' : '- ';
+          
+          var div = document.createElement('div');
+          div.className = 'trx-item';
+          div.innerHTML = 
+            '<div class="trx-info">' +
+              '<h4>' + (t.Descricao || t.descricao || t.Categoria || t.categoria) + '</h4>' +
+              '<span>' + dataF + ' • ' + (t.Login_Aluno || t.login_aluno || t.Academia_Ref || t.academia_ref) + '</span>' +
+            '</div>' +
+            '<div class="trx-valor ' + cor + '">' + sinal + ' R$ ' + parseFloat(t.Valor || t.valor || 0).toFixed(2) + '</div>';
+          container.appendChild(div);
+        });
+      } catch(e) { sentinelaFin("renderizarLista", "ERRO", e.message); }
+    }
+
+    function carregarDependenciasFinanceiras() {
+      try {
+        carregarCategoriasFinanceiras();
+        carregarFormasPagamento();
+        const cascataAluno = document.getElementById('area-aluno-cascata');
+        if(cascataAluno && cascataAluno.style.display === 'block') {
+          popularAlunosPorUnidade();
+        }
+      } catch(e) { sentinelaFin("carregarDependenciasFinanceiras", "ERRO", e.message); }
+    }
+
+    function carregarCategoriasFinanceiras() {
+      try {
+        const elAcad = document.getElementById('fin-academia');
+        const elTipo = document.getElementById('fin-tipo');
+        if(!elAcad || !elTipo) return;
+
+        const local = elAcad.value;
+        const tipo = elTipo.value;
+        
+        google.script.run
+          .withFailureHandler(err => sentinelaFin("getCategoriasFinanceirasCascata", "ERRO", err.message))
+          .withSuccessHandler(function(categorias) {
+          const sel = document.getElementById('fin-categoria');
+          if(!sel) return;
+          sel.innerHTML = '<option value="">-- Selecione a Categoria --</option>';
+          categorias.forEach(c => {
+            let opt = new Option(c.nome || c.Nome, c.nome || c.Nome);
+            opt.dataset.exibeAluno = c.exibe_aluno || c["Exibe Aluno"] || "Não";
+            sel.add(opt);
           });
+        }).getCategoriasFinanceirasCascata(tipo, local);
+      } catch(e) { sentinelaFin("carregarCategoriasFinanceiras", "ERRO", e.message); }
+    }
+
+    function carregarFormasPagamento() {
+      try {
+        const elAcad = document.getElementById('fin-academia');
+        if(!elAcad) return;
+        const local = elAcad.value;
+        google.script.run
+          .withFailureHandler(err => sentinelaFin("getFormasPagamentoCascata", "ERRO", err.message))
+          .withSuccessHandler(function(formas) {
+          const sel = document.getElementById('fin-forma');
+          if(sel) sel.innerHTML = formas.map(f => `<option value="${f.nome || f.Nome}">${f.nome || f.Nome}</option>`).join('');
+        }).getFormasPagamentoCascata(local);
+      } catch(e) { sentinelaFin("carregarFormasPagamento", "ERRO", e.message); }
+    }
+
+    function carregarPacotesSelect() {
+      try {
+        google.script.run
+          .withFailureHandler(err => sentinelaFin("getPacotesDisponiveis", "ERRO", err.message))
+          .withSuccessHandler(function(pacotes) {
+          var sel = document.getElementById('fin-pacote');
+          if(!sel) return;
+          sel.innerHTML = '<option value="">Selecione o Pacote</option>';
+          if(pacotes) {
+              pacotes.forEach(function(p) { 
+                  var opt = document.createElement("option");
+                  const nomeP = p.nome_pacote || p.Nome_Pacote;
+                  const valorP = p.valor_padrao || p.Valor_Padrao;
+                  opt.value = nomeP;
+                  opt.text = nomeP + " - R$ " + valorP;
+                  sel.appendChild(opt);
+              });
+          }
+        }).getPacotesDisponiveis();
+      } catch(e) { sentinelaFin("carregarPacotesSelect", "ERRO", e.message); }
+    }
+
+    function detectarNecessidadeAluno() {
+      try {
+        const selCat = document.getElementById('fin-categoria');
+        const areaAluno = document.getElementById('area-aluno-cascata');
+        const areaPacote = document.getElementById('area-pacote-cascata');
+        
+        if(!selCat || selCat.selectedIndex === -1) return;
+
+        const catName = String(selCat.value).toLowerCase();
+        const exibe = String(selCat.options[selCat.selectedIndex].dataset.exibeAluno).toLowerCase();
+        
+        // 1. Regra do Aluno
+        if(areaAluno) {
+            if (exibe === 'sim' || exibe === 'true') {
+              areaAluno.style.display = 'block';
+              popularAlunosPorUnidade();
+            } else {
+              areaAluno.style.display = 'none';
+            }
+        }
+
+        // 2. Regra do Pacote (Só exibe se for Mensalidade ou Pacote)
+        if(areaPacote) {
+            if(catName.includes('mensalidade') || catName.includes('pacote')) {
+                areaPacote.style.display = 'block';
+            } else {
+                areaPacote.style.display = 'none';
+            }
+        }
+      } catch(e) { sentinelaFin("detectarNecessidadeAluno", "ERRO", e.message); }
+    }
+
+    function popularAlunosPorUnidade() {
+      try {
+        const elAcad = document.getElementById('fin-academia');
+        const selAluno = document.getElementById('fin-aluno-select');
+        if(!elAcad || !selAluno) return;
+
+        const local = elAcad.value;
+        selAluno.innerHTML = '<option value="">Carregando Alunos...</option>';
+
+        google.script.run
+          .withFailureHandler(err => sentinelaFin("listarAlunosAdmin_Fin", "ERRO", err.message))
+          .withSuccessHandler(function(alunos) {
+          // Filtra alunos pelo Local e Status Ativo
+          const filtrados = alunos.filter(a => String(a.academia).includes(local) && String(a.status).toLowerCase() === 'ativo');
+          selAluno.innerHTML = '<option value="">-- Selecione o Aluno --</option>';
+          filtrados.forEach(a => {
+            selAluno.options.add(new Option(a.nome, a.login));
+          });
+        }).listarAlunosAdmin();
+      } catch(e) { sentinelaFin("popularAlunosPorUnidade", "ERRO", e.message); }
+    }
+
+    function salvarMovimentacao() {
+      try {
+        var btn = document.querySelector('.btn-lancar');
+        var selAluno = document.getElementById('fin-aluno-select');
+        var elVal = document.getElementById('fin-valor');
+        var elDesc = document.getElementById('fin-desc');
+        
+        if(!elVal || !elDesc || !btn) return;
+
+        var val = elVal.value;
+        var desc = elDesc.value;
+        
+        if (!val || !desc) { alert("Preencha Descrição e Valor!"); return; }
+
+        btn.disabled = true; btn.innerText = "PROCESSANDO...";
+
+        const safeGetVal = (id) => { const e = document.getElementById(id); return e ? e.value : ""; };
+
+        var dados = {
+          tipo: safeGetVal('fin-tipo'),
+          categoria: safeGetVal('fin-categoria'),
+          descricao: desc,
+          valor: val,
+          academia: safeGetVal('fin-academia'),
+          alunoLogin: (selAluno && selAluno.style.display !== 'none') ? selAluno.value : "",
+          alunoNome: (selAluno && selAluno.style.display !== 'none' && selAluno.options[selAluno.selectedIndex]) ? selAluno.options[selAluno.selectedIndex].text : "",
+          nomePacote: safeGetVal('fin-pacote'),
+          responsavel: usuarioAtual.LOGIN,
+          forma: safeGetVal('fin-forma')
+        };
+
+        google.script.run
+          .withSuccessHandler(function(res) {
+            alert(res.msg || "Sucesso!");
+            toggleForm();
+            carregarDadosAdmin();
+            btn.disabled = false; btn.innerText = "CONFIRMAR LANÇAMENTO";
+          })
+          .withFailureHandler(function(err){
+            sentinelaFin("salvarMovimentacao", "ERRO", err.message);
+            alert("Erro na operação: " + err.message);
+            btn.disabled = false; btn.innerText = "CONFIRMAR LANÇAMENTO";
+          }).registrarMovimentacao(dados);
+      } catch(e) { 
+        sentinelaFin("salvarMovimentacao_Main", "ERRO", e.message);
+        alert("Erro ao formatar os dados. Verifique os campos.");
+        var btn = document.querySelector('.btn-lancar');
+        if(btn) { btn.disabled = false; btn.innerText = "CONFIRMAR LANÇAMENTO"; }
       }
-      document.getElementById('fin-categoria').addEventListener('change', function() {
-        sel.style.display = (this.value === 'Mensalidade' || this.value === 'Pacote') ? 'block' : 'none';
-      });
-    }).getPacotesDisponiveis();
-  }
-
-  function salvarMovimentacao() {
-    var btn = document.querySelector('.btn-lancar');
-    var selAluno = document.getElementById('fin-aluno-select');
-    var val = document.getElementById('fin-valor').value;
-    var desc = document.getElementById('fin-desc').value;
-    
-    if (!val || !desc) { alert("Preencha Descrição e Valor!"); return; }
-
-    btn.disabled = true; btn.innerText = "PROCESSANDO...";
-
-    var dados = {
-      tipo: document.getElementById('fin-tipo').value,
-      categoria: document.getElementById('fin-categoria').value,
-      descricao: desc,
-      valor: val,
-      academia: document.getElementById('fin-academia').value,
-      alunoLogin: selAluno.value,
-      alunoNome: selAluno.options[selAluno.selectedIndex] ? selAluno.options[selAluno.selectedIndex].text : "",
-      nomePacote: document.getElementById('fin-pacote').value,
-      responsavel: usuarioAtual.LOGIN,
-      forma: document.getElementById('fin-forma').value
-    };
-
-    google.script.run.withSuccessHandler(function(res) {
-      alert(res.msg);
-      toggleForm();
-      carregarDadosAdmin();
-      btn.disabled = false; btn.innerText = "CONFIRMAR LANÇAMENTO";
-    }).withFailureHandler(function(err){
-      alert("Erro na operação: " + err.message);
-      btn.disabled = false; btn.innerText = "CONFIRMAR LANÇAMENTO";
-    }).registrarMovimentacao(dados);
-  }
-</script>
+    }
+  } // Fim trava
+  </script>
+</div>

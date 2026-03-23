@@ -330,9 +330,19 @@
     const LINK_YT_APP = "<?= typeof linkYouTube !== 'undefined' ? linkYouTube : 'https://www.youtube.com/' ?>";
     const LINK_INSTA_APP = "<?= typeof linkInstagram !== 'undefined' ? linkInstagram : 'https://www.instagram.com/' ?>";
 
+    // 🛡️ [BLINDAGEM MILITAR] Função de reporte assíncrona para erros não pegos
+    function registrarLogFront(nivel, acao, detalhes) {
+      console.log(`[${nivel}] ${acao}: ${detalhes}`);
+      if(nivel === 'CRÍTICO' || nivel === 'ERRO') {
+        try { google.script.run.registrarLogBlindado(nivel, acao, detalhes); } catch(e) {}
+      }
+    }
+
     window.onerror = function (m, s, l) {
+      registrarLogFront("CRÍTICO", "Erro Global JS", `Msg: ${m} | Linha: ${l}`);
       const banner = document.getElementById('error-banner');
       if(banner) { banner.style.display = 'block'; banner.innerText = `⚠️ Falha: ${m} (Linha ${l})`; }
+      return false; // Continua a execução
     };
   </script>
 
@@ -387,8 +397,10 @@
     <?!= include('ChamadaDinamica'); ?>
     <?!= include('Financeiro'); ?>
   </div>
-  <div id="admin-module-wrapper" style="display:none;">
+
+  <div id="admin-module-wrapper" style="display:none; position:relative; z-index:9000;">
     <?!= include('Adm'); ?>
+    <?!= include('AdmModais'); ?>
   </div>
 
   <div id="btn-ajuda-fab" onclick="abrirModalAjuda()" style="display: flex !important;">
@@ -464,37 +476,44 @@
         if (!s) { logout(); return; }
         renderizarDashboard(JSON.parse(s));
         if(typeof carregarTreinosDeHoje === 'function') carregarTreinosDeHoje();
-      } catch (e) { logout(); }
+      } catch (e) { 
+        registrarLogFront("CRÍTICO", "Boot Dashboard", e.message);
+        logout(); 
+      }
     };
 
     // Montagem da Tela e Saudação
     function renderizarDashboard(user) {
-      currentUser = user;
-      const hora = new Date().getHours();
-      let saudacao = "Olá";
-      if (hora >= 5 && hora < 12) saudacao = "Bom dia";
-      else if (hora >= 12 && hora < 18) saudacao = "Boa tarde";
-      else saudacao = "Boa noite";
+      try {
+        currentUser = user;
+        const hora = new Date().getHours();
+        let saudacao = "Olá";
+        if (hora >= 5 && hora < 12) saudacao = "Bom dia";
+        else if (hora >= 12 && hora < 18) saudacao = "Boa tarde";
+        else saudacao = "Boa noite";
 
-      const primeiroNome = (user.nomeCompleto || user.LOGIN || "Atleta").split(" ")[0];
-      document.getElementById("greeting").textContent = `${saudacao}, ${primeiroNome}!`;
-      document.getElementById("sub-greeting").textContent = user.academia || "Plataforma de Treino";
-      if (user.fotoUrl) document.getElementById("header-img").src = user.fotoUrl;
+        const primeiroNome = (user.nomeCompleto || user.LOGIN || "Atleta").split(" ")[0];
+        document.getElementById("greeting").textContent = `${saudacao}, ${primeiroNome}!`;
+        document.getElementById("sub-greeting").textContent = user.academia || "Plataforma de Treino";
+        if (user.fotoUrl) document.getElementById("header-img").src = user.fotoUrl;
 
-      // Monta os Cards Permissivos Dinamicamente
-      const grid = document.getElementById("dashboard-grid");
-      grid.innerHTML = "";
-      getMenuCards(user).forEach(item => {
-        const div = document.createElement("div");
-        div.className = item.special ? "dash-card card-special" : "dash-card";
-        div.onclick = () => handleAction(item.action);
-        div.innerHTML = `<span class="material-icons card-icon">${item.icon}</span><div class="card-title">${item.title}</div><div class="card-subtitle">${item.subtitle}</div>`;
-        grid.appendChild(div);
-      });
+        // Monta os Cards Permissivos Dinamicamente
+        const grid = document.getElementById("dashboard-grid");
+        grid.innerHTML = "";
+        getMenuCards(user).forEach(item => {
+          const div = document.createElement("div");
+          div.className = item.special ? "dash-card card-special" : "dash-card";
+          div.onclick = () => handleAction(item.action);
+          div.innerHTML = `<span class="material-icons card-icon">${item.icon}</span><div class="card-title">${item.title}</div><div class="card-subtitle">${item.subtitle}</div>`;
+          grid.appendChild(div);
+        });
 
-      // Libera a tela
-      document.getElementById("loading-screen").style.display = "none";
-      document.getElementById("main-content").style.display = "block";
+        // Libera a tela
+        document.getElementById("loading-screen").style.display = "none";
+        document.getElementById("main-content").style.display = "block";
+      } catch(e) {
+        registrarLogFront("ERRO", "Renderizar Dashboard", e.message);
+      }
     }
 
     // 🔒 CONTROLE DE ACESSO (RBAC) BLINDADO
@@ -539,28 +558,51 @@
 
     // 🔗 ROTEADOR DE AÇÕES (Agora usando os Links Dinâmicos)
     function handleAction(action) {
-      if (action === "chamada_instrutor") { if(typeof initChamadaDinamica === 'function') initChamadaDinamica('instrutor'); else alert("Carregando..."); return; }
-      if (action === "chamada_aluno") { if(typeof initChamadaDinamica === 'function') initChamadaDinamica('aluno'); else alert("Carregando..."); return; }
-      if (action === "view_admin") { abrirAdminView(); if (typeof carregarAlunos === 'function') carregarAlunos(); return; }
-      if (action === "view_instrutor") { if(typeof abrirGestaoAlunos === 'function') abrirGestaoAlunos(); else alert("Erro: Módulo de Gestão."); return; }
-      
-      // ROTAS DES-HARDCODIFICADAS
-      if (action === "shop") { window.open(LINK_LOJA_APP, "_blank"); return; }
-      if (action === "form_cadastro") { window.open(LINK_CAD_APP, "_blank"); return; }
+      try {
+        if (action === "chamada_instrutor") { if(typeof initChamadaDinamica === 'function') initChamadaDinamica('instrutor'); else alert("Módulo Chamadas carregando..."); return; }
+        if (action === "chamada_aluno") { if(typeof initChamadaDinamica === 'function') initChamadaDinamica('aluno'); else alert("Módulo Chamadas carregando..."); return; }
+        
+        // 🛡️ [BLINDAGEM MILITAR]: Verifica se as funções pesadas do Admin existem antes de acioná-las.
+        if (action === "view_admin") { 
+            abrirAdminView(); 
+            if (typeof navAdmin === 'function') navAdmin('dashboard_relatorios'); 
+            else console.warn("Aviso: Módulo Admin ainda injetando.");
+            return; 
+        }
+        
+        if (action === "view_instrutor") { if(typeof abrirGestaoAlunos === 'function') abrirGestaoAlunos(); else alert("Erro: Módulo de Gestão."); return; }
+        
+        // ROTAS DES-HARDCODIFICADAS
+        if (action === "shop") { window.open(LINK_LOJA_APP, "_blank"); return; }
+        if (action === "form_cadastro") { window.open(LINK_CAD_APP, "_blank"); return; }
 
-      const map = { 
-          "perfil": () => carregarDadosPerfil(currentUser), 
-          "programa": () => abrirPrograma(currentUser), 
-          "biblioteca": () => abrirBiblioteca(), 
-          "videos": () => abrirVideoteca(), 
-          "locais": () => abrirLocaisTreino(), 
-          "cursos": () => abrirCursos(), 
-          "social": () => abrirSocial(),
-          "financeiro": () => abrirFinanceiro(), 
-          "ranking": () => abrirRanking(), 
-          "certificados": () => abrirCertificados()
-      };
-      if (map[action]) map[action]();
+        const map = { 
+            "perfil": () => carregarDadosPerfil(currentUser), 
+            "programa": () => abrirPrograma(currentUser), 
+            "biblioteca": () => abrirBiblioteca(), 
+            "videos": () => abrirVideoteca(), 
+            "locais": () => abrirLocaisTreino(), 
+            "cursos": () => abrirCursos(), 
+            "social": () => abrirSocial(),
+            "financeiro": () => {
+                // 🛡️ [BLINDAGEM]: Para o admin financeiro funcionar, ele precisa que a casca (Adm) e o Modal (AdmModais) existam.
+                if(typeof abrirFinanceiro === 'function') {
+                    abrirFinanceiro();
+                } else if(typeof abrirModalPagamentoAluno === 'function') {
+                    // Fallback para caso seja um Aluno comum acessando o seu financeiro pessoal.
+                    abrirModalPagamentoAluno();
+                } else {
+                    alert("Aguarde, módulo financeiro carregando...");
+                }
+            }, 
+            "ranking": () => abrirRanking(), 
+            "certificados": () => abrirCertificados()
+        };
+        
+        if (map[action]) map[action]();
+      } catch(e) {
+        registrarLogFront("ERRO", "Router Rota HandleAction", `Ação: ${action} falhou com erro: ${e.message}`);
+      }
     }
 
     // ============================================================================
@@ -680,11 +722,32 @@
     }
 
     // Toggle Admin View
-    function abrirAdminView() { document.getElementById("main-content").style.display = "none"; document.getElementById("admin-module-wrapper").style.display = "block"; if (typeof carregarAlunos === 'function') carregarAlunos(); }
-    window.fecharAdmin = function () { document.getElementById("admin-module-wrapper").style.display = "none"; document.getElementById("main-content").style.display = "block"; };
+    function abrirAdminView() { 
+      const main = document.getElementById("main-content");
+      const wrapper = document.getElementById("admin-module-wrapper");
+      
+      if(main && wrapper) {
+        main.style.display = "none"; 
+        wrapper.style.display = "block"; 
+      }
+    }
+    
+    window.fecharAdmin = function () { 
+      const main = document.getElementById("main-content");
+      const wrapper = document.getElementById("admin-module-wrapper");
+      
+      if(main && wrapper) {
+        wrapper.style.display = "none"; 
+        main.style.display = "block"; 
+      }
+    };
     
     // Destrói a sessão e volta para o Login
-    function logout() { localStorage.removeItem("userSession"); CacheSystem.clearAll(); google.script.run.withSuccessHandler(u => window.top.location.href = u + "?page=login").getScriptUrl(); }
+    function logout() { 
+        localStorage.removeItem("userSession"); 
+        CacheSystem.clearAll(); 
+        google.script.run.withSuccessHandler(u => window.top.location.href = u + "?page=login").getScriptUrl(); 
+    }
 
     /* ============================================================================
        LÓGICA BLINDADA DO MODAL DE SUPORTE E ERROS
@@ -710,9 +773,19 @@
       e.preventDefault(); 
       const btn = e.target.querySelector('button[type="submit"]'); 
       btn.innerText = "ENVIANDO..."; btn.disabled = true;
-      google.script.run.withSuccessHandler(res => { 
+      
+      // Forma blindada de envio
+      const formData = {};
+      new FormData(e.target).forEach((v,k) => formData[k] = v);
+
+      google.script.run
+        .withFailureHandler(err => {
+           alert("Erro ao enviar: " + err.message);
+           btn.innerText = "ENVIAR MENSAGEM"; btn.disabled = false;
+        })
+        .withSuccessHandler(res => { 
           alert("Enviado com sucesso!"); fecharModalAjuda(); btn.innerText = "ENVIAR MENSAGEM"; btn.disabled = false;
-      }).salvarTicketSuporte(new FormData(e.target));
+      }).salvarTicketSuporte(formData);
     }
 
   /**
