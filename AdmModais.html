@@ -433,18 +433,18 @@
 <div id="adm-modal-financeiro" class="adm-modal">
   <div class="adm-modal-box">
     <div class="adm-h3">Fluxo de Caixa Inteligente
-      <button type="button" onclick="closeModal('adm-modal-financeiro')" style="background:none;border:none;color:red;cursor:pointer;font-size:20px;">✕</button>
+      <button type="button" onclick="window.closeModal('adm-modal-financeiro')" style="background:none;border:none;color:red;cursor:pointer;font-size:20px;">✕</button>
     </div>
-    <form onsubmit="handleAdmForm(event, 'registrarMovimentacao')">
+    <form onsubmit="window.handleAdmForm(event, 'registrarMovimentacao')">
       <input type="hidden" name="responsavel" id="fin_resp">
       <div class="form-grid">
         <div>
           <label class="adm-label">1. Selecione a Unidade</label>
-          <select name="academia" id="fin_acad" class="adm-input" onchange="if(typeof carregarConfiguracoesUnidade === 'function') carregarConfiguracoesUnidade()" required></select>
+          <select name="academia" id="fin_acad" class="adm-input" onchange="window.carregarConfiguracoesUnidade()" required></select>
         </div>
         <div>
           <label class="adm-label">2. Tipo</label>
-          <select name="tipo" id="fin_tipo" class="adm-input" onchange="if(typeof carregarCategoriasFinanceiras === 'function') carregarCategoriasFinanceiras()" required>
+          <select name="tipo" id="fin_tipo" class="adm-input" onchange="window.carregarCategoriasFinanceiras()" required>
             <option value="Receita">Receita (Entrada +)</option>
             <option value="Despesa">Despesa (Saída -)</option>
           </select>
@@ -453,7 +453,7 @@
       <div class="form-grid">
         <div>
           <label class="adm-label">3. Categoria</label>
-          <select name="categoria" id="fin_cat" class="adm-input" onchange="if(typeof detectarNecessidadeAluno === 'function') detectarNecessidadeAluno()" required>
+          <select name="categoria" id="fin_cat" class="adm-input" onchange="window.detectarNecessidadeAluno()" required>
             <option value="">Escolha Unidade/Tipo...</option>
           </select>
         </div>
@@ -467,6 +467,11 @@
         style="display:none; background: #fffdf5; padding: 10px; border-radius: 8px; border: 1px solid #ffeaa7; margin-top: 10px;">
         <label class="adm-label" style="color:#d63031; margin-top:0;">👤 Vincular ao Aluno (Nome Completo)</label>
         <select name="alunoLogin" id="fin_aluno_nome" class="adm-input"></select>
+
+        <label class="adm-label" style="color:#d63031; margin-top:10px;">📦 Qual o Plano Adquirido?</label>
+        <select name="nomePacote" id="fin_pacote_venda" class="adm-input">
+           <option value="">-- Opcional (Sem Plano) --</option>
+        </select>
       </div>
 
       <label class="adm-label">Descrição</label>
@@ -484,12 +489,7 @@
         </div>
         <div>
           <label class="adm-label">Modalidade Ref.</label>
-          <select name="modalidade" id="fin_mod_form" class="adm-input">
-                <option value="Geral">Geral (Padrão)</option>
-                <option value="Krav Maga">Krav Maga</option>
-                <option value="Muay Thai">Muay Thai</option>
-                <option value="Karate">Karate</option>
-            </select>
+          <select name="modalidade" id="fin_mod_form" class="adm-input"></select>
         </div>
       </div>
 

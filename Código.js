@@ -1666,7 +1666,7 @@ function verificarCredenciais(formObject) {
   const isCheckOnly = formObject.checkOnly || false;
 
   try {
-    const sheet = getSheet(NOME_ABA_ALUNOS);
+    const sheet = getSheet("cadastro_de_alunos"); // Nome exato
     const data = sheet.getDataRange().getDisplayValues();
     const headers = data[0].map(h => String(h).trim().toLowerCase());
 
@@ -1674,9 +1674,7 @@ function verificarCredenciais(formObject) {
       login: headers.indexOf("login"),
       senha: headers.indexOf("senha"),
       nome: headers.indexOf("nome completo"),
-      // 🥋 Poder do Tatame (Quem dá aula)
       nivelTatame: headers.indexOf("nível do praticante") !== -1 ? headers.indexOf("nível do praticante") : headers.indexOf("nivel do praticante"),
-      // 🏢 Poder do Escritório (RBAC - ADM)
       nivelAdm: headers.indexOf("niveladministrativo") !== -1 ? headers.indexOf("niveladministrativo") : headers.indexOf("nivel administrativo"),
       foto: headers.indexOf("foto 3x4 (para a carteirinha)"),
       grad: headers.indexOf("graduacao_atual") !== -1 ? headers.indexOf("graduacao_atual") : headers.indexOf("graduação_atual"),
@@ -1707,14 +1705,11 @@ function verificarCredenciais(formObject) {
 
         const userModalidade = (col.modalidade > -1 && row[col.modalidade]) ? String(row[col.modalidade]).trim() : gradInfo.modalidade;
 
-        // 🛡️ RBAC: SEPARAÇÃO DE PODERES
         const roleTatame = String((col.nivelTatame > -1 && row[col.nivelTatame]) ? row[col.nivelTatame] : gradInfo.nivel).toUpperCase();
         const roleOffice = String(col.nivelAdm > -1 ? row[col.nivelAdm] : "").toUpperCase();
 
         const isInstrutor = roleTatame.includes("INSTRUTOR") || roleTatame.includes("PROFESSOR") || roleTatame.includes("MESTRE");
         const isMestre = roleTatame.includes("MESTRE");
-
-        // 🚨 A MÁGICA DO RBAC: Só é Admin do sistema se a coluna NivelAdministrativo disser "ADMIN" ou "ADM"
         const isAdmin = (roleOffice === "ADMIN" || roleOffice === "ADM");
 
         const dataNascimento = (col.nasc > -1) ? row[col.nasc] : "";
@@ -1733,7 +1728,7 @@ function verificarCredenciais(formObject) {
         let dataIngresso = (col.carimbo > -1 && row[col.carimbo]) ? String(row[col.carimbo]).split(" ")[0] : "--/--/----";
 
         const userPayload = {
-          LOGIN: loginInput,
+          LOGIN: String(row[col.login]).trim(), // 🛡️ MUDANÇA AQUI: Mantém maiúsculas/minúsculas EXATAS da planilha!
           nomeCompleto: row[col.nome],
           graduacao: (col.grad > -1) ? row[col.grad] : "Iniciante",
           nivel: roleTatame,
@@ -1748,7 +1743,7 @@ function verificarCredenciais(formObject) {
           carimbo: dataIngresso,
           isInstrutor: isInstrutor,
           isMestre: isMestre,
-          isAdmin: isAdmin // <-- Variável que trava o Financeiro e Admin no Frontend
+          isAdmin: isAdmin
         };
 
         if (!isCheckOnly) registrarLogLogin(loginInput, "SUCESSO");
@@ -2835,39 +2830,72 @@ function salvarTurma(form) {
 }
 
 /**
- * ============================================================================
  * 📊 DASHBOARD DE INTELIGÊNCIA E RELATÓRIOS V3 (MULTI-FRANQUIAS)
- * ============================================================================
+ */
+/**
+ * 📊 DASHBOARD DE INTELIGÊNCIA E RELATÓRIOS V3 (MULTI-FRANQUIAS)
  */
 function getEstatisticasRelatorio(login, filtros) {
   try {
+    registrarLogBlindado("INFO", "DASH_BACKEND", `Iniciando cálculos para o usuário: [${login}]`);
     const ws = SpreadsheetApp.getActiveSpreadsheet();
 
-    // 1. CARREGA DADOS DO USUÁRIO LOGADO (Para saber as permissões dele)
+    // 1. CARREGA DADOS DO USUÁRIO LOGADO E CABEÇALHOS
     const abaAlunos = ws.getSheetByName("cadastro_de_alunos");
-    const dadosAlunos = abaAlunos.getDataRange().getValues();
-    const cabecalhoAlunos = dadosAlunos[0];
+    if (!abaAlunos) throw new Error("Aba 'cadastro_de_alunos' não encontrada.");
 
-    const idxLogin = cabecalhoAlunos.indexOf("LOGIN");
-    const idxAcad = cabecalhoAlunos.indexOf("Academia Vinculada");
-    const idxNivelAdmin = cabecalhoAlunos.indexOf("NivelAdministrativo");
+    const dadosAlunos = abaAlunos.getDataRange().getValues();
+    if (dadosAlunos.length < 2) return { success: true, kpiAtivos: 0, kpiInadimplentes: 0, kpiReceitaPrevista: "0,00", kpiRecebido: "0,00", kpiPendente: "0,00", kpiDespesa: "0,00", listaCobranca: [], listaRanking: [] };
+
+    // Para achar as colunas, removemos letras maiúsculas e espaços SÓ DA PESQUISA, a planilha fica intocada.
+    const cabecalhoAlunosNorm = dadosAlunos[0].map(h => String(h).trim().toLowerCase().replace(/\s+/g, ""));
+    const findColAluno = (name) => cabecalhoAlunosNorm.indexOf(String(name).trim().toLowerCase().replace(/\s+/g, ""));
+
+    const idxLogin = findColAluno("LOGIN");
+    const idxAcad = findColAluno("Academia Vinculada");
+    let idxNivelAdmin = findColAluno("NivelAdministrativo");
+    if (idxNivelAdmin === -1) idxNivelAdmin = findColAluno("Nivel Administrativo");
+    const idxStatus = findColAluno("STATUS");
+    const idxNome = findColAluno("Nome Completo");
+    const idxTurma = findColAluno("Turma Vinculada");
+    const idxTel = findColAluno("Telefone");
 
     let userAcads = [];
     let isMaster = false;
+    let usuarioEncontrado = false;
+
+    // A chave do seu sucesso: Deixar tudo perfeitamente limpo na hora da comparação
+    const loginBuscado = String(login).trim();
 
     for (let i = 1; i < dadosAlunos.length; i++) {
-      if (String(dadosAlunos[i][idxLogin]).trim() === login) {
-        let academiasStr = String(dadosAlunos[i][idxAcad]).toLowerCase();
+      let loginPlanilha = idxLogin > -1 ? String(dadosAlunos[i][idxLogin]).trim() : "";
+
+      // Compara ignorando diferenças sutis de maiúsculas, apenas para dar acesso
+      if (loginPlanilha.toLowerCase() === loginBuscado.toLowerCase()) {
+        usuarioEncontrado = true;
+        let academiasStr = idxAcad > -1 ? String(dadosAlunos[i][idxAcad]).toLowerCase() : "";
         userAcads = academiasStr.split(',').map(a => a.trim());
-        let nivel = String(dadosAlunos[i][idxNivelAdmin]).toUpperCase();
+        let nivel = idxNivelAdmin > -1 ? String(dadosAlunos[i][idxNivelAdmin]).toUpperCase().trim() : "";
+
         if (nivel === "ADMIN" || nivel === "DIRETOR" || userAcads.includes("todas")) {
           isMaster = true;
         }
+        registrarLogBlindado("SUCESSO", "DASH_BACKEND", `Usuário [${loginPlanilha}] autenticado. Permissão Master: ${isMaster}`);
         break;
       }
     }
 
-    // 2. CAPTURA OS FILTROS ENVIADOS PELO DASHBOARD
+    if (!usuarioEncontrado) {
+      registrarLogBlindado("ALERTA", "DASH_BACKEND", `Acesso bloqueado. O login [${loginBuscado}] não consta na aba cadastro_de_alunos.`);
+      return { success: true, kpiAtivos: 0, kpiInadimplentes: 0, kpiReceitaPrevista: "0,00", kpiRecebido: "0,00", kpiPendente: "0,00", kpiDespesa: "0,00", listaCobranca: [], listaRanking: [] };
+    }
+
+    if (userAcads.length === 0 && !isMaster) {
+      registrarLogBlindado("ALERTA", "DASH_BACKEND", `Acesso bloqueado. [${loginBuscado}] não possui Academias Vinculadas.`);
+      return { success: true, kpiAtivos: 0, kpiInadimplentes: 0, kpiReceitaPrevista: "0,00", kpiRecebido: "0,00", kpiPendente: "0,00", kpiDespesa: "0,00", listaCobranca: [], listaRanking: [] };
+    }
+
+    // 2. FILTROS DA TELA
     const targetAcad = (filtros && filtros.academia && filtros.academia !== "TODAS") ? String(filtros.academia).trim().toLowerCase() : "";
     const dataIniStr = (filtros && filtros.dataInicio) ? filtros.dataInicio : "";
     const dataFimStr = (filtros && filtros.dataFim) ? filtros.dataFim : "";
@@ -2877,47 +2905,63 @@ function getEstatisticasRelatorio(login, filtros) {
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
 
-    // 3. MAPEAR PACOTES (Para saber os valores)
+    // 3. MAPEAR PACOTES
     const abaPacotes = ws.getSheetByName("Fin_Pacotes");
-    const dadosPacotes = abaPacotes.getDataRange().getValues();
     const mapPacotes = {};
-    const idxPacNome = dadosPacotes[0].indexOf("Nome_Pacote");
-    const idxPacValor = dadosPacotes[0].indexOf("Valor_Padrao");
-    for (let i = 1; i < dadosPacotes.length; i++) {
-      let nome = String(dadosPacotes[i][idxPacNome]).trim();
-      let valor = parseFloat(String(dadosPacotes[i][idxPacValor]).replace(',', '.')) || 0;
-      mapPacotes[nome] = valor;
-    }
+    if (abaPacotes) {
+      const dadosPacotes = abaPacotes.getDataRange().getValues();
+      if (dadosPacotes.length > 1) {
+        const hPacotes = dadosPacotes[0].map(h => String(h).trim().toLowerCase().replace(/\s+/g, ""));
+        const idxPacNome = hPacotes.indexOf("nome_pacote") > -1 ? hPacotes.indexOf("nome_pacote") : hPacotes.indexOf("nomedopacote");
+        const idxPacValor = hPacotes.indexOf("valor_padrao") > -1 ? hPacotes.indexOf("valor_padrao") : hPacotes.indexOf("valorpadrão");
 
-    // 4. MAPEAR ASSINATURAS (Para saber quem está em dia e quem está atrasado)
-    const abaAssinaturas = ws.getSheetByName("Fin_Assinaturas");
-    const dadosAssinaturas = abaAssinaturas.getDataRange().getValues();
-    const mapAssinaturas = {};
-    const idxAssLogin = dadosAssinaturas[0].indexOf("Login_Aluno");
-    const idxAssPacote = dadosAssinaturas[0].indexOf("Pacote_Atual");
-    const idxAssFim = dadosAssinaturas[0].indexOf("Data_Fim");
-    const idxAssStatus = dadosAssinaturas[0].indexOf("Status_Assinatura");
-
-    for (let i = 1; i < dadosAssinaturas.length; i++) {
-      let l = String(dadosAssinaturas[i][idxAssLogin]).trim();
-      if (!l) continue;
-      let v = dadosAssinaturas[i][idxAssFim];
-      let dFimPacote = null;
-      if (v instanceof Date) { dFimPacote = v; }
-      else if (v && String(v).includes('/')) {
-        let p = String(v).split('/');
-        if (p.length === 3) dFimPacote = new Date(p[2], p[1] - 1, p[0]);
-      } else if (v && String(v).includes('-')) {
-        dFimPacote = new Date(v + "T00:00:00");
+        if (idxPacNome > -1 && idxPacValor > -1) {
+          for (let i = 1; i < dadosPacotes.length; i++) {
+            let nome = String(dadosPacotes[i][idxPacNome]).trim().toLowerCase(); // Guardamos em minúsculo para busca infalível
+            let valor = parseFloat(String(dadosPacotes[i][idxPacValor]).replace(',', '.')) || 0;
+            mapPacotes[nome] = valor;
+          }
+        }
       }
-      mapAssinaturas[l] = {
-        pacote: String(dadosAssinaturas[i][idxAssPacote]).trim(),
-        vencimento: dFimPacote,
-        status: String(dadosAssinaturas[i][idxAssStatus]).trim().toLowerCase()
-      };
     }
 
-    // 5. PROCESSAMENTO DE ALUNOS (Cálculo de KPIs e Listas)
+    // 4. MAPEAR ASSINATURAS
+    const abaAssinaturas = ws.getSheetByName("Fin_Assinaturas");
+    const mapAssinaturas = {};
+    if (abaAssinaturas) {
+      const dadosAssinaturas = abaAssinaturas.getDataRange().getValues();
+      if (dadosAssinaturas.length > 1) {
+        const hAssinaturas = dadosAssinaturas[0].map(h => String(h).trim().toLowerCase().replace(/\s+/g, ""));
+        const idxAssLogin = hAssinaturas.indexOf("login_aluno") > -1 ? hAssinaturas.indexOf("login_aluno") : hAssinaturas.indexOf("logindoaluno");
+        const idxAssPacote = hAssinaturas.indexOf("pacote_atual") > -1 ? hAssinaturas.indexOf("pacote_atual") : hAssinaturas.indexOf("pacoteatual");
+        const idxAssFim = hAssinaturas.indexOf("data_fim") > -1 ? hAssinaturas.indexOf("data_fim") : hAssinaturas.indexOf("datafim");
+        const idxAssStatus = hAssinaturas.indexOf("status_assinatura") > -1 ? hAssinaturas.indexOf("status_assinatura") : hAssinaturas.indexOf("statusdaassinatura");
+
+        if (idxAssLogin > -1 && idxAssPacote > -1 && idxAssFim > -1) {
+          for (let i = 1; i < dadosAssinaturas.length; i++) {
+            let l = String(dadosAssinaturas[i][idxAssLogin]).trim().toLowerCase(); // Login em minúsculo
+            if (!l) continue;
+            let v = dadosAssinaturas[i][idxAssFim];
+            let dFimPacote = null;
+            if (v instanceof Date) { dFimPacote = v; }
+            else if (v && String(v).includes('/')) {
+              let p = String(v).split('/');
+              if (p.length === 3) dFimPacote = new Date(p[2], p[1] - 1, p[0]);
+            } else if (v && String(v).includes('-')) {
+              dFimPacote = new Date(String(v).split(' ')[0] + "T00:00:00");
+            }
+            mapAssinaturas[l] = {
+              pacote: String(dadosAssinaturas[i][idxAssPacote]).trim().toLowerCase(), // Pacote em minúsculo
+              vencimento: dFimPacote,
+              status: idxAssStatus > -1 ? String(dadosAssinaturas[i][idxAssStatus]).trim().toLowerCase() : "ativo"
+            };
+          }
+        }
+      }
+    }
+
+    // 5. CÁLCULO DE ALUNOS
+    registrarLogBlindado("INFO", "DASH_BACKEND", "Iniciando cálculo de densidade e receitas...");
     let totalAtivos = 0;
     let totalInadimplentes = 0;
     let receitaPrevista = 0;
@@ -2925,35 +2969,27 @@ function getEstatisticasRelatorio(login, filtros) {
     let listaCobranca = [];
     let contagemTurmas = {};
 
-    const idxStatus = cabecalhoAlunos.indexOf("STATUS");
-    const idxNome = cabecalhoAlunos.indexOf("Nome Completo");
-    const idxTurma = cabecalhoAlunos.indexOf("Turma Vinculada");
-    const idxTel = cabecalhoAlunos.indexOf("Telefone");
-
     for (let i = 1; i < dadosAlunos.length; i++) {
-      let statusAluno = String(dadosAlunos[i][idxStatus]).trim().toLowerCase();
-      if (statusAluno !== "ativo") continue; // Pula inativos
+      let statusAluno = idxStatus > -1 ? String(dadosAlunos[i][idxStatus]).trim().toLowerCase() : "ativo";
+      if (statusAluno !== "ativo" && statusAluno !== "") continue;
 
-      let aAcad = String(dadosAlunos[i][idxAcad]).toLowerCase();
+      let aAcad = idxAcad > -1 ? String(dadosAlunos[i][idxAcad]).toLowerCase() : "";
 
-      // 🛡️ A BLINDAGEM DE FRANQUIAS: Verifica a permissão e o filtro da tela
       if (!isMaster && !userAcads.some(myAcad => aAcad.includes(myAcad))) continue;
       if (targetAcad && !aAcad.includes(targetAcad)) continue;
 
-      totalAtivos++; // Conta +1 no KPI Alunos Ativos
+      totalAtivos++;
 
-      let l = String(dadosAlunos[i][idxLogin]).trim();
-      let nomeA = String(dadosAlunos[i][idxNome]).trim();
-      let turmaA = String(dadosAlunos[i][idxTurma]).trim();
-      let acadA = String(dadosAlunos[i][idxAcad]).trim();
-      let telA = String(dadosAlunos[i][idxTel]).trim();
+      let l = idxLogin > -1 ? String(dadosAlunos[i][idxLogin]).trim().toLowerCase() : "";
+      let nomeA = idxNome > -1 ? String(dadosAlunos[i][idxNome]).trim() : "Sem Nome";
+      let turmaA = idxTurma > -1 ? String(dadosAlunos[i][idxTurma]).trim() : "Sem Turma";
+      let acadA = idxAcad > -1 ? String(dadosAlunos[i][idxAcad]).trim() : "Sem Local";
+      let telA = idxTel > -1 ? String(dadosAlunos[i][idxTel]).trim() : "";
 
-      // Lotação Turma
       let chaveTurma = turmaA + "|||" + acadA;
       if (!contagemTurmas[chaveTurma]) contagemTurmas[chaveTurma] = { nome: turmaA, local: acadA, count: 0 };
       contagemTurmas[chaveTurma].count++;
 
-      // Status Financeiro do Aluno
       let ass = mapAssinaturas[l];
       let inadimplente = false;
       let valorPacote = 0;
@@ -2972,75 +3008,78 @@ function getEstatisticasRelatorio(login, filtros) {
             inadimplente = true;
           }
         } else {
-          inadimplente = true; // Sem data de vencimento válida
+          inadimplente = true;
         }
       } else {
-        inadimplente = true; // Não tem assinatura na base
+        inadimplente = true;
       }
 
       if (inadimplente) {
-        totalInadimplentes++;
-        pagamentosPendentes += valorPacote; // A Receber
-        listaCobranca.push({
-          nome: nomeA,
-          academia: acadA,
-          turma: turmaA,
-          telefone: telA,
-          plano: pacoteNome,
-          vencimento: vencStr
-        });
+        // Se for Master/CEO ele não vai pro painel de cobrança
+        if (acadA.toLowerCase() === "todas" || l.includes("master")) {
+          totalAtivos--; // Remove da contagem de faturamento
+        } else {
+          totalInadimplentes++;
+          pagamentosPendentes += valorPacote;
+          listaCobranca.push({ nome: nomeA, academia: acadA, turma: turmaA, telefone: telA, plano: pacoteNome, vencimento: vencStr });
+        }
       } else {
-        receitaPrevista += valorPacote; // Em dia
+        receitaPrevista += valorPacote;
       }
     }
 
-    // 6. PROCESSAR FLUXO DE CAIXA (Transações)
-    const abaTransacoes = ws.getSheetByName("Fin_Transacoes");
-    const dadosTransacoes = abaTransacoes.getDataRange().getValues();
+    // 6. PROCESSAR TRANSAÇÕES 
     let receitasRealizadas = 0;
     let despesasRealizadas = 0;
+    const abaTransacoes = ws.getSheetByName("Fin_Transacoes");
 
-    const idxTrxData = dadosTransacoes[0].indexOf("Data_Registro");
-    const idxTrxTipo = dadosTransacoes[0].indexOf("Tipo");
-    const idxTrxValor = dadosTransacoes[0].indexOf("Valor");
-    const idxTrxAcad = dadosTransacoes[0].indexOf("Academia_Ref");
-    const idxTrxStatus = dadosTransacoes[0].indexOf("Status");
+    if (abaTransacoes) {
+      const dadosTransacoes = abaTransacoes.getDataRange().getValues();
+      if (dadosTransacoes.length > 1) {
+        const hTrx = dadosTransacoes[0].map(h => String(h).trim().toLowerCase().replace(/\s+/g, ""));
+        const idxTrxData = hTrx.indexOf("data_registro") > -1 ? hTrx.indexOf("data_registro") : hTrx.indexOf("dataderegistro");
+        const idxTrxTipo = hTrx.indexOf("tipo");
+        const idxTrxValor = hTrx.indexOf("valor");
+        const idxTrxAcad = hTrx.indexOf("academia_ref") > -1 ? hTrx.indexOf("academia_ref") : hTrx.indexOf("academiaref");
+        const idxTrxStatus = hTrx.indexOf("status");
 
-    for (let i = 1; i < dadosTransacoes.length; i++) {
-      let status = String(dadosTransacoes[i][idxTrxStatus]).trim().toLowerCase();
-      if (status !== "concluido") continue; // Conta só o que caiu no banco
+        if (idxTrxData > -1 && idxTrxValor > -1) {
+          for (let i = 1; i < dadosTransacoes.length; i++) {
+            let status = idxTrxStatus > -1 ? String(dadosTransacoes[i][idxTrxStatus]).trim().toLowerCase() : "concluido";
+            if (status !== "concluido" && status !== "concluído") continue;
 
-      let trxAcad = String(dadosTransacoes[i][idxTrxAcad]).toLowerCase();
+            let trxAcad = idxTrxAcad > -1 ? String(dadosTransacoes[i][idxTrxAcad]).toLowerCase() : "";
 
-      // 🛡️ A BLINDAGEM DE FRANQUIAS NO FLUXO DE CAIXA
-      if (!isMaster && !userAcads.some(myAcad => trxAcad.includes(myAcad))) continue;
-      if (targetAcad && !trxAcad.includes(targetAcad)) continue;
+            if (!isMaster && !userAcads.some(myAcad => trxAcad.includes(myAcad))) continue;
+            if (targetAcad && !trxAcad.includes(targetAcad)) continue;
 
-      let dTrx = dadosTransacoes[i][idxTrxData];
-      let dValid = null;
-      if (dTrx instanceof Date) { dValid = dTrx; }
-      else if (dTrx && String(dTrx).includes('/')) {
-        let p = String(dTrx).split(' ')[0].split('/');
-        if (p.length === 3) dValid = new Date(p[2], p[1] - 1, p[0]);
-      } else if (dTrx && String(dTrx).includes('-')) {
-        dValid = new Date(String(dTrx).split(' ')[0] + "T00:00:00");
-      }
+            let dTrx = dadosTransacoes[i][idxTrxData];
+            let dValid = null;
+            if (dTrx instanceof Date) { dValid = dTrx; }
+            else if (dTrx && String(dTrx).includes('/')) {
+              let p = String(dTrx).split(' ')[0].split('/');
+              if (p.length === 3) dValid = new Date(p[2], p[1] - 1, p[0]);
+            } else if (dTrx && String(dTrx).includes('-')) {
+              dValid = new Date(String(dTrx).split(' ')[0] + "T00:00:00");
+            }
 
-      // Filtro de Data do Painel
-      if (dValid && dValid >= dIni && dValid <= dFim) {
-        let tipo = String(dadosTransacoes[i][idxTrxTipo]).trim().toLowerCase();
-        let valor = parseFloat(String(dadosTransacoes[i][idxTrxValor]).replace(',', '.')) || 0;
+            if (dValid && dValid >= dIni && dValid <= dFim) {
+              let tipo = idxTrxTipo > -1 ? String(dadosTransacoes[i][idxTrxTipo]).trim().toLowerCase() : "receita";
+              let valor = parseFloat(String(dadosTransacoes[i][idxTrxValor]).replace(',', '.')) || 0;
 
-        if (tipo === "receita") receitasRealizadas += valor;
-        if (tipo === "despesa") despesasRealizadas += valor;
+              if (tipo === "receita") receitasRealizadas += valor;
+              if (tipo === "despesa") despesasRealizadas += valor;
+            }
+          }
+        }
       }
     }
 
-    // Ordenar Ranking de Turmas
-    let turmasArr = Object.values(contagemTurmas);
+    let turmasArr = Object.values(contagemTurmas).filter(t => t.local !== "todas" && t.local !== "" && t.local !== "Sem Local");
     turmasArr.sort((a, b) => b.count - a.count);
 
-    // 7. EMPACOTAR E ENVIAR PARA O FRONT-END
+    registrarLogBlindado("SUCESSO", "DASH_BACKEND", `Processamento Finalizado! Ativos: ${totalAtivos} | Inadimplentes: ${totalInadimplentes} | Receita Prevista: ${receitaPrevista}`);
+
     return {
       success: true,
       kpiAtivos: totalAtivos,
@@ -3063,7 +3102,8 @@ function getEstatisticasRelatorio(login, filtros) {
     };
 
   } catch (e) {
-    return { erro: e.message };
+    registrarLogBlindado("CRÍTICO", "getEstatisticasRelatorio", e.message);
+    return { erro: "Falha interna no motor de cálculos: " + e.message };
   }
 }
 
@@ -3082,48 +3122,117 @@ function getLocaisParaFinanceiro(loginSolicitante) {
   return acads;
 }
 
+function getDadosIniciaisFinanceiro() {
+  try {
+    const ws = SpreadsheetApp.getActiveSpreadsheet();
+
+    // 1. Busca Categorias
+    const sCat = ws.getSheetByName("Categoria_financeira");
+    if (!sCat) throw new Error("Aba 'Categoria_financeira' não encontrada.");
+    const dCat = sCat.getDataRange().getValues();
+    const mapCat = dCat[0].reduce((acc, col, i) => { acc[String(col).trim()] = i; return acc; }, {});
+    let arrCat = [];
+    for (let i = 1; i < dCat.length; i++) {
+      let nomeCat = String(dCat[i][mapCat["Nome"]]).trim();
+      if (!nomeCat) continue;
+      arrCat.push({
+        nome: nomeCat,
+        tipo: String(dCat[i][mapCat["Tipo"]]).trim(),
+        local: String(dCat[i][mapCat["Local"]] || "Todas").trim(),
+        exibeAluno: String(dCat[i][mapCat["Exibe Aluno"]] || "Não").trim(),
+        status: String(dCat[i][mapCat["Status"]] || "Ativo").trim()
+      });
+    }
+
+    // 2. Busca Formas de Pagamento
+    const sPag = ws.getSheetByName("Forma_Pagamento");
+    if (!sPag) throw new Error("Aba 'Forma_Pagamento' não encontrada.");
+    const dPag = sPag.getDataRange().getValues();
+    const mapPag = dPag[0].reduce((acc, col, i) => { acc[String(col).trim()] = i; return acc; }, {});
+    let arrPag = [];
+    for (let i = 1; i < dPag.length; i++) {
+      let nomePag = String(dPag[i][mapPag["Nome"]]).trim();
+      if (!nomePag) continue;
+      arrPag.push({
+        nome: nomePag,
+        local: String(dPag[i][mapPag["Local"]] || "Todas").trim(),
+        status: String(dPag[i][mapPag["Status"]] || "Ativo").trim()
+      });
+    }
+
+    // 3. Busca Locais de Treino (Unidades)
+    const sLoc = ws.getSheetByName("Locais_de_treino");
+    if (!sLoc) throw new Error("Aba 'Locais_de_treino' não encontrada.");
+    const dLoc = sLoc.getDataRange().getValues();
+    const idxLocNome = dLoc[0].indexOf("Nome do Local");
+    const idxLocStatus = dLoc[0].indexOf("Status");
+    let arrLocais = [];
+    for (let i = 1; i < dLoc.length; i++) {
+      let nomeLoc = String(dLoc[i][idxLocNome]).trim();
+      let statusLoc = String(dLoc[i][idxLocStatus]).trim().toLowerCase();
+      if (nomeLoc && statusLoc === "ativo") {
+        arrLocais.push(nomeLoc);
+      }
+    }
+
+    // 4. Busca Modalidades (Dinâmicas da aba GRADUACAO)
+    const sGrad = ws.getSheetByName("GRADUACAO");
+    if (!sGrad) throw new Error("Aba 'GRADUACAO' não encontrada.");
+    const dGrad = sGrad.getDataRange().getValues();
+    const idxGradMod = dGrad[0].indexOf("Modalidade");
+    let setMods = new Set(); // Usamos Set para evitar repetições
+    for (let i = 1; i < dGrad.length; i++) {
+      let mod = String(dGrad[i][idxGradMod]).trim();
+      if (mod) setMods.add(mod);
+    }
+    let arrMods = Array.from(setMods).sort(); // Transforma em Array e ordena em ordem alfabética
+
+    // DEVOLVE TUDO PARA O FRONT-END DE UMA VEZ SÓ!
+    return {
+      categorias: arrCat,
+      formasPagto: arrPag,
+      locais: arrLocais,
+      modalidades: arrMods
+    };
+  } catch (e) {
+    return { erro: e.message };
+  }
+}
+
 /**
  * ============================================================================
  * 📊 PONTE DE TRADUÇÃO DO DASHBOARD (FRONTEND <-> BACKEND)
  * Pega os dados brutos da getEstatisticasRelatorio e embala para o Chart.js e KPIs
  * ============================================================================
  */
+
 function getDadosDashboardAdmin(filtros) {
   try {
-    // 1. Puxa os dados da sua função mestre já existente!
+    registrarLogBlindado("INFO", "DASH_PONTE", `Iniciando embalagem de dados para o Front...`);
+    
+    // 1. Puxa os dados da sua função mestre! Note que agora repassamos o login correto
     const stats = getEstatisticasRelatorio(filtros.usuario, filtros);
 
     if (stats.erro) throw new Error(stats.erro);
 
-    // 2. Formata e embala exatamente como o Front-end pediu
+    registrarLogBlindado("SUCESSO", "DASH_PONTE", `Empacotando: ${stats.kpiAtivos} ativos, R$ ${stats.kpiReceitaPrevista}`);
+
+    // 2. Formata e embala EXATAMENTE como o Front-end pediu, forçando o envio das chaves certas
     return {
-      // --- KPIs Superiores ---
-      kpiAtivos: stats.totalAtivos || 0,
-      kpiInadimplentes: stats.totalInadimplentes || 0,
-      kpiReceitaPrevista: (stats.receitaPrevista || 0).toFixed(2).replace('.', ','),
-      kpiRecebido: (stats.receitasRealizadas || 0).toFixed(2).replace('.', ','),
-      kpiPendente: (stats.pagamentosPendentes || 0).toFixed(2).replace('.', ','),
-      kpiDespesa: (stats.despesasRealizadas || 0).toFixed(2).replace('.', ','),
-
-      // --- Tabelas Inferiores ---
-      listaCobranca: stats.inadimplentes || [],
-      listaRanking: (stats.turmas || []).map(t => ({ turma: t.nome, local: t.local, qtd: t.count })),
-
-      // --- Preparando os Tinteiros para os Gráficos (Chart.js) ---
-      graficoFluxo: {
-        labels: ['Mês Filtrado'],
-        receitas: [stats.receitasRealizadas || 0],
-        despesas: [stats.despesasRealizadas || 0]
-      },
-
-      graficoOcupacao: {
-        labels: (stats.turmas || []).map(t => t.nome),
-        valores: (stats.turmas || []).map(t => t.count)
-      }
+      kpiAtivos: stats.kpiAtivos || 0,
+      kpiInadimplentes: stats.kpiInadimplentes || 0,
+      kpiReceitaPrevista: stats.kpiReceitaPrevista || "0,00",
+      kpiRecebido: stats.kpiRecebido || "0,00",
+      kpiPendente: stats.kpiPendente || "0,00",
+      kpiDespesa: stats.kpiDespesa || "0,00",
+      listaCobranca: stats.listaCobranca || [],
+      listaRanking: stats.listaRanking || [],
+      graficoFluxo: stats.graficoFluxo || { labels: ['Mês Filtrado'], receitas: [0], despesas: [0] },
+      graficoOcupacao: stats.graficoOcupacao || { labels: [], valores: [] }
     };
 
   } catch (e) {
-    registrarLogBlindado("ERRO", "getDadosDashboardAdmin", e.message);
+    registrarLogBlindado("ERRO", "DASH_PONTE", e.message);
     throw new Error("Falha ao embalar dados do Dashboard: " + e.message);
   }
 }
@@ -3287,5 +3396,79 @@ function getDetalhesChamada(idChamada) {
   } catch (e) {
     registrarLogBlindado("ERRO", "getDetalhesChamada", e.message);
     return null;
+  }
+}
+
+
+/**
+ * Puxa os dados para alimentar as cascatas do modal financeiro
+ */
+function getDadosIniciaisCaixa() {
+  try {
+    const ws = SpreadsheetApp.getActiveSpreadsheet();
+
+    // Busca Categorias (Tratando nomes de colunas com e sem underscore)
+    const sCat = ws.getSheetByName("Categoria_financeira");
+    const dCat = sCat ? sCat.getDataRange().getValues() : [];
+    let arrCat = [];
+    if (dCat.length > 1) {
+      const hCat = dCat[0].map(h => String(h).trim().toLowerCase());
+      const iNome = hCat.indexOf("nome"); const iTipo = hCat.indexOf("tipo");
+      const iLoc = hCat.indexOf("local"); const iStat = hCat.indexOf("status");
+      const iExibe = hCat.indexOf("exibe aluno") > -1 ? hCat.indexOf("exibe aluno") : hCat.indexOf("exibe_aluno");
+
+      for (let i = 1; i < dCat.length; i++) {
+        if (String(dCat[i][iNome]).trim() !== "") {
+          arrCat.push({
+            nome: String(dCat[i][iNome]).trim(),
+            tipo: String(dCat[i][iTipo]).trim(),
+            local: String(dCat[i][iLoc] || "Todas").trim(),
+            exibeAluno: String(dCat[i][iExibe] || "Não").trim(),
+            status: String(dCat[i][iStat] || "Ativo").trim()
+          });
+        }
+      }
+    }
+
+    // Busca Formas de Pagamento
+    const sPag = ws.getSheetByName("Forma_Pagamento");
+    const dPag = sPag ? sPag.getDataRange().getValues() : [];
+    let arrPag = [];
+    if (dPag.length > 1) {
+      const hPag = dPag[0].map(h => String(h).trim().toLowerCase());
+      const iNomeP = hPag.indexOf("nome"); const iLocP = hPag.indexOf("local"); const iStatP = hPag.indexOf("status");
+
+      for (let i = 1; i < dPag.length; i++) {
+        if (String(dPag[i][iNomeP]).trim() !== "") {
+          arrPag.push({
+            nome: String(dPag[i][iNomeP]).trim(),
+            local: String(dPag[i][iLocP] || "Todas").trim(),
+            status: String(dPag[i][iStatP] || "Ativo").trim()
+          });
+        }
+      }
+    }
+
+    // Busca Modalidades Dinâmicas (Aba GRADUACAO)
+    const sGrad = ws.getSheetByName("GRADUACAO");
+    let arrMods = ["Geral"]; // Default de segurança
+    if (sGrad) {
+      const dGrad = sGrad.getDataRange().getValues();
+      const colMod = dGrad[0].map(h => String(h).trim().toLowerCase()).indexOf("modalidade");
+      if (colMod > -1) {
+        let setMods = new Set();
+        for (let i = 1; i < dGrad.length; i++) {
+          let mod = String(dGrad[i][colMod]).trim();
+          if (mod) setMods.add(mod);
+        }
+        arrMods = Array.from(setMods).sort();
+        if (!arrMods.includes("Geral")) arrMods.unshift("Geral");
+      }
+    }
+
+    return { categorias: arrCat, formasPagto: arrPag, modalidades: arrMods };
+  } catch (e) {
+    registrarLogBlindado("ERRO", "getDadosIniciaisCaixa", e.message);
+    return { categorias: [], formasPagto: [], modalidades: ["Geral"] };
   }
 }

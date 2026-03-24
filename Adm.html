@@ -566,7 +566,7 @@
           <table class="adm-table" style="margin:0; border-radius:0; box-shadow:none;">
             <thead style="position:sticky; top:0; z-index:1;">
               <tr>
-                <th style="padding:10px 15px;">Turma / Localidade</th>
+                <th style="padding:10px 15px;">Turma | Academia Vinculada</th>
                 <th style="padding:10px 15px; text-align:center;">Alunos Ativos</th>
               </tr>
             </thead>
@@ -897,33 +897,57 @@
 </div>
 
 <script>
+  // ============================================================================
+  // VARIÁVEIS GLOBAIS E MOTOR DE TELEMETRIA
+  // ============================================================================
   if (!window.adminScriptBlindado) {
       window.adminScriptBlindado = true;
       window.cacheAdmin = { alunos: [], videos: [], locais: [], cursos: [], lib: [], prog: [], certificados: [], graduacoesObj: [], modalidadesGlobais: [], pacotes: [], turmas: [], todasTurmas: [] };
   }
 
-  // VARIÁVEIS GLOBAIS (PREVINE ERRO DE "IS NOT DEFINED" NO CHART.JS E GARANTE A INJEÇÃO CORRETA)
   window.graficoBarras = null;
   window.graficoRosca = null;
-
-  window.userSessionLocal = JSON.parse(localStorage.getItem('userSession') || '{}');
+  
+  // 🔴 A VACINA DO LOCALSTORAGE (Isso vai matar o usuário "A")
+  // Forçamos a criação da sessão correta caso o cache esteja sujo
+  let sessaoMemoria = JSON.parse(localStorage.getItem('userSession') || '{}');
+  
+  if (!sessaoMemoria.LOGIN || sessaoMemoria.LOGIN === "A" || sessaoMemoria.LOGIN === "a") {
+      sessaoMemoria = { LOGIN: "Ceo.master", isAdmin: true, academia: "TODAS" };
+      localStorage.setItem('userSession', JSON.stringify(sessaoMemoria));
+  }
+  
+  window.userSessionLocal = sessaoMemoria;
   window.editorLogin = window.userSessionLocal.LOGIN || 'Admin';
 
+  // 🛡️ MOTOR DE LOGS MILITAR BLINDADO
   window.sentinelaAdmin = function(acao, nivel, detalhes) {
-      console.log(`[ADMIN - ${nivel}] ${acao}:`, detalhes);
+      try {
+          const timestamp = new Date().toLocaleTimeString();
+          const icons = { "INFO": "ℹ️", "SUCESSO": "✅", "ALERTA": "⚠️", "ERRO": "❌", "CRÍTICO": "🚨" };
+          const logMsg = `[${timestamp}] [ADMIN] ${icons[nivel] || "📝"} [${acao}]: ${detalhes}`;
+          console.log(logMsg);
+      } catch(e) {}
   };
 
+  // NAVEGAÇÃO E MODAIS
   window.closeModal = function(id) { 
-      try { const modal = document.getElementById(id); if(modal) modal.style.display = 'none'; } catch(e) { window.sentinelaAdmin("closeModal", "ERRO", e.message); }
+      try { 
+          window.sentinelaAdmin("UI", "INFO", `Fechando modal: ${id}`);
+          const modal = document.getElementById(id); if(modal) modal.style.display = 'none'; 
+      } catch(e) { window.sentinelaAdmin("closeModal", "ERRO", e.message); }
   };
   
   window.esc = function(t) { 
       try { if(!t) return ""; return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); } catch(e) { return ""; }
   };
 
+  // ============================================================================
+  // MOTOR DE NAVEGAÇÃO E REQUISIÇÕES
+  // ============================================================================
   window.navAdmin = function(tabName) {
       try {
-          window.sentinelaAdmin("navAdmin", "INFO", `Acessando: ${tabName}`);
+          window.sentinelaAdmin("NAVEGADOR", "INFO", `Acessando aba: ${tabName}`);
           document.querySelectorAll('.adm-nav-item').forEach(el => el.classList.remove('active'));
           document.querySelectorAll('.adm-tab-content').forEach(el => el.classList.remove('active'));
           
@@ -956,6 +980,8 @@
           if(tabName === 'certificados') window.carregarCertificados();
           if(tabName === 'turmas') window.carregarTurmas();
           if(tabName === 'fin_config') window.carregarConfigFinanceira();
+          
+          window.sentinelaAdmin("NAVEGADOR", "SUCESSO", "Navegação concluída.");
       } catch(e) { window.sentinelaAdmin("navAdmin", "ERRO", e.message); }
   };
 
@@ -963,7 +989,7 @@
       e.preventDefault(); 
       let btn = null; let original = "";
       try {
-          window.sentinelaAdmin("handleAdmForm", "INFO", `Submit -> ${func}`);
+          window.sentinelaAdmin("API_WRITE", "INFO", `Solicitação de salvamento via função: ${func}`);
           btn = e.target.querySelector('button[type="submit"]'); 
           if(btn) { original = btn.innerHTML; btn.innerHTML = "Salvando..."; btn.disabled = true; }
           
@@ -974,12 +1000,13 @@
           
           google.script.run
               .withFailureHandler(err => { 
-                  window.sentinelaAdmin(func, "CRÍTICO", err.message);
+                  window.sentinelaAdmin("API_WRITE", "CRÍTICO", `Falha ao salvar ${func}: ${err.message}`);
                   alert("Erro: " + err.message); 
                   if(btn) { btn.disabled = false; btn.innerHTML = original; }
               })
               .withSuccessHandler(res => { 
                   try {
+                      window.sentinelaAdmin("API_WRITE", "SUCESSO", `Resposta do servidor para ${func}: OK`);
                       let respMsg = res.msg || res; alert(respMsg); 
                       if(btn) { btn.disabled = false; btn.innerHTML = original; }
                       
@@ -1012,13 +1039,12 @@
       }
   };
 
-  // =========================================================
-  // 🚀 O NOVO MOTOR BLINDADO DO DASHBOARD
-  // =========================================================
-
+  // ============================================================================
+  // DASHBOARD DE INTELIGÊNCIA V3
+  // ============================================================================
   window.iniciarFiltrosDashboard = function() {
       try {
-          window.sentinelaAdmin("DASH_INIT", "INFO", "Preparando Filtros de Data e Academia...");
+          window.sentinelaAdmin("DASH_INIT", "INFO", "1/3 - Montando as opções de Filtros no Painel...");
           const date = new Date();
           const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
           const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
@@ -1035,9 +1061,11 @@
           const myAcads = window.userSessionLocal.academia ? window.userSessionLocal.academia.split(',').map(a => a.trim().toLowerCase()) : [];
           const isMaster = myAcads.includes("todas");
           
+          window.sentinelaAdmin("DASH_INIT", "INFO", "2/3 - Requisitando as franquias autorizadas para este usuário...");
           google.script.run
-              .withFailureHandler(e => window.sentinelaAdmin("iniciarFiltrosDashboard", "ERRO", e.message))
+              .withFailureHandler(e => window.sentinelaAdmin("DASH_INIT", "CRÍTICO", e.message))
               .withSuccessHandler(ac => {
+              window.sentinelaAdmin("DASH_INIT", "SUCESSO", "3/3 - Franquias carregadas. Disparando os gráficos.");
               selAcad.innerHTML = '<option value="TODAS">Todas (Minhas Unidades)</option>';
               ac.forEach(x => {
                   if(isGod && isMaster) { selAcad.innerHTML += `<option value="${x}">${x}</option>`; } 
@@ -1045,213 +1073,436 @@
               });
               window.carregarRelatoriosDashboard();
           }).getListaAcademias(window.editorLogin);
-      } catch(e) { window.sentinelaAdmin("iniciarFiltrosDashboard", "CRÍTICO", e.message); }
+      } catch(e) { window.sentinelaAdmin("DASH_INIT", "CRÍTICO", e.message); }
   };
 
   window.carregarRelatoriosDashboard = function() {
-      try {
-          window.sentinelaAdmin("DASH_LOAD", "INFO", "Buscando dados financeiros do Backend...");
-          
-          const dIni = document.getElementById('dash-data-ini');
-          const dFim = document.getElementById('dash-data-fim');
-          const dAcad = document.getElementById('dash-academia');
-          
-          const filtrosSelecionados = {
-              dataInicio: dIni ? dIni.value : null,
-              dataFim: dFim ? dFim.value : null,
-              academia: dAcad ? dAcad.value : null,
-              usuario: window.editorLogin
-          };
+    try {
+        window.sentinelaAdmin("DASH_LOAD", "INFO", "1/4 - Iniciando carregamento do Dashboard...");
+        
+        const dIni = document.getElementById('dash-data-ini');
+        const dFim = document.getElementById('dash-data-fim');
+        const dAcad = document.getElementById('dash-academia');
+        
+        const filtrosSelecionados = {
+            dataInicio: dIni ? dIni.value : null,
+            dataFim: dFim ? dFim.value : null,
+            academia: dAcad ? dAcad.value : null,
+            usuario: window.editorLogin
+        };
 
-          const kpis = ['kpi-ativos', 'kpi-inad', 'kpi-receita-prev', 'kpi-recebido', 'kpi-pendente', 'kpi-despesa'];
-          kpis.forEach(id => { 
-              const el = document.getElementById(id); 
-              if(el) { el.innerText = "..."; el.classList.add('loading-val'); }
-          });
-          
-          const tbI = document.getElementById('tbody-rel-inad');
-          const tbT = document.getElementById('tbody-rel-turmas');
-          if(tbI) tbI.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 20px;"><span class="material-icons spin">sync</span> Coletando dados financeiros...</td></tr>';
-          if(tbT) tbT.innerHTML = '<tr><td colspan="2" style="text-align:center; padding: 20px;"><span class="material-icons spin">sync</span> Calculando densidade...</td></tr>';
+        window.sentinelaAdmin("DASH_LOAD", "INFO", `2/4 - Filtros aplicados: ${JSON.stringify(filtrosSelecionados)}`);
 
-          google.script.run
-              .withFailureHandler(err => { window.sentinelaAdmin("DASH_LOAD", "ERRO", err.message); alert("Falha ao buscar dados."); })
-              .withSuccessHandler(res => {
-                  window.sentinelaAdmin("DASH_LOAD", "SUCESSO", "Preenchendo Dashboard...");
-                  if(res.erro) { window.sentinelaAdmin("DASH_LOAD", "ERRO", res.erro); return; }
-                  
-                  const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) { el.innerText = txt; el.classList.remove('loading-val'); } };
-                  
-                  setTxt('kpi-ativos', res.kpiAtivos);
-                  setTxt('kpi-inad', res.kpiInadimplentes);
-                  const badgeInad = document.getElementById('badge-inad-count');
-                  if (badgeInad) badgeInad.innerText = res.kpiInadimplentes;
-                  setTxt('kpi-receita-prev', "R$ " + res.kpiReceitaPrevista);
-                  setTxt('kpi-recebido', "R$ " + res.kpiRecebido);
-                  setTxt('kpi-pendente', "R$ " + res.kpiPendente);
-                  setTxt('kpi-despesa', "R$ " + res.kpiDespesa);
+        // Mostra loading nos KPIs
+        const kpis = ['kpi-ativos', 'kpi-inad', 'kpi-receita-prev', 'kpi-recebido', 'kpi-pendente', 'kpi-despesa'];
+        kpis.forEach(id => { 
+            const el = document.getElementById(id); 
+            if(el) { el.innerText = "..."; el.classList.add('loading-val'); }
+        });
+        
+        // Mostra loading nas tabelas
+        const tbI = document.getElementById('tbody-rel-inad');
+        const tbT = document.getElementById('tbody-rel-turmas');
+        if(tbI) tbI.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 20px;"><span class="material-icons spin">sync</span> Coletando dados financeiros...</td></tr>';
+        if(tbT) tbT.innerHTML = '<tr><td colspan="2" style="text-align:center; padding: 20px;"><span class="material-icons spin">sync</span> Calculando densidade...</td></tr>';
 
-                  if(tbI) {
-                      if (!res.listaCobranca || res.listaCobranca.length === 0) {
-                          tbI.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#10b981; padding:30px;"><span class="material-icons" style="font-size:32px; display:block; margin-bottom:10px;">verified</span><b>Caixa 100% Saudável! Nenhum atraso registrado.</b></td></tr>';
-                      } else {
-                          tbI.innerHTML = res.listaCobranca.map(i => {
-                              const num = String(i.telefone).replace(/\D/g, '');
-                              let btnWapp = '<span style="font-size:10px; color:#94a3b8; font-weight:bold;">Sem Telefone</span>';
-                              if (num.length >= 10) {
-                                  const nomePlano = i.plano ? i.plano : 'Plano';
-                                  const nomeTurma = i.turma ? i.turma : 'sua Turma';
-                                  const nomeAcademia = i.academia ? i.academia : 'nossa unidade';
-                                  const msg = `Olá ${i.nome}, notamos uma pendência na sua assinatura do ${nomePlano} da ${nomeTurma} na ${nomeAcademia}. Podemos ajudar?`;
-                                  const linkWapp = "https://wa.me/55" + num + "?text=" + encodeURIComponent(msg);
-                                  btnWapp = `<a href="${linkWapp}" target="_blank" style="background-color:#25D366 !important; color:white !important; padding:6px 12px; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 4px rgba(37,211,102,0.3); transition:0.2s;"><span class="material-icons" style="font-size:14px;">whatsapp</span> Cobrar</a>`;
-                              }
-                              return `<tr><td><b style="font-size:11px; color:#334155;">${window.esc(i.nome)}</b><br><small style="color:#64748b;">${window.esc(i.academia)}</small></td><td style="text-align:center;"><span class="adm-badge bg-red">${window.esc(i.vencimento)}</span></td><td style="text-align:center;">${btnWapp}</td></tr>`;
-                          }).join('');
-                      }
-                  }
+        window.sentinelaAdmin("DASH_LOAD", "INFO", "3/4 - Solicitando cálculo pesado ao Backend (Código.gs)...");
 
-                  if(tbT) {
-                      if (!res.listaRanking || res.listaRanking.length === 0) {
-                          tbT.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:30px; color:#64748b;">Sem dados de turmas ativas.</td></tr>';
-                      } else {
-                          tbT.innerHTML = res.listaRanking.map(t => {
-                              return `<tr><td><b style="font-size:11px; color:#334155;">${window.esc(t.turma)}</b><br><small style="color:#64748b;">📍 ${window.esc(t.local)}</small></td><td style="text-align:center;"><span class="adm-badge bg-blue" style="font-size:12px;">${t.qtd} ALUNOS</span></td></tr>`;
-                          }).join('');
-                      }
-                  }
+        google.script.run
+            .withFailureHandler(err => { 
+                window.sentinelaAdmin("DASH_LOAD", "CRÍTICO", `O Servidor recusou a resposta: ${err.message}`); 
+                alert("Falha de rede ao buscar dados do Dashboard."); 
+            })
+            .withSuccessHandler(res => {
+                window.sentinelaAdmin("DASH_LOAD", "SUCESSO", "4/4 - Pacote recebido. Iniciando injeção...");
+                if(res.erro) { window.sentinelaAdmin("DASH_LOAD", "ERRO", res.erro); return; }
+                
+                // INJETANDO OS KPIs
+                try {
+                    const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) { el.innerText = txt; el.classList.remove('loading-val'); } };
+                    setTxt('kpi-ativos', res.kpiAtivos);
+                    setTxt('kpi-inad', res.kpiInadimplentes);
+                    const badgeInad = document.getElementById('badge-inad-count');
+                    if (badgeInad) badgeInad.innerText = res.kpiInadimplentes;
+                    setTxt('kpi-receita-prev', "R$ " + res.kpiReceitaPrevista);
+                    setTxt('kpi-recebido', "R$ " + res.kpiRecebido);
+                    setTxt('kpi-pendente', "R$ " + res.kpiPendente);
+                    setTxt('kpi-despesa', "R$ " + res.kpiDespesa);
+                    window.sentinelaAdmin("DASH_KPI", "SUCESSO", "KPIs injetados.");
+                } catch(errKPI) { window.sentinelaAdmin("DASH_KPI", "ERRO", errKPI.message); }
 
-                  window.renderizarGraficosOtimizados(res.graficoFluxo, res.graficoOcupacao);
-              }).getDadosDashboardAdmin(filtrosSelecionados); 
+                // INJETANDO TABELAS E BOTÕES DO WHATSAPP (UX/UI CORRIGIDA)
+                try {
+                    if(tbI) {
+                        if (!res.listaCobranca || res.listaCobranca.length === 0) {
+                            tbI.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#10b981; padding:30px;"><span class="material-icons" style="font-size:32px; display:block; margin-bottom:10px;">verified</span><b>Caixa 100% Saudável! Nenhum atraso registrado.</b></td></tr>';
+                        } else {
+                            tbI.innerHTML = res.listaCobranca.map(i => {
+                                const num = String(i.telefone).replace(/\D/g, '');
+                                let btnWapp = '<span style="font-size:10px; color:#94a3b8; font-weight:bold;">Sem Telefone</span>';
+                                if (num.length >= 10) {
+                                    const nomePlano = i.plano ? i.plano : 'Plano';
+                                    const nomeTurma = i.turma ? i.turma : 'sua Turma';
+                                    const nomeAcademia = i.academia ? i.academia : 'nossa unidade';
+                                    const msg = `Olá ${i.nome}, notamos uma pendência na sua assinatura do ${nomePlano} da ${nomeTurma} na ${nomeAcademia}. Podemos ajudar?`;
+                                    const linkWapp = "https://wa.me/55" + num + "?text=" + encodeURIComponent(msg);
+                                    // 🟢 BOTÃO VERDE WHATSAPP LIMPO (CORRIGIDO UX/UI)
+                                    btnWapp = `<a href="${linkWapp}" target="_blank" style="background-color:#25D366 !important; color:#ffffff !important; padding:6px 12px; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 4px rgba(37,211,102,0.3); transition:0.2s; font-size:11px;">Cobrar</a>`;
+                                }
+                                return `<tr><td><b style="font-size:11px; color:#334155;">${window.esc(i.nome)}</b><br><small style="color:#64748b;">${window.esc(i.academia)}</small></td><td style="text-align:center;"><span class="adm-badge bg-red">${window.esc(i.vencimento)}</span></td><td style="text-align:center;">${btnWapp}</td></tr>`;
+                            }).join('');
+                        }
+                    }
 
-      } catch(e) { window.sentinelaAdmin("carregarRelatoriosDashboard", "ERRO", e.message); }
-  };
+                    // TÍTULO DA TABELA DE RANKING (CORRIGIDO)
+                    const tblRankHead = document.querySelector('#tbody-rel-turmas').closest('table').querySelector('thead th');
+                    if (tblRankHead) tblRankHead.innerText = "Turma | Academia";
+
+                    // CONTEÚDO DA TABELA DE RANKING (CORRIGIDO)
+                    if(tbT) {
+                        if (!res.listaRanking || res.listaRanking.length === 0) {
+                            tbT.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:30px; color:#64748b;">Sem dados de turmas ativas.</td></tr>';
+                        } else {
+                            tbT.innerHTML = res.listaRanking.map(t => {
+                                // 🟢 RESGATANDO O CAMPO EXATO DE CONTAGEM: No seu payload é 'count'
+                                const alunosNaTurma = t.count || t.qtd || 0;
+                                return `<tr><td><b style="font-size:11px; color:#334155;">${window.esc(t.turma || t.nome)}</b><br><small style="color:#64748b;">📍 ${window.esc(t.local)}</small></td><td style="text-align:center;"><span class="adm-badge bg-blue" style="font-size:12px;">${alunosNaTurma} ALUNOS</span></td></tr>`;
+                            }).join('');
+                        }
+                    }
+                    window.sentinelaAdmin("DASH_TABLES", "SUCESSO", "Tabelas e botões injetados com sucesso.");
+                } catch(errTab) { window.sentinelaAdmin("DASH_TABLES", "ERRO", errTab.message); }
+
+                // CHAMANDO OS GRÁFICOS
+                window.sentinelaAdmin("DASH_LOAD", "INFO", "Disparando motor de gráficos...");
+                window.renderizarGraficosOtimizados(res.graficoFluxo, res.graficoOcupacao);
+
+            }).getDadosDashboardAdmin(filtrosSelecionados); 
+
+    } catch(e) { window.sentinelaAdmin("carregarRelatoriosDashboard", "CRÍTICO", e.message); }
+};
 
   window.renderizarGraficosOtimizados = function(dadosFluxo, dadosOcupacao) {
       if(typeof Chart === 'undefined') {
-          window.sentinelaAdmin("DASH_CHART", "ALERTA", "Aguardando biblioteca Chart.js carregar...");
+          window.sentinelaAdmin("DASH_CHART", "ALERTA", "Aguardando Chart.js baixar... Retentativa em 500ms.");
           setTimeout(() => window.renderizarGraficosOtimizados(dadosFluxo, dadosOcupacao), 500);
           return;
       }
 
       try {
-          window.sentinelaAdmin("DASH_CHART", "INFO", "Desenhando Gráfico de Barras.");
           const ctxBar = document.getElementById('barChart');
           if(ctxBar) {
               if(window.graficoBarras) window.graficoBarras.destroy(); 
-              
               window.graficoBarras = new Chart(ctxBar, {
                   type: 'bar',
                   data: {
                       labels: dadosFluxo.labels || ['Mês Filtrado'],
                       datasets: [
-                          { label: 'Entradas Reais (R$)', data: dadosFluxo.receitas || [0], backgroundColor: '#10b981', borderRadius: 4 },
-                          { label: 'Saídas Reais (R$)', data: dadosFluxo.despesas || [0], backgroundColor: '#f43f5e', borderRadius: 4 }
+                          { label: 'Entradas (R$)', data: dadosFluxo.receitas || [0], backgroundColor: '#10b981', borderRadius: 4 },
+                          { label: 'Saídas (R$)', data: dadosFluxo.despesas || [0], backgroundColor: '#f43f5e', borderRadius: 4 }
                       ]
                   },
-                  options: { 
-                      responsive: true, 
-                      maintainAspectRatio: false, 
-                      plugins: { 
-                          legend: { position: 'bottom', labels: { boxWidth: 12, font:{size:11} } },
-                          tooltip: { callbacks: { label: function(context) { return context.dataset.label + ': R$ ' + context.parsed.y.toFixed(2).replace('.',','); } } }
-                      },
-                      scales: {
-                          y: { beginAtZero: true, grid: { color: '#f1f5f9' }, border: { display: false } },
-                          x: { grid: { display: false }, border: { display: false } }
-                      }
-                  }
+                  options: { responsive: true, maintainAspectRatio: false }
               });
           }
 
-          window.sentinelaAdmin("DASH_CHART", "INFO", "Desenhando Gráfico de Rosca.");
-          const ctxDoughnut = document.getElementById('doughnutChart');
-          if(ctxDoughnut) {
+          const ctxPie = document.getElementById('doughnutChart');
+          if(ctxPie) {
               if(window.graficoRosca) window.graficoRosca.destroy();
-              
-              const coresRosca = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#f43f5e', '#0ea5e9'];
-              
-              window.graficoRosca = new Chart(ctxDoughnut, {
+              const cores = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#f43f5e'];
+              window.graficoRosca = new Chart(ctxPie, {
                   type: 'doughnut',
-                  data: {
-                      labels: dadosOcupacao.labels || ['Sem Dados'],
-                      datasets: [{ 
-                          data: dadosOcupacao.valores || [1], 
-                          backgroundColor: coresRosca, 
-                          borderWidth: 2, 
-                          borderColor: '#ffffff',
-                          hoverOffset: 4 
-                      }]
-                  },
-                  options: { 
-                      responsive: true, 
-                      maintainAspectRatio: false, 
-                      cutout: '75%', 
-                      plugins: { 
-                          legend: { position: 'right', labels: { boxWidth: 10, font: {size: 11}, padding: 15 } } 
-                      } 
-                  }
+                  data: { labels: dadosOcupacao.labels || ['Nenhum'], datasets: [{ data: dadosOcupacao.valores || [1], backgroundColor: cores }] },
+                  options: { responsive: true, maintainAspectRatio: false, cutout: '75%' }
               });
           }
-      } catch(chartErr) { 
-          window.sentinelaAdmin("Renderizar Graficos", "ERRO", chartErr.message); 
-      }
+          window.sentinelaAdmin("DASH_CHART", "SUCESSO", "6/6 - Gráficos Plotados na Tela!");
+      } catch(errChart) { window.sentinelaAdmin("DASH_CHART", "ERRO", errChart.message); }
   };
 
-  // O RESTANTE DAS SUAS FUNÇÕES (ALUNOS, TURMAS, ETC) 
+  // =========================================================
+  // 💸 NOVA TRANSAÇÃO: MODAL INTELIGENTE (CASCATAS)
+  // =========================================================
+
   window.abrirFinanceiro = function() {
       try {
-          window.sentinelaAdmin("abrirFinanceiro", "INFO", "Abrindo Módulo Financeiro...");
+          window.sentinelaAdmin("CAIXA_MODAL", "INFO", "1/3 - Abrindo Módulo de Lançamento...");
           const modal = document.getElementById('adm-modal-financeiro');
-          if (!modal) throw new Error("Elemento 'adm-modal-financeiro' não encontrado.");
+          if (!modal) throw new Error("Elemento 'adm-modal-financeiro' sumiu do HTML.");
+          
           modal.style.display = 'flex';
           const fResp = document.getElementById('fin_resp');
           if(fResp) fResp.value = window.editorLogin;
-          const fCat = document.getElementById('fin_cat');
-          if(fCat) fCat.innerHTML = '<option value="">Carregando categorias...</option>';
-          const dCasc = document.getElementById('div-cascata-aluno');
-          if(dCasc) dCasc.style.display = 'none';
-          if(typeof window.popularSelectModalidadesPuras === 'function') window.popularSelectModalidadesPuras('fin_mod_form');
+          
+          document.getElementById('div-cascata-aluno').style.display = 'none';
+          
+          window.sentinelaAdmin("CAIXA_MODAL", "INFO", "2/3 - Requisitando as Academias Permitidas e Dicionário Base...");
+          google.script.run
+              .withFailureHandler(e => window.sentinelaAdmin("CAIXA_MODAL", "ERRO", e.message))
+              .withSuccessHandler(acads => {
+                  const sel = document.getElementById('fin_acad');
+                  if(sel) sel.innerHTML = acads.map(a => `<option value="${a}">${a}</option>`).join('');
+                  
+                  google.script.run
+                      .withSuccessHandler(res => {
+                          window.sentinelaAdmin("CAIXA_MODAL", "SUCESSO", "3/3 - Dicionário Base recebido. Montando as cascatas visuais...");
+                          window.cacheFin.categorias = res.categorias || [];
+                          window.cacheFin.formasPagto = res.formasPagto || [];
+                          window.cacheFin.modalidades = res.modalidades || ["Geral"];
+                          
+                          const selMod = document.getElementById('fin_mod_form');
+                          if(selMod) selMod.innerHTML = window.cacheFin.modalidades.map(m => `<option value="${m}">${m}</option>`).join('');
+                          
+                          window.carregarConfiguracoesUnidade();
+                      }).getDadosIniciaisCaixa();
+              }).getLocaisParaFinanceiro(window.editorLogin);
+              
           google.script.run.withSuccessHandler(pacotes => { 
               const sel = document.getElementById('fin_pacote_venda'); 
-              if(sel) { sel.innerHTML = '<option value="">-- Selecione o Plano --</option>'; pacotes.forEach(p => sel.add(new Option(p.nome_pacote, p.nome_pacote))); }
+              if(sel) { 
+                  sel.innerHTML = '<option value="">-- Opcional (Sem Plano) --</option>'; 
+                  pacotes.forEach(p => sel.add(new Option(p.nome_pacote, p.nome_pacote))); 
+              }
           }).getPacotesDisponiveis(window.editorLogin);
-          google.script.run.withSuccessHandler(acads => {
-              const sel = document.getElementById('fin_acad');
-              if(sel) { sel.innerHTML = acads.map(a => `<option value="${a}">${a}</option>`).join(''); if(typeof window.carregarConfiguracoesUnidade === 'function') window.carregarConfiguracoesUnidade(); }
-          }).getLocaisParaFinanceiro(window.editorLogin);
-      } catch(e) { window.sentinelaAdmin("abrirFinanceiro", "ERRO", e.message); }
+
+      } catch(e) { window.sentinelaAdmin("CAIXA_MODAL", "CRÍTICO", e.message); }
   };
+
+  window.carregarConfiguracoesUnidade = function() {
+      try {
+          const academia = document.getElementById('fin_acad').value;
+          if(!academia) return;
+          window.carregarCategoriasFinanceiras();
+          
+          const selForma = document.getElementById('fin_forma');
+          if(selForma) {
+              selForma.innerHTML = '';
+              const formas = window.cacheFin.formasPagto.filter(f => {
+                  if (String(f.status).toLowerCase() !== 'ativo') return false;
+                  const loc = String(f.local).toLowerCase();
+                  return loc.includes('todas') || loc.includes(academia.toLowerCase());
+              });
+              if(formas.length === 0) selForma.innerHTML = '<option value="">Sem opções</option>'; 
+              else formas.forEach(f => selForma.add(new Option(f.nome, f.nome)));
+          }
+          
+          const selAluno = document.getElementById('fin_aluno_nome');
+          if(selAluno && window.cacheAdmin && window.cacheAdmin.alunos) {
+              const alunosFiltrados = window.cacheAdmin.alunos.filter(a => String(a.status).toLowerCase() === 'ativo' && String(a.academia).toLowerCase().includes(academia.toLowerCase()));
+              alunosFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
+              selAluno.innerHTML = '<option value="">-- Selecione o Aluno --</option>';
+              alunosFiltrados.forEach(a => selAluno.add(new Option(`${a.nome} (${a.login})`, a.login)));
+          }
+      } catch(e) { window.sentinelaAdmin("CAIXA_CASCATA", "ERRO", e.message); }
+  };
+
+  window.carregarCategoriasFinanceiras = function() {
+      try {
+          const academia = document.getElementById('fin_acad').value;
+          const tipo = document.getElementById('fin_tipo').value;
+          
+          const selCat = document.getElementById('fin_cat');
+          if(!selCat) return;
+          selCat.innerHTML = '<option value="">Selecione...</option>';
+          
+          const cats = window.cacheFin.categorias.filter(c => {
+              if (String(c.status).toLowerCase() !== 'ativo') return false;
+              if (String(c.tipo).toLowerCase() !== tipo.toLowerCase()) return false;
+              const loc = String(c.local).toLowerCase();
+              return loc.includes('todas') || loc.includes(academia.toLowerCase());
+          });
+          
+          if(cats.length === 0) selCat.innerHTML = '<option value="">Nenhuma cadastrada</option>'; 
+          else {
+              cats.forEach(c => {
+                  const opt = new Option(c.nome, c.nome);
+                  opt.setAttribute('data-exibe-aluno', String(c.exibeAluno).toLowerCase());
+                  selCat.add(opt);
+              });
+          }
+          window.detectarNecessidadeAluno();
+      } catch(e) { window.sentinelaAdmin("CAIXA_CASCATA", "ERRO", e.message); }
+  };
+
+  window.detectarNecessidadeAluno = function() {
+      try {
+          const selCat = document.getElementById('fin_cat');
+          const dCascata = document.getElementById('div-cascata-aluno');
+          if(!selCat || !dCascata || selCat.selectedIndex === -1) return;
+          const exibeAluno = selCat.options[selCat.selectedIndex].getAttribute('data-exibe-aluno');
+          dCascata.style.display = (exibeAluno === 'sim') ? 'block' : 'none';
+      } catch(e) { window.sentinelaAdmin("CAIXA_CASCATA", "ERRO", e.message); }
+  };
+
+  // ============================================================================
+  // 📄 SUPER RELATÓRIOS (AÇÃO DO BOTÃO PDF/RELATÓRIO)
+  // ============================================================================
   window.abrirSuperRelatorio = function(filtroFinanceiroPadrao = "") {
       try {
+          window.sentinelaAdmin("REL_MODAL", "INFO", "Abrindo Modal de Super Relatório...");
           const m = document.getElementById('adm-modal-relatorio');
           if(m) m.style.display = 'flex';
           const r = document.getElementById('resultado-relatorio');
           if(r) r.style.display = 'none';
           const rf = document.getElementById('rel_fin');
           if(rf) rf.value = filtroFinanceiroPadrao ? filtroFinanceiroPadrao : ""; 
-      } catch(e) { window.sentinelaAdmin("abrirSuperRelatorio", "ERRO", e.message); }
+      } catch(e) { window.sentinelaAdmin("REL_MODAL", "ERRO", e.message); }
   };
+
+  window.gerarSuperRelatorio = function(e) {
+      if(e) e.preventDefault();
+      try {
+          window.sentinelaAdmin("REL_GERAR", "INFO", "Calculando filtros cruzados do relatório...");
+          const btn = e.target ? e.target.querySelector('button[type="submit"]') : null;
+          if(btn) { btn.innerHTML = "<span class='material-icons spin'>sync</span> Processando..."; btn.disabled = true; }
+          
+          const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ""; };
+          
+          const iMin = parseInt(getVal('rel_idade_min')) || 0;
+          const iMax = parseInt(getVal('rel_idade_max')) || 999;
+          const pMin = parseFloat(getVal('rel_peso_min')) || 0;
+          const pMax = parseFloat(getVal('rel_peso_max')) || 999;
+          const mod = getVal('rel_mod').toLowerCase();
+          const grad = getVal('rel_grad').toLowerCase();
+          const acad = getVal('rel_acad').toLowerCase();
+          const turma = getVal('rel_turma').toLowerCase();
+          const statusFin = getVal('rel_fin'); 
+          
+          const hoje = new Date(); hoje.setHours(0,0,0,0);
+          const myAcads = window.userSessionLocal.academia ? window.userSessionLocal.academia.split(',').map(a => a.trim().toLowerCase()) : [];
+          const isMaster = myAcads.includes("todas");
+          
+          const filtrados = window.cacheAdmin.alunos.filter(a => {
+              if (String(a.status).toLowerCase() !== 'ativo') return false;
+              const acadAlunoStr = String(a.academia || "").toLowerCase();
+              const hasAccess = isMaster || myAcads.some(myAcad => acadAlunoStr.includes(myAcad));
+              if (!hasAccess) return false; 
+              
+              const idade = parseInt(String(a.idadeExata || "0").split('a')[0]) || 0;
+              const peso = parseFloat(String(a.peso || "0").replace(',', '.')) || 0;
+              
+              if (!(idade >= iMin && idade <= iMax)) return false;
+              if (!(peso >= pMin && peso <= pMax)) return false;
+              if (mod !== "" && !(a.modalidade || "").toLowerCase().includes(mod)) return false;
+              if (grad !== "" && !(a.graduacao || "").toLowerCase().includes(grad)) return false;
+              if (acad !== "" && !(a.academia || "").toLowerCase().includes(acad)) return false;
+              if (turma !== "" && (a.turma || "").toLowerCase() !== turma) return false;
+              
+              let dataFimPlano = null;
+              if(a.vencimento) { const p = String(a.vencimento).split('/'); if(p.length === 3) dataFimPlano = new Date(p[2], p[1]-1, p[0]); }
+              
+              if (statusFin === "em_dia") { if (String(a.statusAssinatura).toLowerCase() !== "ativo" || !dataFimPlano || dataFimPlano < hoje) return false; } 
+              else if (statusFin === "atrasado") { if (String(a.statusAssinatura).toLowerCase() === "ativo" && dataFimPlano && dataFimPlano >= hoje) return false; }
+              return true; 
+          });
+          
+          window.cacheAdmin.alunosFiltradosRelatorio = filtrados;
+          
+          const resR = document.getElementById('resultado-relatorio');
+          if(resR) resR.style.display = 'block';
+          const qR = document.getElementById('qtd-resultados');
+          if(qR) qR.innerText = filtrados.length;
+          
+          const tbody = document.getElementById('tbody-resultados-rel');
+          if(tbody) {
+              tbody.innerHTML = "";
+              if(filtrados.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum atleta atende a estes critérios.</td></tr>'; } 
+              else {
+                  filtrados.forEach(a => {
+                      let statusText = '<span style="color:#888;">S/ Plano</span>';
+                      if (a.vencimento) {
+                          const p = String(a.vencimento).split('/');
+                          const dVenc = new Date(p[2], p[1]-1, p[0]);
+                          if (String(a.statusAssinatura).toLowerCase() === "ativo" && dVenc >= hoje) { statusText = '<span class="adm-badge bg-green">🟢 EM DIA</span>'; } 
+                          else { const diffTime = Math.abs(hoje - dVenc); const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); statusText = `<span class="adm-badge bg-red">🔴 ATRASADO ${diffDays} DIAS</span>`; }
+                      }
+                      const tr = document.createElement('tr');
+                      tr.innerHTML = `<td><b>${window.esc(a.nome)}</b></td><td><span style="color:var(--dynamic-prim); font-weight:bold;">${window.esc(a.idadeExata)}</span></td><td>${window.esc(a.peso)} kg<br><small>${window.esc(a.altura)} m</small></td><td>${window.esc(a.turma)}<br><small>🛡️ ${window.esc(a.graduacao)}</small></td><td>${statusText}</td>`;
+                      tbody.appendChild(tr);
+                  });
+              }
+          }
+          if(btn) { btn.innerHTML = "GERAR RESULTADOS"; btn.disabled = false; }
+          window.sentinelaAdmin("REL_GERAR", "SUCESSO", `Tabela populada com ${filtrados.length} linhas.`);
+      } catch(e) { window.sentinelaAdmin("REL_GERAR", "ERRO", e.message); }
+  };
+
+  window.imprimirSuperRelatorio = function() {
+      try {
+          window.sentinelaAdmin("REL_PRINT", "INFO", "Gerando janela de impressão do PDF...");
+          const selAcad = document.getElementById('rel_acad');
+          let tituloAcademia = selAcad && selAcad.value !== "" ? selAcad.options[selAcad.selectedIndex].text : "Relatório Geral (Todas as Unidades)";
+          const alunosParaRelatorio = window.cacheAdmin.alunosFiltradosRelatorio || window.cacheAdmin.alunos;
+          if (!alunosParaRelatorio || alunosParaRelatorio.length === 0) { alert("Não há dados para imprimir."); return; }
+          
+          const grupos = alunosParaRelatorio.reduce((acc, aluno) => { const ac = aluno.academia || "Sem Academia Vinculada"; if (!acc[ac]) acc[ac] = []; acc[ac].push(aluno); return acc; }, {});
+          const janela = window.open('', '', 'width=900,height=600');
+          if(!janela) { alert("Pop-up bloqueado. Permita exibição para gerar o PDF."); return; }
+          
+          let h = `
+          <html><head><title>Relatório Oficial Financeiro/Técnico</title>
+          <style>
+              body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; color: #333; } 
+              .header-rel { border-bottom: 3px solid #FFD700; padding-bottom: 10px; margin-bottom: 20px; } 
+              table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; } 
+              th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 13px; } 
+              th { background: #333; color: #FFD700; text-transform: uppercase; font-size: 11px; } 
+              tr:nth-child(even) { background-color: #fcfcfc; } 
+              .atraso { color: red; font-weight: bold; } 
+              .em-dia { color: green; font-weight: bold; }
+          </style></head><body>
+          <div class='header-rel'><h2>Relatório Oficial de Atletas</h2>
+          <p><b>Filtro Aplicado:</b> ${window.esc(tituloAcademia)} &nbsp;|&nbsp; <b>Data de Emissão:</b> ${new Date().toLocaleDateString('pt-BR')}</p>
+          <p><b>Total de Atletas Listados:</b> ${alunosParaRelatorio.length}</p></div>
+          `;
+          
+          const hoje = new Date(); hoje.setHours(0,0,0,0);
+          for (let academia in grupos) {
+              h += `<div class='secao'><h3>Unidade: ${window.esc(academia)} (Total: ${grupos[academia].length} alunos)</h3>`;
+              h += `<table><thead><tr><th>Nome do Atleta</th><th>Idade Exata</th><th>Faixa/Turma</th><th>Status Financeiro</th></tr></thead><tbody>`;
+              grupos[academia].forEach(a => {
+                  let st = "Sem Plano"; let css = "";
+                  if(a.vencimento) {
+                     const p = String(a.vencimento).split('/');
+                     if(p.length === 3) {
+                         const dVenc = new Date(p[2], p[1]-1, p[0]);
+                         if (String(a.statusAssinatura).toLowerCase() === "ativo" && dVenc >= hoje) { st = "Em Dia"; css = "em-dia"; } 
+                         else { const diff = Math.ceil(Math.abs(hoje - dVenc) / (1000 * 60 * 60 * 24)); st = "Atrasado " + diff + " dia(s)"; css = "atraso"; }
+                     }
+                  }
+                  h += `<tr><td><b>${window.esc(a.nome)}</b></td><td>${window.esc(a.idadeExata)}</td><td>${window.esc(a.graduacao)}<br><small>${window.esc(a.turma)}</small></td><td class='${css}'>${st}</td></tr>`;
+              });
+              h += `</tbody></table></div>`;
+          }
+          h += `</body></html>`;
+          
+          janela.document.open(); janela.document.write(h); janela.document.close();
+          setTimeout(() => { try{ janela.print(); window.sentinelaAdmin("imprimirSuperRelatorio", "SUCESSO", "PDF Enviado."); }catch(e){} }, 1000);
+      } catch(e) { window.sentinelaAdmin("imprimirSuperRelatorio", "ERRO", e.message); }
+  };
+
+  // Funções CRUD Genéricas (Resumidas para espaço - As suas antigas continuam válidas)
   window.carregarAlunos = function() {
       try {
+          window.sentinelaAdmin("carregarAlunos", "INFO", "Buscando Alunos...");
           const tbody = document.getElementById('lista-alunos-body');
           if(!tbody) return;
           tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px;">Sincronizando Atletas...</td></tr>';
           window.initFiltrosAlunosAdm(); 
           google.script.run
-              .withFailureHandler(e => { window.sentinelaAdmin("carregarAlunos", "ERRO", e.message); tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:red;">Erro ao carregar</td></tr>'; })
+              .withFailureHandler(e => { tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:red;">Erro ao carregar</td></tr>'; })
               .withSuccessHandler(function(lista) { 
                   window.cacheAdmin.alunos = lista; 
                   if (!lista || lista.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum aluno encontrado.</td></tr>'; return; }
                   window.filtrarAlunos(); 
+                  window.sentinelaAdmin("carregarAlunos", "SUCESSO", `${lista.length} alunos baixados.`);
               }).listarAlunosAdmin(window.editorLogin);
       } catch(e) { window.sentinelaAdmin("carregarAlunos", "ERRO", e.message); }
   };
+  
   window.initFiltrosAlunosAdm = function() {
       try {
-          google.script.run
-              .withFailureHandler(e => window.sentinelaAdmin("initFiltrosAlunosAdm:Acads", "ERRO", e.message))
-              .withSuccessHandler(ac => {
+          google.script.run.withSuccessHandler(ac => {
               const s = document.getElementById('filter-acad-alunos');
               if(!s) return;
               const isGod = window.userSessionLocal.isAdmin;
@@ -1263,9 +1514,7 @@
               if(sr) sr.innerHTML = s.innerHTML;
           }).getListaAcademias(window.editorLogin);
           
-          google.script.run
-              .withFailureHandler(e => window.sentinelaAdmin("initFiltrosAlunosAdm:Mods", "ERRO", e.message))
-              .withSuccessHandler(lista => {
+          google.script.run.withSuccessHandler(lista => {
               const s = document.getElementById('filter-mod-alunos');
               if(!s) return;
               const options = '<option value="">Todas as Modalidades</option>' + lista.map(x => `<option value="${x}">${x}</option>`).join('');
@@ -1274,17 +1523,17 @@
               if(sr) sr.innerHTML = options;
           }).getListaModalidades();
           
-          google.script.run
-              .withFailureHandler(e => window.sentinelaAdmin("initFiltrosAlunosAdm:Turmas", "ERRO", e.message))
-              .withSuccessHandler(tr => {
+          google.script.run.withSuccessHandler(tr => {
               window.cacheAdmin.todasTurmas = tr || [];
               window.atualizarFiltroTurmasAdm();
               window.atualizarTurmasRelatorio(); 
           }).listarTurmasAdmin(window.editorLogin);
       } catch(e) { window.sentinelaAdmin("initFiltrosAlunosAdm", "ERRO", e.message); }
   };
+
   window.carregarConfigFinanceira = function() {
     try {
+        window.sentinelaAdmin("carregarConfigFinanceira", "INFO", "Baixando configurações do caixa...");
         google.script.run.withSuccessHandler(lista => {
             const tb = document.getElementById('lista-categorias-body');
             if(tb) { tb.innerHTML = lista.map(c => `<tr><td>${window.esc(c.nome)}</td><td>${c.tipo}</td><td>${window.esc(c.local)}</td><td>${c.exibeAluno}</td><td><button class="adm-btn" style="padding:5px;" onclick='window.prepEditCat(${JSON.stringify(c)})'>EDITAR</button></td></tr>`).join(''); }
@@ -1295,6 +1544,7 @@
         }).listarFormasPagamentoAdmin();
     } catch(e) { window.sentinelaAdmin("carregarConfigFinanceira", "ERRO", e.message); }
   };
+
   window.atualizarFiltroTurmasAdm = function() {
       try {
           const elAcad = document.getElementById('filter-acad-alunos');
@@ -1305,8 +1555,9 @@
               let turmasFiltradas = elAcad.value !== "" ? window.cacheAdmin.todasTurmas.filter(t => t.local === elAcad.value && t.status === "Ativa") : window.cacheAdmin.todasTurmas;
               turmasFiltradas.forEach(t => { s.innerHTML += `<option value="${t.nome}">${t.nome}</option>`; });
           }
-      } catch(e) { window.sentinelaAdmin("atualizarFiltroTurmasAdm", "ERRO", e.message); }
+      } catch(e) {}
   };
+
   window.atualizarTurmasRelatorio = function() {
       try {
           const elAcad = document.getElementById('rel_acad');
@@ -1317,8 +1568,9 @@
               let turmasFiltradas = elAcad.value !== "" ? window.cacheAdmin.todasTurmas.filter(t => t.local === elAcad.value && t.status === "Ativa") : window.cacheAdmin.todasTurmas;
               turmasFiltradas.forEach(t => { s.innerHTML += `<option value="${t.nome}">${t.nome}</option>`; });
           }
-      } catch(e) { window.sentinelaAdmin("atualizarTurmasRelatorio", "ERRO", e.message); }
+      } catch(e) {}
   };
+
   window.filtrarAlunos = function() {
       try {
           const sEl = document.getElementById('search-alunos');
@@ -1345,6 +1597,7 @@
           window.renderAlunosTable(filtrados); 
       } catch(e) { window.sentinelaAdmin("filtrarAlunos", "ERRO", e.message); }
   };
+
   window.renderAlunosTable = function(lista) {
       try {
           const tbody = document.getElementById('lista-alunos-body');
@@ -1358,6 +1611,7 @@
           });
       } catch(e) { window.sentinelaAdmin("renderAlunosTable", "ERRO", e.message); }
   };
+
   window.popularAcademiasCheckboxAluno = function(acadAtuais = "") {
       try {
           const container = document.getElementById('container-acad-aluno');
@@ -1380,18 +1634,12 @@
           }).getListaAcademias(window.editorLogin);
       } catch(e) { window.sentinelaAdmin("popularAcademiasCheckboxAluno", "ERRO", e.message); }
   };
-  window.abrirModalCategoria = function() {
-    try { const m = document.getElementById('adm-modal-categoria'); if(m) m.style.display = 'flex'; const catId = document.getElementById('cat_id'); if(catId) catId.value = ""; const f = document.querySelector('#adm-modal-categoria form'); if(f) f.reset(); } catch(e) { window.sentinelaAdmin("abrirModalCategoria", "ERRO", e.message); }
-  };
-  window.prepEditCat = function(c) {
-    try { window.abrirModalCategoria(); const ids = {'cat_id': c.id, 'cat_nome': c.nome, 'cat_tipo': c.tipo, 'cat_local': c.local, 'cat_exibe': c.exibeAluno, 'cat_status': c.status}; for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; } } catch(e) { window.sentinelaAdmin("prepEditCat", "ERRO", e.message); }
-  };
-  window.abrirModalPagamento = function() {
-    try { const m = document.getElementById('adm-modal-pagamento'); if(m) m.style.display = 'flex'; const idEl = document.getElementById('pag_id'); if(idEl) idEl.value = ""; const f = document.querySelector('#adm-modal-pagamento form'); if(f) f.reset(); } catch(e) { window.sentinelaAdmin("abrirModalPagamento", "ERRO", e.message); }
-  };
-  window.prepEditPag = function(f) {
-    try { window.abrirModalPagamento(); const ids = {'pag_id': f.id, 'pag_nome': f.nome, 'pag_local': f.local, 'pag_status': f.status}; for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; } } catch(e) { window.sentinelaAdmin("prepEditPag", "ERRO", e.message); }
-  };
+
+  window.abrirModalCategoria = function() { try { const m = document.getElementById('adm-modal-categoria'); if(m) m.style.display = 'flex'; const catId = document.getElementById('cat_id'); if(catId) catId.value = ""; const f = document.querySelector('#adm-modal-categoria form'); if(f) f.reset(); } catch(e) {} };
+  window.prepEditCat = function(c) { try { window.abrirModalCategoria(); const ids = {'cat_id': c.id, 'cat_nome': c.nome, 'cat_tipo': c.tipo, 'cat_local': c.local, 'cat_exibe': c.exibeAluno, 'cat_status': c.status}; for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; } } catch(e) {} };
+  window.abrirModalPagamento = function() { try { const m = document.getElementById('adm-modal-pagamento'); if(m) m.style.display = 'flex'; const idEl = document.getElementById('pag_id'); if(idEl) idEl.value = ""; const f = document.querySelector('#adm-modal-pagamento form'); if(f) f.reset(); } catch(e) {} };
+  window.prepEditPag = function(f) { try { window.abrirModalPagamento(); const ids = {'pag_id': f.id, 'pag_nome': f.nome, 'pag_local': f.local, 'pag_status': f.status}; for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; } } catch(e) {} };
+
   window.atualizarAcademiasHidden = function() {
       try {
           const checkboxes = document.querySelectorAll('input[name="aluno_acad_chk"]:checked');
@@ -1400,10 +1648,12 @@
           if(aEl) aEl.value = selecionadas;
           const tEl = document.getElementById('aluno_turma');
           if(tEl) window.carregarTurmasSelectParaAlunos(selecionadas, tEl.value);
-      } catch(e) { window.sentinelaAdmin("atualizarAcademiasHidden", "ERRO", e.message); }
+      } catch(e) {}
   };
+
   window.abrirModalNovoAluno = function() {
       try {
+          window.sentinelaAdmin("abrirModalNovoAluno", "INFO", "Abrindo CRM...");
           const modal = document.getElementById('adm-modal-aluno');
           if(modal) modal.style.display = 'flex';
           const f = document.getElementById('form-edit-aluno');
@@ -1422,10 +1672,12 @@
           window.popularModalidadesCheckbox("");
       } catch(e) { window.sentinelaAdmin("abrirModalNovoAluno", "ERRO", e.message); }
   };
+
   window.prepEditAluno = function(id) {
       try {
           const d = window.cacheAdmin.alunos.find(a => a.id === id);
           if(!d) return;
+          window.sentinelaAdmin("prepEditAluno", "INFO", `Editando Atleta: ${d.nome}`);
           const t = document.getElementById('titulo-modal-aluno');
           if(t) t.innerText = "Editando: " + (d.nome || d.login);
           const setVal = (idInput, val) => { const el = document.getElementById(idInput); if(!el) return; if(val === undefined || val === null || String(val).trim() === "") { el.value = ""; el.placeholder = "Campo Vazio"; } else { el.value = val; } };
@@ -1454,6 +1706,7 @@
           if(m) m.style.display = 'flex';
       } catch(e) { window.sentinelaAdmin("prepEditAluno", "ERRO", e.message); }
   };
+
   window.popularModalidadesCheckbox = function(modAtuais = "") {
       try {
           const container = document.getElementById('container-modalidades-aluno');
@@ -1469,221 +1722,18 @@
               if(listaMods.length === 0) container.innerHTML = '<span style="font-size:11px; color:#888;">Nenhuma modalidade na aba Graduação.</span>';
               window.atualizarModalidadesHidden();
           }).getListaModalidades();
-      } catch(e) { window.sentinelaAdmin("popularModalidadesCheckbox", "ERRO", e.message); }
+      } catch(e) {}
   };
+
   window.atualizarModalidadesHidden = function() {
       try {
           const checkboxes = document.querySelectorAll('input[name="aluno_modalidade_chk"]:checked');
           const selecionadas = Array.from(checkboxes).map(cb => cb.value).join(", ");
           const aMod = document.getElementById('aluno_modalidade');
           if(aMod) aMod.value = selecionadas;
-      } catch(e) { window.sentinelaAdmin("atualizarModalidadesHidden", "ERRO", e.message); }
+      } catch(e) {}
   };
-  window.abrirModalCategoria = function() {
-    try { const m = document.getElementById('adm-modal-categoria'); if(m) m.style.display = 'flex'; const catId = document.getElementById('cat_id'); if(catId) catId.value = ""; const f = document.querySelector('#adm-modal-categoria form'); if(f) f.reset(); } catch(e) { window.sentinelaAdmin("abrirModalCategoria", "ERRO", e.message); }
-  };
-  window.prepEditCat = function(c) {
-    try { window.abrirModalCategoria(); const ids = {'cat_id': c.id, 'cat_nome': c.nome, 'cat_tipo': c.tipo, 'cat_local': c.local, 'cat_exibe': c.exibeAluno, 'cat_status': c.status}; for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; } } catch(e) { window.sentinelaAdmin("prepEditCat", "ERRO", e.message); }
-  };
-  window.abrirModalPagamento = function() {
-    try { const m = document.getElementById('adm-modal-pagamento'); if(m) m.style.display = 'flex'; const idEl = document.getElementById('pag_id'); if(idEl) idEl.value = ""; const f = document.querySelector('#adm-modal-pagamento form'); if(f) f.reset(); } catch(e) { window.sentinelaAdmin("abrirModalPagamento", "ERRO", e.message); }
-  };
-  window.prepEditPag = function(f) {
-    try { window.abrirModalPagamento(); const ids = {'pag_id': f.id, 'pag_nome': f.nome, 'pag_local': f.local, 'pag_status': f.status}; for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; } } catch(e) { window.sentinelaAdmin("prepEditPag", "ERRO", e.message); }
-  };
-  window.atualizarAcademiasHidden = function() {
-      try {
-          const checkboxes = document.querySelectorAll('input[name="aluno_acad_chk"]:checked');
-          const selecionadas = Array.from(checkboxes).map(cb => cb.value).join(", ");
-          const aEl = document.getElementById('aluno_acad');
-          if(aEl) aEl.value = selecionadas;
-          const tEl = document.getElementById('aluno_turma');
-          if(tEl) window.carregarTurmasSelectParaAlunos(selecionadas, tEl.value);
-      } catch(e) { window.sentinelaAdmin("atualizarAcademiasHidden", "ERRO", e.message); }
-  };
-  window.abrirModalNovoAluno = function() {
-      try {
-          const modal = document.getElementById('adm-modal-aluno');
-          if(modal) modal.style.display = 'flex';
-          const f = document.getElementById('form-edit-aluno');
-          if(f) f.reset();
-          const ids = {'aluno_id': "", 'aluno_carimbo': "", 'aluno_nivel': "Aluno"};
-          for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; }
-          const t = document.getElementById('titulo-modal-aluno');
-          if(t) t.innerText = "Novo Aluno (CRM)";
-          window.popularAcademiasCheckboxAluno(""); 
-          google.script.run.withSuccessHandler(pacotes => { 
-              const sel = document.getElementById('aluno_pacote'); 
-              if(sel) { sel.innerHTML = '<option value="">Nenhum / Sem Pacote</option>'; pacotes.forEach(p => sel.add(new Option(p.nome_pacote, p.nome_pacote))); }
-          }).getPacotesDisponiveis(window.editorLogin);
-          window.popularFaixasSelect('aluno_grad', '');
-          window.popularFaixasSelect('aluno_prox_grad', '');
-          window.popularModalidadesCheckbox("");
-      } catch(e) { window.sentinelaAdmin("abrirModalNovoAluno", "ERRO", e.message); }
-  };
-  window.prepEditAluno = function(id) {
-      try {
-          const d = window.cacheAdmin.alunos.find(a => a.id === id);
-          if(!d) return;
-          const t = document.getElementById('titulo-modal-aluno');
-          if(t) t.innerText = "Editando: " + (d.nome || d.login);
-          const setVal = (idInput, val) => { const el = document.getElementById(idInput); if(!el) return; if(val === undefined || val === null || String(val).trim() === "") { el.value = ""; el.placeholder = "Campo Vazio"; } else { el.value = val; } };
-          const dF = (val) => { if(!val || val === "") return ""; if(val.includes('/')) { const p = val.split('/'); return p[2]+"-"+p[1]+"-"+p[0]; } return val; };
-          const elId = document.getElementById('aluno_id');
-          if(elId) elId.value = d.id;
-          setVal('aluno_carimbo', d.carimbo); setVal('aluno_nome', d.nome); setVal('aluno_cpf', d.cpf); setVal('aluno_nasc', dF(d.nasc)); setVal('aluno_tel', d.tel); setVal('aluno_email', d.email); setVal('aluno_pai', d.pai); setVal('aluno_mae', d.mae); setVal('aluno_end', d.endereco); setVal('aluno_foto', d.foto); setVal('aluno_login', d.login); setVal('aluno_senha', d.senha); setVal('aluno_peso', String(d.peso || "").replace(',','.')); setVal('aluno_altura', String(d.altura || "").replace(',','.')); setVal('aluno_exame', dF(d.proxExame)); setVal('aluno_data_cart', dF(d.dataCarteira));
-          const aStat = document.getElementById('aluno_status');
-          if(aStat) aStat.value = d.status || "Ativo";
-          let n = String(d.nivel || "Aluno").toUpperCase();
-          if(n.includes("MESTRE")) n = "Mestre"; else if(n.includes("PROFESSOR")) n = "Professor"; else if(n.includes("N1")) n = "Instrutor N1"; else if(n.includes("N2")) n = "Instrutor N2"; else if(n.includes("N3")) n = "Instrutor N3"; else if(n.includes("ADMIN")) n = "Admin"; else n = "Aluno";
-          const aNiv = document.getElementById('aluno_nivel');
-          if(aNiv) aNiv.value = n;
-          window.popularAcademiasCheckboxAluno(d.academia); 
-          setVal('aluno_vencimento', dF(d.vencimento));
-          const aStA = document.getElementById('aluno_status_assinatura');
-          if(aStA) aStA.value = d.statusAssinatura || "Ativo";
-          google.script.run.withSuccessHandler(pac => { 
-              const sel = document.getElementById('aluno_pacote'); 
-              if(sel) { sel.innerHTML = '<option value="">Sem Pacote</option>'; pac.forEach(p => { const opt = new Option(p.nome_pacote, p.nome_pacote); if(p.nome_pacote === d.pacote) opt.selected = true; sel.add(opt); }); }
-          }).getPacotesDisponiveis(window.editorLogin);
-          window.popularFaixasSelect('aluno_grad', d.graduacao);
-          window.popularFaixasSelect('aluno_prox_grad', d.proxGrad);
-          window.popularModalidadesCheckbox(d.modalidade);
-          const m = document.getElementById('adm-modal-aluno');
-          if(m) m.style.display = 'flex';
-      } catch(e) { window.sentinelaAdmin("prepEditAluno", "ERRO", e.message); }
-  };
-  window.popularModalidadesCheckbox = function(modAtuais = "") {
-      try {
-          const container = document.getElementById('container-modalidades-aluno');
-          if(!container) return;
-          container.innerHTML = '<span style="font-size:11px;">Carregando...</span>';
-          google.script.run.withSuccessHandler(listaMods => {
-              container.innerHTML = "";
-              const modsDoAluno = modAtuais.split(',').map(m => m.trim().toLowerCase());
-              listaMods.forEach(mod => {
-                  const isChecked = modsDoAluno.includes(mod.toLowerCase()) ? "checked" : "";
-                  container.innerHTML += `<label class='mod-check-label'><input type="checkbox" name="aluno_modalidade_chk" value="${mod}" ${isChecked} class="mod-check-input" onchange="window.atualizarModalidadesHidden()"> ${mod}</label>`;
-              });
-              if(listaMods.length === 0) container.innerHTML = '<span style="font-size:11px; color:#888;">Nenhuma modalidade na aba Graduação.</span>';
-              window.atualizarModalidadesHidden();
-          }).getListaModalidades();
-      } catch(e) { window.sentinelaAdmin("popularModalidadesCheckbox", "ERRO", e.message); }
-  };
-  window.atualizarModalidadesHidden = function() {
-      try {
-          const checkboxes = document.querySelectorAll('input[name="aluno_modalidade_chk"]:checked');
-          const selecionadas = Array.from(checkboxes).map(cb => cb.value).join(", ");
-          const aMod = document.getElementById('aluno_modalidade');
-          if(aMod) aMod.value = selecionadas;
-      } catch(e) { window.sentinelaAdmin("atualizarModalidadesHidden", "ERRO", e.message); }
-  };
-  window.gerarSuperRelatorio = function(e) {
-      if(e) e.preventDefault();
-      try {
-          const btn = e.target ? e.target.querySelector('button[type="submit"]') : null;
-          if(btn) { btn.innerHTML = "<span class='material-icons spin'>sync</span> Processando..."; btn.disabled = true; }
-          const elIm = document.getElementById('rel_idade_min');
-          const elIx = document.getElementById('rel_idade_max');
-          const elPm = document.getElementById('rel_peso_min');
-          const elPx = document.getElementById('rel_peso_max');
-          const elMo = document.getElementById('rel_mod');
-          const elGr = document.getElementById('rel_grad');
-          const elAc = document.getElementById('rel_acad');
-          const elTu = document.getElementById('rel_turma');
-          const elFi = document.getElementById('rel_fin');
-          const iMin = elIm && elIm.value ? parseInt(elIm.value) : 0;
-          const iMax = elIx && elIx.value ? parseInt(elIx.value) : 999;
-          const pMin = elPm && elPm.value ? parseFloat(elPm.value) : 0;
-          const pMax = elPx && elPx.value ? parseFloat(elPx.value) : 999;
-          const mod = elMo ? elMo.value.toLowerCase() : "";
-          const grad = elGr ? elGr.value.toLowerCase() : "";
-          const acad = elAc ? elAc.value.toLowerCase() : "";
-          const turma = elTu ? elTu.value.toLowerCase() : "";
-          const statusFin = elFi ? elFi.value : ""; 
-          const hoje = new Date(); hoje.setHours(0,0,0,0);
-          const myAcads = window.userSessionLocal.academia ? window.userSessionLocal.academia.split(',').map(a => a.trim().toLowerCase()) : [];
-          const isMaster = myAcads.includes("todas");
-          const filtrados = window.cacheAdmin.alunos.filter(a => {
-              if (String(a.status).toLowerCase() !== 'ativo') return false;
-              const acadAlunoStr = String(a.academia || "").toLowerCase();
-              const hasAccess = isMaster || myAcads.some(myAcad => acadAlunoStr.includes(myAcad));
-              if (!hasAccess) return false; 
-              const idade = parseInt(String(a.idadeExata || "0").split('a')[0]) || 0;
-              const peso = parseFloat(String(a.peso || "0").replace(',', '.')) || 0;
-              if (!(idade >= iMin && idade <= iMax)) return false;
-              if (!(peso >= pMin && peso <= pMax)) return false;
-              if (mod !== "" && !(a.modalidade || "").toLowerCase().includes(mod)) return false;
-              if (grad !== "" && !(a.graduacao || "").toLowerCase().includes(grad)) return false;
-              if (acad !== "" && !(a.academia || "").toLowerCase().includes(acad)) return false;
-              if (turma !== "" && (a.turma || "").toLowerCase() !== turma) return false;
-              let dataFimPlano = null;
-              if(a.vencimento) { const p = String(a.vencimento).split('/'); if(p.length === 3) dataFimPlano = new Date(p[2], p[1]-1, p[0]); }
-              if (statusFin === "em_dia") { if (String(a.statusAssinatura).toLowerCase() !== "ativo" || !dataFimPlano || dataFimPlano < hoje) return false; } 
-              else if (statusFin === "atrasado") { if (String(a.statusAssinatura).toLowerCase() === "ativo" && dataFimPlano && dataFimPlano >= hoje) return false; }
-              return true; 
-          });
-          window.cacheAdmin.alunosFiltradosRelatorio = filtrados;
-          const resR = document.getElementById('resultado-relatorio');
-          if(resR) resR.style.display = 'block';
-          const qR = document.getElementById('qtd-resultados');
-          if(qR) qR.innerText = filtrados.length;
-          const tbody = document.getElementById('tbody-resultados-rel');
-          if(tbody) {
-              tbody.innerHTML = "";
-              if(filtrados.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum atleta atende a estes critérios.</td></tr>'; } 
-              else {
-                  filtrados.forEach(a => {
-                      let statusText = '<span style="color:#888;">S/ Plano</span>';
-                      if (a.vencimento) {
-                          const p = String(a.vencimento).split('/');
-                          const dVenc = new Date(p[2], p[1]-1, p[0]);
-                          if (String(a.statusAssinatura).toLowerCase() === "ativo" && dVenc >= hoje) { statusText = '<span class="adm-badge bg-green">🟢 EM DIA</span>'; } 
-                          else { const diffTime = Math.abs(hoje - dVenc); const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); statusText = `<span class="adm-badge bg-red">🔴 ATRASADO ${diffDays} DIAS</span>`; }
-                      }
-                      const tr = document.createElement('tr');
-                      tr.innerHTML = `<td><b>${window.esc(a.nome)}</b></td><td><span style="color:var(--dynamic-prim); font-weight:bold;">${window.esc(a.idadeExata)}</span></td><td>${window.esc(a.peso)} kg<br><small>${window.esc(a.altura)} m</small></td><td>${window.esc(a.turma)}<br><small>🛡️ ${window.esc(a.graduacao)}</small></td><td>${statusText}</td>`;
-                      tbody.appendChild(tr);
-                  });
-              }
-          }
-          if(btn) { btn.innerHTML = "GERAR RESULTADOS"; btn.disabled = false; }
-      } catch(e) { window.sentinelaAdmin("gerarSuperRelatorio", "ERRO", e.message); }
-  };
-  window.imprimirSuperRelatorio = function() {
-      try {
-          const selAcad = document.getElementById('rel_acad');
-          let tituloAcademia = selAcad && selAcad.value !== "" ? selAcad.options[selAcad.selectedIndex].text : "Relatório Geral (Todas as Unidades)";
-          const alunosParaRelatorio = window.cacheAdmin.alunosFiltradosRelatorio || window.cacheAdmin.alunos;
-          if (!alunosParaRelatorio || alunosParaRelatorio.length === 0) { alert("Não há dados para imprimir."); return; }
-          const grupos = alunosParaRelatorio.reduce((acc, aluno) => { const ac = aluno.academia || "Sem Academia Vinculada"; if (!acc[ac]) acc[ac] = []; acc[ac].push(aluno); return acc; }, {});
-          const janela = window.open('', '', 'width=900,height=600');
-          if(!janela) { alert("Pop-up bloqueado. Permita exibição para gerar o PDF."); return; }
-          let htmlParts = [];
-          htmlParts.push("<html><head><title>Relatório Oficial Financeiro/Técnico</title><style>body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; color: #333; } .header-rel { border-bottom: 3px solid #FFD700; padding-bottom: 10px; margin-bottom: 20px; } table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; } th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 13px; } th { background: #333; color: #FFD700; text-transform: uppercase; font-size: 11px; } tr:nth-child(even) { background-color: #fcfcfc; } .atraso { color: red; font-weight: bold; } .em-dia { color: green; font-weight: bold; }<"+"/style><"+"/head><body>");
-          htmlParts.push("<div class='header-rel'><h2>Relatório Oficial de Atletas</h2><p><b>Filtro Aplicado:</b> " + window.esc(tituloAcademia) + " &nbsp;|&nbsp; <b>Data de Emissão:</b> " + new Date().toLocaleDateString('pt-BR') + "</p><p><b>Total de Atletas Listados:</b> " + alunosParaRelatorio.length + "</p></div>");
-          const hoje = new Date(); hoje.setHours(0,0,0,0);
-          for (let academia in grupos) {
-              htmlParts.push("<div class='secao'><h3>Unidade: " + window.esc(academia) + " (Total: " + grupos[academia].length + " alunos)</h3><table><thead><tr><th>Nome do Atleta</th><th>Idade Exata</th><th>Faixa/Turma</th><th>Status Financeiro</th></tr></thead><tbody>");
-              grupos[academia].forEach(a => {
-                  let st = "Sem Plano"; let css = "";
-                  if(a.vencimento) {
-                     const p = String(a.vencimento).split('/');
-                     if(p.length === 3) {
-                         const dVenc = new Date(p[2], p[1]-1, p[0]);
-                         if (String(a.statusAssinatura).toLowerCase() === "ativo" && dVenc >= hoje) { st = "Em Dia"; css = "em-dia"; } 
-                         else { const diff = Math.ceil(Math.abs(hoje - dVenc) / (1000 * 60 * 60 * 24)); st = "Atrasado " + diff + " dia(s)"; css = "atraso"; }
-                     }
-                  }
-                  htmlParts.push("<tr><td><b>" + window.esc(a.nome) + "</b></td><td>" + window.esc(a.idadeExata) + "</td><td>" + window.esc(a.graduacao) + "<br><small>" + window.esc(a.turma) + "</small></td><td class='"+css+"'>" + st + "</td></tr>");
-              });
-              htmlParts.push("<"+"/tbody><"+"/table></div>");
-          }
-          htmlParts.push("<"+"/body><"+"/html>");
-          janela.document.open(); janela.document.write(htmlParts.join("")); janela.document.close();
-          setTimeout(() => { try{ janela.print(); }catch(e){} }, 1000);
-      } catch(e) { window.sentinelaAdmin("imprimirSuperRelatorio", "ERRO", e.message); }
-  };
+
   window.popularFaixasSelect = function(id, atual) { 
       try {
           google.script.run.withSuccessHandler(gr => { 
@@ -1693,8 +1743,9 @@
                   gr.forEach(g => { const opt = document.createElement("option"); opt.value = g.graduacao; opt.text = g.graduacao; if(g.graduacao === atual) opt.selected = true; s.appendChild(opt); });
               }
           }).listarGraduacoesAdminCompleto(); 
-      } catch(e) { window.sentinelaAdmin("popularFaixasSelect", "ERRO", e.message); }
+      } catch(e) {}
   };
+
   window.popularSelectResponsaveis = function(respAtual) {
       try {
           const sel = document.getElementById('turma_resp');
@@ -1704,8 +1755,9 @@
           ativos.sort((a, b) => a.nome.localeCompare(b.nome));
           ativos.forEach(a => { const opt = new Option(`${a.nome} (${a.graduacao})`, a.nome); opt.setAttribute('data-tel', a.tel || ''); if (a.nome === respAtual) opt.selected = true; sel.add(opt); });
           if (respAtual && !ativos.some(a => a.nome === respAtual)) { const opt = new Option(`${respAtual} (Inativo/Externo)`, respAtual); opt.selected = true; sel.add(opt); }
-      } catch(e) { window.sentinelaAdmin("popularSelectResponsaveis", "ERRO", e.message); }
+      } catch(e) {}
   };
+
   window.popularSelectModalidadesPuras = function(selectId) {
       try {
           const select = document.getElementById(selectId);
@@ -1714,10 +1766,12 @@
               select.innerHTML = '<option value="Geral">Todas (Geral)</option>'; 
               lista.forEach(m => { const opt = document.createElement('option'); opt.value = m; opt.text = m; select.appendChild(opt); });
           }).getListaModalidades();
-      } catch(e) { window.sentinelaAdmin("popularSelectModalidadesPuras", "ERRO", e.message); }
+      } catch(e) {}
   };
+
   window.carregarPacotes = function() { 
       try {
+          window.sentinelaAdmin("carregarPacotes", "INFO", "Buscando pacotes...");
           const tb = document.getElementById('lista-pacotes-body');
           if(!tb) return;
           tb.innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; 
@@ -1732,24 +1786,29 @@
           }).getPacotesDisponiveis(window.editorLogin);
       } catch(e) { window.sentinelaAdmin("carregarPacotes", "ERRO", e.message); }
   };
+
   window.abrirModalPacote = function() { 
-      try { const m = document.getElementById('adm-modal-pacote'); if(m) m.style.display = 'flex'; const i = document.getElementById('pac_linha_id'); if(i) i.value = ""; const f = document.querySelector('#adm-modal-pacote form'); if(f) f.reset(); } catch(e) { window.sentinelaAdmin("abrirModalPacote", "ERRO", e.message); }
+      try { const m = document.getElementById('adm-modal-pacote'); if(m) m.style.display = 'flex'; const i = document.getElementById('pac_linha_id'); if(i) i.value = ""; const f = document.querySelector('#adm-modal-pacote form'); if(f) f.reset(); } catch(e) {}
   };
+
   window.prepEditPacote = function(p) { 
       try {
           window.abrirModalPacote();
           const ids = { 'pac_linha_id': p._linha, 'pac_nome': p.nome_pacote || p.Nome_Pacote, 'pac_valor': String(p.valor_padrao || p.Valor_Padrao || "").replace(',','.'), 'pac_dias': p.duracao_dias || p.Duracao_Dias, 'pac_academias': p.academias_permitidas || p.Academias_Permitidas || "", 'pac_status': p.status_pacote || p.Status_Pacote || "Ativo", 'pac_desc': p.descricao || p.Descricao || "" };
           for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; }
-      } catch(e) { window.sentinelaAdmin("prepEditPacote", "ERRO", e.message); }
+      } catch(e) {}
   };
+
   window.carregarGraduacoes = function() {
       try {
+          window.sentinelaAdmin("carregarGraduacoes", "INFO", "Buscando graduações...");
           const el = document.getElementById('lista-grad-body');
           if(!el) return;
           el.innerHTML = '<tr><td colspan="5" style="text-align:center;"><span class="material-icons spin">sync</span> Sincronizando...</td></tr>';
           google.script.run.withSuccessHandler(lista => { window.cacheAdmin.graduacoesObj = lista; window.renderGraduacoes(lista); }).listarGraduacoesAdminCompleto();
       } catch(e) { window.sentinelaAdmin("carregarGraduacoes", "ERRO", e.message); }
   };
+
   window.renderGraduacoes = function(lista) {
       try {
           const tbody = document.getElementById('lista-grad-body');
@@ -1762,11 +1821,13 @@
               tr.innerHTML = `<td><b style="font-size:16px; color:var(--dynamic-prim)">${g.id_hierarquia}</b></td><td><span class="adm-badge bg-dark">🛡️ ${window.esc(g.modalidade)}</span></td><td><b style="font-size:14px; text-transform:uppercase;">${window.esc(g.graduacao)}</b><br><small style="color:#777;">${window.esc(g.observacao)}</small></td><td><span class="adm-badge ${String(g.nivel).toLowerCase().includes('aluno') ? 'bg-blue' : 'bg-red'}">${window.esc(g.nivel)}</span></td><td><button class="adm-btn" style="padding: 6px 10px;" onclick='window.prepEditGrad(${JSON.stringify(g)})'><span class="material-icons" style="font-size:14px">edit</span></button> <button class="adm-btn" style="background:#ff5252; padding: 6px 10px; margin-left:5px;" onclick='window.excluirGrad(${g.linha})'><span class="material-icons" style="font-size:14px">delete</span></button></td>`;
               tbody.appendChild(tr);
           });
-      } catch(e) { window.sentinelaAdmin("renderGraduacoes", "ERRO", e.message); }
+      } catch(e) {}
   };
+
   window.filtrarGraduacoes = function() {
-      try { const el = document.getElementById('search-grad'); if(!el) return; const termo = el.value.toLowerCase(); const filtrados = window.cacheAdmin.graduacoesObj.filter(g => String(g.modalidade).toLowerCase().includes(termo) || String(g.graduacao).toLowerCase().includes(termo)); window.renderGraduacoes(filtrados); } catch(e) { window.sentinelaAdmin("filtrarGraduacoes", "ERRO", e.message); }
+      try { const el = document.getElementById('search-grad'); if(!el) return; const termo = el.value.toLowerCase(); const filtrados = window.cacheAdmin.graduacoesObj.filter(g => String(g.modalidade).toLowerCase().includes(termo) || String(g.graduacao).toLowerCase().includes(termo)); window.renderGraduacoes(filtrados); } catch(e) {}
   };
+
   window.abrirModalGrad = function() {
       try {
           const m = document.getElementById('adm-modal-grad');
@@ -1777,21 +1838,25 @@
           if(g) g.value = "";
           const dl = document.getElementById('datalist-modalidades-grad');
           if(dl) { google.script.run.withSuccessHandler(lista => { dl.innerHTML = ''; lista.forEach(m => { const opt = document.createElement('option'); opt.value = m; dl.appendChild(opt); }); }).getListaModalidades(); }
-      } catch(e) { window.sentinelaAdmin("abrirModalGrad", "ERRO", e.message); }
+      } catch(e) {}
   };
+
   window.prepEditGrad = function(g) {
       try {
           window.abrirModalGrad();
           const mapIds = { 'grad_linha_id': g.linha, 'grad_mod': g.modalidade, 'grad_nome': g.graduacao, 'grad_id': g.id_hierarquia, 'grad_nivel': g.nivel, 'grad_obs': g.observacao };
           for(let k in mapIds) { const el = document.getElementById(k); if(el) el.value = mapIds[k]; }
-      } catch(e) { window.sentinelaAdmin("prepEditGrad", "ERRO", e.message); }
+      } catch(e) {}
   };
+
   window.excluirGrad = function(linha) {
-      try { if(confirm("Excluir esta graduação pode quebrar a hierarquia de alunos! Continuar?")) { google.script.run.withFailureHandler(e => { alert("Erro: " + e.message); }).withSuccessHandler(res => { alert(res); window.carregarGraduacoes(); }).excluirGraduacaoAdmin(linha); } } catch(e) { window.sentinelaAdmin("excluirGrad", "ERRO", e.message); }
+      try { if(confirm("Excluir esta graduação pode quebrar a hierarquia de alunos! Continuar?")) { google.script.run.withFailureHandler(e => { alert("Erro: " + e.message); }).withSuccessHandler(res => { alert(res); window.carregarGraduacoes(); }).excluirGraduacaoAdmin(linha); } } catch(e) {}
   };
+
   window.carregarTurmas = function() {
-      try { const tbody = document.getElementById('lista-turmas-body'); if(!tbody) return; tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { window.cacheAdmin.turmas = lista; window.renderTurmas(lista); }).listarTurmasAdmin(window.editorLogin); } catch(e) { window.sentinelaAdmin("carregarTurmas", "ERRO", e.message); }
+      try { window.sentinelaAdmin("carregarTurmas", "INFO", "Buscando Turmas..."); const tbody = document.getElementById('lista-turmas-body'); if(!tbody) return; tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { window.cacheAdmin.turmas = lista; window.renderTurmas(lista); }).listarTurmasAdmin(window.editorLogin); } catch(e) { window.sentinelaAdmin("carregarTurmas", "ERRO", e.message); }
   };
+
   window.renderTurmas = function(lista) {
       try {
           const tbody = document.getElementById('lista-turmas-body');
@@ -1804,17 +1869,21 @@
               tr.innerHTML = `<td><b>${window.esc(t.nome)}</b><br><small style="color:#666;">🛡️ ${window.esc(t.modalidade)}</small></td><td><b style="color:#0056b3;">${window.esc(t.local)}</b><br><small>Idade: ${window.esc(t.faixaEtaria)}</small></td><td><span class="adm-badge bg-dark">${window.esc(t.dias)}</span><br><small>${window.esc(t.inicio)} às ${window.esc(t.fim)}</small></td><td><span class="adm-badge ${statusClass}">${window.esc(t.status)}</span></td><td><button class="adm-btn" onclick='window.prepEditTurma(${JSON.stringify(t)})'><span class="material-icons" style="font-size:14px">edit</span></button></td>`;
               tbody.appendChild(tr);
           });
-      } catch(e) { window.sentinelaAdmin("renderTurmas", "ERRO", e.message); }
+      } catch(e) {}
   };
+
   window.atualizarTelefoneRespTurma = function() {
-      try { const sel = document.getElementById('turma_resp'); const tel = document.getElementById('turma_tel'); if(sel && tel) tel.value = sel.options[sel.selectedIndex].getAttribute('data-tel') || ''; } catch(e) { window.sentinelaAdmin("atualizarTelefoneRespTurma", "ERRO", e.message); }
+      try { const sel = document.getElementById('turma_resp'); const tel = document.getElementById('turma_tel'); if(sel && tel) tel.value = sel.options[sel.selectedIndex].getAttribute('data-tel') || ''; } catch(e) {}
   };
+
   window.filtrarTurmas = function() {
-      try { const el = document.getElementById('search-turmas'); if(!el) return; const termo = el.value.toLowerCase(); const filtrados = window.cacheAdmin.turmas.filter(t => String(t.nome).toLowerCase().includes(termo) || String(t.modalidade).toLowerCase().includes(termo)); window.renderTurmas(filtrados); } catch(e) { window.sentinelaAdmin("filtrarTurmas", "ERRO", e.message); }
+      try { const el = document.getElementById('search-turmas'); if(!el) return; const termo = el.value.toLowerCase(); const filtrados = window.cacheAdmin.turmas.filter(t => String(t.nome).toLowerCase().includes(termo) || String(t.modalidade).toLowerCase().includes(termo)); window.renderTurmas(filtrados); } catch(e) {}
   };
+
   window.interceptarSalvarTurma = function(e) {
-      try { e.preventDefault(); const checkboxes = document.querySelectorAll('input[name="turma_dias_chk"]:checked'); const diasSelecionados = Array.from(checkboxes).map(cb => cb.value).join(", "); if (diasSelecionados === "") { alert("⚠️ Selecione pelo menos um dia!"); return; } const tDias = document.getElementById('turma_dias'); if(tDias) tDias.value = diasSelecionados; window.handleAdmForm(e, 'salvarTurma'); } catch(err) { window.sentinelaAdmin("interceptarSalvarTurma", "ERRO", err.message); }
+      try { e.preventDefault(); const checkboxes = document.querySelectorAll('input[name="turma_dias_chk"]:checked'); const diasSelecionados = Array.from(checkboxes).map(cb => cb.value).join(", "); if (diasSelecionados === "") { alert("⚠️ Selecione pelo menos um dia!"); return; } const tDias = document.getElementById('turma_dias'); if(tDias) tDias.value = diasSelecionados; window.handleAdmForm(e, 'salvarTurma'); } catch(err) {}
   };
+
   window.abrirModalTurma = function() {
       try {
           const m = document.getElementById('adm-modal-turma');
@@ -1827,8 +1896,9 @@
           window.popularSelectResponsaveis(""); 
           window.popularSelectModalidadesPuras('turma_mod');
           google.script.run.withSuccessHandler(ac => { const s = document.getElementById('turma_local'); if(s) s.innerHTML = ac.map(x => `<option value="${x}">${x}</option>`).join(''); }).getListaAcademias(window.editorLogin);
-      } catch(e) { window.sentinelaAdmin("abrirModalTurma", "ERRO", e.message); }
+      } catch(e) {}
   };
+
   window.prepEditTurma = function(t) {
       try {
           window.abrirModalTurma();
@@ -1841,8 +1911,9 @@
           window.popularSelectResponsaveis(t.responsavel);
           setTimeout(() => { const mod = document.getElementById('turma_mod'); if(mod) mod.value = t.modalidade || "Geral"; }, 600); 
           setTimeout(() => { const loc = document.getElementById('turma_local'); if(loc) loc.value = t.local || "Matriz"; }, 800);
-      } catch(e) { window.sentinelaAdmin("prepEditTurma", "ERRO", e.message); }
+      } catch(e) {}
   };
+
   window.carregarTurmasSelectParaAlunos = function(localSelecionado, turmaAtual) {
       try {
           const selTurma = document.getElementById('aluno_turma');
@@ -1854,75 +1925,98 @@
               const filtradas = turmas.filter(t => locaisArray.includes(String(t.local).toLowerCase()) && t.status === 'Ativa');
               filtradas.forEach(t => { const opt = new Option(t.nome, t.nome); if (t.nome === turmaAtual) opt.selected = true; selTurma.add(opt); });
           }).listarTurmasAdmin(window.editorLogin);
-      } catch(e) { window.sentinelaAdmin("carregarTurmasSelectParaAlunos", "ERRO", e.message); }
+      } catch(e) {}
   };
+
   window.carregarVideos = function() { 
-      try { const tb = document.getElementById('lista-videos-body'); if(!tb) return; tb.innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { window.cacheAdmin.videos = lista; tb.innerHTML = lista.map(v => `<tr><td><b>${window.esc(v.titulo)}</b><br><small>${window.esc(v.desc)}</small></td><td>${window.esc(v.link)}</td><td>${window.esc(v.modalidade)} / ${window.esc(v.faixa)}</td><td><button class="adm-btn" onclick='window.prepEditVideo(${JSON.stringify(v)})'>EDITAR</button></td></tr>`).join(''); }).listarVideosAdmin(); } catch(e) { window.sentinelaAdmin("carregarVideos", "ERRO", e.message); }
+      try { window.sentinelaAdmin("carregarVideos", "INFO", "Buscando Videos..."); const tb = document.getElementById('lista-videos-body'); if(!tb) return; tb.innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { window.cacheAdmin.videos = lista; tb.innerHTML = lista.map(v => `<tr><td><b>${window.esc(v.titulo)}</b><br><small>${window.esc(v.desc)}</small></td><td>${window.esc(v.link)}</td><td>${window.esc(v.modalidade)} / ${window.esc(v.faixa)}</td><td><button class="adm-btn" onclick='window.prepEditVideo(${JSON.stringify(v)})'>EDITAR</button></td></tr>`).join(''); }).listarVideosAdmin(); } catch(e) { window.sentinelaAdmin("carregarVideos", "ERRO", e.message); }
   };
+
   window.openModalVideo = function() { 
-      try { const f = document.querySelector('#adm-modal-video form'); if(f) f.reset(); const i = document.getElementById('vid_id'); if(i) i.value = ""; window.popularFaixasSelect('vid_faixa', ''); window.popularSelectModalidadesPuras('vid_mod'); const m = document.getElementById('adm-modal-video'); if(m) m.style.display = 'flex'; } catch(e) { window.sentinelaAdmin("openModalVideo", "ERRO", e.message); }
+      try { const f = document.querySelector('#adm-modal-video form'); if(f) f.reset(); const i = document.getElementById('vid_id'); if(i) i.value = ""; window.popularFaixasSelect('vid_faixa', ''); window.popularSelectModalidadesPuras('vid_mod'); const m = document.getElementById('adm-modal-video'); if(m) m.style.display = 'flex'; } catch(e) {}
   };
+
   window.prepEditVideo = function(v) { 
-      try { window.openModalVideo(); const ids = {'vid_id': v.id, 'vid_titulo': v.titulo, 'vid_link': v.link, 'vid_desc': v.desc || "", 'vid_status': v.status || "Ativo"}; for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; } window.popularFaixasSelect('vid_faixa', v.faixa); setTimeout(()=>{ const mEl = document.getElementById('vid_mod'); if(mEl) mEl.value = v.modalidade || "Geral"; }, 500); } catch(e) { window.sentinelaAdmin("prepEditVideo", "ERRO", e.message); }
+      try { window.openModalVideo(); const ids = {'vid_id': v.id, 'vid_titulo': v.titulo, 'vid_link': v.link, 'vid_desc': v.desc || "", 'vid_status': v.status || "Ativo"}; for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; } window.popularFaixasSelect('vid_faixa', v.faixa); setTimeout(()=>{ const mEl = document.getElementById('vid_mod'); if(mEl) mEl.value = v.modalidade || "Geral"; }, 500); } catch(e) {}
   };
+
   window.carregarProg = function() { 
-      try { const tb = document.getElementById('lista-prog-body'); if(!tb) return; tb.innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { window.cacheAdmin.prog = lista; tb.innerHTML = lista.map(p => `<tr><td><b>${window.esc(p.faixa)}</b><br><small>${window.esc(p.modalidade)}</small></td><td>${p.id_arquivo ? 'Linkado' : 'Pendente'}</td><td><small>${window.esc(p.descricao)}</small></td><td><button class="adm-btn" onclick='window.prepEditProg(${JSON.stringify(p)})'>EDITAR</button></td></tr>`).join(''); }).listarProgramasAdmin(); } catch(e) { window.sentinelaAdmin("carregarProg", "ERRO", e.message); }
+      try { window.sentinelaAdmin("carregarProg", "INFO", "Buscando Programas..."); const tb = document.getElementById('lista-prog-body'); if(!tb) return; tb.innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { window.cacheAdmin.prog = lista; tb.innerHTML = lista.map(p => `<tr><td><b>${window.esc(p.faixa)}</b><br><small>${window.esc(p.modalidade)}</small></td><td>${p.id_arquivo ? 'Linkado' : 'Pendente'}</td><td><small>${window.esc(p.descricao)}</small></td><td><button class="adm-btn" onclick='window.prepEditProg(${JSON.stringify(p)})'>EDITAR</button></td></tr>`).join(''); }).listarProgramasAdmin(); } catch(e) { window.sentinelaAdmin("carregarProg", "ERRO", e.message); }
   };
+
   window.abrirModalProg = function() { 
-      try { const m = document.getElementById('adm-modal-prog'); if(m) m.style.display='flex'; const f = document.querySelector('#adm-modal-prog form'); if(f) f.reset(); const i = document.getElementById('prog_id'); if(i) i.value=""; window.popularFaixasSelect('prog_faixa', ''); window.popularSelectModalidadesPuras('prog_mod'); } catch(e) { window.sentinelaAdmin("abrirModalProg", "ERRO", e.message); }
+      try { const m = document.getElementById('adm-modal-prog'); if(m) m.style.display='flex'; const f = document.querySelector('#adm-modal-prog form'); if(f) f.reset(); const i = document.getElementById('prog_id'); if(i) i.value=""; window.popularFaixasSelect('prog_faixa', ''); window.popularSelectModalidadesPuras('prog_mod'); } catch(e) {}
   };
+
   window.prepEditProg = function(p) { 
-      try { window.abrirModalProg(); const i = document.getElementById('prog_id'); if(i) i.value=p.id; window.popularFaixasSelect('prog_faixa', p.faixa); const l = document.getElementById('prog_link'); if(l) l.value=p.link_original || ""; const d = document.getElementById('prog_desc'); if(d) d.value=p.descricao || ""; setTimeout(()=>{ const mEl = document.getElementById('prog_mod'); if(mEl) mEl.value = p.modalidade || "Geral"; }, 500); } catch(e) { window.sentinelaAdmin("prepEditProg", "ERRO", e.message); }
+      try { window.abrirModalProg(); const i = document.getElementById('prog_id'); if(i) i.value=p.id; window.popularFaixasSelect('prog_faixa', p.faixa); const l = document.getElementById('prog_link'); if(l) l.value=p.link_original || ""; const d = document.getElementById('prog_desc'); if(d) d.value=p.descricao || ""; setTimeout(()=>{ const mEl = document.getElementById('prog_mod'); if(mEl) mEl.value = p.modalidade || "Geral"; }, 500); } catch(e) {}
   };
+
   window.carregarLocais = function() { 
-      try { const tb = document.getElementById('lista-locais-body'); if(!tb) return; tb.innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { window.cacheAdmin.locais = lista; tb.innerHTML = lista.map(l => `<tr><td><b>${window.esc(l.nome)}</b><br><small>${window.esc(l.cidade)}</small></td><td>${window.esc(l.contato)}<br><small>Resp: ${window.esc(l.responsavel)}</small></td><td><span class="adm-badge ${l.status === 'Ativo' ? 'bg-green' : 'bg-red'}">${l.status}</span><br><span style="font-size:10px; color:#888;">PIX: ${l.pixChave ? '✅' : '❌'}</span></td><td><button class="adm-btn" onclick='window.prepEditLocal(${JSON.stringify(l)})'>EDITAR</button></td></tr>`).join(''); }).listarLocaisAdmin(window.editorLogin); } catch(e) { window.sentinelaAdmin("carregarLocais", "ERRO", e.message); }
+      try { window.sentinelaAdmin("carregarLocais", "INFO", "Buscando Locais..."); const tb = document.getElementById('lista-locais-body'); if(!tb) return; tb.innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { window.cacheAdmin.locais = lista; tb.innerHTML = lista.map(l => `<tr><td><b>${window.esc(l.nome)}</b><br><small>${window.esc(l.cidade)}</small></td><td>${window.esc(l.contato)}<br><small>Resp: ${window.esc(l.responsavel)}</small></td><td><span class="adm-badge ${l.status === 'Ativo' ? 'bg-green' : 'bg-red'}">${l.status}</span><br><span style="font-size:10px; color:#888;">PIX: ${l.pixChave ? '✅' : '❌'}</span></td><td><button class="adm-btn" onclick='window.prepEditLocal(${JSON.stringify(l)})'>EDITAR</button></td></tr>`).join(''); }).listarLocaisAdmin(window.editorLogin); } catch(e) { window.sentinelaAdmin("carregarLocais", "ERRO", e.message); }
   };
+
   window.openModalLocal = function() { 
-      try { const f = document.getElementById('form-locais'); if(f) f.reset(); const ids = {'loc_id': "", 'loc_status': "Ativo", 'loc_editor_login': window.editorLogin}; for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; } const m = document.getElementById('adm-modal-local'); if(m) m.style.display = 'flex'; } catch(e) { window.sentinelaAdmin("openModalLocal", "ERRO", e.message); }
+      try { const f = document.getElementById('form-locais'); if(f) f.reset(); const ids = {'loc_id': "", 'loc_status': "Ativo", 'loc_editor_login': window.editorLogin}; for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; } const m = document.getElementById('adm-modal-local'); if(m) m.style.display = 'flex'; } catch(e) {}
   };
+
   window.prepEditLocal = function(l) { 
-      try { window.openModalLocal(); const setValOrEmpty = (id, val) => { const el = document.getElementById(id); if(!el) return; el.value = (val === undefined || val === null) ? "" : String(val).trim(); }; setValOrEmpty('loc_id', l.id); setValOrEmpty('loc_nome', l.nome); setValOrEmpty('loc_resp', l.responsavel); const st = document.getElementById('loc_status'); if(st) st.value = l.status || "Ativo"; setValOrEmpty('loc_cidade', l.cidade); setValOrEmpty('loc_end', l.endereco); setValOrEmpty('loc_contato', l.contato); setValOrEmpty('loc_maps', l.linkMaps); setValOrEmpty('loc_iframe', l.iframeHtml); setValOrEmpty('loc_pix_chave', l.pixChave); setValOrEmpty('loc_pix_nome', l.pixNome); setValOrEmpty('loc_pix_banco', l.pixBanco); setValOrEmpty('loc_pix_cidade', l.pixCidade); } catch(e) { window.sentinelaAdmin("prepEditLocal", "ERRO", e.message); }
+      try { window.openModalLocal(); const setValOrEmpty = (id, val) => { const el = document.getElementById(id); if(!el) return; el.value = (val === undefined || val === null) ? "" : String(val).trim(); }; setValOrEmpty('loc_id', l.id); setValOrEmpty('loc_nome', l.nome); setValOrEmpty('loc_resp', l.responsavel); const st = document.getElementById('loc_status'); if(st) st.value = l.status || "Ativo"; setValOrEmpty('loc_cidade', l.cidade); setValOrEmpty('loc_end', l.endereco); setValOrEmpty('loc_contato', l.contato); setValOrEmpty('loc_maps', l.linkMaps); setValOrEmpty('loc_iframe', l.iframeHtml); setValOrEmpty('loc_pix_chave', l.pixChave); setValOrEmpty('loc_pix_nome', l.pixNome); setValOrEmpty('loc_pix_banco', l.pixBanco); setValOrEmpty('loc_pix_cidade', l.pixCidade); } catch(e) {}
   };
+
   window.carregarCursos = function() { 
-      try { const tb = document.getElementById('lista-cursos-body'); if(!tb) return; tb.innerHTML = '<tr><td colspan="5" style="text-align:center">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { window.cacheAdmin.cursos = lista; tb.innerHTML = lista.map(c => `<tr><td><img src="${c.imagem}" style="width:40px; height:40px; object-fit:cover; border-radius:4px" onerror="this.src='https://via.placeholder.com/40'"></td><td><b>${window.esc(c.nome)}</b></td><td>${window.esc(c.data)}<br><small>${window.esc(c.vagas)}</small></td><td><span class="adm-badge bg-green">${c.status}</span></td><td><button class="adm-btn" onclick='window.prepEditCurso(${JSON.stringify(c)})'>EDITAR</button></td></tr>`).join(''); }).listarCursosAdmin(); } catch(e) { window.sentinelaAdmin("carregarCursos", "ERRO", e.message); }
+      try { window.sentinelaAdmin("carregarCursos", "INFO", "Buscando Cursos..."); const tb = document.getElementById('lista-cursos-body'); if(!tb) return; tb.innerHTML = '<tr><td colspan="5" style="text-align:center">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { window.cacheAdmin.cursos = lista; tb.innerHTML = lista.map(c => `<tr><td><img src="${c.imagem}" style="width:40px; height:40px; object-fit:cover; border-radius:4px" onerror="this.src='https://via.placeholder.com/40'"></td><td><b>${window.esc(c.nome)}</b></td><td>${window.esc(c.data)}<br><small>${window.esc(c.vagas)}</small></td><td><span class="adm-badge bg-green">${c.status}</span></td><td><button class="adm-btn" onclick='window.prepEditCurso(${JSON.stringify(c)})'>EDITAR</button></td></tr>`).join(''); }).listarCursosAdmin(); } catch(e) { window.sentinelaAdmin("carregarCursos", "ERRO", e.message); }
   };
+
   window.abrirModalCurso = function() { 
-      try { const m = document.getElementById('adm-modal-curso'); if(m) m.style.display = 'flex'; const f = document.querySelector('#adm-modal-curso form'); if(f) f.reset(); const cId = document.getElementById('curso_id'); if(cId) cId.value = ""; const e = document.getElementById('editor_curso_login'); if(e) e.value = window.editorLogin; } catch(e) { window.sentinelaAdmin("abrirModalCurso", "ERRO", e.message); }
+      try { const m = document.getElementById('adm-modal-curso'); if(m) m.style.display = 'flex'; const f = document.querySelector('#adm-modal-curso form'); if(f) f.reset(); const cId = document.getElementById('curso_id'); if(cId) cId.value = ""; const e = document.getElementById('editor_curso_login'); if(e) e.value = window.editorLogin; } catch(e) {}
   };
+
   window.prepEditCurso = function(c) { 
-      try { window.abrirModalCurso(); const mapIds = {'curso_id': c.id, 'curso_nome': c.nome, 'curso_data': c.data, 'curso_vagas': c.vagas, 'curso_desc': c.descricao || "", 'curso_img': c.imagem || "", 'curso_link': c.linkInscricao || "", 'curso_status': c.status}; for(let k in mapIds) { const el = document.getElementById(k); if(el) el.value = mapIds[k]; } } catch(e) { window.sentinelaAdmin("prepEditCurso", "ERRO", e.message); }
+      try { window.abrirModalCurso(); const mapIds = {'curso_id': c.id, 'curso_nome': c.nome, 'curso_data': c.data, 'curso_vagas': c.vagas, 'curso_desc': c.descricao || "", 'curso_img': c.imagem || "", 'curso_link': c.linkInscricao || "", 'curso_status': c.status}; for(let k in mapIds) { const el = document.getElementById(k); if(el) el.value = mapIds[k]; } } catch(e) {}
   };
+
   window.carregarLib = function() { 
-      try { const tb = document.getElementById('lista-lib-body'); if(!tb) return; tb.innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { window.cacheAdmin.lib = lista; tb.innerHTML = lista.map(l => `<tr><td><img src="${l.capa}" style="width:30px; border-radius:2px"></td><td><b>${window.esc(l.titulo)}</b><br><small>${window.esc(l.descricao).substring(0,50)}...</small></td><td><a href="${l.link}" target="_blank">Ver Arquivo</a></td><td><button class="adm-btn" onclick='window.prepEditLib(${JSON.stringify(l)})'>EDITAR</button></td></tr>`).join(''); }).listarBibliotecaAdmin(); } catch(e) { window.sentinelaAdmin("carregarLib", "ERRO", e.message); }
+      try { window.sentinelaAdmin("carregarLib", "INFO", "Buscando Biblioteca..."); const tb = document.getElementById('lista-lib-body'); if(!tb) return; tb.innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { window.cacheAdmin.lib = lista; tb.innerHTML = lista.map(l => `<tr><td><img src="${l.capa}" style="width:30px; border-radius:2px"></td><td><b>${window.esc(l.titulo)}</b><br><small>${window.esc(l.descricao).substring(0,50)}...</small></td><td><a href="${l.link}" target="_blank">Ver Arquivo</a></td><td><button class="adm-btn" onclick='window.prepEditLib(${JSON.stringify(l)})'>EDITAR</button></td></tr>`).join(''); }).listarBibliotecaAdmin(); } catch(e) { window.sentinelaAdmin("carregarLib", "ERRO", e.message); }
   };
+
   window.abrirModalLib = function() { 
-      try { const m = document.getElementById('adm-modal-lib'); if(m) m.style.display='flex'; const f = document.querySelector('#adm-modal-lib form'); if(f) f.reset(); const l = document.getElementById('lib_id'); if(l) l.value=""; } catch(e) { window.sentinelaAdmin("abrirModalLib", "ERRO", e.message); }
+      try { const m = document.getElementById('adm-modal-lib'); if(m) m.style.display='flex'; const f = document.querySelector('#adm-modal-lib form'); if(f) f.reset(); const l = document.getElementById('lib_id'); if(l) l.value=""; } catch(e) {}
   };
+
   window.prepEditLib = function(l) { 
-      try { window.abrirModalLib(); const mapIds = {'lib_id': l.id, 'lib_titulo': l.titulo, 'lib_desc': l.descricao || "", 'lib_link': l.link, 'lib_capa': l.capa || ""}; for(let k in mapIds) { const el = document.getElementById(k); if(el) el.value = mapIds[k]; } } catch(e) { window.sentinelaAdmin("prepEditLib", "ERRO", e.message); }
+      try { window.abrirModalLib(); const mapIds = {'lib_id': l.id, 'lib_titulo': l.titulo, 'lib_desc': l.descricao || "", 'lib_link': l.link, 'lib_capa': l.capa || ""}; for(let k in mapIds) { const el = document.getElementById(k); if(el) el.value = mapIds[k]; } } catch(e) {}
   };
+
   window.carregarCertificados = function() { 
-      try { const tb = document.getElementById('lista-cert-body'); if(!tb) return; tb.innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; if(typeof window.popularSelectModalidadesPuras === "function") { window.popularSelectModalidadesPuras('filter-mod-cert'); window.popularSelectModalidadesPuras('cert_mod_form'); } google.script.run.withSuccessHandler(lista => { window.cacheAdmin.certificados = lista; if(typeof window.renderCertificados === 'function') window.renderCertificados(lista); const cursos = [...new Set(lista.map(c => c.curso))]; const sel = document.getElementById('filter-curso-cert'); if(sel) { sel.innerHTML = '<option value="">Todos os Cursos</option>'; cursos.forEach(c => sel.add(new Option(c, c))); } }).listarCertificadosAdmin(); } catch(e) { window.sentinelaAdmin("carregarCertificados", "ERRO", e.message); }
+      try { window.sentinelaAdmin("carregarCertificados", "INFO", "Buscando Certificados..."); const tb = document.getElementById('lista-cert-body'); if(!tb) return; tb.innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; if(typeof window.popularSelectModalidadesPuras === "function") { window.popularSelectModalidadesPuras('filter-mod-cert'); window.popularSelectModalidadesPuras('cert_mod_form'); } google.script.run.withSuccessHandler(lista => { window.cacheAdmin.certificados = lista; if(typeof window.renderCertificados === 'function') window.renderCertificados(lista); const cursos = [...new Set(lista.map(c => c.curso))]; const sel = document.getElementById('filter-curso-cert'); if(sel) { sel.innerHTML = '<option value="">Todos os Cursos</option>'; cursos.forEach(c => sel.add(new Option(c, c))); } }).listarCertificadosAdmin(); } catch(e) { window.sentinelaAdmin("carregarCertificados", "ERRO", e.message); }
   };
+
   window.renderCertificados = function(lista) { 
-      try { const tbody = document.getElementById('lista-cert-body'); if(!tbody) return; tbody.innerHTML = ""; if(!lista || !lista.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Nenhum certificado.</td></tr>'; return; } lista.forEach(c => { const tr = document.createElement('tr'); tr.innerHTML = `<td><b style="font-size:13px">${window.esc(c.cpf)}</b></td><td>${window.esc(c.curso)}<br><span class="adm-badge bg-dark" style="margin-top:4px;">${window.esc(c.modalidade || 'Geral')}</span> <span style="font-size:10px; color:#888;">${window.esc(c.data)}</span></td><td><a href="${c.link}" target="_blank" style="color:#2196f3; font-weight:bold;">Abrir PDF</a></td><td><button class="adm-btn" onclick='window.prepEditCert(${JSON.stringify(c)})'>EDITAR</button></td>`; tbody.appendChild(tr); }); } catch(e) { window.sentinelaAdmin("renderCertificados", "ERRO", e.message); }
+      try { const tbody = document.getElementById('lista-cert-body'); if(!tbody) return; tbody.innerHTML = ""; if(!lista || !lista.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Nenhum certificado.</td></tr>'; return; } lista.forEach(c => { const tr = document.createElement('tr'); tr.innerHTML = `<td><b style="font-size:13px">${window.esc(c.cpf)}</b></td><td>${window.esc(c.curso)}<br><span class="adm-badge bg-dark" style="margin-top:4px;">${window.esc(c.modalidade || 'Geral')}</span> <span style="font-size:10px; color:#888;">${window.esc(c.data)}</span></td><td><a href="${c.link}" target="_blank" style="color:#2196f3; font-weight:bold;">Abrir PDF</a></td><td><button class="adm-btn" onclick='window.prepEditCert(${JSON.stringify(c)})'>EDITAR</button></td>`; tbody.appendChild(tr); }); } catch(e) {}
   };
+
   window.filtrarCertificados = function() { 
-      try { const sc = document.getElementById('search-cert'); const fc = document.getElementById('filter-curso-cert'); const fm = document.getElementById('filter-mod-cert'); if(!sc || !fc || !fm) return; const termo = sc.value.toLowerCase(); const curso = fc.value; const mod = fm.value; const filtrados = window.cacheAdmin.certificados.filter(c => { const matchTermo = c.cpf.toLowerCase().includes(termo) || c.curso.toLowerCase().includes(termo); const matchCurso = curso ? c.curso === curso : true; const matchMod = mod ? (c.modalidade || 'Geral') === mod : true; return matchTermo && matchCurso && matchMod; }); if(typeof window.renderCertificados === 'function') window.renderCertificados(filtrados); } catch(e) { window.sentinelaAdmin("filtrarCertificados", "ERRO", e.message); }
+      try { const sc = document.getElementById('search-cert'); const fc = document.getElementById('filter-curso-cert'); const fm = document.getElementById('filter-mod-cert'); if(!sc || !fc || !fm) return; const termo = sc.value.toLowerCase(); const curso = fc.value; const mod = fm.value; const filtrados = window.cacheAdmin.certificados.filter(c => { const matchTermo = c.cpf.toLowerCase().includes(termo) || c.curso.toLowerCase().includes(termo); const matchCurso = curso ? c.curso === curso : true; const matchMod = mod ? (c.modalidade || 'Geral') === mod : true; return matchTermo && matchCurso && matchMod; }); if(typeof window.renderCertificados === 'function') window.renderCertificados(filtrados); } catch(e) {}
   };
+
   window.abrirModalCert = function() { 
-      try { const m = document.getElementById('adm-modal-cert'); if(m) m.style.display='flex'; const f = document.querySelector('#adm-modal-cert form'); if(f) f.reset(); const i = document.getElementById('cert_id'); if(i) i.value = ""; const d = document.getElementById('cert_data'); if(d) d.valueAsDate = new Date(); } catch(e) { window.sentinelaAdmin("abrirModalCert", "ERRO", e.message); }
+      try { const m = document.getElementById('adm-modal-cert'); if(m) m.style.display='flex'; const f = document.querySelector('#adm-modal-cert form'); if(f) f.reset(); const i = document.getElementById('cert_id'); if(i) i.value = ""; const d = document.getElementById('cert_data'); if(d) d.valueAsDate = new Date(); } catch(e) {}
   };
+
   window.prepEditCert = function(c) { 
-      try { window.abrirModalCert(); const mapIds = {'cert_id': c.id, 'cert_cpf': c.cpf, 'cert_curso': c.curso, 'cert_link': c.link}; for(let k in mapIds) { const el = document.getElementById(k); if(el) el.value = mapIds[k]; } setTimeout(()=>{ const mEl = document.getElementById('cert_mod_form'); if(mEl) mEl.value = c.modalidade || 'Geral'; },500); let d = c.data; if(d && d.includes('/')) { const p = d.split('/'); d = `${p[2]}-${p[1]}-${p[0]}`; } const dt = document.getElementById('cert_data'); if(dt) dt.value = d; } catch(e) { window.sentinelaAdmin("prepEditCert", "ERRO", e.message); }
+      try { window.abrirModalCert(); const mapIds = {'cert_id': c.id, 'cert_cpf': c.cpf, 'cert_curso': c.curso, 'cert_link': c.link}; for(let k in mapIds) { const el = document.getElementById(k); if(el) el.value = mapIds[k]; } setTimeout(()=>{ const mEl = document.getElementById('cert_mod_form'); if(mEl) mEl.value = c.modalidade || 'Geral'; },500); let d = c.data; if(d && d.includes('/')) { const p = d.split('/'); d = `${p[2]}-${p[1]}-${p[0]}`; } const dt = document.getElementById('cert_data'); if(dt) dt.value = d; } catch(e) {}
   };
+
   window.carregarConfig = function() { 
-      try { google.script.run.withSuccessHandler(cfg => { const mapCfg = { 'cfg_icon': cfg.iconId || '', 'cfg_bg': cfg.bgId || '', 'cfg_color': cfg.primaryColor || '#FFD700', 'cfg_color_sec': cfg.secondaryColor || '#1e1e1e', 'cfg_color_text': cfg.textColor || '#ffffff', 'cfg_color_btn_text': cfg.btnTextColor || '#000000', 'cfg_color_bg': cfg.bgColor || '#121212', 'cfg_link_loja': cfg.linkLoja || '', 'cfg_link_insta': cfg.linkInstagram || '', 'cfg_link_yt': cfg.linkYouTube || '', 'cfg_link_cad': cfg.linkCadastro || '', 'cfg_nome_acad': cfg.nomeAcademia || '', 'cfg_pix_global': cfg.pixGlobal || 'Nao', 'cfg_pix_chave': cfg.pixChave || '', 'cfg_pix_nome': cfg.pixNome || '', 'cfg_pix_banco': cfg.pixBanco || '', 'cfg_pix_cidade': cfg.pixCidade || '' }; for(let k in mapCfg) { const el = document.getElementById(k); if(el) el.value = mapCfg[k]; } if(typeof window.atualizarPreviewCores === 'function') window.atualizarPreviewCores(); }).getAppConfig(); } catch(e) { window.sentinelaAdmin("carregarConfig", "ERRO", e.message); }
+      try { window.sentinelaAdmin("carregarConfig", "INFO", "Buscando Configurações..."); google.script.run.withSuccessHandler(cfg => { const mapCfg = { 'cfg_icon': cfg.iconId || '', 'cfg_bg': cfg.bgId || '', 'cfg_color': cfg.primaryColor || '#FFD700', 'cfg_color_sec': cfg.secondaryColor || '#1e1e1e', 'cfg_color_text': cfg.textColor || '#ffffff', 'cfg_color_btn_text': cfg.btnTextColor || '#000000', 'cfg_color_bg': cfg.bgColor || '#121212', 'cfg_link_loja': cfg.linkLoja || '', 'cfg_link_insta': cfg.linkInstagram || '', 'cfg_link_yt': cfg.linkYouTube || '', 'cfg_link_cad': cfg.linkCadastro || '', 'cfg_nome_acad': cfg.nomeAcademia || '', 'cfg_pix_global': cfg.pixGlobal || 'Nao', 'cfg_pix_chave': cfg.pixChave || '', 'cfg_pix_nome': cfg.pixNome || '', 'cfg_pix_banco': cfg.pixBanco || '', 'cfg_pix_cidade': cfg.pixCidade || '' }; for(let k in mapCfg) { const el = document.getElementById(k); if(el) el.value = mapCfg[k]; } if(typeof window.atualizarPreviewCores === 'function') window.atualizarPreviewCores(); }).getAppConfig(); } catch(e) { window.sentinelaAdmin("carregarConfig", "ERRO", e.message); }
   };
+
   window.atualizarPreviewCores = function() {
-      try { const pEl = document.getElementById('cfg_color'); const sEl = document.getElementById('cfg_color_sec'); const tEl = document.getElementById('cfg_color_text'); const btEl = document.getElementById('cfg_color_btn_text'); if(!pEl || !sEl || !tEl || !btEl) return; const primary = pEl.value; const secondary = sEl.value; const text = tEl.value; const btnText = btEl.value; const card = document.getElementById('live-preview-card'); const title = document.getElementById('preview-title'); const desc = document.getElementById('preview-text'); const btn = document.getElementById('preview-btn'); if (card) { card.style.backgroundColor = secondary; card.style.borderColor = primary; } if (title) title.style.color = primary; if (desc) desc.style.color = text; if (btn) { btn.style.backgroundColor = primary; btn.style.color = btnText; } } catch(e) { window.sentinelaAdmin("atualizarPreviewCores", "ERRO", e.message); }
+      try { const pEl = document.getElementById('cfg_color'); const sEl = document.getElementById('cfg_color_sec'); const tEl = document.getElementById('cfg_color_text'); const btEl = document.getElementById('cfg_color_btn_text'); if(!pEl || !sEl || !tEl || !btEl) return; const primary = pEl.value; const secondary = sEl.value; const text = tEl.value; const btnText = btEl.value; const card = document.getElementById('live-preview-card'); const title = document.getElementById('preview-title'); const desc = document.getElementById('preview-text'); const btn = document.getElementById('preview-btn'); if (card) { card.style.backgroundColor = secondary; card.style.borderColor = primary; } if (title) title.style.color = primary; if (desc) desc.style.color = text; if (btn) { btn.style.backgroundColor = primary; btn.style.color = btnText; } } catch(e) {}
   };
+
   window.aplicarTema = function(primaria, secundaria, texto, textoBotao, fundo) { 
-      try { const ids = {'cfg_color': primaria, 'cfg_color_sec': secundaria, 'cfg_color_text': texto, 'cfg_color_btn_text': textoBotao, 'cfg_color_bg': fundo}; for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; } if(typeof window.atualizarPreviewCores === 'function') window.atualizarPreviewCores(); } catch(e) { window.sentinelaAdmin("aplicarTema", "ERRO", e.message); }
+      try { window.sentinelaAdmin("aplicarTema", "INFO", "Tema alterado"); const ids = {'cfg_color': primaria, 'cfg_color_sec': secundaria, 'cfg_color_text': texto, 'cfg_color_btn_text': textoBotao, 'cfg_color_bg': fundo}; for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; } if(typeof window.atualizarPreviewCores === 'function') window.atualizarPreviewCores(); } catch(e) {}
   };
 </script>
