@@ -908,10 +908,8 @@
   window.graficoBarras = null;
   window.graficoRosca = null;
   
-  // 🔴 A VACINA DO LOCALSTORAGE (Isso vai matar o usuário "A")
-  // Forçamos a criação da sessão correta caso o cache esteja sujo
+  // 🔴 A VACINA DO LOCALSTORAGE
   let sessaoMemoria = JSON.parse(localStorage.getItem('userSession') || '{}');
-  
   if (!sessaoMemoria.LOGIN || sessaoMemoria.LOGIN === "A" || sessaoMemoria.LOGIN === "a") {
       sessaoMemoria = { LOGIN: "Ceo.master", isAdmin: true, academia: "TODAS" };
       localStorage.setItem('userSession', JSON.stringify(sessaoMemoria));
@@ -930,7 +928,9 @@
       } catch(e) {}
   };
 
-  // NAVEGAÇÃO E MODAIS
+  // ============================================================================
+  // FUNÇÕES DE UTILIDADE (NAVEGAÇÃO E MODAIS)
+  // ============================================================================
   window.closeModal = function(id) { 
       try { 
           window.sentinelaAdmin("UI", "INFO", `Fechando modal: ${id}`);
@@ -991,7 +991,7 @@
       try {
           window.sentinelaAdmin("API_WRITE", "INFO", `Solicitação de salvamento via função: ${func}`);
           btn = e.target.querySelector('button[type="submit"]'); 
-          if(btn) { original = btn.innerHTML; btn.innerHTML = "Salvando..."; btn.disabled = true; }
+          if(btn) { original = btn.innerHTML; btn.innerHTML = "<span class='material-icons spin'>sync</span> Salvando..."; btn.disabled = true; }
           
           const formData = {}; 
           for (let [k, v] of new FormData(e.target).entries()) {
@@ -1093,14 +1093,12 @@
 
         window.sentinelaAdmin("DASH_LOAD", "INFO", `2/4 - Filtros aplicados: ${JSON.stringify(filtrosSelecionados)}`);
 
-        // Mostra loading nos KPIs
         const kpis = ['kpi-ativos', 'kpi-inad', 'kpi-receita-prev', 'kpi-recebido', 'kpi-pendente', 'kpi-despesa'];
         kpis.forEach(id => { 
             const el = document.getElementById(id); 
             if(el) { el.innerText = "..."; el.classList.add('loading-val'); }
         });
         
-        // Mostra loading nas tabelas
         const tbI = document.getElementById('tbody-rel-inad');
         const tbT = document.getElementById('tbody-rel-turmas');
         if(tbI) tbI.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 20px;"><span class="material-icons spin">sync</span> Coletando dados financeiros...</td></tr>';
@@ -1117,7 +1115,6 @@
                 window.sentinelaAdmin("DASH_LOAD", "SUCESSO", "4/4 - Pacote recebido. Iniciando injeção...");
                 if(res.erro) { window.sentinelaAdmin("DASH_LOAD", "ERRO", res.erro); return; }
                 
-                // INJETANDO OS KPIs
                 try {
                     const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) { el.innerText = txt; el.classList.remove('loading-val'); } };
                     setTxt('kpi-ativos', res.kpiAtivos);
@@ -1131,7 +1128,6 @@
                     window.sentinelaAdmin("DASH_KPI", "SUCESSO", "KPIs injetados.");
                 } catch(errKPI) { window.sentinelaAdmin("DASH_KPI", "ERRO", errKPI.message); }
 
-                // INJETANDO TABELAS E BOTÕES DO WHATSAPP (UX/UI CORRIGIDA)
                 try {
                     if(tbI) {
                         if (!res.listaCobranca || res.listaCobranca.length === 0) {
@@ -1146,7 +1142,6 @@
                                     const nomeAcademia = i.academia ? i.academia : 'nossa unidade';
                                     const msg = `Olá ${i.nome}, notamos uma pendência na sua assinatura do ${nomePlano} da ${nomeTurma} na ${nomeAcademia}. Podemos ajudar?`;
                                     const linkWapp = "https://wa.me/55" + num + "?text=" + encodeURIComponent(msg);
-                                    // 🟢 BOTÃO VERDE WHATSAPP LIMPO (CORRIGIDO UX/UI)
                                     btnWapp = `<a href="${linkWapp}" target="_blank" style="background-color:#25D366 !important; color:#ffffff !important; padding:6px 12px; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 4px rgba(37,211,102,0.3); transition:0.2s; font-size:11px;">Cobrar</a>`;
                                 }
                                 return `<tr><td><b style="font-size:11px; color:#334155;">${window.esc(i.nome)}</b><br><small style="color:#64748b;">${window.esc(i.academia)}</small></td><td style="text-align:center;"><span class="adm-badge bg-red">${window.esc(i.vencimento)}</span></td><td style="text-align:center;">${btnWapp}</td></tr>`;
@@ -1154,17 +1149,14 @@
                         }
                     }
 
-                    // TÍTULO DA TABELA DE RANKING (CORRIGIDO)
                     const tblRankHead = document.querySelector('#tbody-rel-turmas').closest('table').querySelector('thead th');
                     if (tblRankHead) tblRankHead.innerText = "Turma | Academia";
 
-                    // CONTEÚDO DA TABELA DE RANKING (CORRIGIDO)
                     if(tbT) {
                         if (!res.listaRanking || res.listaRanking.length === 0) {
                             tbT.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:30px; color:#64748b;">Sem dados de turmas ativas.</td></tr>';
                         } else {
                             tbT.innerHTML = res.listaRanking.map(t => {
-                                // 🟢 RESGATANDO O CAMPO EXATO DE CONTAGEM: No seu payload é 'count'
                                 const alunosNaTurma = t.count || t.qtd || 0;
                                 return `<tr><td><b style="font-size:11px; color:#334155;">${window.esc(t.turma || t.nome)}</b><br><small style="color:#64748b;">📍 ${window.esc(t.local)}</small></td><td style="text-align:center;"><span class="adm-badge bg-blue" style="font-size:12px;">${alunosNaTurma} ALUNOS</span></td></tr>`;
                             }).join('');
@@ -1173,14 +1165,13 @@
                     window.sentinelaAdmin("DASH_TABLES", "SUCESSO", "Tabelas e botões injetados com sucesso.");
                 } catch(errTab) { window.sentinelaAdmin("DASH_TABLES", "ERRO", errTab.message); }
 
-                // CHAMANDO OS GRÁFICOS
                 window.sentinelaAdmin("DASH_LOAD", "INFO", "Disparando motor de gráficos...");
                 window.renderizarGraficosOtimizados(res.graficoFluxo, res.graficoOcupacao);
 
             }).getDadosDashboardAdmin(filtrosSelecionados); 
 
     } catch(e) { window.sentinelaAdmin("carregarRelatoriosDashboard", "CRÍTICO", e.message); }
-};
+  };
 
   window.renderizarGraficosOtimizados = function(dadosFluxo, dadosOcupacao) {
       if(typeof Chart === 'undefined') {
@@ -1188,7 +1179,6 @@
           setTimeout(() => window.renderizarGraficosOtimizados(dadosFluxo, dadosOcupacao), 500);
           return;
       }
-
       try {
           const ctxBar = document.getElementById('barChart');
           if(ctxBar) {
@@ -1220,122 +1210,68 @@
       } catch(errChart) { window.sentinelaAdmin("DASH_CHART", "ERRO", errChart.message); }
   };
 
-  // =========================================================
-  // 💸 NOVA TRANSAÇÃO: MODAL INTELIGENTE (CASCATAS)
-  // =========================================================
-
-  window.abrirFinanceiro = function() {
+  // ============================================================================
+  // 🖨️ PDF DE INADIMPLENTES (RELATÓRIO DE COBRANÇA DIRETO DO DASHBOARD)
+  // ============================================================================
+  window.gerarPDFInadimplentes = function() {
       try {
-          window.sentinelaAdmin("CAIXA_MODAL", "INFO", "1/3 - Abrindo Módulo de Lançamento...");
-          const modal = document.getElementById('adm-modal-financeiro');
-          if (!modal) throw new Error("Elemento 'adm-modal-financeiro' sumiu do HTML.");
+          window.sentinelaAdmin("PDF_COBRANCA", "INFO", "Gerando janela de impressão para inadimplentes...");
           
-          modal.style.display = 'flex';
-          const fResp = document.getElementById('fin_resp');
-          if(fResp) fResp.value = window.editorLogin;
+          const dAcad = document.getElementById('dash-academia');
+          const tituloAcademia = dAcad && dAcad.value !== "TODAS" ? dAcad.options[dAcad.selectedIndex].text : "Todas as Unidades (Geral)";
           
-          document.getElementById('div-cascata-aluno').style.display = 'none';
+          const tabelaOriginal = document.getElementById('tbody-rel-inad');
+          if (!tabelaOriginal || tabelaOriginal.innerHTML.includes('Caixa 100% Saudável')) {
+              alert("Não há alunos em atraso para gerar o relatório.");
+              return;
+          }
+
+          const janela = window.open('', '', 'width=900,height=600');
+          if(!janela) { alert("Pop-up bloqueado. Permita a exibição para gerar o PDF."); return; }
           
-          window.sentinelaAdmin("CAIXA_MODAL", "INFO", "2/3 - Requisitando as Academias Permitidas e Dicionário Base...");
-          google.script.run
-              .withFailureHandler(e => window.sentinelaAdmin("CAIXA_MODAL", "ERRO", e.message))
-              .withSuccessHandler(acads => {
-                  const sel = document.getElementById('fin_acad');
-                  if(sel) sel.innerHTML = acads.map(a => `<option value="${a}">${a}</option>`).join('');
-                  
-                  google.script.run
-                      .withSuccessHandler(res => {
-                          window.sentinelaAdmin("CAIXA_MODAL", "SUCESSO", "3/3 - Dicionário Base recebido. Montando as cascatas visuais...");
-                          window.cacheFin.categorias = res.categorias || [];
-                          window.cacheFin.formasPagto = res.formasPagto || [];
-                          window.cacheFin.modalidades = res.modalidades || ["Geral"];
-                          
-                          const selMod = document.getElementById('fin_mod_form');
-                          if(selMod) selMod.innerHTML = window.cacheFin.modalidades.map(m => `<option value="${m}">${m}</option>`).join('');
-                          
-                          window.carregarConfiguracoesUnidade();
-                      }).getDadosIniciaisCaixa();
-              }).getLocaisParaFinanceiro(window.editorLogin);
-              
-          google.script.run.withSuccessHandler(pacotes => { 
-              const sel = document.getElementById('fin_pacote_venda'); 
-              if(sel) { 
-                  sel.innerHTML = '<option value="">-- Opcional (Sem Plano) --</option>'; 
-                  pacotes.forEach(p => sel.add(new Option(p.nome_pacote, p.nome_pacote))); 
+          let htmlPDF = `
+          <html><head><title>Relatório de Inadimplência</title>
+          <style>
+              body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; color: #333; } 
+              .header-rel { border-bottom: 3px solid #ff5252; padding-bottom: 10px; margin-bottom: 20px; } 
+              table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; } 
+              th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 13px; } 
+              th { background: #333; color: #fff; text-transform: uppercase; font-size: 11px; } 
+              tr:nth-child(even) { background-color: #f9f9f9; } 
+              .vencido { color: #d32f2f; font-weight: bold; }
+          </style></head><body>
+          <div class='header-rel'>
+            <h2 style="color: #d32f2f; margin-bottom: 5px;">Relatório de Inadimplência / Cobrança</h2>
+            <p style="margin-top:0;"><b>Filtro:</b> ${window.esc(tituloAcademia)} &nbsp;|&nbsp; <b>Data de Emissão:</b> ${new Date().toLocaleDateString('pt-BR')}</p>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Nome do Aluno e Unidade</th><th>Data do Vencimento</th></tr>
+            </thead>
+            <tbody>
+          `;
+          
+          const linhas = tabelaOriginal.querySelectorAll('tr');
+          linhas.forEach(tr => {
+              const colunas = tr.querySelectorAll('td');
+              if(colunas.length >= 2) {
+                  const nome = colunas[0].innerText || colunas[0].textContent;
+                  const venc = colunas[1].innerText || colunas[1].textContent;
+                  htmlPDF += `<tr><td>${nome.replace(/\\n/g, '<br>')}</td><td class="vencido">${venc}</td></tr>`;
               }
-          }).getPacotesDisponiveis(window.editorLogin);
-
-      } catch(e) { window.sentinelaAdmin("CAIXA_MODAL", "CRÍTICO", e.message); }
-  };
-
-  window.carregarConfiguracoesUnidade = function() {
-      try {
-          const academia = document.getElementById('fin_acad').value;
-          if(!academia) return;
-          window.carregarCategoriasFinanceiras();
-          
-          const selForma = document.getElementById('fin_forma');
-          if(selForma) {
-              selForma.innerHTML = '';
-              const formas = window.cacheFin.formasPagto.filter(f => {
-                  if (String(f.status).toLowerCase() !== 'ativo') return false;
-                  const loc = String(f.local).toLowerCase();
-                  return loc.includes('todas') || loc.includes(academia.toLowerCase());
-              });
-              if(formas.length === 0) selForma.innerHTML = '<option value="">Sem opções</option>'; 
-              else formas.forEach(f => selForma.add(new Option(f.nome, f.nome)));
-          }
-          
-          const selAluno = document.getElementById('fin_aluno_nome');
-          if(selAluno && window.cacheAdmin && window.cacheAdmin.alunos) {
-              const alunosFiltrados = window.cacheAdmin.alunos.filter(a => String(a.status).toLowerCase() === 'ativo' && String(a.academia).toLowerCase().includes(academia.toLowerCase()));
-              alunosFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
-              selAluno.innerHTML = '<option value="">-- Selecione o Aluno --</option>';
-              alunosFiltrados.forEach(a => selAluno.add(new Option(`${a.nome} (${a.login})`, a.login)));
-          }
-      } catch(e) { window.sentinelaAdmin("CAIXA_CASCATA", "ERRO", e.message); }
-  };
-
-  window.carregarCategoriasFinanceiras = function() {
-      try {
-          const academia = document.getElementById('fin_acad').value;
-          const tipo = document.getElementById('fin_tipo').value;
-          
-          const selCat = document.getElementById('fin_cat');
-          if(!selCat) return;
-          selCat.innerHTML = '<option value="">Selecione...</option>';
-          
-          const cats = window.cacheFin.categorias.filter(c => {
-              if (String(c.status).toLowerCase() !== 'ativo') return false;
-              if (String(c.tipo).toLowerCase() !== tipo.toLowerCase()) return false;
-              const loc = String(c.local).toLowerCase();
-              return loc.includes('todas') || loc.includes(academia.toLowerCase());
           });
           
-          if(cats.length === 0) selCat.innerHTML = '<option value="">Nenhuma cadastrada</option>'; 
-          else {
-              cats.forEach(c => {
-                  const opt = new Option(c.nome, c.nome);
-                  opt.setAttribute('data-exibe-aluno', String(c.exibeAluno).toLowerCase());
-                  selCat.add(opt);
-              });
-          }
-          window.detectarNecessidadeAluno();
-      } catch(e) { window.sentinelaAdmin("CAIXA_CASCATA", "ERRO", e.message); }
-  };
-
-  window.detectarNecessidadeAluno = function() {
-      try {
-          const selCat = document.getElementById('fin_cat');
-          const dCascata = document.getElementById('div-cascata-aluno');
-          if(!selCat || !dCascata || selCat.selectedIndex === -1) return;
-          const exibeAluno = selCat.options[selCat.selectedIndex].getAttribute('data-exibe-aluno');
-          dCascata.style.display = (exibeAluno === 'sim') ? 'block' : 'none';
-      } catch(e) { window.sentinelaAdmin("CAIXA_CASCATA", "ERRO", e.message); }
+          htmlPDF += `</tbody></table></body></html>`;
+          
+          janela.document.open(); janela.document.write(htmlPDF); janela.document.close();
+          setTimeout(() => { try{ janela.print(); window.sentinelaAdmin("PDF_COBRANCA", "SUCESSO", "PDF Aberto."); }catch(e){} }, 1000);
+      } catch (e) {
+          window.sentinelaAdmin("PDF_COBRANCA", "ERRO", e.message);
+      }
   };
 
   // ============================================================================
-  // 📄 SUPER RELATÓRIOS (AÇÃO DO BOTÃO PDF/RELATÓRIO)
+  // FUNÇÕES CRUD GENÉRICAS
   // ============================================================================
   window.abrirSuperRelatorio = function(filtroFinanceiroPadrao = "") {
       try {
@@ -1481,7 +1417,6 @@
       } catch(e) { window.sentinelaAdmin("imprimirSuperRelatorio", "ERRO", e.message); }
   };
 
-  // Funções CRUD Genéricas (Resumidas para espaço - As suas antigas continuam válidas)
   window.carregarAlunos = function() {
       try {
           window.sentinelaAdmin("carregarAlunos", "INFO", "Buscando Alunos...");
@@ -2018,5 +1953,191 @@
 
   window.aplicarTema = function(primaria, secundaria, texto, textoBotao, fundo) { 
       try { window.sentinelaAdmin("aplicarTema", "INFO", "Tema alterado"); const ids = {'cfg_color': primaria, 'cfg_color_sec': secundaria, 'cfg_color_text': texto, 'cfg_color_btn_text': textoBotao, 'cfg_color_bg': fundo}; for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; } if(typeof window.atualizarPreviewCores === 'function') window.atualizarPreviewCores(); } catch(e) {}
+  };
+
+  // 1. Escudo Global: Garante que os repositórios existam ANTES da tela carregar
+  window.cacheFin = window.cacheFin || { categorias: [], formasPagto: [], modalidades: [], pacotes: [] };
+  window.cacheAdmin = window.cacheAdmin || { alunos: [] };
+
+  window.abrirFinanceiro = function() {
+      try {
+          window.sentinelaAdmin("CAIXA_MODAL", "INFO", "1/3 - Abrindo Módulo de Lançamento...");
+          const modal = document.getElementById('adm-modal-financeiro');
+          if (!modal) throw new Error("Elemento 'adm-modal-financeiro' não encontrado no HTML.");
+          
+          modal.style.display = 'flex';
+          
+          // Auto-preenche o responsável logado
+          const fResp = document.getElementById('fin_resp');
+          if(fResp) fResp.value = window.editorLogin || 'Admin';
+          
+          // Fecha as cascatas de aluno/pacote por segurança
+          const divAluno = document.getElementById('div-cascata-aluno');
+          if (divAluno) divAluno.style.display = 'none';
+          
+          // Limpa resíduos e foca na aba padrão
+          const form = modal.querySelector('form');
+          if(form) form.reset();
+          
+          // Injeta a Data Exata sem depender de UTC
+          const fData = document.getElementById('fin_data_manual');
+          if(fData) {
+              const dataHoje = new Date();
+              const ajustada = new Date(dataHoje.getTime() - (dataHoje.getTimezoneOffset() * 60000));
+              fData.value = ajustada.toISOString().split('T')[0];
+          }
+          
+          window.sentinelaAdmin("CAIXA_MODAL", "INFO", "2/3 - Requisitando as Academias Permitidas e Dicionário Base...");
+          
+          // 2. Chama as Franquias (Locais) do banco
+          google.script.run
+              .withFailureHandler(e => window.sentinelaAdmin("CAIXA_MODAL", "ERRO", e.message))
+              .withSuccessHandler(acads => {
+                  const sel = document.getElementById('fin_acad');
+                  if(sel) {
+                      sel.innerHTML = acads.map(a => `<option value="${a}">${a}</option>`).join('');
+                  }
+                  
+                  // 3. Puxa as Categorias, Pagamentos e Modalidades simultaneamente
+                  google.script.run
+                      .withFailureHandler(e => window.sentinelaAdmin("CAIXA_DICIONARIO", "ERRO", e.message))
+                      .withSuccessHandler(res => {
+                          window.sentinelaAdmin("CAIXA_MODAL", "SUCESSO", "3/3 - Dicionário Base recebido. Montando as cascatas visuais...");
+                          // Trava de segurança (Evita o Erro de Undefined Categories)
+                          if (!res || typeof res !== 'object') {
+                              throw new Error("Resposta do Dicionário Financeiro veio corrompida.");
+                          }
+                          window.cacheFin.categorias = res.categorias || [];
+                          window.cacheFin.formasPagto = res.formasPagto || [];
+                          window.cacheFin.modalidades = res.modalidades || ["Geral"];
+                          
+                          const selMod = document.getElementById('fin_mod_form');
+                          if(selMod) {
+                              selMod.innerHTML = window.cacheFin.modalidades.map(m => `<option value="${m}">${m}</option>`).join('');
+                          }
+                          
+                          // Agora sim, é 100% seguro desenhar a primeira tela (Aciona a cascata)
+                          if (typeof window.carregarConfiguracoesUnidade === 'function') {
+                              window.carregarConfiguracoesUnidade();
+                          }
+                      }).getDadosIniciaisCaixa();
+              }).getLocaisParaFinanceiro(window.editorLogin);
+
+          // 4. Carrega os Pacotes (Planos de Venda)
+          google.script.run
+            .withFailureHandler(e => window.sentinelaAdmin("CAIXA_PACOTES", "ERRO", e.message))
+            .withSuccessHandler(pacotes => { 
+              window.cacheFin.pacotes = pacotes || [];
+              const sel = document.getElementById('fin_pacote_venda'); 
+              if(sel) { 
+                  sel.innerHTML = '<option value="">-- Opcional (Sem Plano) --</option>'; 
+                  pacotes.forEach(p => {
+                      const nomeP = p.nome_pacote || p.Nome_Pacote || "";
+                      if(nomeP) sel.add(new Option(nomeP, nomeP));
+                  }); 
+              }
+          }).getPacotesDisponiveis(window.editorLogin);
+          
+          // 5. Previne que a aba Aluno fique vazia ao abrir uma Mensalidade
+          if (!window.cacheAdmin.alunos || window.cacheAdmin.alunos.length === 0) {
+              google.script.run
+                .withSuccessHandler(alunos => { window.cacheAdmin.alunos = alunos || []; })
+                .listarAlunosAdmin(window.editorLogin);
+          }
+
+      } catch(e) { window.sentinelaAdmin("CAIXA_MODAL", "CRÍTICO", e.message); }
+  };
+
+  window.carregarConfiguracoesUnidade = function() {
+      try {
+          const academia = document.getElementById('fin_acad').value;
+          if(!academia) return;
+          
+          window.carregarCategoriasFinanceiras();
+          
+          const selForma = document.getElementById('fin_forma');
+          if(selForma) {
+              selForma.innerHTML = '';
+              const formas = window.cacheFin.formasPagto.filter(f => {
+                  if (String(f.status).toLowerCase() !== 'ativo') return false;
+                  const loc = String(f.local).toLowerCase();
+                  return loc.includes('todas') || loc.includes(academia.toLowerCase());
+              });
+              if(formas.length === 0) selForma.innerHTML = '<option value="">Sem opções cadastradas</option>'; 
+              else formas.forEach(f => selForma.add(new Option(f.nome, f.nome)));
+          }
+          
+          const selAluno = document.getElementById('fin_aluno_nome');
+          if(selAluno && window.cacheAdmin && window.cacheAdmin.alunos) {
+              const alunosFiltrados = window.cacheAdmin.alunos.filter(a => String(a.status).toLowerCase() === 'ativo' && String(a.academia).toLowerCase().includes(academia.toLowerCase()));
+              alunosFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
+              selAluno.innerHTML = '<option value="">-- Selecione o Aluno --</option>';
+              alunosFiltrados.forEach(a => selAluno.add(new Option(`${a.nome} (${a.login})`, a.login)));
+          }
+      } catch(e) { window.sentinelaAdmin("CAIXA_CASCATA", "ERRO", e.message); }
+  };
+
+  window.carregarCategoriasFinanceiras = function() {
+      try {
+          const academia = document.getElementById('fin_acad').value;
+          const tipo = document.getElementById('fin_tipo').value;
+          
+          const selCat = document.getElementById('fin_cat');
+          if(!selCat) return;
+          selCat.innerHTML = '<option value="">Selecione...</option>';
+          
+          const cats = window.cacheFin.categorias.filter(c => {
+              if (String(c.status).toLowerCase() !== 'ativo') return false;
+              if (String(c.tipo).toLowerCase() !== tipo.toLowerCase()) return false;
+              const loc = String(c.local).toLowerCase();
+              return loc.includes('todas') || loc.includes(academia.toLowerCase());
+          });
+          
+          if(cats.length === 0) selCat.innerHTML = '<option value="">Nenhuma categoria encontrada</option>'; 
+          else {
+              cats.forEach(c => {
+                  const opt = new Option(c.nome, c.nome);
+                  opt.setAttribute('data-exibe-aluno', String(c.exibeAluno || c.exibe_aluno || "").toLowerCase());
+                  selCat.add(opt);
+              });
+          }
+          window.detectarNecessidadeAluno();
+      } catch(e) { window.sentinelaAdmin("CAIXA_CASCATA", "ERRO", e.message); }
+  };
+
+  window.detectarNecessidadeAluno = function() {
+      try {
+          const selCat = document.getElementById('fin_cat');
+          const dCascata = document.getElementById('div-cascata-aluno');
+          const selPacote = document.getElementById('fin_pacote_venda');
+          
+          if(!selCat || !dCascata || selCat.selectedIndex === -1) {
+              if(dCascata) dCascata.style.display = 'none';
+              return;
+          }
+          
+          const exibeAluno = selCat.options[selCat.selectedIndex].getAttribute('data-exibe-aluno');
+          const catName = String(selCat.value).toLowerCase();
+          
+          // 1. Regra do Aluno (Mostra a DIV se Exibe Aluno = Sim)
+          if (exibeAluno === 'sim') {
+              dCascata.style.display = 'block';
+              document.getElementById('fin_aluno_nome').required = true;
+          } else {
+              dCascata.style.display = 'none';
+              document.getElementById('fin_aluno_nome').required = false;
+              document.getElementById('fin_aluno_nome').value = ""; 
+          }
+          
+          // 2. Regra do Pacote (Só habilita o select de pacotes se a palavra mensalidade/pacote/plano estiver no nome da Categoria)
+          if (selPacote) {
+              if (catName.includes('mensalidade') || catName.includes('pacote') || catName.includes('plano')) {
+                  selPacote.disabled = false;
+              } else {
+                  selPacote.disabled = true;
+                  selPacote.value = "";
+              }
+          }
+      } catch(e) { window.sentinelaAdmin("CAIXA_CASCATA", "ERRO", e.message); }
   };
 </script>

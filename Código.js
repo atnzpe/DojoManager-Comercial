@@ -1221,20 +1221,32 @@ function salvarAluno(form) {
 
     const res = salvarDadosSeguro(NOME_ABA_ALUNOS, dadosParaSalvar, isNaN(idLinha) ? null : idLinha);
 
-    // Sincroniza Assinatura se houver pacote
+    // Sincroniza Assinatura se houver pacote, PRESERVANDO a Data de Início Original
     if (form.aluno_pacote) {
       const assinaturas = lerTabelaDinamica("Fin_Assinaturas");
       const login = String(form.aluno_login).toLowerCase().trim();
-      const aAtual = assinaturas.find(a => String(a.login_aluno).toLowerCase().trim() === login);
-      salvarDadosSeguro("Fin_Assinaturas", {
+      const aAtual = assinaturas.find(a => String(a.login_aluno || a["Login_Aluno"]).toLowerCase().trim() === login);
+
+      const dadosAssinatura = {
         "Login_Aluno": form.aluno_login,
         "Pacote_Atual": form.aluno_pacote,
         "Data_Fim": form.aluno_vencimento,
         "Status_Assinatura": form.aluno_status_assinatura
-      }, aAtual ? aAtual._linha : null);
+      };
+
+      // 🛡️ MÁGICA AQUI: Se a assinatura já existia, recupera a data inicial dela. Senão, põe a de hoje.
+      if (aAtual && (aAtual.data_inicio || aAtual["Data_Inicio"])) {
+        dadosAssinatura["Data_Inicio"] = formatDate(aAtual.data_inicio || aAtual["Data_Inicio"]);
+      } else {
+        dadosAssinatura["Data_Inicio"] = formatDate(new Date());
+      }
+
+      salvarDadosSeguro("Fin_Assinaturas", dadosAssinatura, aAtual ? aAtual._linha : null);
     }
     return res;
-  } catch (e) { return "❌ Erro: " + e.message; }
+  } catch (e) {
+    return "❌ Erro: " + e.message;
+  }
 }
 
 /**
@@ -3209,7 +3221,7 @@ function getDadosIniciaisFinanceiro() {
 function getDadosDashboardAdmin(filtros) {
   try {
     registrarLogBlindado("INFO", "DASH_PONTE", `Iniciando embalagem de dados para o Front...`);
-    
+
     // 1. Puxa os dados da sua função mestre! Note que agora repassamos o login correto
     const stats = getEstatisticasRelatorio(filtros.usuario, filtros);
 
@@ -3470,5 +3482,53 @@ function getDadosIniciaisCaixa() {
   } catch (e) {
     registrarLogBlindado("ERRO", "getDadosIniciaisCaixa", e.message);
     return { categorias: [], formasPagto: [], modalidades: ["Geral"] };
+  }
+}
+
+// ============================================================================
+// 🌍 APIs PÚBLICAS (Para a Tela de Agendamento de Visitantes)
+// ============================================================================
+
+/**
+ * Busca todas as Academias ATIVAS para a tela pública de agendamento (Sem trava de usuário)
+ */
+function getLocaisTreinoPublico() {
+  try {
+    const locais = lerTabelaDinamica("Locais_de_treino");
+    return locais
+      .filter(l => String(l.status).toLowerCase() === "ativo" && l.nome_do_local)
+      .map(row => ({
+        nome: row.nome_do_local,
+        endereco: row['endereço'] || row.endereco || "Endereço sob consulta",
+        cidade: row['cidade/estado'] || "",
+        contato: row.contato || "",
+        iframeHtml: row.html_mapa_off_lline || "",
+        status: row.status || "Ativo"
+      }));
+  } catch (e) {
+    registrarLogBlindado("ERRO", "API_PUBLICA_LOCAIS", e.message);
+    return [];
+  }
+}
+
+/**
+ * Busca todas as Turmas ATIVAS para a tela pública de agendamento (Sem trava de usuário)
+ */
+function listarTurmasPublico() {
+  try {
+    const turmas = lerTabelaDinamica("Config_Turmas");
+    return turmas
+      .filter(t => String(t.status).toLowerCase() === "ativa" || String(t.status).toLowerCase() === "ativo")
+      .map(t => ({
+        nome: t.nome_da_turma || "Sem Nome",
+        local: t.local_vinculado || "Matriz",
+        dias: t.dias_da_semana || "",
+        inicio: t["horário_início"] || t.horario_inicio || "",
+        fim: t["horário_fim"] || t.horario_fim || "",
+        status: t.status || "Ativa"
+      }));
+  } catch (e) {
+    registrarLogBlindado("ERRO", "API_PUBLICA_TURMAS", e.message);
+    return [];
   }
 }
