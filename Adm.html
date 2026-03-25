@@ -1057,19 +1057,28 @@
           const selAcad = document.getElementById('dash-academia');
           if(!selAcad) return;
           
-          const isGod = window.userSessionLocal.isAdmin;
           const myAcads = window.userSessionLocal.academia ? window.userSessionLocal.academia.split(',').map(a => a.trim().toLowerCase()) : [];
-          const isMaster = myAcads.includes("todas");
+          const isMaster = myAcads.includes("todas"); // 🛡️ A única forma de ser Deus é ter "todas" escrito
           
           window.sentinelaAdmin("DASH_INIT", "INFO", "2/3 - Requisitando as franquias autorizadas para este usuário...");
           google.script.run
               .withFailureHandler(e => window.sentinelaAdmin("DASH_INIT", "CRÍTICO", e.message))
               .withSuccessHandler(ac => {
               window.sentinelaAdmin("DASH_INIT", "SUCESSO", "3/3 - Franquias carregadas. Disparando os gráficos.");
-              selAcad.innerHTML = '<option value="TODAS">Todas (Minhas Unidades)</option>';
+              
+              // 🛡️ Se ele é Master, mostra "Rede Completa". Se não, diz "Minhas Unidades" e o Backend se encarrega de trancar os dados.
+              if (isMaster) {
+                  selAcad.innerHTML = '<option value="TODAS">Rede Completa (Todas as Unidades)</option>';
+              } else {
+                  selAcad.innerHTML = '<option value="TODAS">Minhas Unidades Restritas</option>';
+              }
+              
               ac.forEach(x => {
-                  if(isGod && isMaster) { selAcad.innerHTML += `<option value="${x}">${x}</option>`; } 
-                  else if (myAcads.includes(String(x).toLowerCase())) { selAcad.innerHTML += `<option value="${x}">${x}</option>`; }
+                  if (isMaster) { 
+                      selAcad.innerHTML += `<option value="${x}">${x}</option>`; 
+                  } else if (myAcads.includes(String(x).toLowerCase())) { 
+                      selAcad.innerHTML += `<option value="${x}">${x}</option>`; 
+                  }
               });
               window.carregarRelatoriosDashboard();
           }).getListaAcademias(window.editorLogin);
@@ -1472,11 +1481,11 @@
         google.script.run.withSuccessHandler(lista => {
             const tb = document.getElementById('lista-categorias-body');
             if(tb) { tb.innerHTML = lista.map(c => `<tr><td>${window.esc(c.nome)}</td><td>${c.tipo}</td><td>${window.esc(c.local)}</td><td>${c.exibeAluno}</td><td><button class="adm-btn" style="padding:5px;" onclick='window.prepEditCat(${JSON.stringify(c)})'>EDITAR</button></td></tr>`).join(''); }
-        }).listarCategoriasFinanceirasAdmin();
+        }).listarCategoriasFinanceirasAdmin(window.editorLogin);
         google.script.run.withSuccessHandler(lista => {
             const tb = document.getElementById('lista-pagamentos-body');
             if(tb) { tb.innerHTML = lista.map(f => `<tr><td>${window.esc(f.nome)}</td><td>${window.esc(f.local)}</td><td>${f.status}</td><td><button class="adm-btn" style="padding:5px;" onclick='window.prepEditPag(${JSON.stringify(f)})'>EDITAR</button></td></tr>`).join(''); }
-        }).listarFormasPagamentoAdmin();
+        }).listarFormasPagamentoAdmin(window.editorLogin);
     } catch(e) { window.sentinelaAdmin("carregarConfigFinanceira", "ERRO", e.message); }
   };
 
@@ -1570,10 +1579,123 @@
       } catch(e) { window.sentinelaAdmin("popularAcademiasCheckboxAluno", "ERRO", e.message); }
   };
 
-  window.abrirModalCategoria = function() { try { const m = document.getElementById('adm-modal-categoria'); if(m) m.style.display = 'flex'; const catId = document.getElementById('cat_id'); if(catId) catId.value = ""; const f = document.querySelector('#adm-modal-categoria form'); if(f) f.reset(); } catch(e) {} };
-  window.prepEditCat = function(c) { try { window.abrirModalCategoria(); const ids = {'cat_id': c.id, 'cat_nome': c.nome, 'cat_tipo': c.tipo, 'cat_local': c.local, 'cat_exibe': c.exibeAluno, 'cat_status': c.status}; for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; } } catch(e) {} };
-  window.abrirModalPagamento = function() { try { const m = document.getElementById('adm-modal-pagamento'); if(m) m.style.display = 'flex'; const idEl = document.getElementById('pag_id'); if(idEl) idEl.value = ""; const f = document.querySelector('#adm-modal-pagamento form'); if(f) f.reset(); } catch(e) {} };
-  window.prepEditPag = function(f) { try { window.abrirModalPagamento(); const ids = {'pag_id': f.id, 'pag_nome': f.nome, 'pag_local': f.local, 'pag_status': f.status}; for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; } } catch(e) {} };
+  window.abrirModalCategoria = function() { 
+      try { 
+          const m = document.getElementById('adm-modal-categoria'); 
+          if(m) m.style.display = 'flex'; 
+          const catId = document.getElementById('cat_id'); 
+          if(catId) catId.value = ""; 
+          const f = document.querySelector('#adm-modal-categoria form'); 
+          if(f) f.reset(); 
+          
+          // 🛡️ NOVO: Puxa dinamicamente a lista de academias com Trava de Franquia
+          const selLoc = document.getElementById('cat_local');
+          if (selLoc) {
+              selLoc.innerHTML = '<option value="">Carregando...</option>';
+              google.script.run.withSuccessHandler(ac => {
+                  selLoc.innerHTML = '';
+                  
+                  // Descobre se o cara é o Master (Dono da Rede)
+                  const myAcads = window.userSessionLocal.academia ? window.userSessionLocal.academia.split(',').map(a => a.trim().toLowerCase()) : [];
+                  const isMaster = myAcads.includes("todas");
+
+                  // Se for o dono da rede, ele PODE criar categorias para "Todas as Unidades"
+                  if (isMaster) {
+                      selLoc.innerHTML += '<option value="Todas">Rede Completa (Todas as Unidades)</option>';
+                  }
+                  
+                  // Injeta as academias que o cara tem permissão
+                  ac.forEach(x => {
+                      selLoc.innerHTML += "<option value='" + x + "'>" + x + "</option>";
+                  });
+              }).getListaAcademias(window.editorLogin);
+          }
+      } catch(e) {} 
+  };
+
+  window.prepEditCat = function(c) { 
+      try { 
+          window.abrirModalCategoria(); 
+          const ids = {
+              'cat_id': c.id, 
+              'cat_nome': c.nome, 
+              'cat_tipo': c.tipo, 
+              'cat_exibe': c.exibeAluno, 
+              'cat_status': c.status
+          }; 
+          
+          // Preenche os campos normais instantaneamente
+          for(let k in ids) { 
+              const el = document.getElementById(k); 
+              if(el) el.value = ids[k]; 
+          }
+          
+          // 🛡️ Aguarda meio segundo para a lista de Academias baixar, e então seleciona a certa!
+          setTimeout(() => {
+              const elLocal = document.getElementById('cat_local');
+              if(elLocal) elLocal.value = c.local || "Todas";
+          }, 800);
+          
+      } catch(e) {} 
+  };
+
+  window.abrirModalPagamento = function() { 
+      try { 
+          const m = document.getElementById('adm-modal-pagamento'); 
+          if(m) m.style.display = 'flex'; 
+          const idEl = document.getElementById('pag_id'); 
+          if(idEl) idEl.value = ""; 
+          const f = document.querySelector('#adm-modal-pagamento form'); 
+          if(f) f.reset(); 
+          
+          // 🛡️ Puxa dinamicamente a lista de academias com Trava de Franquia
+          const selLoc = document.getElementById('pag_local');
+          if (selLoc) {
+              selLoc.innerHTML = '<option value="">Carregando...</option>';
+              google.script.run.withSuccessHandler(ac => {
+                  selLoc.innerHTML = '';
+                  
+                  // Descobre se o cara é o Master (Dono da Rede)
+                  const myAcads = window.userSessionLocal.academia ? window.userSessionLocal.academia.split(',').map(a => a.trim().toLowerCase()) : [];
+                  const isMaster = myAcads.includes("todas");
+
+                  // Se for o dono da rede, ele PODE criar forma de pagamento para "Todas as Unidades"
+                  if (isMaster) {
+                      selLoc.innerHTML += '<option value="Todas">Rede Completa (Todas as Unidades)</option>';
+                  }
+                  
+                  // Injeta as academias que o cara tem permissão
+                  ac.forEach(x => {
+                      selLoc.innerHTML += "<option value='" + x + "'>" + x + "</option>";
+                  });
+              }).getListaAcademias(window.editorLogin);
+          }
+      } catch(e) {} 
+  };
+
+  window.prepEditPag = function(f) { 
+      try { 
+          window.abrirModalPagamento(); 
+          const ids = {
+              'pag_id': f.id, 
+              'pag_nome': f.nome, 
+              'pag_status': f.status
+          }; 
+          
+          // Preenche os campos normais na mesma hora
+          for(let k in ids) { 
+              const el = document.getElementById(k); 
+              if(el) el.value = ids[k]; 
+          }
+          
+          // 🛡️ Aguarda a lista de Academias baixar (delay), e então seleciona a opção correta!
+          setTimeout(() => {
+              const elLocal = document.getElementById('pag_local');
+              if(elLocal) elLocal.value = f.local || "Todas";
+          }, 800);
+          
+      } catch(e) {} 
+  };
 
   window.atualizarAcademiasHidden = function() {
       try {
@@ -1709,28 +1831,95 @@
           window.sentinelaAdmin("carregarPacotes", "INFO", "Buscando pacotes...");
           const tb = document.getElementById('lista-pacotes-body');
           if(!tb) return;
-          tb.innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; 
-          google.script.run.withSuccessHandler(lista => { 
-              window.cacheAdmin.pacotes = lista; tb.innerHTML = "";
-              if(!lista || lista.length === 0) { tb.innerHTML = '<tr><td colspan="4" style="text-align:center;">Nenhum plano.</td></tr>'; return; }
-              lista.forEach(p => { 
-                  const tr = document.createElement('tr');
-                  tr.innerHTML = `<td><b>${window.esc(p.nome_pacote)}</b></td><td>R$ ${window.esc(p.valor_padrao)}</td><td>${window.esc(p.duracao_dias)} dias</td><td>${window.esc(p.status_pacote)}</td><td><button class="adm-btn" onclick='window.prepEditPacote(${JSON.stringify(p)})'>EDITAR</button></td>`; 
-                  tb.appendChild(tr);
-              });
-          }).getPacotesDisponiveis(window.editorLogin);
+          tb.innerHTML = '<tr><td colspan="5" style="text-align:center"><span class="material-icons spin">sync</span> Sincronizando...</td></tr>'; 
+          
+          google.script.run
+              .withFailureHandler(e => window.sentinelaAdmin("carregarPacotes", "ERRO", e.message))
+              .withSuccessHandler(lista => { 
+                  window.cacheAdmin.pacotes = lista; 
+                  tb.innerHTML = "";
+                  
+                  if(!lista || lista.length === 0) { 
+                      tb.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhum plano.</td></tr>'; 
+                      return; 
+                  }
+                  
+                  lista.forEach(p => { 
+                      let statusClass = (p.status_pacote === 'Inativo') ? 'bg-red' : 'bg-green';
+                      const tr = document.createElement('tr');
+                      tr.innerHTML = `
+                          <td><b>${window.esc(p.nome_pacote)}</b><br><small style="color:#666;">📍 ${window.esc(p.academias_permitidas)}</small></td>
+                          <td>R$ ${parseFloat(p.valor_padrao).toFixed(2).replace('.', ',')}</td>
+                          <td>${window.esc(p.duracao_dias)} dias</td>
+                          <td><span class="adm-badge ${statusClass}">${window.esc(p.status_pacote)}</span></td>
+                          <td><button class="adm-btn" onclick='window.prepEditPacote(${JSON.stringify(p)})'><span class="material-icons" style="font-size:14px">edit</span></button></td>
+                      `; 
+                      tb.appendChild(tr);
+                  });
+              }).listarPacotesAdmin(window.editorLogin); // 🛡️ CHAMA A NOVA FUNÇÃO PASSANDO A CREDENCIAL!
       } catch(e) { window.sentinelaAdmin("carregarPacotes", "ERRO", e.message); }
   };
 
   window.abrirModalPacote = function() { 
-      try { const m = document.getElementById('adm-modal-pacote'); if(m) m.style.display = 'flex'; const i = document.getElementById('pac_linha_id'); if(i) i.value = ""; const f = document.querySelector('#adm-modal-pacote form'); if(f) f.reset(); } catch(e) {}
+      try { 
+          const m = document.getElementById('adm-modal-pacote'); 
+          if(m) m.style.display = 'flex'; 
+          const i = document.getElementById('pac_linha_id'); 
+          if(i) i.value = ""; 
+          const f = document.querySelector('#adm-modal-pacote form'); 
+          if(f) f.reset(); 
+
+          // 🛡️ Puxa dinamicamente a lista de academias com Trava de Franquia
+          const selLoc = document.getElementById('pac_academias');
+          if (selLoc) {
+              selLoc.innerHTML = '<option value="">Carregando...</option>';
+              google.script.run.withSuccessHandler(ac => {
+                  selLoc.innerHTML = '';
+                  
+                  // Descobre se o cara é o Master (Dono da Rede)
+                  const myAcads = window.userSessionLocal.academia ? window.userSessionLocal.academia.split(',').map(a => a.trim().toLowerCase()) : [];
+                  const isMaster = myAcads.includes("todas");
+
+                  // Se for o dono da rede, ele PODE criar pacote/plano para "Todas as Unidades"
+                  if (isMaster) {
+                      selLoc.innerHTML += '<option value="Todas">Rede Completa (Todas as Unidades)</option>';
+                  }
+                  
+                  // Injeta as academias que o cara tem permissão
+                  ac.forEach(x => {
+                      selLoc.innerHTML += "<option value='" + x + "'>" + x + "</option>";
+                  });
+              }).getListaAcademias(window.editorLogin);
+          }
+
+      } catch(e) {}
   };
 
   window.prepEditPacote = function(p) { 
       try {
           window.abrirModalPacote();
-          const ids = { 'pac_linha_id': p._linha, 'pac_nome': p.nome_pacote || p.Nome_Pacote, 'pac_valor': String(p.valor_padrao || p.Valor_Padrao || "").replace(',','.'), 'pac_dias': p.duracao_dias || p.Duracao_Dias, 'pac_academias': p.academias_permitidas || p.Academias_Permitidas || "", 'pac_status': p.status_pacote || p.Status_Pacote || "Ativo", 'pac_desc': p.descricao || p.Descricao || "" };
-          for(let k in ids) { const el = document.getElementById(k); if(el) el.value = ids[k]; }
+          const ids = { 
+              'pac_linha_id': p._linha, 
+              'pac_nome': p.nome_pacote || p.Nome_Pacote, 
+              'pac_valor': String(p.valor_padrao || p.Valor_Padrao || "").replace(',','.'), 
+              'pac_dias': p.duracao_dias || p.Duracao_Dias, 
+              'pac_status': p.status_pacote || p.Status_Pacote || "Ativo", 
+              'pac_desc': p.descricao || p.Descricao || "" 
+          };
+          
+          for(let k in ids) { 
+              const el = document.getElementById(k); 
+              if(el) el.value = ids[k]; 
+          }
+
+          // 🛡️ Aguarda a lista de Academias baixar (delay), e então seleciona a opção correta!
+          setTimeout(() => {
+              const elLocal = document.getElementById('pac_academias');
+              // Procura se tem a propriedade antiga ou nova
+              const valorSalvoNoBanco = p.academias_permitidas || p.Academias_Permitidas || "Todas";
+              if(elLocal) elLocal.value = valorSalvoNoBanco;
+          }, 800);
+
       } catch(e) {}
   };
 

@@ -121,20 +121,38 @@
     </div>
     <form onsubmit="handleAdmForm(event, 'salvarCategoriaFinanceira')">
       <input type="hidden" name="cat_id" id="cat_id">
+
       <label class="adm-label">Nome da Categoria</label>
       <input type="text" name="cat_nome" id="cat_nome" class="adm-input" required>
+
       <div class="form-grid">
         <div>
-          <label class="adm-label">Tipo</label><select name="cat_tipo" id="cat_tipo" class="adm-input"><option value="Receita">Receita</option><option value="Despesa">Despesa</option></select>
+          <label class="adm-label">Tipo</label>
+          <select name="cat_tipo" id="cat_tipo" class="adm-input">
+            <option value="Receita">Receita</option>
+            <option value="Despesa">Despesa</option>
+          </select>
         </div>
         <div>
-          <label class="adm-label">Status</label><select name="cat_status" id="cat_status" class="adm-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select>
+          <label class="adm-label">Status</label>
+          <select name="cat_status" id="cat_status" class="adm-input">
+            <option value="Ativo">Ativo</option>
+            <option value="Inativo">Inativo</option>
+          </select>
         </div>
       </div>
+
       <label class="adm-label">Unidade (Local)</label>
-      <input type="text" name="cat_local" id="cat_local" class="adm-input" placeholder="Todas ou nomes separados por vírgula">
+      <select name="cat_local" id="cat_local" class="adm-input">
+         <option value="Todas">Todas as Unidades</option>
+      </select>
+
       <label class="adm-label">Exibir campo Aluno?</label>
-      <select name="cat_exibe" id="cat_exibe" class="adm-input"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+      <select name="cat_exibe" id="cat_exibe" class="adm-input">
+        <option value="Não">Não</option>
+        <option value="Sim">Sim</option>
+      </select>
+
       <button type="submit" class="adm-btn" style="width:100%; margin-top:20px;">SALVAR CATEGORIA</button>
     </form>
   </div>
@@ -147,12 +165,16 @@
     </div>
     <form onsubmit="window.handleAdmForm(event, 'salvarFormaPagamento')">
       <input type="hidden" name="pag_id" id="pag_id">
+
       <label class="adm-label">Nome (Ex: Pix, Dinheiro, Cartão)</label>
       <input type="text" name="pag_nome" id="pag_nome" class="adm-input" required>
+
       <div class="form-grid">
         <div>
           <label class="adm-label">Unidades Permitidas</label>
-          <input type="text" name="pag_local" id="pag_local" class="adm-input" placeholder="Ex: TODAS ou Matriz">
+          <select name="pag_local" id="pag_local" class="adm-input">
+             <option value="Todas">Todas as Unidades</option>
+          </select>
         </div>
         <div>
           <label class="adm-label">Status</label>
@@ -170,30 +192,49 @@
 <div id="adm-modal-pacote" class="adm-modal">
   <div class="adm-modal-box">
     <div class="adm-h3" style="margin:0 0 20px 0; border:none; padding:0; justify-content:space-between;">
-      <span id="titulo-modal-pacote">Novo Plano/Pacote</span><button type="button" onclick="closeModal('adm-modal-pacote')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+      <span id="titulo-modal-pacote">Novo Plano/Pacote</span>
+      <button type="button" onclick="window.closeModal('adm-modal-pacote')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
     </div>
-    <form onsubmit="handleAdmForm(event, 'salvarPacote')">
+    <form onsubmit="window.handleAdmForm(event, 'salvarPacote')">
       <input type="hidden" name="linha_id" id="pac_linha_id">
-      <label class="adm-label">Nome do Plano*</label><input type="text" name="pac_nome" id="pac_nome" class="adm-input" required>
+
+      <label class="adm-label">Nome do Plano*</label>
+      <input type="text" name="pac_nome" id="pac_nome" class="adm-input" required>
+
       <div class="form-grid">
-        <div><label class="adm-label">Valor Padrão (R$)*</label><input type="number" step="0.01" name="pac_valor" id="pac_valor" class="adm-input" required>
+        <div>
+          <label class="adm-label">Valor Padrão (R$)*</label>
+          <input type="number" step="0.01" name="pac_valor" id="pac_valor" class="adm-input" required>
         </div>
-        <div><label class="adm-label">Duração (Dias)*</label><input type="number" name="pac_dias" id="pac_dias" class="adm-input" required>
+        <div>
+          <label class="adm-label">Duração (Dias)*</label>
+          <input type="number" name="pac_dias" id="pac_dias" class="adm-input" required>
         </div>
       </div>
 
       <div class="form-grid">
-        <div><label class="adm-label">Academias Permitidas</label><input type="text" name="pac_academias" id="pac_academias" class="adm-input" placeholder="Ex: TODAS ou Matriz">
+        <div>
+          <label class="adm-label">Academias Permitidas</label>
+          <select name="pac_academias" id="pac_academias" class="adm-input">
+             <option value="Todas">Todas as Unidades</option>
+          </select>
         </div>
         <div>
-          <label class="adm-label">Status do Plano</label><select name="pac_status" id="pac_status" class="adm-input"><option value="Ativo">Ativo</option><option value="Inativo">Inativo</option></select>
+          <label class="adm-label">Status do Plano</label>
+          <select name="pac_status" id="pac_status" class="adm-input">
+            <option value="Ativo">Ativo</option>
+            <option value="Inativo">Inativo</option>
+          </select>
         </div>
       </div>
-      <label class="adm-label">Descrição / Regras</label><textarea name="pac_desc" id="pac_desc" class="adm-input" rows="2" placeholder="O que este plano oferece?"></textarea>
+
+      <label class="adm-label">Descrição / Regras</label>
+      <textarea name="pac_desc" id="pac_desc" class="adm-input" rows="2" placeholder="O que este plano oferece?"></textarea>
 
       <div
         style="display:flex; justify-content:flex-end; gap:10px; margin-top:25px; border-top: 1px solid #ddd; padding-top: 15px;">
-        <button type="button" onclick="closeModal('adm-modal-pacote')" class="adm-btn adm-btn-outline">Cancelar</button><button type="submit" class="adm-btn">Salvar Plano</button>
+        <button type="button" onclick="window.closeModal('adm-modal-pacote')" class="adm-btn adm-btn-outline">Cancelar</button>
+        <button type="submit" class="adm-btn">Salvar Plano</button>
       </div>
     </form>
   </div>
