@@ -321,16 +321,17 @@
     var turmaSelecionadaObj = null;
 
     window.onload = function() {
-      // Dispara a busca das duas tabelas em simultâneo!
+      // 🛡️ API Pública: Busca locais sem exigir login (Visitantes)
       google.script.run.withSuccessHandler(locais => {
           locaisCache = locais;
           verificarCarregamentoPronto();
-      }).getLocaisTreino();
+      }).getLocaisTreinoPublico();
 
+      // 🛡️ API Pública: Busca turmas sem exigir login (Visitantes)
       google.script.run.withSuccessHandler(turmas => {
           turmasCache = turmas;
           verificarCarregamentoPronto();
-      }).listarTurmasAdmin();
+      }).listarTurmasPublico();
     };
 
     function verificarCarregamentoPronto() {
