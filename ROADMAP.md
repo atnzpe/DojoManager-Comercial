@@ -39,7 +39,8 @@ Acompanhe a evolução, as metas e as próximas entregas do nosso sistema.
 - [x] **[🔥 ALTO ROI]Implementar Controle MultiAcademia e mono Academia para ADm (Estilo Franquia):** Um usuario ADM só podera acessar a academia que estiver vinclulada ano seu cadastro dentro da coluna academia_vinclulada. Assimum franqueador podera ver todoas as acedemias se no seu cadastro estiver escrito 'todas' e seus franqueados so poderam ver duas ou mais acadeoias se estiver escrito o nome dela na coluna 'academias_vinclualdas'. (revisar Código.gs, Adm.html e GestãoAlunos.html)
 - [x] **[🔥 ALTO ROI] Crud Formas de pagamento:** Cada acedemia deve ter as suas forma de pagamento cadastrada . Nenhuma forma de pagamento pode ser hardcode (revisar Código.gs, Adm.html e Finaiceiro.html)
 - [x] **[🔥 ALTO ROI] Crud Categoria Finaiceira:** Tipo (Se mensalidade, aluguel, pacote procional, curso, despesa propoganda, etc) e dizer se é um despsa ou receita, de qual academia esta vinculda, se uma ou todas, a data de vencimento ou recimento  e o status se esta paga /  recebida ou pendente. Criar um relatori analitivo fiultardo por data, academia, tipo e status. Revisar (Código,gs, Financeiro.html, Adm.html)
-
+- [ ] Incluir no campo senha a opçõa do suario visualiza senha digitar ants de confirmar
+- 
 
 ## 💰 Fase 3: Inteligência Financeira e Relatórios (Próximos Passos - Foco Emilly)
 - [ ]Nova Aba "Relatórios" no Adm.html:** Central de Inteligência com relatórios de Cadastros, Inadimplência e Lotação de Turmas.
@@ -64,3 +65,7 @@ Acompanhe a evolução, as metas e as próximas entregas do nosso sistema.
 - [ ] Criar uma apresentação institucional do App para vender a outras academias.
 - [ ] Adaptação do sistema base para a **Confederação Pernambucana de Sambo**. 
 - [ ] Criar uma Landing Page comercial e direcionar o tráfego diretamente para a tela de Agendamento do App.
+
+- Fase 6:
+- [ ] Implentar uma base de dados frie base
+- [ ] Implentamentear login com o google

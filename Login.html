@@ -191,8 +191,22 @@
         .withSuccessHandler(function(res) { 
           if(res.success) { 
             try { localStorage.setItem('userSession', JSON.stringify(res.user)); } catch(err) {} 
-            showMsg("Sucesso! Redirecionando...", false);
-            window.top.location.href = res.redirectUrl; 
+            showMsg("Sucesso! Entrando no sistema...", false);
+            
+            // 🛡️ NAVEGAÇÃO SEGURA: Contorna o erro "Unsafe attempt to initiate navigation"
+            const linkAcesso = res.redirectUrl || "";
+            if (linkAcesso) {
+                 // Cria um elemento A fantasma e força o clique dele direcionando pro top
+                 // É a forma que a Google aceita para redirecionamentos dentro de Web Apps
+                 const a = document.createElement('a');
+                 a.href = linkAcesso;
+                 a.target = '_top';
+                 document.body.appendChild(a);
+                 a.click();
+            } else {
+                 showMsg("Erro de rota. Recarregue a página.", true);
+            }
+
           } else { 
             toggleLoading(false); 
             showMsg(res.message, true); 
@@ -210,10 +224,10 @@
       const spin = document.getElementById('spin');
       const msg = document.getElementById('msg');
       if (isLoading) {
-        btn.disabled = true; btn.style.opacity = 0.5; btn.textContent = "VERIFICANDO...";
+        btn.disabled = true; btn.style.opacity = 0.5; btn.innerHTML = "VERIFICANDO...";
         spin.style.display = 'block'; msg.style.display = 'none'; 
       } else {
-        btn.disabled = false; btn.style.opacity = 1; btn.textContent = "ENTRAR";
+        btn.disabled = false; btn.style.opacity = 1; btn.innerHTML = "ENTRAR";
         spin.style.display = 'none';
       }
     }
@@ -221,13 +235,17 @@
     function showMsg(text, isError) {
       const msg = document.getElementById('msg');
       msg.textContent = text; 
-      msg.style.color = isError ? 'var(--error-color)' : 'var(--success-color)';
+      msg.style.color = isError ? 'var(--error-color, #ff5252)' : 'var(--success-color, #4caf50)';
       msg.style.display = 'block';
     }
 
     function nav(page) {
       google.script.run.withSuccessHandler(url => { 
-        window.top.location.href = url + "?page=" + page; 
+          const a = document.createElement('a');
+          a.href = url + "?page=" + page;
+          a.target = '_top';
+          document.body.appendChild(a);
+          a.click();
       }).getScriptUrl();
     }
   </script>

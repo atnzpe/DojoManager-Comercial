@@ -2553,6 +2553,7 @@ function getAlunoFullData(loginInput) {
 
 /**
  * 🛠️ BACKEND: BUSCA DADOS PIX (Lógica Global vs Local)
+ * BLINDAGEM: Lê os cabeçalhos exatos da planilha e limpa espaços invisíveis
  */
 function getPixDataFromServer(login) {
   try {
@@ -2569,29 +2570,30 @@ function getPixDataFromServer(login) {
     const pacote = pacotes.find(p => p.nome_pacote === assinatura?.pacote_atual);
 
     // 1. Inicia o payload puxando as colunas da CONTA GLOBAL (Aba Config_App)
+    // 🛡️ Nomes exatos normalizados: pix_chave_global, pix_nome, pix_cidade
     let info = {
-      chave: configApp.pix_chave_global || "",
+      chave: configApp.pix_chave_global ? String(configApp.pix_chave_global).trim() : "",
       beneficiario: configApp.pix_nome || "Dojo Manager",
       cidade: configApp.pix_cidade || "RECIFE",
       banco: configApp.nome_banco_pix_global || "Instituição Bancária",
-      valor: pacote ? pacote.valor_padrao : 0, // Zera se não tiver pacote
+      valor: pacote ? pacote.valor_padrao : 0,
       contatoWhatsApp: ""
     };
 
-    // 2. 🛡️ A MÁGICA: Se o PIX Global estiver DESATIVADO, sobrepõe com a CONTA LOCAL
+    // 2. Se o PIX Global estiver DESATIVADO, sobrepõe com a CONTA LOCAL
     if (String(configApp.pix_global_ativo).toLowerCase() !== "sim") {
       const local = locais.find(l => String(l.nome_do_local).toLowerCase() === String(aluno.academia_vinculada).toLowerCase());
 
-      // Só substitui se o local existir e a aba status do local estiver 'Ativo'
       if (local && String(local.status).toLowerCase() === "ativo") {
-        info.chave = local.pix_chave_local_de_treino || info.chave;
+        // 🛡️ Nomes exatos normalizados: pix_chave_local_de_treino, pix_nome_local_de_treino...
+        info.chave = local.pix_chave_local_de_treino ? String(local.pix_chave_local_de_treino).trim() : info.chave;
         info.beneficiario = local.pix_nome_local_de_treino || info.beneficiario;
         info.cidade = local.pix_cidade_local_de_treino || info.cidade;
         info.banco = local.banco_local_de_treino || info.banco;
       }
     }
 
-    // Pega o contato WhatsApp do local de qualquer forma para o aluno enviar o comprovante
+    // Busca o WhatsApp do local para o envio do comprovante
     const localResp = locais.find(l => String(l.nome_do_local).toLowerCase() === String(aluno.academia_vinculada).toLowerCase());
     info.contatoWhatsApp = localResp?.contato ? String(localResp.contato).replace(/\D/g, "") : "5581997629232";
 
