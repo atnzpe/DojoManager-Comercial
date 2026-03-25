@@ -204,44 +204,38 @@ function verificarCriarAbasSistema() {
 }
 
 /**
- * RELATÓRIO ADMIN/INSTRUTOR (COM FILTROS E PERMISSÕES ESTRITAS)
+ * RELATÓRIO ADMIN (FINANCEIRO TELA DE LANÇAMENTOS) - 100% BLINDADO PELA ACADEMIA VINCULADA
  */
 function getRelatorioFinanceiroAdmin(loginSolicitante, filtros = {}) {
   try {
     const transacoes = lerTabelaDinamica("Fin_Transacoes");
     const alunos = lerTabelaDinamica("cadastro_de_alunos");
 
-    // 1. Verifica Nível do Solicitante (REGRA ESTRITA: APENAS ADM/ADMIN)
+    // 1. Puxa o solicitante e aplica a Regra Mestra da Academia
     const solicitante = alunos.find(a => String(a.login).toLowerCase() === String(loginSolicitante).toLowerCase());
+    const acadsSolicitante = solicitante ? String(solicitante.academia_vinculada || "").toLowerCase().split(',').map(a => a.trim()) : [];
 
-    // Busca a coluna de NivelAdministrativo dinamicamente
-    const nivelAdm = solicitante ? String(solicitante.niveladministrativo || solicitante["nivel_administrativo"] || solicitante["nivel administrativo"] || "").toUpperCase().trim() : "";
-
-    // BLINDAGEM: Apenas ADM ou ADMIN
-    const isSuperAdmin = (nivelAdm === "ADMIN" || nivelAdm === "ADM");
-
-    // Se não for Admin, assume que é Instrutor e força filtro pela academia dele
-    const academiaInstrutor = solicitante ? String(solicitante.academia_vinculada).trim() : "";
+    // O usuário só é Master/Deus se tiver "todas" escrito na Academia Vinculada!
+    const isMaster = acadsSolicitante.includes("todas");
 
     let ent = 0, sai = 0;
 
     // 2. Filtragem
     const dadosFiltrados = transacoes.filter(t => {
-      const tAcad = String(t.academia_ref || "").trim();
+      const tAcad = String(t.academia_ref || "").trim().toLowerCase();
       const tData = parseDataSegura(t.data_registro);
 
-      // REGRA 1: Hierarquia Estrita
-      if (!isSuperAdmin) {
-        // Instrutor só vê a SUA academia
-        if (tAcad.toLowerCase() !== academiaInstrutor.toLowerCase()) return false;
-      } else {
-        // Admin vê o que quiser (Filtro de Tela)
-        if (filtros.academia && filtros.academia !== "TODAS") {
-          if (tAcad.toLowerCase() !== String(filtros.academia).toLowerCase()) return false;
-        }
+      // REGRA MESTRA: Se não for Master, a transação TEM que pertencer às academias dele
+      if (!isMaster) {
+        if (!acadsSolicitante.some(myAcad => tAcad.includes(myAcad))) return false;
       }
 
-      // REGRA 2: Filtro de Data
+      // Filtro de Tela (O que o usuário selecionou no Dropdown)
+      if (filtros.academia && filtros.academia !== "TODAS") {
+        if (tAcad !== String(filtros.academia).toLowerCase()) return false;
+      }
+
+      // Filtro de Data
       if (filtros.dataInicio && tData) {
         const dIni = new Date(filtros.dataInicio);
         if (tData < dIni) return false;
@@ -273,7 +267,7 @@ function getRelatorioFinanceiroAdmin(loginSolicitante, filtros = {}) {
       entradas: ent,
       saidas: sai,
       historico: dadosFiltrados.reverse(),
-      isSuperAdmin: isSuperAdmin
+      isSuperAdmin: isMaster // Retorna isMaster real para o Front-end
     });
 
   } catch (e) {
@@ -283,29 +277,32 @@ function getRelatorioFinanceiroAdmin(loginSolicitante, filtros = {}) {
 }
 
 /**
- * 🛠️ HELPER DE FORMULÁRIO (Menus Dinâmicos)
- * Busca listas de Academias e Alunos para preencher os selects do Financeiro.
+ * 🛠️ HELPER DE FORMULÁRIO BLINDADO
+ * Se não for master, o Select de Academias para Registrar Contas só mostra a dele.
  */
-function getDadosParaLancamento() {
-  // 1. Busca Locais
+function getDadosParaLancamento(loginSolicitante) {
+  const auth = getPermissoesUsuario(loginSolicitante);
   const locaisRaw = lerTabelaDinamica("Locais_de_treino");
-  const listaLocais = locaisRaw.map(l => String(l.nome_do_local).trim()).filter(n => n !== "");
 
-  // 2. Busca Alunos (Login e Nome)
+  let listaLocais = locaisRaw.map(l => String(l.nome_do_local).trim()).filter(n => n !== "");
+
+  // 🛡️ Filtra locais
+  if (!auth.isMaster) {
+    listaLocais = listaLocais.filter(loc => auth.academias.some(myAcad => loc.toLowerCase().includes(myAcad)));
+  }
+
   const alunosRaw = lerTabelaDinamica("cadastro_de_alunos");
-  // Ordena por nome para facilitar a busca
-  const listaAlunos = alunosRaw
-    .filter(a => String(a.status).toLowerCase() === "ativo") // Só ativos
-    .map(a => ({
-      login: String(a.login).trim(),
-      nome: String(a.nome_completo).trim()
-    }))
+  let listaAlunos = alunosRaw.filter(a => String(a.status).toLowerCase() === "ativo");
+
+  // 🛡️ Filtra Alunos
+  if (!auth.isMaster) {
+    listaAlunos = listaAlunos.filter(a => auth.academias.some(myAcad => String(a.academia_vinculada).toLowerCase().includes(myAcad)));
+  }
+
+  listaAlunos = listaAlunos.map(a => ({ login: String(a.login).trim(), nome: String(a.nome_completo).trim() }))
     .sort((a, b) => a.nome.localeCompare(b.nome));
 
-  return {
-    locais: listaLocais,
-    alunos: listaAlunos
-  };
+  return { locais: listaLocais, alunos: listaAlunos };
 }
 
 // ============================================================================
@@ -388,6 +385,33 @@ function getPacotesDisponiveis(login) {
     if (permitidas.includes("todas") || auth.isMaster) return true;
     return auth.academias.some(myAcad => permitidas.includes(myAcad));
   });
+}
+
+/**
+ * 📦 LISTAR PACOTES ADMIN (Com Trava de Franquia - Mostra Ativos e Inativos)
+ */
+function listarPacotesAdmin(login) {
+  try {
+    const auth = getPermissoesUsuario(login);
+    const pacotes = lerTabelaDinamica("Fin_Pacotes");
+
+    return pacotes.filter(p => {
+      const permitidas = String(p.academias_permitidas || "Todas").toLowerCase();
+      // O Master vê tudo. O franqueado vê os pacotes "Todas" (Matriz) e os específicos da unidade dele.
+      return auth.isMaster || permitidas === "todas" || auth.academias.some(myAcad => permitidas.includes(myAcad));
+    }).map(p => ({
+      _linha: p._linha,
+      nome_pacote: p.nome_pacote || "",
+      valor_padrao: p.valor_padrao || 0,
+      duracao_dias: p.duracao_dias || 30,
+      academias_permitidas: p.academias_permitidas || "Todas",
+      status_pacote: p.status_pacote || "Ativo",
+      descricao: p.descricao || ""
+    }));
+  } catch (e) {
+    registrarLogBlindado("ERRO", "listarPacotesAdmin", e.message);
+    return [];
+  }
 }
 
 /**
@@ -1221,20 +1245,32 @@ function salvarAluno(form) {
 
     const res = salvarDadosSeguro(NOME_ABA_ALUNOS, dadosParaSalvar, isNaN(idLinha) ? null : idLinha);
 
-    // Sincroniza Assinatura se houver pacote
+    // Sincroniza Assinatura se houver pacote, PRESERVANDO a Data de Início Original
     if (form.aluno_pacote) {
       const assinaturas = lerTabelaDinamica("Fin_Assinaturas");
       const login = String(form.aluno_login).toLowerCase().trim();
-      const aAtual = assinaturas.find(a => String(a.login_aluno).toLowerCase().trim() === login);
-      salvarDadosSeguro("Fin_Assinaturas", {
+      const aAtual = assinaturas.find(a => String(a.login_aluno || a["Login_Aluno"]).toLowerCase().trim() === login);
+
+      const dadosAssinatura = {
         "Login_Aluno": form.aluno_login,
         "Pacote_Atual": form.aluno_pacote,
         "Data_Fim": form.aluno_vencimento,
         "Status_Assinatura": form.aluno_status_assinatura
-      }, aAtual ? aAtual._linha : null);
+      };
+
+      // 🛡️ MÁGICA AQUI: Se a assinatura já existia, recupera a data inicial dela. Senão, põe a de hoje.
+      if (aAtual && (aAtual.data_inicio || aAtual["Data_Inicio"])) {
+        dadosAssinatura["Data_Inicio"] = formatDate(aAtual.data_inicio || aAtual["Data_Inicio"]);
+      } else {
+        dadosAssinatura["Data_Inicio"] = formatDate(new Date());
+      }
+
+      salvarDadosSeguro("Fin_Assinaturas", dadosAssinatura, aAtual ? aAtual._linha : null);
     }
     return res;
-  } catch (e) { return "❌ Erro: " + e.message; }
+  } catch (e) {
+    return "❌ Erro: " + e.message;
+  }
 }
 
 /**
@@ -1666,7 +1702,7 @@ function verificarCredenciais(formObject) {
   const isCheckOnly = formObject.checkOnly || false;
 
   try {
-    const sheet = getSheet(NOME_ABA_ALUNOS);
+    const sheet = getSheet("cadastro_de_alunos"); // Nome exato
     const data = sheet.getDataRange().getDisplayValues();
     const headers = data[0].map(h => String(h).trim().toLowerCase());
 
@@ -1674,9 +1710,7 @@ function verificarCredenciais(formObject) {
       login: headers.indexOf("login"),
       senha: headers.indexOf("senha"),
       nome: headers.indexOf("nome completo"),
-      // 🥋 Poder do Tatame (Quem dá aula)
       nivelTatame: headers.indexOf("nível do praticante") !== -1 ? headers.indexOf("nível do praticante") : headers.indexOf("nivel do praticante"),
-      // 🏢 Poder do Escritório (RBAC - ADM)
       nivelAdm: headers.indexOf("niveladministrativo") !== -1 ? headers.indexOf("niveladministrativo") : headers.indexOf("nivel administrativo"),
       foto: headers.indexOf("foto 3x4 (para a carteirinha)"),
       grad: headers.indexOf("graduacao_atual") !== -1 ? headers.indexOf("graduacao_atual") : headers.indexOf("graduação_atual"),
@@ -1707,14 +1741,11 @@ function verificarCredenciais(formObject) {
 
         const userModalidade = (col.modalidade > -1 && row[col.modalidade]) ? String(row[col.modalidade]).trim() : gradInfo.modalidade;
 
-        // 🛡️ RBAC: SEPARAÇÃO DE PODERES
         const roleTatame = String((col.nivelTatame > -1 && row[col.nivelTatame]) ? row[col.nivelTatame] : gradInfo.nivel).toUpperCase();
         const roleOffice = String(col.nivelAdm > -1 ? row[col.nivelAdm] : "").toUpperCase();
 
         const isInstrutor = roleTatame.includes("INSTRUTOR") || roleTatame.includes("PROFESSOR") || roleTatame.includes("MESTRE");
         const isMestre = roleTatame.includes("MESTRE");
-
-        // 🚨 A MÁGICA DO RBAC: Só é Admin do sistema se a coluna NivelAdministrativo disser "ADMIN" ou "ADM"
         const isAdmin = (roleOffice === "ADMIN" || roleOffice === "ADM");
 
         const dataNascimento = (col.nasc > -1) ? row[col.nasc] : "";
@@ -1733,7 +1764,7 @@ function verificarCredenciais(formObject) {
         let dataIngresso = (col.carimbo > -1 && row[col.carimbo]) ? String(row[col.carimbo]).split(" ")[0] : "--/--/----";
 
         const userPayload = {
-          LOGIN: loginInput,
+          LOGIN: String(row[col.login]).trim(), // 🛡️ MUDANÇA AQUI: Mantém maiúsculas/minúsculas EXATAS da planilha!
           nomeCompleto: row[col.nome],
           graduacao: (col.grad > -1) ? row[col.grad] : "Iniciante",
           nivel: roleTatame,
@@ -1748,7 +1779,7 @@ function verificarCredenciais(formObject) {
           carimbo: dataIngresso,
           isInstrutor: isInstrutor,
           isMestre: isMestre,
-          isAdmin: isAdmin // <-- Variável que trava o Financeiro e Admin no Frontend
+          isAdmin: isAdmin
         };
 
         if (!isCheckOnly) registrarLogLogin(loginInput, "SUCESSO");
@@ -2546,6 +2577,7 @@ function getAlunoFullData(loginInput) {
 
 /**
  * 🛠️ BACKEND: BUSCA DADOS PIX (Lógica Global vs Local)
+ * BLINDAGEM: Lê os cabeçalhos exatos da planilha e limpa espaços invisíveis
  */
 function getPixDataFromServer(login) {
   try {
@@ -2562,29 +2594,30 @@ function getPixDataFromServer(login) {
     const pacote = pacotes.find(p => p.nome_pacote === assinatura?.pacote_atual);
 
     // 1. Inicia o payload puxando as colunas da CONTA GLOBAL (Aba Config_App)
+    // 🛡️ Nomes exatos normalizados: pix_chave_global, pix_nome, pix_cidade
     let info = {
-      chave: configApp.pix_chave_global || "",
+      chave: configApp.pix_chave_global ? String(configApp.pix_chave_global).trim() : "",
       beneficiario: configApp.pix_nome || "Dojo Manager",
       cidade: configApp.pix_cidade || "RECIFE",
       banco: configApp.nome_banco_pix_global || "Instituição Bancária",
-      valor: pacote ? pacote.valor_padrao : 0, // Zera se não tiver pacote
+      valor: pacote ? pacote.valor_padrao : 0,
       contatoWhatsApp: ""
     };
 
-    // 2. 🛡️ A MÁGICA: Se o PIX Global estiver DESATIVADO, sobrepõe com a CONTA LOCAL
+    // 2. Se o PIX Global estiver DESATIVADO, sobrepõe com a CONTA LOCAL
     if (String(configApp.pix_global_ativo).toLowerCase() !== "sim") {
       const local = locais.find(l => String(l.nome_do_local).toLowerCase() === String(aluno.academia_vinculada).toLowerCase());
 
-      // Só substitui se o local existir e a aba status do local estiver 'Ativo'
       if (local && String(local.status).toLowerCase() === "ativo") {
-        info.chave = local.pix_chave_local_de_treino || info.chave;
+        // 🛡️ Nomes exatos normalizados: pix_chave_local_de_treino, pix_nome_local_de_treino...
+        info.chave = local.pix_chave_local_de_treino ? String(local.pix_chave_local_de_treino).trim() : info.chave;
         info.beneficiario = local.pix_nome_local_de_treino || info.beneficiario;
         info.cidade = local.pix_cidade_local_de_treino || info.cidade;
         info.banco = local.banco_local_de_treino || info.banco;
       }
     }
 
-    // Pega o contato WhatsApp do local de qualquer forma para o aluno enviar o comprovante
+    // Busca o WhatsApp do local para o envio do comprovante
     const localResp = locais.find(l => String(l.nome_do_local).toLowerCase() === String(aluno.academia_vinculada).toLowerCase());
     info.contatoWhatsApp = localResp?.contato ? String(localResp.contato).replace(/\D/g, "") : "5581997629232";
 
@@ -2655,10 +2688,18 @@ function gerarPDFCarteirinhaServer(login) {
 
 /**
  * 💳 CRUD: Lista todas as Formas de Pagamento para a tabela Administrativa
+ * 🛡️ BLINDADA COM TRAVA DE FRANQUIA
  */
-function listarFormasPagamentoAdmin() {
+function listarFormasPagamentoAdmin(login) {
   try {
-    return lerTabelaDinamica("Forma_Pagamento").map(f => ({
+    const auth = getPermissoesUsuario(login);
+    const formasPagamento = lerTabelaDinamica("Forma_Pagamento");
+
+    return formasPagamento.filter(f => {
+      const pagLocal = String(f.local || "Todas").toLowerCase();
+      // O Master vê tudo. O franqueado vê as formas "Todas" e as específicas da unidade dele.
+      return auth.isMaster || pagLocal === "todas" || auth.academias.some(myAcad => pagLocal.includes(myAcad));
+    }).map(f => ({
       id: f._linha,
       nome: f.nome || "Sem Nome",
       local: f.local || "Todas",
@@ -2835,125 +2876,226 @@ function salvarTurma(form) {
 }
 
 /**
- * ============================================================================
- * 📊 DASHBOARD DE INTELIGÊNCIA E RELATÓRIOS V3 (MULTI-FRANQUIAS)
- * ============================================================================
+ * 📊 DASHBOARD DE INTELIGÊNCIA (SUPER RELATÓRIO) - BLINDADO
  */
-function getEstatisticasRelatorio(loginSolicitante, filtros) {
+function getEstatisticasRelatorio(login, filtros) {
   try {
-    const alunos = lerTabelaDinamica("cadastro_de_alunos");
-    const assinaturas = lerTabelaDinamica("Fin_Assinaturas");
-    const turmas = lerTabelaDinamica("Config_Turmas");
-    const pacotes = lerTabelaDinamica("Fin_Pacotes");
-    const transacoes = lerTabelaDinamica("Fin_Transacoes");
+    const ws = SpreadsheetApp.getActiveSpreadsheet();
+    const abaAlunos = ws.getSheetByName("cadastro_de_alunos");
+    if (!abaAlunos) throw new Error("Aba 'cadastro_de_alunos' não encontrada.");
 
-    // 1. Identifica o Solicitante e o seu Nível de Acesso (Franquias)
-    const solicitante = alunos.find(a => String(a.login).toLowerCase() === String(loginSolicitante).toLowerCase());
-    let userAcads = solicitante ? String(solicitante.academia_vinculada).split(',').map(a => a.trim().toLowerCase()) : [];
-    const isMaster = userAcads.includes("todas"); // CEO Vê Tudo!
+    const dadosAlunos = abaAlunos.getDataRange().getValues();
+    if (dadosAlunos.length < 2) return { success: true, kpiAtivos: 0, kpiInadimplentes: 0, kpiReceitaPrevista: "0,00", kpiRecebido: "0,00", kpiPendente: "0,00", kpiDespesa: "0,00", listaCobranca: [], listaRanking: [] };
 
-    // 2. Trata os Filtros Recebidos do Frontend
-    let targetAcad = (filtros && filtros.academia && filtros.academia !== "TODAS") ? String(filtros.academia).trim().toLowerCase() : "";
+    const cabecalhoAlunosNorm = dadosAlunos[0].map(h => String(h).trim().toLowerCase().replace(/\s+/g, ""));
+    const findColAluno = (name) => cabecalhoAlunosNorm.indexOf(String(name).trim().toLowerCase().replace(/\s+/g, ""));
 
-    let dIni = null; let dFim = null;
-    if (filtros && filtros.dataInicio) dIni = new Date(filtros.dataInicio + "T00:00:00");
-    if (filtros && filtros.dataFim) { dFim = new Date(filtros.dataFim + "T00:00:00"); dFim.setHours(23, 59, 59, 999); }
+    const idxLogin = findColAluno("LOGIN");
+    const idxAcad = findColAluno("Academia Vinculada");
+    const idxStatus = findColAluno("STATUS");
+    const idxNome = findColAluno("Nome Completo");
+    const idxTurma = findColAluno("Turma Vinculada");
+    const idxTel = findColAluno("Telefone");
 
+    let userAcads = [];
+    let isMaster = false;
+    let usuarioEncontrado = false;
+    const loginBuscado = String(login).trim().toLowerCase();
+
+    // VALIDAÇÃO CORTANTE DA ACADEMIA
+    for (let i = 1; i < dadosAlunos.length; i++) {
+      let loginPlanilha = idxLogin > -1 ? String(dadosAlunos[i][idxLogin]).trim().toLowerCase() : "";
+      if (loginPlanilha === loginBuscado) {
+        usuarioEncontrado = true;
+        let academiasStr = idxAcad > -1 ? String(dadosAlunos[i][idxAcad]).toLowerCase() : "";
+        userAcads = academiasStr.split(',').map(a => a.trim());
+
+        // 🚨 REMOVIDA A TRAVA DE "ADMIN/DIRETOR". AGORA SÓ "TODAS" DÁ PODER DE DEUS!
+        if (userAcads.includes("todas")) {
+          isMaster = true;
+        }
+        break;
+      }
+    }
+
+    if (!usuarioEncontrado || (userAcads.length === 0 && !isMaster)) {
+      return { success: true, kpiAtivos: 0, kpiInadimplentes: 0, kpiReceitaPrevista: "0,00", kpiRecebido: "0,00", kpiPendente: "0,00", kpiDespesa: "0,00", listaCobranca: [], listaRanking: [] };
+    }
+
+    // 2. FILTROS DA TELA
+    const targetAcad = (filtros && filtros.academia && filtros.academia !== "TODAS") ? String(filtros.academia).trim().toLowerCase() : "";
+    const dataIniStr = (filtros && filtros.dataInicio) ? filtros.dataInicio : "";
+    const dataFimStr = (filtros && filtros.dataFim) ? filtros.dataFim : "";
+    const dIni = dataIniStr ? new Date(dataIniStr + "T00:00:00") : new Date(2000, 0, 1);
+    const dFim = dataFimStr ? new Date(dataFimStr + "T23:59:59") : new Date(2100, 0, 1);
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
 
-    // 3. Variáveis de KPI
-    let totalAtivos = 0, receitaPrevista = 0, receitasRealizadas = 0, despesasRealizadas = 0, pagamentosPendentes = 0;
-    let inadimplentes = []; let estatisticasTurmas = {};
-
-    // 4. Processa Turmas da Franquia
-    turmas.forEach(t => {
-      if (String(t.status).toLowerCase() === "ativa") {
-        const tAcad = String(t.local_vinculado).toLowerCase();
-        if (!isMaster && !userAcads.includes(tAcad)) return; // Trava de Franquia
-        if (targetAcad && tAcad !== targetAcad) return; // Filtro de Tela
-
-        estatisticasTurmas[t.nome_da_turma] = { nome: t.nome_da_turma, local: t.local_vinculado, count: 0 };
+    // 3. MAPEAR PACOTES E ASSINATURAS... (Permanece igual)
+    const abaPacotes = ws.getSheetByName("Fin_Pacotes");
+    const mapPacotes = {};
+    if (abaPacotes) {
+      const dadosPacotes = abaPacotes.getDataRange().getValues();
+      if (dadosPacotes.length > 1) {
+        const hPacotes = dadosPacotes[0].map(h => String(h).trim().toLowerCase().replace(/\s+/g, ""));
+        const idxPacNome = hPacotes.indexOf("nome_pacote") > -1 ? hPacotes.indexOf("nome_pacote") : hPacotes.indexOf("nomedopacote");
+        const idxPacValor = hPacotes.indexOf("valor_padrao") > -1 ? hPacotes.indexOf("valor_padrao") : hPacotes.indexOf("valorpadrão");
+        if (idxPacNome > -1 && idxPacValor > -1) {
+          for (let i = 1; i < dadosPacotes.length; i++) {
+            let nome = String(dadosPacotes[i][idxPacNome]).trim().toLowerCase();
+            let valor = parseFloat(String(dadosPacotes[i][idxPacValor]).replace(',', '.')) || 0;
+            mapPacotes[nome] = valor;
+          }
+        }
       }
-    });
+    }
 
-    // 5. Processa Alunos e Inadimplência
-    alunos.forEach(a => {
-      const aAcad = String(a.academia_vinculada).toLowerCase();
+    const abaAssinaturas = ws.getSheetByName("Fin_Assinaturas");
+    const mapAssinaturas = {};
+    if (abaAssinaturas) {
+      const dadosAssinaturas = abaAssinaturas.getDataRange().getValues();
+      if (dadosAssinaturas.length > 1) {
+        const hAssinaturas = dadosAssinaturas[0].map(h => String(h).trim().toLowerCase().replace(/\s+/g, ""));
+        const idxAssLogin = hAssinaturas.indexOf("login_aluno") > -1 ? hAssinaturas.indexOf("login_aluno") : hAssinaturas.indexOf("logindoaluno");
+        const idxAssPacote = hAssinaturas.indexOf("pacote_atual") > -1 ? hAssinaturas.indexOf("pacote_atual") : hAssinaturas.indexOf("pacoteatual");
+        const idxAssFim = hAssinaturas.indexOf("data_fim") > -1 ? hAssinaturas.indexOf("data_fim") : hAssinaturas.indexOf("datafim");
+        const idxAssStatus = hAssinaturas.indexOf("status_assinatura") > -1 ? hAssinaturas.indexOf("status_assinatura") : hAssinaturas.indexOf("statusdaassinatura");
 
-      if (!isMaster && !userAcads.includes(aAcad)) return; // Trava de Franquia
-      if (targetAcad && aAcad !== targetAcad) return; // Filtro de Tela
-      if (String(a.status).toLowerCase() !== "ativo") return;
+        if (idxAssLogin > -1 && idxAssPacote > -1 && idxAssFim > -1) {
+          for (let i = 1; i < dadosAssinaturas.length; i++) {
+            let l = String(dadosAssinaturas[i][idxAssLogin]).trim().toLowerCase();
+            if (!l) continue;
+            let v = dadosAssinaturas[i][idxAssFim];
+            let dFimPacote = null;
+            if (v instanceof Date) { dFimPacote = v; }
+            else if (v && String(v).includes('/')) {
+              let p = String(v).split('/');
+              if (p.length === 3) dFimPacote = new Date(p[2], p[1] - 1, p[0]);
+            } else if (v && String(v).includes('-')) {
+              dFimPacote = new Date(String(v).split(' ')[0] + "T00:00:00");
+            }
+            mapAssinaturas[l] = {
+              pacote: String(dadosAssinaturas[i][idxAssPacote]).trim().toLowerCase(),
+              vencimento: dFimPacote,
+              status: idxAssStatus > -1 ? String(dadosAssinaturas[i][idxAssStatus]).trim().toLowerCase() : "ativo"
+            };
+          }
+        }
+      }
+    }
+
+    let totalAtivos = 0; let totalInadimplentes = 0; let receitaPrevista = 0; let pagamentosPendentes = 0;
+    let listaCobranca = []; let contagemTurmas = {};
+
+    for (let i = 1; i < dadosAlunos.length; i++) {
+      let statusAluno = idxStatus > -1 ? String(dadosAlunos[i][idxStatus]).trim().toLowerCase() : "ativo";
+      if (statusAluno !== "ativo" && statusAluno !== "") continue;
+
+      let aAcad = idxAcad > -1 ? String(dadosAlunos[i][idxAcad]).toLowerCase() : "";
+
+      // 🛡️ A BARREIRA INTRANSPONÍVEL DA ACADEMIA
+      if (!isMaster && !userAcads.some(myAcad => aAcad.includes(myAcad))) continue;
+      if (targetAcad && !aAcad.includes(targetAcad)) continue;
 
       totalAtivos++;
 
-      const tVinculada = String(a.turma_vinculada || "Sem Turma").trim();
-      if (estatisticasTurmas[tVinculada]) {
-        estatisticasTurmas[tVinculada].count++;
-      } else {
-        estatisticasTurmas[tVinculada] = { nome: tVinculada, local: a.academia_vinculada, count: 1 };
-      }
+      let l = idxLogin > -1 ? String(dadosAlunos[i][idxLogin]).trim().toLowerCase() : "";
+      let nomeA = idxNome > -1 ? String(dadosAlunos[i][idxNome]).trim() : "Sem Nome";
+      let turmaA = idxTurma > -1 ? String(dadosAlunos[i][idxTurma]).trim() : "Sem Turma";
+      let acadA = idxAcad > -1 ? String(dadosAlunos[i][idxAcad]).trim() : "Sem Local";
+      let telA = idxTel > -1 ? String(dadosAlunos[i][idxTel]).trim() : "";
 
-      const loginBusca = String(a.login).toLowerCase().trim();
-      const ass = assinaturas.find(as => String(as.login_aluno).toLowerCase().trim() === loginBusca);
+      let chaveTurma = turmaA + "|||" + acadA;
+      if (!contagemTurmas[chaveTurma]) contagemTurmas[chaveTurma] = { nome: turmaA, local: acadA, count: 0 };
+      contagemTurmas[chaveTurma].count++;
 
-      let isInadimplente = true; let vencimentoFormatado = "Sem Plano";
-      let valorPacote = 0;
+      let ass = mapAssinaturas[l];
+      let inadimplente = false; let valorPacote = 0; let pacoteNome = ""; let vencStr = "Sem Plano";
 
       if (ass) {
-        const pacote = pacotes.find(p => String(p.nome_pacote).toLowerCase() === String(ass.pacote_atual).toLowerCase());
-        if (pacote) valorPacote = parseFloat(String(pacote.valor_padrao).replace(',', '.')) || 0;
+        pacoteNome = ass.pacote;
+        valorPacote = mapPacotes[pacoteNome] || 0;
+        if (ass.vencimento) {
+          let v = ass.vencimento;
+          vencStr = ('0' + v.getDate()).slice(-2) + '/' + ('0' + (v.getMonth() + 1)).slice(-2) + '/' + v.getFullYear();
+          if (ass.status !== "ativo" || v < hoje) inadimplente = true;
+        } else inadimplente = true;
+      } else inadimplente = true;
 
-        const dataFim = parseDataSegura(ass.data_fim);
-        if (dataFim) vencimentoFormatado = formatDate(dataFim);
+      if (inadimplente) {
+        if (acadA.toLowerCase() === "todas" || l.includes("master")) {
+          totalAtivos--;
+        } else {
+          totalInadimplentes++; pagamentosPendentes += valorPacote;
+          listaCobranca.push({ nome: nomeA, academia: acadA, turma: turmaA, telefone: telA, plano: pacoteNome, vencimento: vencStr });
+        }
+      } else {
+        receitaPrevista += valorPacote;
+      }
+    }
 
-        if (String(ass.status_assinatura).toLowerCase() === "ativo" && dataFim && dataFim >= hoje) {
-          isInadimplente = false;
-          receitaPrevista += valorPacote; // Receita Base
+    // PROCESSAR TRANSAÇÕES 
+    let receitasRealizadas = 0; let despesasRealizadas = 0;
+    const abaTransacoes = ws.getSheetByName("Fin_Transacoes");
+
+    if (abaTransacoes) {
+      const dadosTransacoes = abaTransacoes.getDataRange().getValues();
+      if (dadosTransacoes.length > 1) {
+        const hTrx = dadosTransacoes[0].map(h => String(h).trim().toLowerCase().replace(/\s+/g, ""));
+        const idxTrxData = hTrx.indexOf("data_registro") > -1 ? hTrx.indexOf("data_registro") : hTrx.indexOf("dataderegistro");
+        const idxTrxTipo = hTrx.indexOf("tipo"); const idxTrxValor = hTrx.indexOf("valor");
+        const idxTrxAcad = hTrx.indexOf("academia_ref") > -1 ? hTrx.indexOf("academia_ref") : hTrx.indexOf("academiaref");
+        const idxTrxStatus = hTrx.indexOf("status");
+
+        if (idxTrxData > -1 && idxTrxValor > -1) {
+          for (let i = 1; i < dadosTransacoes.length; i++) {
+            let status = idxTrxStatus > -1 ? String(dadosTransacoes[i][idxTrxStatus]).trim().toLowerCase() : "concluido";
+            if (status !== "concluido" && status !== "concluído") continue;
+
+            let trxAcad = idxTrxAcad > -1 ? String(dadosTransacoes[i][idxTrxAcad]).toLowerCase() : "";
+
+            // 🛡️ A BARREIRA NA TRANSAÇÃO
+            if (!isMaster && !userAcads.some(myAcad => trxAcad.includes(myAcad))) continue;
+            if (targetAcad && !trxAcad.includes(targetAcad)) continue;
+
+            let dTrx = dadosTransacoes[i][idxTrxData];
+            let dValid = null;
+            if (dTrx instanceof Date) { dValid = dTrx; }
+            else if (dTrx && String(dTrx).includes('/')) {
+              let p = String(dTrx).split(' ')[0].split('/');
+              if (p.length === 3) dValid = new Date(p[2], p[1] - 1, p[0]);
+            } else if (dTrx && String(dTrx).includes('-')) {
+              dValid = new Date(String(dTrx).split(' ')[0] + "T00:00:00");
+            }
+
+            if (dValid && dValid >= dIni && dValid <= dFim) {
+              let tipo = idxTrxTipo > -1 ? String(dadosTransacoes[i][idxTrxTipo]).trim().toLowerCase() : "receita";
+              let valor = parseFloat(String(dadosTransacoes[i][idxTrxValor]).replace(',', '.')) || 0;
+              if (tipo === "receita") receitasRealizadas += valor;
+              if (tipo === "despesa") despesasRealizadas += valor;
+            }
+          }
         }
       }
+    }
 
-      if (isInadimplente) {
-        pagamentosPendentes += valorPacote; // Dinheiro que deveria ter entrado
-        inadimplentes.push({
-          nome: a.nome_completo || a.nome || "Sem Nome",
-          telefone: a.telefone || "",
-          academia: a.academia_vinculada || "Sem Local",
-          vencimento: vencimentoFormatado
-        });
-      }
-    });
-
-    // 6. Processa Fluxo de Caixa (Filtro de Data + Franquia)
-    transacoes.forEach(trx => {
-      const trxAcad = String(trx.academia_ref).toLowerCase();
-      if (!isMaster && !userAcads.includes(trxAcad)) return;
-      if (targetAcad && trxAcad !== targetAcad) return;
-
-      const dataTrx = parseDataSegura(trx.data_registro);
-      if (!dataTrx) return;
-
-      // Aplica o filtro do Mês selecionado no frontend
-      if (dIni && dataTrx < dIni) return;
-      if (dFim && dataTrx > dFim) return;
-
-      let val = parseFloat(String(trx.valor).replace(',', '.')) || 0;
-      const tipo = String(trx.tipo).toLowerCase();
-      const status = String(trx.status).toLowerCase();
-
-      if (tipo === 'receita' && status === 'concluido') receitasRealizadas += val;
-      if (tipo === 'despesa' && status === 'concluido') despesasRealizadas += val;
-    });
+    let turmasArr = Object.values(contagemTurmas).filter(t => t.local !== "todas" && t.local !== "" && t.local !== "Sem Local");
+    turmasArr.sort((a, b) => b.count - a.count);
 
     return {
-      totalAtivos, totalInadimplentes: inadimplentes.length, receitaPrevista,
-      receitasRealizadas, despesasRealizadas, pagamentosPendentes, inadimplentes,
-      turmas: Object.values(estatisticasTurmas).sort((a, b) => b.count - a.count)
+      success: true, kpiAtivos: totalAtivos, kpiInadimplentes: totalInadimplentes,
+      kpiReceitaPrevista: receitaPrevista.toFixed(2).replace('.', ','),
+      kpiRecebido: receitasRealizadas.toFixed(2).replace('.', ','),
+      kpiPendente: pagamentosPendentes.toFixed(2).replace('.', ','),
+      kpiDespesa: despesasRealizadas.toFixed(2).replace('.', ','),
+      listaCobranca: listaCobranca, listaRanking: turmasArr,
+      graficoFluxo: { labels: ["Período Filtrado"], receitas: [receitasRealizadas], despesas: [despesasRealizadas] },
+      graficoOcupacao: { labels: turmasArr.slice(0, 5).map(t => t.nome), valores: turmasArr.slice(0, 5).map(t => t.count) }
     };
   } catch (e) { return { erro: e.message }; }
 }
 
 /**
- * Busca as Unidades (Locais) permitidas para o usuário logado
+ * Puxa os Locais Autorizados (Financeiro)
  */
 function getLocaisParaFinanceiro(loginSolicitante) {
   const alunos = lerTabelaDinamica(NOME_ABA_ALUNOS);
@@ -2962,10 +3104,127 @@ function getLocaisParaFinanceiro(loginSolicitante) {
 
   const acads = String(user.academia_vinculada || "Matriz").split(',').map(a => a.trim());
   if (acads.map(a => a.toLowerCase()).includes("todas")) {
-    return getListaAcademias(); // Retorna todas se for Master
+    const locais = lerTabelaDinamica("Locais_de_treino");
+    return locais.filter(l => String(l.status).toLowerCase() === 'ativo').map(l => String(l.nome_do_local).trim());
   }
   return acads;
 }
+
+function getDadosIniciaisFinanceiro() {
+  try {
+    const ws = SpreadsheetApp.getActiveSpreadsheet();
+
+    // 1. Busca Categorias
+    const sCat = ws.getSheetByName("Categoria_financeira");
+    if (!sCat) throw new Error("Aba 'Categoria_financeira' não encontrada.");
+    const dCat = sCat.getDataRange().getValues();
+    const mapCat = dCat[0].reduce((acc, col, i) => { acc[String(col).trim()] = i; return acc; }, {});
+    let arrCat = [];
+    for (let i = 1; i < dCat.length; i++) {
+      let nomeCat = String(dCat[i][mapCat["Nome"]]).trim();
+      if (!nomeCat) continue;
+      arrCat.push({
+        nome: nomeCat,
+        tipo: String(dCat[i][mapCat["Tipo"]]).trim(),
+        local: String(dCat[i][mapCat["Local"]] || "Todas").trim(),
+        exibeAluno: String(dCat[i][mapCat["Exibe Aluno"]] || "Não").trim(),
+        status: String(dCat[i][mapCat["Status"]] || "Ativo").trim()
+      });
+    }
+
+    // 2. Busca Formas de Pagamento
+    const sPag = ws.getSheetByName("Forma_Pagamento");
+    if (!sPag) throw new Error("Aba 'Forma_Pagamento' não encontrada.");
+    const dPag = sPag.getDataRange().getValues();
+    const mapPag = dPag[0].reduce((acc, col, i) => { acc[String(col).trim()] = i; return acc; }, {});
+    let arrPag = [];
+    for (let i = 1; i < dPag.length; i++) {
+      let nomePag = String(dPag[i][mapPag["Nome"]]).trim();
+      if (!nomePag) continue;
+      arrPag.push({
+        nome: nomePag,
+        local: String(dPag[i][mapPag["Local"]] || "Todas").trim(),
+        status: String(dPag[i][mapPag["Status"]] || "Ativo").trim()
+      });
+    }
+
+    // 3. Busca Locais de Treino (Unidades)
+    const sLoc = ws.getSheetByName("Locais_de_treino");
+    if (!sLoc) throw new Error("Aba 'Locais_de_treino' não encontrada.");
+    const dLoc = sLoc.getDataRange().getValues();
+    const idxLocNome = dLoc[0].indexOf("Nome do Local");
+    const idxLocStatus = dLoc[0].indexOf("Status");
+    let arrLocais = [];
+    for (let i = 1; i < dLoc.length; i++) {
+      let nomeLoc = String(dLoc[i][idxLocNome]).trim();
+      let statusLoc = String(dLoc[i][idxLocStatus]).trim().toLowerCase();
+      if (nomeLoc && statusLoc === "ativo") {
+        arrLocais.push(nomeLoc);
+      }
+    }
+
+    // 4. Busca Modalidades (Dinâmicas da aba GRADUACAO)
+    const sGrad = ws.getSheetByName("GRADUACAO");
+    if (!sGrad) throw new Error("Aba 'GRADUACAO' não encontrada.");
+    const dGrad = sGrad.getDataRange().getValues();
+    const idxGradMod = dGrad[0].indexOf("Modalidade");
+    let setMods = new Set(); // Usamos Set para evitar repetições
+    for (let i = 1; i < dGrad.length; i++) {
+      let mod = String(dGrad[i][idxGradMod]).trim();
+      if (mod) setMods.add(mod);
+    }
+    let arrMods = Array.from(setMods).sort(); // Transforma em Array e ordena em ordem alfabética
+
+    // DEVOLVE TUDO PARA O FRONT-END DE UMA VEZ SÓ!
+    return {
+      categorias: arrCat,
+      formasPagto: arrPag,
+      locais: arrLocais,
+      modalidades: arrMods
+    };
+  } catch (e) {
+    return { erro: e.message };
+  }
+}
+
+/**
+ * ============================================================================
+ * 📊 PONTE DE TRADUÇÃO DO DASHBOARD (FRONTEND <-> BACKEND)
+ * Pega os dados brutos da getEstatisticasRelatorio e embala para o Chart.js e KPIs
+ * ============================================================================
+ */
+
+function getDadosDashboardAdmin(filtros) {
+  try {
+    registrarLogBlindado("INFO", "DASH_PONTE", `Iniciando embalagem de dados para o Front...`);
+
+    // 1. Puxa os dados da sua função mestre! Note que agora repassamos o login correto
+    const stats = getEstatisticasRelatorio(filtros.usuario, filtros);
+
+    if (stats.erro) throw new Error(stats.erro);
+
+    registrarLogBlindado("SUCESSO", "DASH_PONTE", `Empacotando: ${stats.kpiAtivos} ativos, R$ ${stats.kpiReceitaPrevista}`);
+
+    // 2. Formata e embala EXATAMENTE como o Front-end pediu, forçando o envio das chaves certas
+    return {
+      kpiAtivos: stats.kpiAtivos || 0,
+      kpiInadimplentes: stats.kpiInadimplentes || 0,
+      kpiReceitaPrevista: stats.kpiReceitaPrevista || "0,00",
+      kpiRecebido: stats.kpiRecebido || "0,00",
+      kpiPendente: stats.kpiPendente || "0,00",
+      kpiDespesa: stats.kpiDespesa || "0,00",
+      listaCobranca: stats.listaCobranca || [],
+      listaRanking: stats.listaRanking || [],
+      graficoFluxo: stats.graficoFluxo || { labels: ['Mês Filtrado'], receitas: [0], despesas: [0] },
+      graficoOcupacao: stats.graficoOcupacao || { labels: [], valores: [] }
+    };
+
+  } catch (e) {
+    registrarLogBlindado("ERRO", "DASH_PONTE", e.message);
+    throw new Error("Falha ao embalar dados do Dashboard: " + e.message);
+  }
+}
+
 
 /**
  * Busca categorias filtradas por Tipo e Local
@@ -2996,11 +3255,22 @@ function getFormasPagamentoCascata(local) {
 
 //CRUD financeiro
 
-function listarCategoriasFinanceirasAdmin() {
-  return lerTabelaDinamica("Categoria_financeira").map(c => ({
-    id: c._linha, nome: c.nome || "", tipo: c.tipo || "Receita",
-    local: c.local || "Todas", exibeAluno: c.exibe_aluno || "Não", status: c.status || "Ativo"
-  }));
+function listarCategoriasFinanceirasAdmin(login) {
+  try {
+    const auth = getPermissoesUsuario(login);
+    const categorias = lerTabelaDinamica("Categoria_financeira");
+
+    return categorias.filter(c => {
+      const catLocal = String(c.local || "Todas").toLowerCase();
+      // O Master vê tudo. O franqueado vê as categorias "Todas" (criadas pelo master) e as específicas da unidade dele.
+      return auth.isMaster || catLocal === "todas" || auth.academias.some(myAcad => catLocal.includes(myAcad));
+    }).map(c => ({
+      id: c._linha, nome: c.nome || "", tipo: c.tipo || "Receita",
+      local: c.local || "Todas", exibeAluno: c.exibe_aluno || "Não", status: c.status || "Ativo"
+    }));
+  } catch (e) {
+    return [];
+  }
 }
 
 function salvarCategoriaFinanceira(form) {
@@ -3125,5 +3395,127 @@ function getDetalhesChamada(idChamada) {
   } catch (e) {
     registrarLogBlindado("ERRO", "getDetalhesChamada", e.message);
     return null;
+  }
+}
+
+
+/**
+ * Puxa os dados para alimentar as cascatas do modal financeiro
+ */
+function getDadosIniciaisCaixa() {
+  try {
+    const ws = SpreadsheetApp.getActiveSpreadsheet();
+
+    // Busca Categorias (Tratando nomes de colunas com e sem underscore)
+    const sCat = ws.getSheetByName("Categoria_financeira");
+    const dCat = sCat ? sCat.getDataRange().getValues() : [];
+    let arrCat = [];
+    if (dCat.length > 1) {
+      const hCat = dCat[0].map(h => String(h).trim().toLowerCase());
+      const iNome = hCat.indexOf("nome"); const iTipo = hCat.indexOf("tipo");
+      const iLoc = hCat.indexOf("local"); const iStat = hCat.indexOf("status");
+      const iExibe = hCat.indexOf("exibe aluno") > -1 ? hCat.indexOf("exibe aluno") : hCat.indexOf("exibe_aluno");
+
+      for (let i = 1; i < dCat.length; i++) {
+        if (String(dCat[i][iNome]).trim() !== "") {
+          arrCat.push({
+            nome: String(dCat[i][iNome]).trim(),
+            tipo: String(dCat[i][iTipo]).trim(),
+            local: String(dCat[i][iLoc] || "Todas").trim(),
+            exibeAluno: String(dCat[i][iExibe] || "Não").trim(),
+            status: String(dCat[i][iStat] || "Ativo").trim()
+          });
+        }
+      }
+    }
+
+    // Busca Formas de Pagamento
+    const sPag = ws.getSheetByName("Forma_Pagamento");
+    const dPag = sPag ? sPag.getDataRange().getValues() : [];
+    let arrPag = [];
+    if (dPag.length > 1) {
+      const hPag = dPag[0].map(h => String(h).trim().toLowerCase());
+      const iNomeP = hPag.indexOf("nome"); const iLocP = hPag.indexOf("local"); const iStatP = hPag.indexOf("status");
+
+      for (let i = 1; i < dPag.length; i++) {
+        if (String(dPag[i][iNomeP]).trim() !== "") {
+          arrPag.push({
+            nome: String(dPag[i][iNomeP]).trim(),
+            local: String(dPag[i][iLocP] || "Todas").trim(),
+            status: String(dPag[i][iStatP] || "Ativo").trim()
+          });
+        }
+      }
+    }
+
+    // Busca Modalidades Dinâmicas (Aba GRADUACAO)
+    const sGrad = ws.getSheetByName("GRADUACAO");
+    let arrMods = ["Geral"]; // Default de segurança
+    if (sGrad) {
+      const dGrad = sGrad.getDataRange().getValues();
+      const colMod = dGrad[0].map(h => String(h).trim().toLowerCase()).indexOf("modalidade");
+      if (colMod > -1) {
+        let setMods = new Set();
+        for (let i = 1; i < dGrad.length; i++) {
+          let mod = String(dGrad[i][colMod]).trim();
+          if (mod) setMods.add(mod);
+        }
+        arrMods = Array.from(setMods).sort();
+        if (!arrMods.includes("Geral")) arrMods.unshift("Geral");
+      }
+    }
+
+    return { categorias: arrCat, formasPagto: arrPag, modalidades: arrMods };
+  } catch (e) {
+    registrarLogBlindado("ERRO", "getDadosIniciaisCaixa", e.message);
+    return { categorias: [], formasPagto: [], modalidades: ["Geral"] };
+  }
+}
+
+// ============================================================================
+// 🌍 APIs PÚBLICAS (Para a Tela de Agendamento de Visitantes)
+// ============================================================================
+
+/**
+ * Busca todas as Academias ATIVAS para a tela pública de agendamento (Sem trava de usuário)
+ */
+function getLocaisTreinoPublico() {
+  try {
+    const locais = lerTabelaDinamica("Locais_de_treino");
+    return locais
+      .filter(l => String(l.status).toLowerCase() === "ativo" && l.nome_do_local)
+      .map(row => ({
+        nome: row.nome_do_local,
+        endereco: row['endereço'] || row.endereco || "Endereço sob consulta",
+        cidade: row['cidade/estado'] || "",
+        contato: row.contato || "",
+        iframeHtml: row.html_mapa_off_lline || "",
+        status: row.status || "Ativo"
+      }));
+  } catch (e) {
+    registrarLogBlindado("ERRO", "API_PUBLICA_LOCAIS", e.message);
+    return [];
+  }
+}
+
+/**
+ * Busca todas as Turmas ATIVAS para a tela pública de agendamento (Sem trava de usuário)
+ */
+function listarTurmasPublico() {
+  try {
+    const turmas = lerTabelaDinamica("Config_Turmas");
+    return turmas
+      .filter(t => String(t.status).toLowerCase() === "ativa" || String(t.status).toLowerCase() === "ativo")
+      .map(t => ({
+        nome: t.nome_da_turma || "Sem Nome",
+        local: t.local_vinculado || "Matriz",
+        dias: t.dias_da_semana || "",
+        inicio: t["horário_início"] || t.horario_inicio || "",
+        fim: t["horário_fim"] || t.horario_fim || "",
+        status: t.status || "Ativa"
+      }));
+  } catch (e) {
+    registrarLogBlindado("ERRO", "API_PUBLICA_TURMAS", e.message);
+    return [];
   }
 }

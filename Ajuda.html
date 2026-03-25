@@ -185,6 +185,7 @@
       border-radius: 3px;
       font-size: 0.7rem;
       vertical-align: middle;
+      margin-left: 5px;
     }
 
     .chapter-title {
@@ -200,34 +201,34 @@
     /* ============================================================================
        RODAPÉ DO DESENVOLVEDOR (WHITE-LABEL SAAS)
        ============================================================================ */
-  .developer-footer {
-    text-align: center;
-    padding: 20px 10px;
-    font-size: 11px;
-    color: var(--dynamic-text, #ffffff);
-    opacity: 0.5;
-    /* Discreto para não roubar a atenção do App */
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: auto;
-    /* Empurra para o fundo */
-    width: 100%;
-    box-sizing: border-box;
-    z-index: 10;
-    position: relative;
-  }
+    .developer-footer {
+      text-align: center;
+      padding: 20px 10px;
+      font-size: 11px;
+      color: var(--dynamic-text, #ffffff);
+      opacity: 0.5;
+      /* Discreto para não roubar a atenção do App */
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: auto;
+      /* Empurra para o fundo */
+      width: 100%;
+      box-sizing: border-box;
+      z-index: 10;
+      position: relative;
+    }
 
-  .developer-footer a {
-    color: var(--dynamic-prim, #FFD700);
-    text-decoration: none;
-    font-weight: 900;
-    transition: opacity 0.2s;
-  }
+    .developer-footer a {
+      color: var(--dynamic-prim, #FFD700);
+      text-decoration: none;
+      font-weight: 900;
+      transition: opacity 0.2s;
+    }
 
-  .developer-footer a:hover {
-    opacity: 0.8;
-    text-decoration: underline;
-  }
+    .developer-footer a:hover {
+      opacity: 0.8;
+      text-decoration: underline;
+    }
   </style>
 </head>
 
@@ -356,22 +357,27 @@
     <div class="chapter-title">3. Mensalidades e Pagamentos PIX</div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">payments</span> Como pagar meu plano com o novo PIX?</span>
+      <span><span class="material-icons icon-topic">payments</span> Como pagar meu plano com o novo PIX? <span class="highlight">NOVO</span></span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>Pagar a sua mensalidade agora é 100% digital e sem erros:</p>
+      <p>Pagar a sua mensalidade agora é 100% digital, seguro e sem erros de valor:</p>
       <ol>
         <li>Acesse o card <strong>"Financeiro"</strong> no painel principal.</li>
         <li>Se o seu plano estiver vencido ou próximo do vencimento, o sistema exibirá automaticamente a opção de
           pagamento.</li>
-        <li>Você verá o <strong>QR Code</strong>, o Valor, a Instituição Bancária e a Chave da Academia.</li>
+        <li>Você verá o <strong>QR Code Oficial</strong>, o Valor exato da mensalidade, o Nome do Recebedor e a
+          Instituição Bancária.</li>
         <li><strong>Para pagar pelo mesmo telemóvel:</strong> Clique no botão verde <strong>"PIX COPIA E COLA"</strong>.
-          O código oficial do Banco Central será copiado. Abra o App do seu banco, escolha "Pix Copia e Cola" e confirme
-          o pagamento.</li>
+          O código já vai preenchido com a assinatura matemática do Banco Central, você não precisa digitar nenhum
+          valor.</li>
+        <li>Abra o App do seu banco, escolha "Pix Copia e Cola" e confirme o pagamento.</li>
         <li>Por fim, clique em <strong>"Enviar Comprovante"</strong> para encaminhar o recibo diretamente para o
           WhatsApp da secretaria da sua unidade.</li>
       </ol>
+      <p>
+        <em>Nota: Caso a unidade ainda não tenha o PIX configurado ou o valor da sua mensalidade não esteja definido, o sistema de segurança do app ocultará o QR Code e exibirá um botão direto para você falar com a secretaria.</em>
+      </p>
     </div>
 
     <div class="chapter-title">4. Para Instrutores e Gestores</div>
@@ -387,6 +393,73 @@
           alunos/turmas de todas as franquias.</li>
         <li><strong>Instrutor/Professor:</strong> Não tem acesso ao módulo Financeiro da gestão nem ao "Painel Admin".
           Ele visualiza <strong>apenas</strong> os alunos das Academias em que está vinculado.</li>
+      </ul>
+    </div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">account_balance_wallet</span> Lançamentos Financeiros (Caixa Inteligente) <span class="highlight">NOVO</span></span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>A interface de gestão de caixa foi modernizada com uma "Cascata Inteligente" à prova de erros para os
+        Administradores:</p>
+      <ol>
+        <li>No Dashboard, clique no botão verde <strong>"Nova Transação (Caixa)"</strong>.</li>
+        <li>Selecione a <strong>Unidade</strong> e o <strong>Tipo</strong> (Entrada ou Saída).</li>
+        <li>Ao escolher a Categoria (ex: Mensalidade), o formulário <strong>automaticamente revelará</strong> as opções
+          de Aluno e Plano.</li>
+        <li>Ao selecionar o plano do aluno, a mágica acontece: o campo de <strong>Valor (R$) é autopreenchido</strong>
+          com o valor exato cadastrado no sistema, agilizando a rotina da secretaria!</li>
+      </ol>
+    </div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">request_quote</span> Cobrança e PDF de Inadimplentes <span class="highlight">NOVO</span></span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>A gestão de inadimplência agora é proativa e automatizada:</p>
+      <ul>
+        <li>No Dashboard Administrativo, o sistema possui uma tabela exclusiva chamada
+          <strong>Painel de Cobrança</strong>.</li>
+        <li>Ela detecta exatamente quem está com a assinatura vencida no dia de hoje.</li>
+        <li>Clique no botão verde de <strong>WhatsApp</strong> ao lado do nome do aluno para abrir o aplicativo já com
+          uma mensagem de cobrança educada, informando o nome da turma e da academia.</li>
+        <li>Para reuniões de gestão, clique no botão vermelho <strong>"PDF Inadimplência"</strong> para imprimir ou
+          salvar a lista completa dos alunos em atraso.</li>
+      </ul>
+    </div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">analytics</span> Super Relatório de Atletas <span class="highlight">NOVO</span></span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>A ferramenta mais poderosa para análise da base de alunos:</p>
+      <ul>
+        <li>Acesse o <strong>Super Relatório</strong> através do Dashboard ou da Aba Alunos.</li>
+        <li>Realize filtros avançados combinando Múltiplas Condições: Idade (Mín/Máx), Peso, Modalidade, Faixa, Unidade
+          e Turma Específica.</li>
+        <li><strong>Novo Filtro Financeiro:</strong> Encontre instantaneamente todos os alunos que estão com o status
+          "Em Dia" ou "Atrasado".</li>
+        <li>Exiba os resultados ao vivo na tela e gere um <strong>Documento PDF Oficial</strong> formatado e separado
+          por unidades para impressão.</li>
+      </ul>
+    </div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">security</span> Proteção Anti-Apagão (Hydration) <span class="highlight">NOVO</span></span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>O coração do sistema foi blindado para garantir a segurança dos dados do aluno:</p>
+      <ul>
+        <li>Se um instrutor editar os dados de um aluno através de um formulário menor, o sistema inteligente
+          ("Hydration V5") faz uma cópia instantânea das informações ocultas na planilha (como a Data Original de
+          Ingresso e Status de Pagamentos passados).</li>
+        <li>Isso garante que <strong>nenhum dado do histórico do aluno seja apagado acidentalmente</strong>.</li>
+        <li>A renovação de pacotes mensais pelo Caixa também calcula automaticamente a rolagem de dias preservando o
+          histórico de quem pagou em dia.</li>
       </ul>
     </div>
 
@@ -464,12 +537,12 @@
     <div class="chapter-title">6. Captação de Novos Alunos (Leads)</div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">campaign</span> Link de Aula Experimental <span class="highlight">NOVO</span></span>
+      <span><span class="material-icons icon-topic">campaign</span> Link de Aula Experimental</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>O sistema agora funciona como uma máquina de vendas! Você possui uma página exclusiva para captar novos alunos
-        direto do seu Instagram ou WhatsApp.</p>
+      <p>O sistema funciona como uma máquina de vendas! Você possui uma página exclusiva para captar novos alunos direto
+        do seu Instagram ou WhatsApp.</p>
       <ul>
         <li>O visitante acessa a página de "Aula Experimental" (sem precisar de senha).</li>
         <li>Ele informa o nome e escolhe a unidade mais próxima.</li>
