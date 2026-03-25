@@ -43,12 +43,12 @@ Acompanhe a evolução, as metas e as próximas entregas do nosso sistema.
 - 
 
 ## 💰 Fase 3: Inteligência Financeira e Relatórios (Próximos Passos - Foco Emilly)
-- [ ]Nova Aba "Relatórios" no Adm.html:** Central de Inteligência com relatórios de Cadastros, Inadimplência e Lotação de Turmas.
-- [ ] Contas a Pagar e Receber:** Lançamento de despesas (aluguel, repasse de professores) e receitas cruzadas.
-- [ ] Dashboard de Previsões (Financeiro.html):** Visão de Faturamento Previsto vs. Realizado.
+- [x ]Nova Aba "Relatórios" no Adm.html:** Central de Inteligência com relatórios de Cadastros, Inadimplência e Lotação de Turmas.
+- [ x] Contas a Pagar e Receber:** Lançamento de despesas (aluguel, repasse de professores) e receitas cruzadas.
+- [ x] Dashboard de Previsões (Financeiro.html):** Visão de Faturamento Previsto vs. Realizado.
 
 ## 🔮 Fase 4: Automação, CRM e Compliance
-- [ ] Expandir Hydration:** Aplicar blindagem anti-apagão nos CRUDs menores (Alunos, financeiros, Cursos, Locais, Vídeos, etc).
+- [x ] Expandir Hydration:** Aplicar blindagem anti-apagão nos CRUDs menores (Alunos, financeiros, Cursos, Locais, Vídeos, etc).
 - [ ] Check-in Antecipado: Permitir que o aluno agende a sua presença na grade de aulas com antecedência.
 - [ ] Histórico do Aluno (tempo na turma, aulas assistidas, conteúdo visualizado).
 - [ ] **Compliance:** Controle de Anuidade (Bloqueio em caso de inadimplência).
