@@ -649,25 +649,40 @@
         const dataHojePT = hojeDate.toLocaleDateString('pt-BR');
 
         // Atualiza o título do Widget com o Dia e a Data
-        document.getElementById('lbl-dia-semana').textContent = `- ${diaHojeStr}, ${dataHojePT}`;
+        const lblDia = document.getElementById('lbl-dia-semana');
+        if(lblDia) lblDia.textContent = `- ${diaHojeStr}, ${dataHojePT}`;
         
         const container = document.getElementById('lista-hoje-container');
+        if(!container) return;
         
-        // 🚀 O MOTOR RELACIONAL (Dispara as 3 buscas em simultâneo)
-        google.script.run.withSuccessHandler(aulasLive => {
-            google.script.run.withSuccessHandler(locaisFixos => {
-                google.script.run.withSuccessHandler(todasTurmas => {
+        // 🚀 O MOTOR RELACIONAL (Tratando as promessas com segurança)
+        google.script.run
+            .withFailureHandler(e => registrarLogFront("ERRO", "carregarTreinosDeHoje", "Aulas Live Falharam: " + e.message))
+            .withSuccessHandler(aulasLiveRetorno => {
+            
+            google.script.run
+                .withFailureHandler(e => registrarLogFront("ERRO", "carregarTreinosDeHoje", "Locais Fixos Falharam: " + e.message))
+                .withSuccessHandler(locaisFixosRetorno => {
+                
+                google.script.run
+                    .withFailureHandler(e => registrarLogFront("ERRO", "carregarTreinosDeHoje", "Todas Turmas Falharam: " + e.message))
+                    .withSuccessHandler(todasTurmasRetorno => {
                     
+                    // 🛡️ GARANTIA DE ARRAY (Prevê retornos nulos)
+                    const aulasLive = aulasLiveRetorno || [];
+                    const locaisFixos = locaisFixosRetorno || [];
+                    const todasTurmas = todasTurmasRetorno || [];
+
                     container.innerHTML = ""; 
                     let encontrouAlgum = false;
 
                     // Mapeia Locais para pegar o Link do Mapa rapidamente
                     const mapaLocais = {};
-                    if(locaisFixos) locaisFixos.forEach(l => mapaLocais[l.nome.trim().toLowerCase()] = l);
+                    if(locaisFixos.length > 0) locaisFixos.forEach(l => mapaLocais[String(l.nome || l.nome_do_local || "").trim().toLowerCase()] = l);
 
                     // 1. RENDERIZAR AULAS AO VIVO (O Mestre já abriu a sala)
                     const liveTurmasIds = []; // Array para evitar duplicar turmas
-                    if (aulasLive && aulasLive.length > 0) {
+                    if (aulasLive.length > 0) {
                         aulasLive.forEach(aula => {
                             encontrouAlgum = true;
                             const localNorm = String(aula.academia).trim().toLowerCase();
@@ -679,18 +694,20 @@
 
                             const titulo = aula.turma || "Aula Extra/Especial";
                             const dataHoraStr = `📅 ${dataHojePT} | ⏰ ${aula.horario}`;
-                            const detalheTexto = `📍 ${aula.academia} • 🔴 Ao Vivo com ${aula.instrutor.split(' ')[0]}`;
+                            // Evita erro de split no instrutor
+                            const nomeInst = aula.instrutor ? aula.instrutor.split(' ')[0] : "Professor";
+                            const detalheTexto = `📍 ${aula.academia} • 🔴 Ao Vivo com ${nomeInst}`;
                             
                             container.appendChild(criarCardTreino(titulo, dataHoraStr, detalheTexto, true, linkMapa, aula.pin, "var(--dynamic-text)"));
                         });
                     }
 
                     // 2. RENDERIZAR TURMAS AGENDADAS (Que o instrutor ainda não abriu)
-                    if (todasTurmas && todasTurmas.length > 0) {
+                    if (todasTurmas.length > 0) {
                         // Filtra apenas as turmas que acontecem HOJE
                         const turmasHoje = todasTurmas.filter(t => {
                             const d = String(t.dias).toLowerCase();
-                            return t.status === "Ativa" && (d.includes(diaHojeCurto) || d.includes("todos") || d.includes("diario"));
+                            return String(t.status).toLowerCase() === "ativa" && (d.includes(diaHojeCurto) || d.includes("todos") || d.includes("diario"));
                         });
 
                         turmasHoje.forEach(turma => {
@@ -714,9 +731,10 @@
                     }
 
                     // Se encontrou turmas, mostra o Widget, senão oculta.
-                    document.getElementById('widget-treino-hoje').style.display = encontrouAlgum ? 'block' : 'none';
+                    const widgetHoje = document.getElementById('widget-treino-hoje');
+                    if (widgetHoje) widgetHoje.style.display = encontrouAlgum ? 'block' : 'none';
 
-                }).listarTurmasAdmin(); // 👈 Lendo da Aba de Turmas!
+                }).listarTurmasAdmin(currentUser.LOGIN || "TODOS"); // 👈 Evita erro de variável não definida
             }).getLocaisTreino();
         }).buscarAulasDisponiveisAluno("TODOS"); 
     }

@@ -1,6 +1,6 @@
 <style>
   /* ============================================================================
-     ESTILOS DO DASHBOARD PREMIUM E UX/UI OTIMIZADO
+     ESTILOS DO DASHBOARD PREMIUM E UX/UI OTIMIZADO 25-03-2026
      ============================================================================ */
   .stat-card {
     background: #ffffff;
@@ -487,7 +487,7 @@
     <div class="adm-toolbar" style="background:#f8fafc; padding:15px; border-radius:12px; border:1px dashed #cbd5e1;">
       <button class="adm-btn" style="background:#10b981; color:white; border:none;" onclick="window.abrirModalLancamentoCaixa()">Nova Transação (Caixa)</button>
       <button class="adm-btn" style="background:#f43f5e; color:white; border:none;" onclick="window.abrirSuperRelatorio('atrasado')">PDF Inadimplência</button>
-      <button class="adm-btn" style="background:#3b82f6; color:white; border:none;" onclick="window.abrirSuperRelatorio()">Super Relatório</button>
+
     </div>
 
     <div
@@ -607,8 +607,17 @@
     </table>
   </div>
   <div id="adm-tab-alunos" class="adm-tab-content">
-    <div class="adm-h3">Gestão de Alunos (Módulo CRM) <div style="display:flex; gap:10px;">
-        <button class="adm-btn adm-btn-outline" onclick="window.carregarAlunos()"><span class="material-icons" style="font-size:16px;">refresh</span> Atualizar</button><button class="adm-btn" onclick="window.abrirModalNovoAluno()"><span class="material-icons" style="font-size:16px;">person_add</span> Novo Aluno</button>
+    <div class="adm-h3">Gestão de Alunos (Módulo CRM)
+      <div style="display:flex; gap:10px;">
+        <button class="adm-btn" style="background:#3b82f6; color:white;" onclick="window.abrirSuperRelatorio()">
+           <span class="material-icons" style="font-size:16px;">analytics</span> Listagem Alunos
+        </button>
+        <button class="adm-btn adm-btn-outline" onclick="window.carregarAlunos()">
+           <span class="material-icons" style="font-size:16px;">refresh</span> Atualizar
+        </button>
+        <button class="adm-btn" onclick="window.abrirModalNovoAluno()">
+           <span class="material-icons" style="font-size:16px;">person_add</span> Novo Aluno
+        </button>
       </div>
     </div>
     <div class="adm-toolbar"
@@ -1294,6 +1303,71 @@
       } catch(e) { window.sentinelaAdmin("REL_MODAL", "ERRO", e.message); }
   };
 
+  // ============================================================================
+  // 🛡️ CASCATA INTELIGENTE PARA O SUPER RELATÓRIO (MODALIDADE -> FAIXAS)
+  // ============================================================================
+  window.atualizarCascataGraduacoes = function() {
+      try {
+          const modSelect = document.getElementById('rel_mod');
+          const gradSelect = document.getElementById('rel_grad');
+          if (!modSelect || !gradSelect) return;
+
+          const modEscolhida = modSelect.value.trim().toLowerCase();
+          
+          // Se não escolheu nenhuma modalidade, mostra "Todas" ou limpa
+          if (modEscolhida === "") {
+              gradSelect.innerHTML = '<option value="">Todas as Graduações</option>';
+              // Se já temos a lista carregada globalmente (do cacheAdmin), restauramos
+              if (window.cacheAdmin && window.cacheAdmin.graduacoesObj) {
+                  window.cacheAdmin.graduacoesObj.forEach(g => {
+                      gradSelect.innerHTML += `<option value="${g.graduacao}">${g.graduacao} (${g.modalidade})</option>`;
+                  });
+              }
+              return;
+          }
+
+          // Inicia o carregamento
+          gradSelect.innerHTML = '<option value="">Carregando faixas...</option>';
+
+          // Se já temos as graduações baixadas na memória (O sistema puxou antes na aba Graduações)
+          if (window.cacheAdmin && window.cacheAdmin.graduacoesObj && window.cacheAdmin.graduacoesObj.length > 0) {
+              
+              // Filtra as faixas que pertencem à modalidade escolhida
+              const filtradas = window.cacheAdmin.graduacoesObj.filter(g => 
+                  String(g.modalidade).toLowerCase() === modEscolhida
+              );
+              
+              // Ordena pela hierarquia para ficar bonitinho
+              filtradas.sort((a, b) => parseInt(a.id_hierarquia) - parseInt(b.id_hierarquia));
+              
+              gradSelect.innerHTML = '<option value="">Todas desta Modalidade</option>';
+              filtradas.forEach(g => {
+                  gradSelect.innerHTML += `<option value="${g.graduacao}">${g.graduacao}</option>`;
+              });
+              
+          } else {
+              // Se por algum motivo o Cache estiver vazio, busca do Back-end
+              google.script.run
+                  .withSuccessHandler(lista => {
+                      // Salva no cache para uso futuro
+                      if (!window.cacheAdmin) window.cacheAdmin = {};
+                      window.cacheAdmin.graduacoesObj = lista;
+                      
+                      const filtradas = lista.filter(g => String(g.modalidade).toLowerCase() === modEscolhida);
+                      filtradas.sort((a, b) => parseInt(a.id_hierarquia) - parseInt(b.id_hierarquia));
+                      
+                      gradSelect.innerHTML = '<option value="">Todas desta Modalidade</option>';
+                      filtradas.forEach(g => {
+                          gradSelect.innerHTML += `<option value="${g.graduacao}">${g.graduacao}</option>`;
+                      });
+                  })
+                  .listarGraduacoesAdminCompleto();
+          }
+      } catch (e) {
+          window.sentinelaAdmin("CascataGraduacoes", "ERRO", e.message);
+      }
+  };
+
   window.gerarSuperRelatorio = function(e) {
       if(e) e.preventDefault();
       try {
@@ -1384,8 +1458,9 @@
           const janela = window.open('', '', 'width=900,height=600');
           if(!janela) { alert("Pop-up bloqueado. Permita exibição para gerar o PDF."); return; }
           
+          const hojeStr = new Date().toLocaleString('pt-BR').replace(/[\/:]/g, '-').replace(', ', '_');
           let h = `
-          <html><head><title>Relatório Oficial Financeiro/Técnico</title>
+          <html><head><title>Relatório Alunos_${hojeStr}</title>
           <style>
               body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; color: #333; } 
               .header-rel { border-bottom: 3px solid #FFD700; padding-bottom: 10px; margin-bottom: 20px; } 
@@ -1396,7 +1471,7 @@
               .atraso { color: red; font-weight: bold; } 
               .em-dia { color: green; font-weight: bold; }
           </style></head><body>
-          <div class='header-rel'><h2>Relatório Oficial de Atletas</h2>
+          <div class='header-rel'><h2>Listagem Oficial de Alunos</h2>
           <p><b>Filtro Aplicado:</b> ${window.esc(tituloAcademia)} &nbsp;|&nbsp; <b>Data de Emissão:</b> ${new Date().toLocaleDateString('pt-BR')}</p>
           <p><b>Total de Atletas Listados:</b> ${alunosParaRelatorio.length}</p></div>
           `;

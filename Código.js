@@ -30,18 +30,18 @@ const SCRIPT_URL = ScriptApp.getService().getUrl();
 
 // IDs de arquivos no Google Drive para assets padrão (Logo e Fundo)
 const DEFAULT_ASSETS = {
-  BACKGROUND_ID: "1JfeThTR7oe4w7fhg7XFk0ImdIRDOR1KF",
-  ICON_ID: "1mVV2idWbyfoOP4EV76I1fHV_PaoEUcdv",
+  BACKGROUND_ID: "",
+  ICON_ID: "",
   PRIMARY_COLOR: "#FFFFFF",
   SECONDARY_COLOR: "#1e1e1e",
   TEXT_COLOR: "#ffffff",
   BTN_TEXT_COLOR: "#000000",
   BG_COLOR: "#121212",
   // <-- NOVOS LINKS PADRÕES DO SISTEMA (FALLBACK)
-  LINK_LOJA: "https://wa.me/5581997629232",
-  LINK_INSTA: "https://www.instagram.com/fbkmklnoficial/",
-  LINK_YT: "https://www.youtube.com/@KMLNDEFENSE",
-  LINK_CAD: "https://forms.gle/3vXp86VCmuLzHrk46"
+  LINK_LOJA: "https://wa.me/seu numero aqui",
+  LINK_INSTA: "https://www.instagram.com/",
+  LINK_YT: "https://www.youtube.com/",
+  LINK_CAD: ""
 };
 
 
@@ -156,7 +156,7 @@ function verificarCriarAbasSistema() {
     { nome: "Cursos", colunas: ["Nome do Curso", "Data", "Descrição", "Número de Vagas", "Imagem", "Status", "Link da Inscrição"] },
     { nome: "Config_Biblioteca", colunas: ["Titulo", "Descricao", "Link_Arquivo", "Link_Capa"] },
     { nome: "Config_Videoteca", colunas: ["Faixa", "Modalidade", "Titulo", "Youtube_Link", "Status", "Descricao"] },
-    { nome: "GRADUACAO", colunas: ["Faixa / Nivel", "Observacao", "ID", "Modalidade", "Nivel"] },
+    { nome: "GRADUACAO", colunas: ["Graduação", "Observacao", "ID", "Modalidade", "Nivel"] },
     { nome: "Categoria_financeira", colunas: ["Nome", "Tipo", "Local", "Exibe Aluno", "Status"] },
     { nome: "Forma_Pagamento", colunas: ["Nome", "Local", "Status"] }
   ];
@@ -634,6 +634,38 @@ function logMilitar(modulo, tipo, mensagem, dados = null) {
  * @param {string} detalhes - Dados técnicos ou mensagem de erro
  */
 function registrarLogBlindado(nivel, acao, detalhes) {
+  try {
+    const planilha = SpreadsheetApp.getActiveSpreadsheet();
+    let abaLogs = planilha.getSheetByName("Logs_Auditoria");
+
+    // Auto-setup da aba de logs se não existir
+    if (!abaLogs) {
+      abaLogs = planilha.insertSheet("Logs_Auditoria");
+      abaLogs.appendRow(["Data/Hora", "Usuário", "Nível", "Ação", "Detalhes", "Página"]);
+    }
+
+    const usuario = Session.getActiveUser().getEmail() || "Sistema/LocalStorage";
+    const carimbo = new Date();
+
+    abaLogs.appendRow([carimbo, usuario, nivel, acao, detalhes, "Backend"]);
+
+    // Se o erro for Crítico, console.error para o Log do Google Cloud
+    if (nivel === "CRÍTICO" || nivel === "ERRO") {
+      console.error(`🚨 [${acao}] - ${detalhes}`);
+    }
+  } catch (e) {
+    // Fallback silencioso apenas se a própria gravação de log falhar
+    console.warn("Falha catastrófica no motor de log: " + e.message);
+  }
+}
+
+/**
+ * 🛡️ SISTEMA DE LOG MILITAR - REGISTRO DE ALTA PRECISÃO
+ * @param {string} nível - INFO, SUCESSO, ALERTA, ERRO, CRÍTICO
+ * @param {string} ação - O que foi feito (ex: "Acesso ao Admin", "Salvar Aluno")
+ * @param {string} detalhes - Dados técnicos ou mensagem de erro
+ */
+function registrarLogAuditoria(nivel, acao, detalhes) {
   try {
     const planilha = SpreadsheetApp.getActiveSpreadsheet();
     let abaLogs = planilha.getSheetByName("Logs_Auditoria");
@@ -2090,7 +2122,8 @@ function iniciarAulaDinamica(dados) {
 
 /**
  * 📝 QA Note: Busca as aulas ativas para o aluno fazer check-in.
- * Mapeia dinamicamente os cabeçalhos para ler as posições corretas.
+ * Mapeia dinamicamente os cabeçalhos para evitar quebra de índice.
+ * 🛡️ FIX: Comparação de datas blindada (Dia, Mês e Ano).
  */
 function buscarAulasDisponiveisAluno(academiaAluno) {
   try {
@@ -2102,7 +2135,11 @@ function buscarAulasDisponiveisAluno(academiaAluno) {
     const aulas = [];
     const minhaAcademia = String(academiaAluno).trim().toUpperCase();
     const buscarTudo = (minhaAcademia === "TODOS");
-    const hojeStr = Utilities.formatDate(agora, Session.getScriptTimeZone(), "yyyy-MM-dd");
+
+    // Pegando Dia, Mês e Ano exatos de hoje no servidor
+    const hojeAno = agora.getFullYear();
+    const hojeMes = agora.getMonth();
+    const hojeDia = agora.getDate();
 
     // 🧠 MAPEAMENTO DINÂMICO DE COLUNAS
     const headers = data[0].map(h => String(h).trim().toLowerCase());
@@ -2121,15 +2158,12 @@ function buscarAulasDisponiveisAluno(academiaAluno) {
       const acadAula = String(data[i][colAcad]).trim().toUpperCase();
 
       if (status === "ABERTA" && (buscarTudo || acadAula === minhaAcademia)) {
-        let diaPlanilha = data[i][colData];
-        let diaStr = "";
-        if (diaPlanilha instanceof Date) {
-          diaStr = Utilities.formatDate(diaPlanilha, Session.getScriptTimeZone(), "yyyy-MM-dd");
-        } else {
-          diaStr = String(diaPlanilha).split("T")[0];
-        }
 
-        if (diaStr === hojeStr) {
+        let diaPlanilha = data[i][colData];
+        let dObj = parseDataSegura(diaPlanilha); // Usa nosso parser indestrutível
+
+        // Se a data for válida, compara as partes essenciais
+        if (dObj && dObj.getFullYear() === hojeAno && dObj.getMonth() === hojeMes && dObj.getDate() === hojeDia) {
           aulas.push({
             id: data[i][colId],
             instrutor: data[i][colInst],
@@ -2142,7 +2176,10 @@ function buscarAulasDisponiveisAluno(academiaAluno) {
       }
     }
     return aulas;
-  } catch (e) { return []; }
+  } catch (e) {
+    registrarLogBlindado("ERRO", "buscarAulasDisponiveisAluno", e.message);
+    return [];
+  }
 }
 
 // ============================================================================

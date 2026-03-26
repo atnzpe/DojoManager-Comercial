@@ -300,29 +300,32 @@
 
     // 🗓️ MAGIA DCU: Descobrir o dia de hoje
     const diasSemana = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
-    const diaHojeStr = diasSemana[new Date().getDay()].toLowerCase().slice(0, 3);
+    const diaHoje = diasSemana[new Date().getDay()];
+    const diaHojeStr = diaHoje.toLowerCase().slice(0, 3); // "seg", "ter"
     
+    // 🛡️ Filtro mais tolerante para os dias da semana
     const turmasHoje = turmas.filter(t => {
-        const d = String(t.dias).toLowerCase();
-        return d.includes(diaHojeStr) || d.includes("todos") || d.includes("diario");
+        if (!t.dias || typeof t.dias !== 'string') return false;
+        const d = t.dias.toLowerCase();
+        return d.includes(diaHojeStr) || d.includes("todos") || d.includes("diario") || d.includes(diaHoje.toLowerCase());
     });
 
     const mapLive = {};
-    if(aulasLive && aulasLive.length > 0) aulasLive.forEach(a => mapLive[String(a.academia).trim().toLowerCase()] = a);
+    if(aulasLive && aulasLive.length > 0) {
+        aulasLive.forEach(a => mapLive[String(a.academia).trim().toLowerCase()] = a);
+    }
 
     let locaisRenderizados = 0;
 
     locais.forEach(function(local) {
        var status = local.status ? String(local.status).toLowerCase().trim() : 'ativo';
-       if (status !== 'ativo') return;
+       if (status !== 'ativo') return; // Se a academia fechou as portas, esconde.
        
-       const nomeNorm = String(local.nome).trim().toLowerCase();
+       const nomeNorm = String(local.nome || local.nome_do_local || "").trim().toLowerCase();
+       if (!nomeNorm) return;
+       
        const aulaAtiva = mapLive[nomeNorm];
-       
-       const turmasDesteLocalHoje = turmasHoje.filter(t => t.local === local.nome && t.status === "Ativa");
-
-       // Oculta se não tem turma hoje e nem aula live
-       if (turmasDesteLocalHoje.length === 0 && !aulaAtiva) return; 
+       const turmasDesteLocalHoje = turmasHoje.filter(t => String(t.local).trim().toLowerCase() === nomeNorm && t.status === "Ativa");
 
        locaisRenderizados++;
        var card = document.createElement('div');
@@ -340,15 +343,29 @@
        var contentHtml = '<div class="local-content">';
        if(aulaAtiva) contentHtml += '<div style="background:#4caf50; color:#fff; font-size:0.7rem; font-weight:900; padding:4px 10px; border-radius:4px; align-self:flex-start; text-transform:uppercase; margin-bottom:5px;">🔴 Aula ao Vivo</div>';
        
-       contentHtml += '<div class="local-title">' + (local.nome || 'Unidade') + '</div>';
+       contentHtml += '<div class="local-title">' + (local.nome || local.nome_do_local || 'Unidade') + '</div>';
        contentHtml += '<div class="local-info-group">';
-       if (local.endereco) contentHtml += '<div class="local-info"><span class="material-icons">place</span> ' + local.endereco + '</div>';
        
-       // Renderiza os Chips
+       // 🟢 AQUI ADICIONAMOS O ENDEREÇO E O RESPONSÁVEL 🟢
+       if (local.endereco) {
+           contentHtml += '<div class="local-info"><span class="material-icons">place</span> ' + local.endereco + '</div>';
+       }
+       if (local.responsavel) {
+           contentHtml += '<div class="local-info"><span class="material-icons" style="font-size:18px; margin-top:2px;">person</span> <span style="font-size:0.85rem;">Resp: <b>' + local.responsavel + '</b></span></div>';
+       }
+       // ------------------------------------------------
+       
+       // 🛡️ Se não tem turma hoje, avisa na tela ao invés de ocultar a academia!
        contentHtml += '<div class="turmas-chips" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px;">';
-       turmasDesteLocalHoje.forEach(t => {
-           contentHtml += `<div class="chip-turma" style="background:rgba(0,0,0,0.3); border:1px solid var(--dynamic-prim); border-radius:6px; padding:6px 10px; font-size:0.75rem; color:var(--dynamic-text);"><strong style="color:var(--dynamic-prim); display:block;">${t.nome}</strong>⏰ ${t.inicio} às ${t.fim}</div>`;
-       });
+       
+       if (turmasDesteLocalHoje.length > 0) {
+           turmasDesteLocalHoje.forEach(t => {
+               contentHtml += `<div class="chip-turma" style="background:rgba(0,0,0,0.3); border:1px solid var(--dynamic-prim); border-radius:6px; padding:6px 10px; font-size:0.75rem; color:var(--dynamic-text);"><strong style="color:var(--dynamic-prim); display:block;">${t.nome}</strong>⏰ ${t.inicio} às ${t.fim}</div>`;
+           });
+       } else {
+           contentHtml += `<div style="font-size: 0.8rem; color: var(--dynamic-text); opacity: 0.5;"><i>Nenhum treino agendado para hoje.</i></div>`;
+       }
+       
        contentHtml += '</div></div></div>';
 
        var actionsHtml = '<div class="local-actions">';
@@ -360,7 +377,7 @@
        var whatsNum = local.contato ? String(local.contato).replace(/\D/g, '') : '';
        if(whatsNum.length >= 10) {
            if (!whatsNum.startsWith('55') && whatsNum.length <= 11) whatsNum = '55' + whatsNum;
-           var txtWhats = encodeURIComponent(`Olá! Gostaria de informações sobre as turmas na unidade ${local.nome}.`);
+           var txtWhats = encodeURIComponent(`Olá! Gostaria de informações sobre as turmas na unidade ${local.nome || local.nome_do_local}.`);
            actionsHtml += `<a href="https://wa.me/${whatsNum}?text=${txtWhats}" target="_blank" class="btn-action btn-whats" style="flex:0; padding:0 15px;"><span class="material-icons">chat</span></a>`;
        }
        actionsHtml += '</div>';
@@ -370,7 +387,7 @@
     });
 
     if(locaisRenderizados === 0) {
-       grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--dynamic-text); opacity:0.5;"><span class="material-icons" style="font-size:48px;">event_busy</span><p>Nenhum treino agendado para hoje.</p></div>';
+       grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--dynamic-text); opacity:0.5;"><span class="material-icons" style="font-size:48px;">event_busy</span><p>Nenhuma academia ativa no sistema.</p></div>';
     }
   }
 

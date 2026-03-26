@@ -11,28 +11,19 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="icon" href="<?= logoUrl ?>" type="image/x-icon">
 
+  <?!= include('Style'); ?>
+
   <style>
     /**
      * ============================================================================
      * INJEÇÃO DE VARIÁVEIS DO BACKEND (WHITE-LABEL)
-     * O Apps Script troca as tags do servidor pelos valores reais do Sheets 
-     * ANTES de enviar o HTML para o navegador do cliente.
      * ============================================================================
      */
     :root {
-      /* Mapeia a 5ª Cor (Fundo Geral) */
       --dynamic-bg: <?=bgColor ?> !important;
-
-      /* Cor da marca da academia (Ex: Dourado, Vermelho) */
       --dynamic-prim: <?=primaryColor ?> !important;
-
-      /* Cor de fundo do Card de Login (Superfície) */
       --dynamic-sec: <?=secondaryColor ?> !important;
-
-      /* Cor da fonte principal do cliente */
       --dynamic-text: <?=textColor ?> !important;
-
-      /* Cor do texto DENTRO dos botões principais */
       --dynamic-btn-text: <?=btnTextColor ?> !important;
     }
 
@@ -47,7 +38,7 @@
       width: 100%;
       height: 100%;
       background-image: url('<?= bgUrl ?>');
-      background-color: var(--bg-color);
+      background-color: var(--dynamic-bg);
       background-size: cover;
       background-position: center;
       z-index: -2;
@@ -71,18 +62,21 @@
       justify-content: center;
       padding: 20px;
       box-sizing: border-box;
+      flex-direction: column;
     }
 
     .login-card {
-      background-color: var(--secondary-color);
+      background-color: var(--dynamic-sec);
       padding: 40px 30px;
       border-radius: 16px;
       width: 100%;
       max-width: 380px;
       text-align: center;
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
-      border: 1px solid var(--primary-color);
+      border: 1px solid var(--dynamic-prim);
       backdrop-filter: blur(10px);
+      position: relative;
+      z-index: 2;
     }
 
     .logo-img {
@@ -90,12 +84,47 @@
       height: 110px;
       object-fit: contain;
       border-radius: 50%;
-      border: 3px solid var(--primary-color);
+      border: 3px solid var(--dynamic-prim);
       margin-bottom: 25px;
-      background-color: var(--secondary-color);
+      background-color: var(--dynamic-sec);
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
     }
 
+    /* 🛡️ TRUQUE DOS ÍCONES NO INPUT */
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .input-wrapper .material-icons.icon-left {
+      position: absolute;
+      left: 12px;
+      color: var(--dynamic-prim);
+      pointer-events: none; /* Deixa o clique passar direto para o input */
+    }
+
+    .input-wrapper .material-icons.icon-right {
+      position: absolute;
+      right: 12px;
+      color: #888;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .input-wrapper .material-icons.icon-right:hover {
+      color: var(--dynamic-text);
+    }
+
+    /* Sobrescreve O SEU .input-field APENAS dentro do Login para caber os ícones */
+    .input-wrapper .input-field {
+      padding-left: 40px !important;
+      padding-right: 40px !important;
+      margin-bottom: 0 !important; /* Retira margem porque o form-field já tem */
+    }
+
+    /* LINKS DE SUPORTE */
     .support-links {
       display: flex;
       justify-content: space-between;
@@ -104,25 +133,24 @@
     }
 
     .link-gold {
-      color: var(--primary-color);
+      color: var(--dynamic-prim);
       text-decoration: none;
       font-weight: bold;
     }
 
     .link-gray {
-      color: var(--text-color);
+      color: var(--dynamic-text);
       opacity: 0.7;
       text-decoration: none;
     }
 
     .divider {
       margin: 25px 0;
-      border-top: 1px solid var(--text-color);
+      border-top: 1px solid var(--dynamic-text);
       opacity: 0.2;
     }
   </style>
 
-  <?!= include('Style'); ?>
 </head>
 
 <body>
@@ -134,14 +162,22 @@
       <img src="<?= logoUrl ?>" class="logo-img" alt="Logo" onerror="this.src='https://ui-avatars.com/api/?name=Dojo+Manager'">
 
       <form onsubmit="handleLogin(event)">
+        
         <div class="form-field">
           <label for="login">Usuário</label>
-          <input type="text" id="login" class="input-field" placeholder="Digite seu login" required>
+          <div class="input-wrapper">
+            <span class="material-icons icon-left">person</span>
+            <input type="text" id="login" class="input-field" placeholder="Digite seu login" required>
+          </div>
         </div>
 
         <div class="form-field">
           <label for="senha">Senha</label>
-          <input type="password" id="senha" class="input-field" placeholder="Sua senha" required>
+          <div class="input-wrapper">
+            <span class="material-icons icon-left">lock</span>
+            <input type="password" id="senha" class="input-field" placeholder="Senha" required>
+            <span class="material-icons icon-right" id="btn-olho" onclick="toggleSenha('senha', 'btn-olho')">visibility</span>
+          </div>
         </div>
 
         <div id="feedback-area" style="min-height: 24px; margin-bottom: 15px;">
@@ -160,7 +196,7 @@
 
       <div class="divider"></div>
 
-      <button class="text-button" onclick="nav('agendar')">
+      <button class="text-button" onclick="nav('agendar')" style="margin-bottom: 10px;">
         <span class="material-icons">calendar_today</span> Agendar Aula Experimental
       </button>
 
@@ -170,12 +206,11 @@
 
     </div>
 
-  </div>
-  <div class="developer-footer">
-    ⚡ Powered by <a href="https://wa.me/5581992467787?text=Olá! Gostaria de saber mais sobre o sistema DojoManager."
-      target="_blank">DojoManager SaaS</a>
-  </div>
+    <div class="developer-footer" style="margin-top: 20px;">
+      ⚡ Powered by <a href="https://wa.me/5581992467787" target="_blank">DojoManager SaaS</a>
+    </div>
 
+  </div>
 
   <script>
     function handleLogin(e) {
@@ -193,19 +228,26 @@
             try { localStorage.setItem('userSession', JSON.stringify(res.user)); } catch(err) {} 
             showMsg("Sucesso! Entrando no sistema...", false);
             
-            // 🛡️ NAVEGAÇÃO SEGURA: Contorna o erro "Unsafe attempt to initiate navigation"
-            const linkAcesso = res.redirectUrl || "";
-            if (linkAcesso) {
-                 // Cria um elemento A fantasma e força o clique dele direcionando pro top
-                 // É a forma que a Google aceita para redirecionamentos dentro de Web Apps
-                 const a = document.createElement('a');
-                 a.href = linkAcesso;
-                 a.target = '_top';
-                 document.body.appendChild(a);
-                 a.click();
-            } else {
-                 showMsg("Erro de rota. Recarregue a página.", true);
-            }
+            // 🛡️ NAVEGAÇÃO SEGURA (Anti-Sandbox / Anti-Apagão)
+            google.script.run
+               .withFailureHandler(err => {
+                   document.getElementById('feedback-area').innerHTML = `
+                     <div style="margin-top:10px;">
+                        <a href="${res.redirectUrl}" target="_top" style="display:inline-block; padding:10px 20px; background:var(--dynamic-prim); color:var(--dynamic-btn-text); border-radius:8px; font-weight:bold; text-decoration:none;">Acessar Painel</a>
+                     </div>
+                   `;
+               })
+               .withSuccessHandler(url => {
+                   try {
+                       window.top.location.href = url + "?page=dashboard";
+                   } catch(e) {
+                       document.getElementById('feedback-area').innerHTML = `
+                         <div style="margin-top:10px;">
+                            <a href="${url}?page=dashboard" target="_top" style="display:inline-block; padding:10px 20px; background:var(--dynamic-prim); color:var(--dynamic-btn-text); border-radius:8px; font-weight:bold; text-decoration:none;">Acessar Painel</a>
+                         </div>
+                       `;
+                   }
+               }).getScriptUrl();
 
           } else { 
             toggleLoading(false); 
@@ -235,7 +277,7 @@
     function showMsg(text, isError) {
       const msg = document.getElementById('msg');
       msg.textContent = text; 
-      msg.style.color = isError ? 'var(--error-color, #ff5252)' : 'var(--success-color, #4caf50)';
+      msg.style.color = isError ? 'var(--error-color, #ff5252)' : 'var(--success-color, #00e676)'; // 👈 Trazendo sua cor de sucesso
       msg.style.display = 'block';
     }
 
@@ -247,6 +289,24 @@
           document.body.appendChild(a);
           a.click();
       }).getScriptUrl();
+    }
+
+    /**
+     * 👁️ Alterna a visualização da senha
+     */
+    function toggleSenha(inputId, iconId) {
+        const campo = document.getElementById(inputId);
+        const icone = document.getElementById(iconId);
+        
+        if (campo.type === "password") {
+            campo.type = "text";
+            icone.textContent = "visibility_off";
+            icone.style.color = "var(--dynamic-prim)"; // Fica destacado
+        } else {
+            campo.type = "password";
+            icone.textContent = "visibility";
+            icone.style.color = "#888"; // Volta ao neutro
+        }
     }
   </script>
 </body>
