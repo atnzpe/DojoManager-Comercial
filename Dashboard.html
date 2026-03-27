@@ -338,11 +338,40 @@
       }
     }
 
-    window.onerror = function (m, s, l) {
-      registrarLogFront("CRÍTICO", "Erro Global JS", `Msg: ${m} | Linha: ${l}`);
+    // 🛡️ [BLINDAGEM MILITAR] Radar de Erros Microscópico
+    window.onerror = function (message, source, lineno, colno, error) {
+      // 1. Pega o Ficheiro
+      let nomeArquivo = source ? source.split('/').pop() : "Arquivo Desconhecido";
+      
+      // 2. Extrai a Classe ou Função exata do Rastro (Stack Trace)
+      let contextoOndeQuebrou = "Global/Desconhecido";
+      if (error && error.stack) {
+         let linhasStack = error.stack.split('\n');
+         if (linhasStack.length > 1) {
+             // A segunda linha do stack trace costuma ter o formato "at NomeDaFuncao (url:linha:coluna)"
+             contextoOndeQuebrou = linhasStack[1].trim(); 
+         }
+      }
+
+      const msgDetalhada = `Msg: ${message} | Linha: ${lineno}, Coluna: ${colno} | Contexto: ${contextoOndeQuebrou}`;
+      
+      // 3. Regista no Banco de Dados
+      if (typeof registrarLogFront === "function") {
+         registrarLogFront("CRÍTICO", "Erro Global JS", msgDetalhada);
+      }
+      
+      // 4. Exibe o Banner Vermelho com TODOS os detalhes visíveis para si
       const banner = document.getElementById('error-banner');
-      if(banner) { banner.style.display = 'block'; banner.innerText = `⚠️ Falha: ${m} (Linha ${l})`; }
-      return false; // Continua a execução
+      if(banner) { 
+        banner.style.display = 'block'; 
+        banner.innerHTML = `
+           ⚠️ <b>FALHA:</b> ${message} <br>
+           📁 <b>Arquivo:</b> ${nomeArquivo} (Linha ${lineno}, Coluna ${colno}) <br>
+           🔍 <b>Rastro/Função:</b> ${contextoOndeQuebrou}
+        `; 
+      }
+      
+      return false; // Continua a execução para não congelar totalmente o ecrã
     };
   </script>
 
