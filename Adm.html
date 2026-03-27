@@ -825,6 +825,7 @@
       </table>
     </div>
   </div>
+  
   <div id="adm-tab-config" class="adm-tab-content">
     <form onsubmit="window.handleAdmForm(event, 'salvarConfig')">
       <div class="adm-h3">Identidade Visual (White-Label)</div>
@@ -920,14 +921,16 @@
   window.graficoBarras = null;
   window.graficoRosca = null;
   
-  // 🔴 A VACINA DO LOCALSTORAGE
-  let sessaoMemoria = JSON.parse(localStorage.getItem('userSession') || '{}');
-  if (!sessaoMemoria.LOGIN || sessaoMemoria.LOGIN === "A" || sessaoMemoria.LOGIN === "a") {
-      sessaoMemoria = { LOGIN: "Ceo.master", isAdmin: true, academia: "TODAS" };
-      localStorage.setItem('userSession', JSON.stringify(sessaoMemoria));
+  
+  
+  // 🛡️ MODO SEGURO: Puxa a sessão oficial do LocalStorage
+  try {
+      const sessaoSalva = localStorage.getItem('userSession');
+      window.userSessionLocal = sessaoSalva ? JSON.parse(sessaoSalva) : { LOGIN: "Anonimo", isAdmin: false, academia: "" };
+  } catch(e) {
+      window.userSessionLocal = { LOGIN: "Anonimo", isAdmin: false, academia: "" };
   }
   
-  window.userSessionLocal = sessaoMemoria;
   window.editorLogin = window.userSessionLocal.LOGIN || 'Admin';
 
   // 🛡️ MOTOR DE LOGS MILITAR BLINDADO
