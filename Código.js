@@ -38,9 +38,9 @@ const DEFAULT_ASSETS = {
   BTN_TEXT_COLOR: "#000000",
   BG_COLOR: "#121212",
   // <-- NOVOS LINKS PADRÕES DO SISTEMA (FALLBACK)
-  LINK_LOJA: "https://wa.me/seu numero aqui",
-  LINK_INSTA: "https://www.instagram.com/",
-  LINK_YT: "https://www.youtube.com/",
+  LINK_LOJA: "",
+  LINK_INSTA: "",
+  LINK_YT: "",
   LINK_CAD: ""
 };
 
@@ -330,11 +330,19 @@ function getFinanceiroPessoal(login) {
     const academiaAluno = alunoPerfil ? alunoPerfil.academia_vinculada : "";
 
     // 3. Busca Contato do Responsável pela Academia
-    let contatoResp = "5581997629232"; // Fallback (Número do Mestre/Geral)
+    let contatoResp = ""; // Fallback (Número do Mestre/Geral)
+    const configApp = lerTabelaDinamica("Config_App");
+    if (configApp && configApp.length > 0) {
+      let linkLojaApp = String(configApp[0].link_loja || configApp[0].Link_Loja || "");
+      if (linkLojaApp.includes("wa.me") || linkLojaApp.includes("api.whatsapp")) {
+        contatoResp = linkLojaApp.replace(/\D/g, "");
+      }
+    }
+
+    // Se o local tiver contato próprio, sobrepõe
     if (academiaAluno) {
       const localInfo = locais.find(l => String(l.nome_do_local).toLowerCase() === String(academiaAluno).toLowerCase());
       if (localInfo && localInfo.contato) {
-        // Limpa o telefone para formato WhatsApp (apenas números)
         contatoResp = String(localInfo.contato).replace(/\D/g, "");
       }
     }
@@ -415,11 +423,10 @@ function listarPacotesAdmin(login) {
 }
 
 /**
- * 💰 REGISTRAR MOVIMENTAÇÃO (Agora salva Comprovante e Data Retroativa)
+ * 💰 REGISTRAR MOVIMENTAÇÃO (Agora suporta Contas a Pagar/Receber Pendentes)
  */
 function registrarMovimentacao(dados) {
   try {
-    // 🛡️ Se vier uma data manual do frontend, usa ela. Senão, usa hoje.
     let dataParaSalvar = new Date();
     if (dados.data_registro && dados.data_registro !== "") {
       const p = String(dados.data_registro).split('-');
@@ -437,16 +444,19 @@ function registrarMovimentacao(dados) {
       "Responsavel": dados.responsavel,
       "Login_Aluno": dados.alunoLogin || "",
       "Academia_Ref": dados.academia || "Matriz",
-      "Status": "Concluido",
-      "Comprovante_Url": padronizarLinkDrive(dados.comprovante_url) || "", // <-- INJETADO
+      "Status": dados.status_pagamento || "Concluido", // 🛡️ LÊ DO NOVO CAMPO DO MODAL
+      "Comprovante_Url": padronizarLinkDrive(dados.comprovante_url) || "",
       "Modalidade": dados.modalidade || "Geral"
     };
 
     salvarFinanceiroSeguro("Fin_Transacoes", novaTransacao);
 
-    if (dados.tipo === "Receita" && (String(dados.categoria).toLowerCase().includes("mensalidade") || String(dados.categoria).toLowerCase().includes("pacote"))) {
+    // 🛡️ REGRA DE NEGÓCIO: Só renova assinatura se o pagamento estiver CONCLUÍDO
+    const statusLimpo = String(novaTransacao.Status).toLowerCase();
+    if (statusLimpo.includes("conclu") && dados.tipo === "Receita" && (String(dados.categoria).toLowerCase().includes("mensalidade") || String(dados.categoria).toLowerCase().includes("pacote"))) {
       processarRenovacaoAssinatura(dados.alunoLogin, dados.nomePacote);
     }
+
     return { success: true, msg: "Movimentação registrada com sucesso!" };
   } catch (e) {
     return { success: false, msg: "Erro financeiro: " + e.message };
@@ -1194,7 +1204,8 @@ function buscarAlunoPorLogin(login) {
 }
 
 /**
- * 🛠️ FIX: MAPEAMENTO DINÂMICO PARA EVITAR CHAVE 'UNDEFINED'
+ * 🛠️ BACKEND: BUSCA DADOS DE PAGAMENTO PARA O MODAL DO ALUNO
+ * BLINDAGEM: Sanitizado para White-Label (Sem Hardcode de ZAP)
  */
 function getDadosPagamentoAluno(login) {
   try {
@@ -1226,13 +1237,21 @@ function getDadosPagamentoAluno(login) {
       }
     }
 
-    // Busca o WhatsApp do local para o envio do comprovante
-    const localResp = locais.find(l => l.nome_do_local === aluno.academia_vinculada);
-    info.contatoWhatsApp = localResp?.contato ? String(localResp.contato).replace(/\D/g, "") : "5581997629232";
+    // 🛡️ SISTEMA DE FALLBACK DINÂMICO DO WHATSAPP (SEM HARDCODE)
+    let zapGlobal = "";
+    let linkLojaApp = String(configApp.link_loja || configApp.Link_Loja || "");
+    if (linkLojaApp.includes("wa.me") || linkLojaApp.includes("api.whatsapp")) {
+      zapGlobal = linkLojaApp.replace(/\D/g, "");
+    }
+
+    const localResp = locais.find(l => String(l.nome_do_local).toLowerCase() === String(aluno.academia_vinculada).toLowerCase());
+
+    // Se a academia tem telefone, usa ele. Se não, tenta o Zap Global. Se nenhum existir, retorna vazio.
+    info.contatoWhatsApp = (localResp && localResp.contato) ? String(localResp.contato).replace(/\D/g, "") : zapGlobal;
 
     return info;
   } catch (e) {
-    console.error("Erro fatal no servidor ao buscar PIX: " + e.message);
+    console.error("Erro fatal no servidor ao buscar Dados Pagamento: " + e.message);
     return null;
   }
 }
@@ -1734,7 +1753,7 @@ function verificarCredenciais(formObject) {
   const isCheckOnly = formObject.checkOnly || false;
 
   try {
-    const sheet = getSheet("cadastro_de_alunos"); // Nome exato
+    const sheet = getSheet("cadastro_de_alunos");
     const data = sheet.getDataRange().getDisplayValues();
     const headers = data[0].map(h => String(h).trim().toLowerCase());
 
@@ -1796,7 +1815,7 @@ function verificarCredenciais(formObject) {
         let dataIngresso = (col.carimbo > -1 && row[col.carimbo]) ? String(row[col.carimbo]).split(" ")[0] : "--/--/----";
 
         const userPayload = {
-          LOGIN: String(row[col.login]).trim(), // 🛡️ MUDANÇA AQUI: Mantém maiúsculas/minúsculas EXATAS da planilha!
+          LOGIN: String(row[col.login]).trim(),
           nomeCompleto: row[col.nome],
           graduacao: (col.grad > -1) ? row[col.grad] : "Iniciante",
           nivel: roleTatame,
@@ -1814,6 +1833,42 @@ function verificarCredenciais(formObject) {
           isAdmin: isAdmin
         };
 
+        // ====================================================================
+        // 🛑 CATRACA VIRTUAL: BLOQUEIO DE INADIMPLENTES (Apenas Alunos)
+        // ====================================================================
+        if (!isCheckOnly && !isInstrutor && !isMestre && !isAdmin) {
+          try {
+            const assinaturas = lerTabelaDinamica("Fin_Assinaturas");
+            const assDoAluno = assinaturas.find(a => String(a.login_aluno).toLowerCase() === loginInput);
+
+            // Se não tem assinatura ou não está ativo
+            if (!assDoAluno || String(assDoAluno.status_assinatura).toLowerCase() !== "ativo") {
+              if (!isCheckOnly) registrarLogLogin(loginInput, "BLOQUEIO_FINANCEIRO_S_PLANO");
+              return { success: false, message: "🚫 Assinatura inativa ou não localizada. Procure a recepção." };
+            }
+
+            const dataVencimento = parseDataSegura(assDoAluno.data_fim);
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+
+            // Se a data de validade já passou
+            if (dataVencimento && dataVencimento < hoje) {
+              if (!isCheckOnly) registrarLogLogin(loginInput, "BLOQUEIO_FINANCEIRO_VENCIDO");
+
+              const dataVencStr = ('0' + dataVencimento.getDate()).slice(-2) + '/' + ('0' + (dataVencimento.getMonth() + 1)).slice(-2) + '/' + dataVencimento.getFullYear();
+
+              return {
+                success: false,
+                message: `🚫 ACESSO BLOQUEADO!\nSua mensalidade venceu dia ${dataVencStr}.\nProcure a recepção ou faça o pagamento para liberar seu acesso.`
+              };
+            }
+          } catch (e) {
+            // Falha silenciosa se houver erro na aba financeira (não bloqueia por erro sistêmico)
+            console.error("Erro na leitura da Catraca Virtual:", e);
+          }
+        }
+        // ====================================================================
+
         if (!isCheckOnly) registrarLogLogin(loginInput, "SUCESSO");
         return { success: true, user: userPayload, redirectUrl: SCRIPT_URL + "?page=dashboard" };
       }
@@ -1821,7 +1876,6 @@ function verificarCredenciais(formObject) {
     return { success: false, message: "Usuário não encontrado." };
   } catch (e) { return { success: false, message: e.message }; }
 }
-
 /**
  * 🛡️ A FUNÇÃO QUE ESTAVA FALTANDO NO SEU ARQUIVO: getListaAcademias
  * Essencial para o Instrutor/Aluno escolher a unidade correta no dropdown.
@@ -2613,8 +2667,9 @@ function getAlunoFullData(loginInput) {
 }
 
 /**
- * 🛠️ BACKEND: BUSCA DADOS PIX (Lógica Global vs Local)
+ * 🛠️ BACKEND: BUSCA DADOS PIX PARA GERADOR DE QR CODE
  * BLINDAGEM: Lê os cabeçalhos exatos da planilha e limpa espaços invisíveis
+ * SANITIZADO: White-Label (Sem Hardcode de WhatsApp)
  */
 function getPixDataFromServer(login) {
   try {
@@ -2631,7 +2686,6 @@ function getPixDataFromServer(login) {
     const pacote = pacotes.find(p => p.nome_pacote === assinatura?.pacote_atual);
 
     // 1. Inicia o payload puxando as colunas da CONTA GLOBAL (Aba Config_App)
-    // 🛡️ Nomes exatos normalizados: pix_chave_global, pix_nome, pix_cidade
     let info = {
       chave: configApp.pix_chave_global ? String(configApp.pix_chave_global).trim() : "",
       beneficiario: configApp.pix_nome || "Dojo Manager",
@@ -2646,7 +2700,6 @@ function getPixDataFromServer(login) {
       const local = locais.find(l => String(l.nome_do_local).toLowerCase() === String(aluno.academia_vinculada).toLowerCase());
 
       if (local && String(local.status).toLowerCase() === "ativo") {
-        // 🛡️ Nomes exatos normalizados: pix_chave_local_de_treino, pix_nome_local_de_treino...
         info.chave = local.pix_chave_local_de_treino ? String(local.pix_chave_local_de_treino).trim() : info.chave;
         info.beneficiario = local.pix_nome_local_de_treino || info.beneficiario;
         info.cidade = local.pix_cidade_local_de_treino || info.cidade;
@@ -2654,9 +2707,17 @@ function getPixDataFromServer(login) {
       }
     }
 
-    // Busca o WhatsApp do local para o envio do comprovante
+    // 🛡️ SISTEMA DE FALLBACK DINÂMICO DO WHATSAPP (SEM HARDCODE)
+    let zapGlobal = "";
+    let linkLojaApp = String(configApp.link_loja || configApp.Link_Loja || "");
+    if (linkLojaApp.includes("wa.me") || linkLojaApp.includes("api.whatsapp")) {
+      zapGlobal = linkLojaApp.replace(/\D/g, "");
+    }
+
     const localResp = locais.find(l => String(l.nome_do_local).toLowerCase() === String(aluno.academia_vinculada).toLowerCase());
-    info.contatoWhatsApp = localResp?.contato ? String(localResp.contato).replace(/\D/g, "") : "5581997629232";
+
+    // Se a academia tem telefone, usa ele. Se não, tenta o Zap Global. Se nenhum existir, retorna vazio.
+    info.contatoWhatsApp = (localResp && localResp.contato) ? String(localResp.contato).replace(/\D/g, "") : zapGlobal;
 
     return info;
   } catch (e) {
@@ -2678,9 +2739,9 @@ function gerarPDFCarteirinhaServer(login) {
 
     // 1. Injeta Dados em Texto
     template.nome = alunoInfo["nome completo"] || "NÃO INFORMADO";
-    template.cpf = alunoInfo["cpf"] || "000.000.000-00";
-    template.graduacao = alunoInfo["graduacao_atual"] || "INICIANTE";
-    template.academia = alunoInfo["academia vinculada"] || "MATRIZ";
+    template.cpf = alunoInfo["cpf"] || "NÃO INFORMADO";
+    template.graduacao = alunoInfo["graduacao_atual"] || "NÃO INFORMADO";
+    template.academia = alunoInfo["academia vinculada"] || "NÃO INFORMADO";
 
     let filiacaoStr = (alunoInfo["nome da mãe"] || "") + " / " + (alunoInfo["nome do pai"] || "");
     if (filiacaoStr === " / ") filiacaoStr = "NÃO INFORMADA";
@@ -3554,5 +3615,156 @@ function listarTurmasPublico() {
   } catch (e) {
     registrarLogBlindado("ERRO", "API_PUBLICA_TURMAS", e.message);
     return [];
+  }
+}
+
+/**
+ * 💰 MOTOR DE BI: RELATÓRIO ANALÍTICO FINANCEIRO AVANÇADO
+ * Agora com cálculo de Previsto vs Realizado
+ */
+function getRelatorioAnaliticoFinanceiro(loginSolicitante, filtros) {
+  try {
+    const auth = getPermissoesUsuario(loginSolicitante);
+    const transacoes = lerTabelaDinamica("Fin_Transacoes");
+    const alunos = lerTabelaDinamica("cadastro_de_alunos");
+
+    const mapAlunos = {};
+    alunos.forEach(a => {
+      const log = String(a.login || "").toLowerCase().trim();
+      if (log) {
+        mapAlunos[log] = { nome: a.nome_completo || a.nome || "", graduacao: a.graduacao_atual || "Iniciante", modalidade: a.modalidade || "Geral" };
+      }
+    });
+
+    // 🛡️ NOVOS ACUMULADORES (Iguais aos Cards do Dashboard)
+    let recebido = 0;
+    let aReceber = 0;
+    let despesasPagas = 0;
+    let aPagar = 0;
+
+    let filtroAcads = filtros.academias ? filtros.academias.map(a => String(a).toLowerCase().trim()) : [];
+    let buscarTodas = filtroAcads.length === 0 || filtroAcads.includes("todas");
+
+    let dadosFiltrados = transacoes.filter(t => {
+      const tAcad = String(t.academia_ref || "").trim().toLowerCase();
+
+      if (!auth.isMaster && !auth.academias.some(myAcad => tAcad.includes(myAcad))) return false;
+      if (!buscarTodas && !filtroAcads.some(fAcad => tAcad.includes(fAcad))) return false;
+      if (filtros.tipo && filtros.tipo !== "TODOS" && String(t.tipo).toLowerCase() !== String(filtros.tipo).toLowerCase()) return false;
+      if (filtros.categoria && filtros.categoria !== "TODAS" && String(t.categoria).toLowerCase() !== String(filtros.categoria).toLowerCase()) return false;
+      if (filtros.status && filtros.status !== "TODOS" && !String(t.status).toLowerCase().includes(String(filtros.status).toLowerCase())) return false;
+
+      const tLogin = String(t.login_aluno || "").toLowerCase().trim();
+      const alunoInfo = mapAlunos[tLogin] || { nome: "", graduacao: "", modalidade: "" };
+
+      if (filtros.aluno && !alunoInfo.nome.toLowerCase().includes(String(filtros.aluno).toLowerCase())) return false;
+      if (filtros.graduacao && filtros.graduacao !== "TODAS" && String(alunoInfo.graduacao).toLowerCase() !== String(filtros.graduacao).toLowerCase()) return false;
+      if (filtros.modalidade && filtros.modalidade !== "TODAS" && String(alunoInfo.modalidade).toLowerCase() !== String(filtros.modalidade).toLowerCase()) return false;
+
+      const tData = parseDataSegura(t.data_registro);
+      if (filtros.dataInicio && tData) { if (tData < new Date(filtros.dataInicio + "T00:00:00")) return false; }
+      if (filtros.dataFim && tData) { if (tData > new Date(filtros.dataFim + "T23:59:59")) return false; }
+
+      t._alunoNome = alunoInfo.nome || "-";
+      t._alunoGraduacao = alunoInfo.graduacao || "-";
+      t._alunoModalidade = t.modalidade || alunoInfo.modalidade || "-";
+
+      let vStr = String(t.valor || "0").replace("R$", "").trim();
+      if (vStr.includes(",") && !vStr.includes(".")) vStr = vStr.replace(/\./g, "").replace(",", ".");
+      const valNum = parseFloat(vStr) || 0;
+
+      // 🛡️ SEPARAÇÃO INTELIGENTE (CAIXA REAL VS PREVISÃO)
+      const isConcluido = String(t.status).toLowerCase().includes("conclu");
+
+      if (String(t.tipo).toLowerCase() === "receita") {
+        if (isConcluido) recebido += valNum; else aReceber += valNum;
+      } else if (String(t.tipo).toLowerCase() === "despesa") {
+        if (isConcluido) despesasPagas += valNum; else aPagar += valNum;
+      }
+
+      return true;
+    });
+
+    const resultado = dadosFiltrados.reverse().map(t => ({
+      id: t.id_transacao, data: formatDate(t.data_registro), tipo: t.tipo || "---",
+      categoria: t.categoria || "---", descricao: t.descricao || "---",
+      valor: parseFloat(String(t.valor).replace(',', '.') || 0).toFixed(2).replace('.', ','),
+      forma: t.forma_pagto || "---", status: t.status || "Concluido",
+      academia: t.academia_ref || "---", aluno: t._alunoNome, graduacao: t._alunoGraduacao, modalidade: t._alunoModalidade
+    }));
+
+    return {
+      success: true,
+      data: resultado,
+      resumo: {
+        recebido: recebido,
+        aReceber: aReceber,
+        despesas: despesasPagas,
+        aPagar: aPagar,
+        saldo: recebido - despesasPagas
+      }
+    };
+  } catch (e) { return { success: false, msg: e.message }; }
+}
+
+/**
+ * ============================================================================
+ * 💰 MOTOR DE BAIXA: TRANSFORMA PENDENTE EM CONCLUÍDO E RENOVA PLANO
+ * ============================================================================
+ */
+function darBaixaTransacaoPendente(idTransacao, loginSolicitante) {
+  try {
+    const auth = getPermissoesUsuario(loginSolicitante);
+    const sheet = getSheet("Fin_Transacoes");
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0].map(h => String(h).trim().toLowerCase().replace(/\s+/g, "_"));
+
+    const colId = headers.indexOf("id_transacao");
+    const colStatus = headers.indexOf("status");
+    const colAcad = headers.indexOf("academia_ref");
+    const colTipo = headers.indexOf("tipo");
+    const colCat = headers.indexOf("categoria");
+    const colAluno = headers.indexOf("login_aluno");
+
+    let linhaAlvo = -1;
+    let transacao = null;
+
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][colId]) === idTransacao) {
+        linhaAlvo = i + 1;
+        transacao = data[i];
+
+        const tAcad = String(data[i][colAcad]).toLowerCase();
+        if (!auth.isMaster && !auth.academias.some(myAcad => tAcad.includes(myAcad))) {
+          return { success: false, msg: "Acesso negado a esta unidade." };
+        }
+        break;
+      }
+    }
+
+    if (linhaAlvo === -1) return { success: false, msg: "Transação não encontrada." };
+    if (String(transacao[colStatus]).toLowerCase().includes("conclu")) return { success: false, msg: "Esta conta já está paga!" };
+
+    // Atualiza status para Concluído
+    sheet.getRange(linhaAlvo, colStatus + 1).setValue("Concluido");
+
+    // Regra de Negócio: Se for mensalidade, renova o plano do aluno
+    const tipo = String(transacao[colTipo]).toLowerCase();
+    const cat = String(transacao[colCat]).toLowerCase();
+    const alunoLogin = String(transacao[colAluno]);
+
+    if (tipo === "receita" && (cat.includes("mensalidade") || cat.includes("pacote") || cat.includes("plano")) && alunoLogin) {
+      const assinaturas = lerTabelaDinamica("Fin_Assinaturas");
+      const assAtual = assinaturas.find(a => String(a.login_aluno).toLowerCase() === alunoLogin.toLowerCase());
+      const pacoteDoAluno = assAtual ? assAtual.pacote_atual : "Mensalidade Padrão";
+      processarRenovacaoAssinatura(alunoLogin, pacoteDoAluno);
+    }
+
+    registrarLogBlindado("SUCESSO", "DAR_BAIXA", `Transação ${idTransacao} concluída por ${loginSolicitante}`);
+    return { success: true, msg: "Baixa realizada com sucesso! Saldo e Assinaturas atualizados." };
+
+  } catch (e) {
+    registrarLogBlindado("ERRO", "darBaixaTransacaoPendente", e.message);
+    return { success: false, msg: "Erro Crítico: " + e.message };
   }
 }

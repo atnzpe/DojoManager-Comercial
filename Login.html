@@ -102,7 +102,8 @@
       position: absolute;
       left: 12px;
       color: var(--dynamic-prim);
-      pointer-events: none; /* Deixa o clique passar direto para o input */
+      pointer-events: none;
+      /* Deixa o clique passar direto para o input */
     }
 
     .input-wrapper .material-icons.icon-right {
@@ -121,7 +122,8 @@
     .input-wrapper .input-field {
       padding-left: 40px !important;
       padding-right: 40px !important;
-      margin-bottom: 0 !important; /* Retira margem porque o form-field já tem */
+      margin-bottom: 0 !important;
+      /* Retira margem porque o form-field já tem */
     }
 
     /* LINKS DE SUPORTE */
@@ -162,7 +164,7 @@
       <img src="<?= logoUrl ?>" class="logo-img" alt="Logo" onerror="this.src='https://ui-avatars.com/api/?name=Dojo+Manager'">
 
       <form onsubmit="handleLogin(event)">
-        
+
         <div class="form-field">
           <label for="login">Usuário</label>
           <div class="input-wrapper">
@@ -206,8 +208,44 @@
 
     </div>
 
-    <div class="developer-footer" style="margin-top: 20px;">
-      ⚡ Powered by <a href="https://wa.me/5581992467787" target="_blank">DojoManager SaaS</a>
+    <div class="no-print" style="
+        background-color: #111111 !important; 
+        text-align: center; 
+        padding: 15px 10px !important; 
+        margin: 20px 10px 15px 10px !important; 
+        border-radius: 8px !important;
+        border-top: 3px solid var(--dynamic-prim, #FFD700) !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
+        display: block !important;
+        ">
+
+      <p
+        style="margin: 0 0 8px 0 !important; font-size: 13px !important; font-weight: bold !important; color: var(--dynamic-prim, #FFD700) !important; background: transparent !important; line-height: 1.2 !important; white-space: normal !important;">
+        ⚡ Quer um sistema igual na SUA academia?
+      </p>
+
+      <p
+        style="margin: 0 0 12px 0 !important; font-size: 11px !important; color: #cccccc !important; background: transparent !important; line-height: 1.3 !important; white-space: normal !important;">
+        O DojoManager SaaS é a solução definitiva.
+      </p>
+
+      <a href="https://wa.me/5581992467787?text=Olá, vi o App DojoManager e gostaria de saber mais sobre como implementá-lo na minha academia."
+        target="_blank" style="
+            background-color: #25D366 !important; 
+            color: #ffffff !important; 
+            padding: 8px 10px !important; 
+            border-radius: 5px !important; 
+            text-decoration: none !important; 
+            font-weight: bold !important;
+            font-size: 12px !important;
+            display: block !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+      ">
+        <span class="material-icons" style="vertical-align: middle; font-size: 14px; margin-right: 3px; background: transparent !important; color: #fff !important;">chat</span>
+        Falar com o Dev
+      </a>
+
     </div>
 
   </div>

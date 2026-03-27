@@ -73,7 +73,7 @@
           </div>
           <div>
             <label class="adm-label">Nível Sistema</label>
-            <select id="aluno_nivel" name="aluno_nivel" class="adm-input"><option value="Aluno">Aluno</option><option value="Instrutor N1">Instrutor N1</option><option value="Instrutor N2">Instrutor N2</option><option value="Instrutor N3">Instrutor N3</option><option value="Professor">Professor</option><option value="Mestre">Mestre</option><option value="Admin">Admin</option></select>
+            <select id="aluno_nivel" name="aluno_nivel" class="adm-input"><option value="Aluno">Aluno</option><option value="Instrutor N1">Instrutor N1</option><option value="Instrutor N2">Instrutor N2</option><option value="Instrutor N3">Instrutor N3</option><option value="Professor">Professor</option><option value="Mestre">Mestre</option><option value="ADM">Admin</option></select>
           </div>
         </div>
 
@@ -314,7 +314,7 @@
         <div><label class="adm-label">ID Hierarquia Numérica*</label><input type="number" name="grad_id" id="grad_id" class="adm-input" required min="0">
         </div>
         <div>
-          <label class="adm-label">Nível no Sistema</label><select name="grad_nivel" id="grad_nivel" class="adm-input"><option value="Aluno">Aluno</option><option value="INSTRUTOR NÍVEL 1">Instrutor</option><option value="Professor">Professor</option><option value="Mestre">Mestre</option><option value="Admin">Admin</option></select>
+          <label class="adm-label">Nível no Sistema</label><select name="grad_nivel" id="grad_nivel" class="adm-input"><option value="Aluno">Aluno</option><option value="INSTRUTOR NÍVEL 1">Instrutor</option><option value="Professor">Professor</option><option value="Mestre">Mestre</option><option value="ADM">Admin</option></select>
         </div>
       </div><label class="adm-label">Observações</label><input type="text" name="grad_obs" id="grad_obs" class="adm-input">
       <div
@@ -523,6 +523,13 @@
         </div>
         <div><label class="adm-label">Data</label><input type="date" name="data_registro" id="fin_data_manual" class="adm-input">
         </div>
+        <div class="form-full">
+          <label class="adm-label" style="color: #f59e0b;">Status do Lançamento</label>
+          <select name="status_pagamento" id="fin_status_pagamento" class="adm-input" required>
+            <option value="Concluido">✅ Concluído (Recebido / Pago)</option>
+            <option value="Pendente">⏳ Pendente (A Receber / A Pagar)</option>
+          </select>
+        </div>
       </div>
 
       <div class="form-grid" style="margin-top:15px; padding-top:15px; border-top: 1px dashed #ccc;">
@@ -606,6 +613,153 @@
         </thead>
         <tbody id="tbody-resultados-rel"></tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<div id="modal-relatorio-analitico" class="adm-modal" style="display:none;">
+  <div class="adm-modal-box large" style="width: 95%; max-width: 1200px;">
+
+    <div class="adm-h3" style="margin:0 0 20px 0; justify-content:space-between;">
+      <span><span class="material-icons" style="color:#2196F3; vertical-align:middle;">analytics</span> Relatório
+      Analítico (BI)</span>
+      <button type="button" onclick="window.fecharModalRelatorioAnalitico()" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+    </div>
+
+    <style>
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+
+        #modal-relatorio-analitico,
+        #modal-relatorio-analitico * {
+          visibility: visible;
+          color: #000 !important;
+        }
+
+        #modal-relatorio-analitico {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          background: #fff !important;
+        }
+
+        .adm-modal-box {
+          box-shadow: none;
+          border: none;
+          width: 100%;
+          max-width: 100%;
+          padding: 0;
+        }
+
+        .no-print {
+          display: none !important;
+        }
+
+        .adm-table th {
+          background-color: #eee !important;
+          color: #000 !important;
+          border: 1px solid #000;
+        }
+
+        .adm-table td {
+          border: 1px solid #ccc;
+        }
+      }
+    </style>
+
+    <div class="no-print">
+      <div
+        style="background:#f9f9f9; padding:15px; border-radius:8px; border-left: 4px solid #2196F3; margin-bottom: 15px;">
+        <h4 style="margin:0 0 10px 0; color:#333; text-transform:uppercase; font-size:12px;">Filtros de Data e Local
+        </h4>
+        <div class="form-grid">
+          <div><label class="adm-label">Data Início</label><input type="date" id="filtro_fin_ini" class="adm-input">
+          </div>
+          <div><label class="adm-label">Data Fim</label><input type="date" id="filtro_fin_fim" class="adm-input"></div>
+        </div>
+        <label class="adm-label" style="color:#2196f3;">Academias / Unidades (Múltipla Seleção)</label>
+        <div id="container-acad-bi" class="checkbox-grid"></div>
+      </div>
+
+      <div
+        style="background:#f4f4f4; padding:15px; border-radius:8px; border-left: 4px solid #FFD700; margin-bottom: 15px;">
+        <h4 style="margin:0 0 10px 0; color:#333; text-transform:uppercase; font-size:12px;">Segmentação Financeira</h4>
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+          <div>
+            <label class="adm-label">Tipo</label><select id="filtro_fin_tipo" class="adm-input"><option value="TODOS">Todos</option><option value="Receita">Receita (+)</option><option value="Despesa">Despesa (-)</option></select>
+          </div>
+          <div>
+            <label class="adm-label">Status</label><select id="filtro_fin_status" class="adm-input"><option value="TODOS">Todos</option><option value="Concluido">Concluído (Pago)</option><option value="Pendente">Pendente</option></select>
+          </div>
+          <div>
+            <label class="adm-label">Categoria</label><select id="filtro_fin_cat" class="adm-input"><option value="TODAS">Todas</option></select>
+          </div>
+          <div>
+            <label class="adm-label">Modalidade</label><select id="filtro_fin_mod" class="adm-input"><option value="TODAS">Todas</option></select>
+          </div>
+        </div>
+        <div class="form-grid" style="margin-top: 10px;">
+          <div>
+            <label class="adm-label">Graduação (Faixa)</label><select id="filtro_fin_grad" class="adm-input"><option value="TODAS">Todas as Faixas</option></select>
+          </div>
+          <div><label class="adm-label">Nome do Aluno / Fornecedor</label><input type="text" id="filtro_fin_aluno" class="adm-input" placeholder="Digite parte do nome...">
+          </div>
+        </div>
+      </div>
+
+      <button class="adm-btn" onclick="window.gerarRelatorioAnalitico()" style="width: 100%; background:#2196F3; color:white; padding: 12px; font-size: 14px;">
+        <span class="material-icons">search</span> GERAR RELATÓRIO
+      </button>
+    </div>
+
+    <div id="area-resultados-bi" style="margin-top:20px; border-top:1px solid #ccc; padding-top:20px;">
+
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+        <div class="no-print" style="display: flex; gap: 10px;">
+          <button class="adm-btn" onclick="window.exportarBI_CSV('Relatorio_Financeiro.csv')" style="background: #217346; color: white;"><span class="material-icons" style="font-size:16px;">table_view</span> Excel</button>
+          <button class="adm-btn" onclick="window.imprimirBI_PDF()" style="background: #D32F2F; color: white;"><span class="material-icons" style="font-size:16px;">picture_as_pdf</span> Imprimir</button>
+        </div>
+      </div>
+
+      <div
+        style="display: flex; flex-wrap: wrap; gap: 15px; font-size: 13px; font-weight: bold; color: #333; background: #e3f2fd; padding: 15px; border-radius: 8px; border: 1px solid #bbdefb; margin-bottom: 15px; justify-content: center;">
+        <span style="color:#2e7d32;"><span class="material-icons" style="font-size:16px;vertical-align:middle;">account_balance_wallet</span>
+        Recebido: <span id="res_fin_rec">R$ 0,00</span></span>
+        <span style="color:#f59e0b;"><span class="material-icons" style="font-size:16px;vertical-align:middle;">pending_actions</span>
+        A Receber: <span id="res_fin_arec">R$ 0,00</span></span>
+        <span style="color:#c62828;"><span class="material-icons" style="font-size:16px;vertical-align:middle;">trending_down</span>
+        Despesas: <span id="res_fin_desp">R$ 0,00</span></span>
+        <span style="color:#e91e63;"><span class="material-icons" style="font-size:16px;vertical-align:middle;">money_off</span>
+        A Pagar: <span id="res_fin_apag">R$ 0,00</span></span>
+        <span style="color:#1565c0; font-size: 15px; border-left: 2px solid #90caf9; padding-left: 15px;"><span class="material-icons" style="font-size:18px;vertical-align:middle;">account_balance</span>
+        Saldo Real: <span id="res_fin_saldo">R$ 0,00</span></span>
+      </div>
+
+      <div style="max-height: 400px; overflow-y: auto;">
+        <table class="adm-table" id="tabela-analitica">
+          <thead style="position: sticky; top: 0; z-index: 1;">
+            <tr>
+              <th>Data</th>
+              <th>Academia</th>
+              <th>Tipo</th>
+              <th>Categoria</th>
+              <th>Aluno / Modalidade</th>
+              <th>Forma</th>
+              <th>Status</th>
+              <th style="text-align:right;">Valor (R$)</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-analitico">
+            <tr>
+              <td colspan="8" style="text-align:center; padding:20px; color:#888;">Aguardando geração do relatório.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>

@@ -398,6 +398,40 @@
     <?!= include('Financeiro'); ?>
   </div>
 
+  <div class="no-print" style="
+        background-color: #111111 !important; 
+        text-align: center; 
+        padding: 20px 15px !important; 
+        margin: 40px 0 20px 0 !important; 
+        border-radius: 8px !important;
+        border-top: 4px solid var(--dynamic-prim, #FFD700) !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
+        display: block !important;
+    ">
+    <p
+      style="margin: 0 0 10px 0 !important; font-size: 15px !important; font-weight: bold !important; color: var(--dynamic-prim, #FFD700) !important; background: transparent !important; line-height: 1.2 !important; white-space: normal !important;">
+      ⚡ Quer um sistema igual na SUA academia?
+    </p>
+
+    <p
+      style="margin: 0 0 15px 0 !important; font-size: 13px !important; color: #cccccc !important; background: transparent !important; line-height: 1.3 !important; white-space: normal !important;">
+      O DojoManager SaaS é a solução definitiva.
+    </p>
+
+    <a href="https://wa.me/5581992467787?text=Olá, vi o App DojoManager e gostaria de saber mais sobre como implementá-lo na minha academia."
+      target="_blank" style="
+            background-color: #25D366 !important; 
+            padding: 10px 15px !important; 
+            border-radius: 5px !important; 
+            text-decoration: none !important; 
+            display: inline-block !important;
+            border: none !important;
+      ">
+      <span class="material-icons" style="vertical-align: middle; font-size: 16px; margin-right: 4px; background: transparent !important; color: #ffffff !important;">chat</span>
+      <span style="color: #ffffff !important; font-weight: bold !important; font-size: 14px !important; background: transparent !important;">Falar com o Desenvolvedor</span>
+    </a>
+  </div>
+
   <div id="admin-module-wrapper" style="display:none; position:relative; z-index:9000;">
     <?!= include('Adm'); ?>
     <?!= include('AdmModais'); ?>
@@ -440,14 +474,10 @@
       </form>
     </div>
 
-  </div>
-  <div class="developer-footer">
-    ⚡ Powered by <a href="https://wa.me/5581992467787?text=Olá! Gostaria de saber mais sobre o sistema DojoManager."
-      target="_blank">DojoManager SaaS</a>
-  </div>
 
-  <script>
-    let currentUser = {};
+
+    <script>
+      let currentUser = {};
     const LISTA_INSTRUTOR = ["INSTRUTOR N1", "INSTRUTOR N2", "INSTRUTOR N3", "PROFESSOR", "MESTRE", "VERDE ESCURO", "AZUL ESCURO", "MARROM", "PRETA", "PRETA E BRANCA"];
     const LISTA_ADMIN = ["MESTRE", "ADMIN", "PRETA E BRANCA", "VERMELHA"];
 
@@ -899,7 +929,7 @@
     }).getPixDataFromServer(login);
   }
 
-  </script>
+    </script>
 </body>
 
 </html>

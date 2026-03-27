@@ -23,9 +23,15 @@
   <?!= include('Style'); ?>
 
   <style>
-    /* --- ESTILOS EXCLUSIVOS DESTE MÓDULO (LEAD CONVERSION) --- */
+    /* ============================================================================
+       🛡️ ARMADURA VISUAL (GLASSMORPHISM & ALTO CONTRASTE)
+       ============================================================================ */
     body {
-      background-color: transparent !important;
+      background-color: #000 !important;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      font-family: 'Roboto', sans-serif;
     }
 
     .bg-layer {
@@ -46,66 +52,117 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.85);
+      background-color: rgba(0, 0, 0, 0.75);
+      /* Escurece a foto de fundo */
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
       z-index: -1;
     }
 
     .agendar-container {
       width: 100%;
-      max-width: 500px;
+      max-width: 450px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 20px 15px;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
       position: relative;
       z-index: 1;
       min-height: 100vh;
+      justify-content: center;
       animation: fadeIn 0.4s ease-out;
+    }
+
+    /* 🛡️ O CARD BLINDADO QUE PROTEGE O TEXTO */
+    .glass-card {
+      background: rgba(20, 20, 20, 0.9) !important;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-top: 5px solid var(--primary-color) !important;
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .header-nav {
       display: flex;
       align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 15px;
     }
 
     .header-title {
       flex: 1;
       text-align: center;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       font-weight: 900;
-      color: var(--primary-color);
+      color: #ffffff !important;
+      /* Força Branco */
       margin-right: 32px;
       text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .intro-text {
       text-align: center;
-      color: var(--text-color);
-      opacity: 0.8;
+      color: #cccccc !important;
+      /* Força Cinza Claro */
       margin-bottom: 25px;
-      font-size: 1rem;
+      font-size: 0.95rem;
       line-height: 1.5;
+    }
+
+    .form-field {
+      margin-bottom: 20px;
+    }
+
+    .form-field label {
+      color: #eeeeee !important;
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: block;
+      font-size: 0.9rem;
+    }
+
+    .glass-card .input-field {
+      background: rgba(0, 0, 0, 0.5) !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      border-radius: 8px !important;
+      padding: 14px !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      font-size: 1rem !important;
+      transition: all 0.3s ease !important;
+    }
+
+    .glass-card .input-field:focus {
+      border-color: var(--primary-color) !important;
+      outline: none !important;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .glass-card .input-field option {
+      background-color: #222 !important;
+      color: #fff !important;
     }
 
     #details-area {
       display: none;
-      background: var(--secondary-color);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 10px;
+      background: transparent !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 20px;
+      margin-top: 5px;
       animation: slideUp 0.4s ease-out;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
 
     .academy-name {
       margin-top: 0;
-      color: var(--primary-color);
-      font-size: 1.3rem;
+      color: #ffffff !important;
+      font-size: 1.2rem;
       margin-bottom: 15px;
       text-transform: uppercase;
       font-weight: 900;
@@ -119,15 +176,13 @@
     }
 
     .d-icon {
-      color: var(--primary-color);
-      opacity: 0.8;
+      color: var(--primary-color) !important;
       font-size: 20px;
       margin-top: 2px;
     }
 
     .d-text {
-      color: var(--text-color);
-      opacity: 0.9;
+      color: #dddddd !important;
       font-size: 0.95rem;
       line-height: 1.4;
       flex: 1;
@@ -139,7 +194,7 @@
       background: #000;
       border-radius: 8px;
       margin: 15px 0;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       overflow: hidden;
     }
 
@@ -149,18 +204,17 @@
       border: 0;
     }
 
-    /* 🚨 ESTILOS DOS CHIPS DE TURMAS (NOVIDADE) */
     .turmas-container {
       display: grid;
       grid-template-columns: 1fr;
       gap: 10px;
-      margin-top: 15px;
-      margin-bottom: 15px;
+      margin-top: 10px;
+      margin-bottom: 20px;
     }
 
     .chip-turma {
-      background: rgba(0, 0, 0, 0.3);
-      border: 2px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 8px;
       padding: 12px;
       cursor: pointer;
@@ -170,40 +224,39 @@
       gap: 5px;
     }
 
-    .chip-turma:hover {
-      background: rgba(0, 0, 0, 0.5);
-    }
-
     .chip-turma.selected {
-      border-color: var(--primary-color);
-      background: rgba(255, 215, 0, 0.1);
-      /* Um brilho subtil da cor principal */
+      border-color: var(--primary-color) !important;
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: inset 3px 0 0 var(--primary-color);
     }
 
     .chip-title {
       font-weight: 900;
-      color: var(--primary-color);
+      color: #ffffff !important;
       font-size: 1rem;
     }
 
     .chip-details {
       font-size: 0.8rem;
-      color: var(--text-color);
-      opacity: 0.8;
+      color: #bbbbbb !important;
       display: flex;
       align-items: center;
       gap: 5px;
     }
 
+    .chip-details .material-icons {
+      color: var(--primary-color) !important;
+    }
+
     .btn-whatsapp {
-      background-color: #25D366;
-      color: #ffffff;
+      background-color: #25D366 !important;
+      color: #ffffff !important;
       width: 100%;
       margin-top: 10px;
-      font-size: 1.1rem;
-      padding: 16px;
+      font-size: 1.05rem;
+      padding: 15px;
       border: none;
-      border-radius: 50px;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: 900;
       display: flex;
@@ -212,12 +265,7 @@
       gap: 10px;
       transition: transform 0.1s;
       text-transform: uppercase;
-      box-shadow: 0 4px 10px rgba(37, 211, 102, 0.2);
-    }
-
-    .btn-whatsapp:hover {
-      background-color: #1ebe57;
-      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
     }
 
     .btn-whatsapp:active {
@@ -227,7 +275,7 @@
     @keyframes slideUp {
       from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(15px);
       }
 
       to {
@@ -254,56 +302,89 @@
 
   <div class="agendar-container">
 
-    <div class="header-nav">
-      <button onclick="voltarLogin()" style="background:none; border:none; cursor:pointer; color:var(--text-color); padding:5px;">
-        <span class="material-icons" style="font-size: 28px;">arrow_back</span>
-      </button>
-      <div class="header-title">Aula Experimental</div>
-    </div>
-
-    <p class="intro-text">
-      Informe o seu nome e escolha a unidade para iniciar o seu treino gratuito.
-    </p>
-
-    <div class="form-field">
-      <label>Como gostaria de ser chamado?</label>
-      <input type="text" id="user-name" class="input-field" placeholder="Seu nome ou apelido">
-    </div>
-
-    <div class="form-field">
-      <label>Onde deseja treinar?</label>
-
-      <div id="loading-locais" style="text-align:center; color:var(--text-color); opacity: 0.7; padding: 10px;">
-        <span class="material-icons spinner" style="display:inline-block; animation: spin 1s linear infinite; color: var(--primary-color);">refresh</span><br>Carregando unidades...
+    <div class="glass-card">
+      <div class="header-nav">
+        <button onclick="voltarLogin()" style="background:none; border:none; cursor:pointer; color:#ffffff; padding:5px;">
+          <span class="material-icons" style="font-size: 28px;">arrow_back</span>
+        </button>
+        <div class="header-title">Aula Experimental</div>
       </div>
 
-      <select id="location-select" class="input-field" style="display:none" onchange="selecionarLocal()">
-        <option value="" disabled selected>Toque para selecionar...</option>
-      </select>
-    </div>
+      <p class="intro-text">
+        Informe o seu nome e escolha a unidade para iniciar o seu treino gratuito.
+      </p>
 
-    <div id="details-area">
-      <h3 id="sel-nome" class="academy-name">Nome da Academia</h3>
-
-      <div class="detail-row">
-        <span class="material-icons d-icon">place</span>
-        <span id="sel-end" class="d-text">Endereço...</span>
+      <div class="form-field">
+        <label>Como gostaria de ser chamado?</label>
+        <input type="text" id="user-name" class="input-field" placeholder="Seu nome ou apelido">
       </div>
 
-      <div id="map-box" class="map-embed" style="display:none;"></div>
+      <div class="form-field">
+        <label>Onde deseja treinar?</label>
 
-      <div id="area-turmas" style="margin-top:20px; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px;">
-        <label class="d-text" style="font-weight:900; color:var(--text-color); text-transform:uppercase; font-size:0.85rem;">Selecione a Turma de Interesse:</label>
-        <div id="chips-turmas" class="turmas-container"></div>
+        <div id="loading-locais" style="text-align:center; color:#aaaaaa; padding: 10px; font-size:0.9rem;">
+          <span class="material-icons spinner" style="display:inline-block; animation: spin 1s linear infinite; color: var(--primary-color);">refresh</span><br>Carregando unidades...
+        </div>
+
+        <select id="location-select" class="input-field" style="display:none" onchange="selecionarLocal()">
+          <option value="" disabled selected>Toque para selecionar...</option>
+        </select>
       </div>
 
-      <button id="btn-finalizar" class="btn-whatsapp" onclick="enviarWhatsApp()">
-        <span class="material-icons">chat</span> Agendar Agora
-      </button>
+      <div id="details-area">
+        <h3 id="sel-nome" class="academy-name">Nome da Academia</h3>
+
+        <div class="detail-row">
+          <span class="material-icons d-icon">place</span>
+          <span id="sel-end" class="d-text">Endereço...</span>
+        </div>
+
+        <div id="map-box" class="map-embed" style="display:none;"></div>
+
+        <div id="area-turmas" style="margin-top:20px; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px;">
+          <label style="color:#ffffff !important; font-weight:900; text-transform:uppercase; font-size:0.85rem;">Selecione a Turma de Interesse:</label>
+          <div id="chips-turmas" class="turmas-container"></div>
+        </div>
+
+        <button id="btn-finalizar" class="btn-whatsapp" onclick="enviarWhatsApp()">
+          <span class="material-icons" style="color:#ffffff !important;">chat</span> Agendar Agora
+        </button>
+      </div>
     </div>
-    <div class="developer-footer">
-      ⚡ Powered by <a href="https://wa.me/5581992467787?text=Olá! Gostaria de saber mais sobre o sistema DojoManager."
-        target="_blank">DojoManager SaaS</a>
+    <div class="no-print" style="
+        background-color: #111111 !important; 
+        text-align: center; 
+        padding: 15px 10px !important; 
+        margin: 20px 10px 15px 10px !important; 
+        border-radius: 8px !important;
+        border-top: 3px solid var(--dynamic-prim, #FFD700) !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
+        display: block !important;
+        ">
+      <p
+        style="margin: 0 0 8px 0 !important; font-size: 13px !important; font-weight: bold !important; color: var(--dynamic-prim, #FFD700) !important; background: transparent !important; line-height: 1.2 !important; white-space: normal !important;">
+        ⚡ Quer um sistema igual na SUA academia?
+      </p>
+      <p
+        style="margin: 0 0 12px 0 !important; font-size: 11px !important; color: #cccccc !important; background: transparent !important; line-height: 1.3 !important; white-space: normal !important;">
+        O DojoManager SaaS é a solução definitiva.
+      </p>
+      <a href="https://wa.me/5581992467787?text=Olá, vi o App DojoManager e gostaria de saber mais sobre como implementá-lo na minha academia."
+        target="_blank" style="
+            background-color: #25D366 !important; 
+            color: #ffffff !important; 
+            padding: 8px 10px !important; 
+            border-radius: 5px !important; 
+            text-decoration: none !important; 
+            font-weight: bold !important;
+            font-size: 12px !important;
+            display: block !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+      ">
+        <span class="material-icons" style="vertical-align: middle; font-size: 14px; margin-right: 3px; background: transparent !important; color: #fff !important;">chat</span>
+        Falar com o Dev
+      </a>
     </div>
 
   </div>
@@ -312,6 +393,7 @@
     /**
      * ============================================================================
      * CONTROLLER JAVASCRIPT: Lógica de Agendamento Inteligente (Multi-Tabelas)
+     * (MANTIDO 100% ORIGINAL CONFORME SOLICITADO PELO COMANDANTE)
      * ============================================================================
      */
 

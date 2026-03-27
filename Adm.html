@@ -486,7 +486,10 @@
 
     <div class="adm-toolbar" style="background:#f8fafc; padding:15px; border-radius:12px; border:1px dashed #cbd5e1;">
       <button class="adm-btn" style="background:#10b981; color:white; border:none;" onclick="window.abrirModalLancamentoCaixa()">Nova Transação (Caixa)</button>
+
       <button class="adm-btn" style="background:#f43f5e; color:white; border:none;" onclick="window.abrirSuperRelatorio('atrasado')">PDF Inadimplência</button>
+      <button class="adm-btn" style="background:#f43f5e; color:white; border:none;" onclick="window.abrirRelatorioAnalitico()">RELATÓRIO ANALÍTICO (BI)</button>
+
 
     </div>
 
@@ -2437,4 +2440,308 @@ window.preencherValorPorPacoteModal = function() {
         }
     } catch(e) { window.sentinelaAdmin("CAIXA_VALOR", "ERRO", e.message); }
 };
+
+// ============================================================================
+  // 📊 MOTOR DE BI: RELATÓRIO ANALÍTICO FINANCEIRO, EXPORTAÇÃO E BAIXA
+  // ============================================================================
+
+  window.dadosAtuaisBI = []; 
+  window.resumoAtualBI = null; 
+
+  window.abrirRelatorioAnalitico = function() {
+      try {
+          const btnAbrir = event.currentTarget || event.target;
+          const textoOriginalBtn = btnAbrir.innerHTML;
+          btnAbrir.innerHTML = "<span class='material-icons spin'>sync</span> Carregando Filtros...";
+          btnAbrir.disabled = true;
+
+          google.script.run.withSuccessHandler(dicionario => {
+              const selectCat = document.getElementById('filtro_fin_cat');
+              if (selectCat) {
+                  selectCat.innerHTML = '<option value="TODAS">Todas as Categorias</option>';
+                  dicionario.categorias.forEach(c => selectCat.innerHTML += `<option value="${c.nome}">${c.nome} (${c.tipo})</option>`);
+              }
+
+              const selectMod = document.getElementById('filtro_fin_mod');
+              if (selectMod) {
+                  selectMod.innerHTML = '<option value="TODAS">Todas as Modalidades</option>';
+                  dicionario.modalidades.forEach(m => selectMod.innerHTML += `<option value="${m}">${m}</option>`);
+              }
+
+              google.script.run.withSuccessHandler(grads => {
+                  const selectGrad = document.getElementById('filtro_fin_grad');
+                  if (selectGrad) {
+                      selectGrad.innerHTML = '<option value="TODAS">Todas as Faixas</option>';
+                      grads.forEach(g => selectGrad.innerHTML += `<option value="${g.graduacao}">${g.graduacao}</option>`);
+                  }
+
+                  google.script.run.withSuccessHandler(locais => {
+                      const containerAcad = document.getElementById('container-acad-bi');
+                      if (containerAcad) {
+                          containerAcad.innerHTML = "";
+                          const myAcads = window.userSessionLocal.academia ? window.userSessionLocal.academia.split(',').map(a => a.trim().toLowerCase()) : [];
+                          const isMaster = myAcads.includes("todas");
+                          
+                          locais.forEach(local => {
+                              if (isMaster || myAcads.includes(local.toLowerCase())) {
+                                  containerAcad.innerHTML += `<label class='mod-check-label'><input type="checkbox" name="bi_acad_chk" value="${local}" checked class="mod-check-input"> ${local}</label>`;
+                              }
+                          });
+                      }
+
+                      const hoje = new Date();
+                      const trintaDiasAtras = new Date();
+                      trintaDiasAtras.setDate(hoje.getDate() - 30);
+                      const elIni = document.getElementById('filtro_fin_ini');
+                      const elFim = document.getElementById('filtro_fin_fim');
+                      if (elIni) elIni.value = trintaDiasAtras.toISOString().split('T')[0];
+                      if (elFim) elFim.value = hoje.toISOString().split('T')[0];
+
+                      btnAbrir.innerHTML = textoOriginalBtn;
+                      btnAbrir.disabled = false;
+                      const modal = document.getElementById('modal-relatorio-analitico');
+                      if (modal) modal.style.display = 'flex';
+
+                  }).getListaAcademias(window.editorLogin);
+              }).listarGraduacoesAdminCompleto();
+          }).getDadosIniciaisCaixa();
+          
+      } catch(e) { window.sentinelaAdmin("REL_ANALITICO", "ERRO", e.message); }
+  };
+
+  window.fecharModalRelatorioAnalitico = function() {
+      const modal = document.getElementById('modal-relatorio-analitico');
+      if (modal) modal.style.display = 'none';
+  };
+
+  window.gerarRelatorioAnalitico = function() {
+      try {
+          const btn = event.currentTarget || event.target;
+          const textoOriginal = btn.innerHTML;
+          btn.innerHTML = '<span class="material-icons spin">refresh</span> CARREGANDO...';
+          btn.disabled = true;
+
+          const tbody = document.getElementById('tbody-analitico');
+          if(tbody) tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;"><div class="spinner-admin" style="margin:0 auto;"></div><br>Processando Inteligência de Dados...</td></tr>';
+
+          const arrAcademiasMarcadas = Array.from(document.querySelectorAll('input[name="bi_acad_chk"]:checked')).map(cb => cb.value);
+
+          const filtros = {
+              dataInicio: document.getElementById('filtro_fin_ini') ? document.getElementById('filtro_fin_ini').value : "",
+              dataFim: document.getElementById('filtro_fin_fim') ? document.getElementById('filtro_fin_fim').value : "",
+              academias: arrAcademiasMarcadas,
+              tipo: document.getElementById('filtro_fin_tipo') ? document.getElementById('filtro_fin_tipo').value : "",
+              status: document.getElementById('filtro_fin_status') ? document.getElementById('filtro_fin_status').value : "",
+              categoria: document.getElementById('filtro_fin_cat') ? document.getElementById('filtro_fin_cat').value : "",
+              modalidade: document.getElementById('filtro_fin_mod') ? document.getElementById('filtro_fin_mod').value : "",
+              graduacao: document.getElementById('filtro_fin_grad') ? document.getElementById('filtro_fin_grad').value : "",
+              aluno: document.getElementById('filtro_fin_aluno') ? document.getElementById('filtro_fin_aluno').value.trim() : ""
+          };
+
+          google.script.run
+              .withFailureHandler(err => {
+                  if(tbody) tbody.innerHTML = `<tr><td colspan="8" style="color:red; text-align:center;">Falha: ${err.message}</td></tr>`;
+                  if(btn) { btn.innerHTML = textoOriginal; btn.disabled = false; }
+              })
+              .withSuccessHandler(res => {
+                  if(!res.success) {
+                      if(tbody) tbody.innerHTML = `<tr><td colspan="8" style="color:red; text-align:center;">${res.msg}</td></tr>`;
+                      if(btn) { btn.innerHTML = textoOriginal; btn.disabled = false; }
+                      return;
+                  }
+
+                  window.dadosAtuaisBI = res.data;
+                  window.resumoAtualBI = res.resumo;
+
+                  // 🛡️ INJETA OS 5 VALORES EXATOS NA TELA
+                  const fMoeda = (val) => `R$ ${parseFloat(val).toFixed(2).replace('.', ',')}`;
+                  
+                  if(document.getElementById('res_fin_rec')) document.getElementById('res_fin_rec').textContent = fMoeda(res.resumo.recebido);
+                  if(document.getElementById('res_fin_arec')) document.getElementById('res_fin_arec').textContent = fMoeda(res.resumo.aReceber);
+                  if(document.getElementById('res_fin_desp')) document.getElementById('res_fin_desp').textContent = fMoeda(res.resumo.despesas);
+                  if(document.getElementById('res_fin_apag')) document.getElementById('res_fin_apag').textContent = fMoeda(res.resumo.aPagar);
+                  if(document.getElementById('res_fin_saldo')) document.getElementById('res_fin_saldo').textContent = fMoeda(res.resumo.saldo);
+
+                  if(tbody) {
+                      if (res.data.length === 0) {
+                          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#888;">Nenhuma transação atende a estes critérios.</td></tr>';
+                      } else {
+                          tbody.innerHTML = '';
+                          res.data.forEach(t => {
+                              let corStatus = t.status.toLowerCase().includes('conclu') ? '#4caf50' : '#ff9800';
+                              let corTipo = t.tipo.toLowerCase() === 'receita' ? '#4caf50' : '#f44336';
+                              
+                              let btnBaixa = "";
+                              if (t.status.toLowerCase().includes("pendente")) {
+                                  btnBaixa = `<br><button class="adm-btn" style="background:#4caf50; color:white; padding:4px 8px; font-size:10px; margin-top:4px;" onclick="window.darBaixaBI('${t.id}')"><span class="material-icons" style="font-size:12px; margin-right:2px;">check_circle</span> Baixar</button>`;
+                              }
+                              
+                              tbody.innerHTML += `
+                                  <tr>
+                                      <td>${t.data}</td>
+                                      <td>${t.academia}</td>
+                                      <td style="color:${corTipo}; font-weight:bold;">${t.tipo}</td>
+                                      <td>${t.categoria}</td>
+                                      <td><b>${t.aluno}</b><br><small>🛡️ ${t.graduacao} | ${t.modalidade}</small></td>
+                                      <td>${t.forma}</td>
+                                      <td style="color:${corStatus}; font-weight:bold; text-align:center;">
+                                         ${t.status.toUpperCase()}
+                                         ${btnBaixa}
+                                      </td>
+                                      <td style="text-align:right; font-weight:bold; color:${corTipo};">R$ ${t.valor}</td>
+                                  </tr>
+                              `;
+                          });
+                      }
+                  }
+
+                  if(btn) { btn.innerHTML = textoOriginal; btn.disabled = false; }
+              })
+              .getRelatorioAnaliticoFinanceiro(window.editorLogin, filtros);
+      } catch(e) { window.sentinelaAdmin("GERAR_RELATORIO", "ERRO", e.message); }
+  };
+
+  window.darBaixaBI = function(idTransacao) {
+      if(!confirm("Tem certeza que deseja marcar esta conta como PAGA? Isso atualizará o caixa e renovará o plano (caso seja uma mensalidade).")) return;
+      
+      const btnClickado = event.currentTarget || event.target;
+      const textoOriginal = btnClickado.innerHTML;
+      btnClickado.innerHTML = "Salvando...";
+      btnClickado.disabled = true;
+      
+      google.script.run
+          .withFailureHandler(err => {
+              alert("Erro de rede: " + err.message);
+              btnClickado.innerHTML = textoOriginal;
+              btnClickado.disabled = false;
+          })
+          .withSuccessHandler(res => {
+              alert(res.msg);
+              if(res.success) {
+                  window.gerarRelatorioAnalitico(); 
+                  if(typeof window.carregarRelatoriosDashboard === 'function') window.carregarRelatoriosDashboard();
+              } else {
+                  btnClickado.innerHTML = textoOriginal;
+                  btnClickado.disabled = false;
+              }
+          })
+          .darBaixaTransacaoPendente(idTransacao, window.editorLogin);
+  };
+
+  window.imprimirBI_PDF = function() {
+      if (!window.dadosAtuaisBI || window.dadosAtuaisBI.length === 0) {
+          alert("Gere o relatório primeiro na tela antes de imprimir.");
+          return;
+      }
+      
+      const janela = window.open('', '', 'width=900,height=600');
+      if(!janela) { alert("Pop-up bloqueado. Permita exibição para gerar o PDF."); return; }
+      
+      const fMoeda = (val) => `R$ ${parseFloat(val || 0).toFixed(2).replace('.', ',')}`;
+      const vRec = window.resumoAtualBI ? fMoeda(window.resumoAtualBI.recebido) : "R$ 0,00";
+      const vARec = window.resumoAtualBI ? fMoeda(window.resumoAtualBI.aReceber) : "R$ 0,00";
+      const vDesp = window.resumoAtualBI ? fMoeda(window.resumoAtualBI.despesas) : "R$ 0,00";
+      const vAPag = window.resumoAtualBI ? fMoeda(window.resumoAtualBI.aPagar) : "R$ 0,00";
+      const vSal = window.resumoAtualBI ? fMoeda(window.resumoAtualBI.saldo) : "R$ 0,00";
+
+      let html = `
+      <html><head><title>Relatório Financeiro BI</title>
+      <style>
+          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; color: #333; }
+          .header-rel { border-bottom: 3px solid #2196F3; padding-bottom: 10px; margin-bottom: 20px; }
+          .resumo-box { display: flex; flex-wrap: wrap; gap: 15px; background: #f4f4f4; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ccc; font-weight: bold; font-size: 12px; }
+          table { width: 100%; border-collapse: collapse; background: #fff; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 11px; }
+          th { background: #333; color: #fff; text-transform: uppercase; font-size: 10px; }
+          tr:nth-child(even) { background-color: #f9f9f9; }
+          .val-receita { color: #2e7d32; font-weight: bold; }
+          .val-despesa { color: #c62828; font-weight: bold; }
+      </style>
+      </head><body>
+      <div class='header-rel'>
+          <h2 style="margin:0; color:#2196F3;">Inteligência Financeira (BI)</h2>
+          <p style="margin:5px 0 0 0;"><b>Emissão:</b> ${new Date().toLocaleString('pt-BR')}</p>
+      </div>
+      
+      <div class="resumo-box">
+          <span style="color:#2e7d32;">RECEBIDO: ${vRec}</span> |
+          <span style="color:#f59e0b;">A RECEBER: ${vARec}</span> |
+          <span style="color:#c62828;">DESPESAS: ${vDesp}</span> |
+          <span style="color:#e91e63;">A PAGAR: ${vAPag}</span> |
+          <span style="color:#1565c0; font-size:14px;">SALDO REAL: ${vSal}</span>
+      </div>
+
+      <table>
+          <thead>
+              <tr>
+                  <th>Data</th><th>Unidade</th><th>Tipo</th><th>Categoria</th>
+                  <th>Atleta/Fornecedor</th><th>Forma</th><th>Status</th><th>Valor (R$)</th>
+              </tr>
+          </thead>
+          <tbody>
+      `;
+      
+      window.dadosAtuaisBI.forEach(t => {
+          let cssCor = t.tipo.toLowerCase() === 'receita' ? 'val-receita' : 'val-despesa';
+          html += `<tr>
+              <td>${t.data}</td>
+              <td>${t.academia}</td>
+              <td class="${cssCor}">${t.tipo.toUpperCase()}</td>
+              <td>${t.categoria}</td>
+              <td><b>${t.aluno}</b><br>${t.modalidade} / ${t.graduacao}</td>
+              <td>${t.forma}</td>
+              <td>${t.status.toUpperCase()}</td>
+              <td class="${cssCor}" style="text-align:right;">R$ ${t.valor}</td>
+          </tr>`;
+      });
+      
+      html += `</tbody></table></body></html>`;
+      janela.document.open(); janela.document.write(html); janela.document.close();
+      setTimeout(() => { try{ janela.print(); }catch(e){} }, 1000);
+  };
+
+  window.exportarBI_CSV = function(filename) {
+      if (!window.dadosAtuaisBI || window.dadosAtuaisBI.length === 0) {
+          alert("Gere o relatório primeiro na tela antes de exportar.");
+          return;
+      }
+      
+      const fMoeda = (val) => `R$ ${parseFloat(val || 0).toFixed(2).replace('.', ',')}`;
+      const vRec = window.resumoAtualBI ? fMoeda(window.resumoAtualBI.recebido) : "R$ 0,00";
+      const vARec = window.resumoAtualBI ? fMoeda(window.resumoAtualBI.aReceber) : "R$ 0,00";
+      const vDesp = window.resumoAtualBI ? fMoeda(window.resumoAtualBI.despesas) : "R$ 0,00";
+      const vAPag = window.resumoAtualBI ? fMoeda(window.resumoAtualBI.aPagar) : "R$ 0,00";
+      const vSal = window.resumoAtualBI ? fMoeda(window.resumoAtualBI.saldo) : "R$ 0,00";
+
+      let csvContent = "\uFEFF"; 
+      
+      // 🛡️ OS 5 VALORES NO EXCEL
+      csvContent += "RESUMO ANALÍTICO DE BI\n";
+      csvContent += `"RECEBIDO (Caixa Real +)";"${vRec}"\n`;
+      csvContent += `"A RECEBER (Pendente +)";"${vARec}"\n`;
+      csvContent += `"DESPESAS PAGAS (Caixa Real -)";"${vDesp}"\n`;
+      csvContent += `"A PAGAR (Pendente -)";"${vAPag}"\n`;
+      csvContent += `"SALDO LÍQUIDO (=)";"${vSal}"\n\n`;
+      
+      csvContent += "DATA;ACADEMIA;TIPO;CATEGORIA;ALUNO_FORNECEDOR;MODALIDADE;FAIXA;FORMA;STATUS;VALOR\n";
+      
+      window.dadosAtuaisBI.forEach(t => {
+          let row = [
+              `"${t.data}"`, `"${t.academia}"`, `"${t.tipo}"`, `"${t.categoria}"`,
+              `"${t.aluno}"`, `"${t.modalidade}"`, `"${t.graduacao}"`, `"${t.forma}"`,
+              `"${t.status}"`, `"${t.valor}"`
+          ];
+          csvContent += row.join(";") + "\n";
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  };
 </script>
