@@ -398,6 +398,40 @@
     <?!= include('Financeiro'); ?>
   </div>
 
+  <div class="no-print" style="
+        background-color: #111111 !important; 
+        text-align: center; 
+        padding: 20px 15px !important; 
+        margin: 40px 0 20px 0 !important; 
+        border-radius: 8px !important;
+        border-top: 4px solid var(--dynamic-prim, #FFD700) !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
+        display: block !important;
+    ">
+    <p
+      style="margin: 0 0 10px 0 !important; font-size: 15px !important; font-weight: bold !important; color: var(--dynamic-prim, #FFD700) !important; background: transparent !important; line-height: 1.2 !important; white-space: normal !important;">
+      ⚡ Quer um sistema igual na SUA academia?
+    </p>
+
+    <p
+      style="margin: 0 0 15px 0 !important; font-size: 13px !important; color: #cccccc !important; background: transparent !important; line-height: 1.3 !important; white-space: normal !important;">
+      O DojoManager SaaS é a solução definitiva.
+    </p>
+
+    <a href="https://wa.me/5581992467787?text=Olá, vi o App DojoManager e gostaria de saber mais sobre como implementá-lo na minha academia."
+      target="_blank" style="
+            background-color: #25D366 !important; 
+            padding: 10px 15px !important; 
+            border-radius: 5px !important; 
+            text-decoration: none !important; 
+            display: inline-block !important;
+            border: none !important;
+      ">
+      <span class="material-icons" style="vertical-align: middle; font-size: 16px; margin-right: 4px; background: transparent !important; color: #ffffff !important;">chat</span>
+      <span style="color: #ffffff !important; font-weight: bold !important; font-size: 14px !important; background: transparent !important;">Falar com o Desenvolvedor</span>
+    </a>
+  </div>
+
   <div id="admin-module-wrapper" style="display:none; position:relative; z-index:9000;">
     <?!= include('Adm'); ?>
     <?!= include('AdmModais'); ?>
@@ -440,14 +474,10 @@
       </form>
     </div>
 
-  </div>
-  <div class="developer-footer">
-    ⚡ Powered by <a href="https://wa.me/5581992467787?text=Olá! Gostaria de saber mais sobre o sistema DojoManager."
-      target="_blank">DojoManager SaaS</a>
-  </div>
 
-  <script>
-    let currentUser = {};
+
+    <script>
+      let currentUser = {};
     const LISTA_INSTRUTOR = ["INSTRUTOR N1", "INSTRUTOR N2", "INSTRUTOR N3", "PROFESSOR", "MESTRE", "VERDE ESCURO", "AZUL ESCURO", "MARROM", "PRETA", "PRETA E BRANCA"];
     const LISTA_ADMIN = ["MESTRE", "ADMIN", "PRETA E BRANCA", "VERMELHA"];
 
@@ -649,25 +679,40 @@
         const dataHojePT = hojeDate.toLocaleDateString('pt-BR');
 
         // Atualiza o título do Widget com o Dia e a Data
-        document.getElementById('lbl-dia-semana').textContent = `- ${diaHojeStr}, ${dataHojePT}`;
+        const lblDia = document.getElementById('lbl-dia-semana');
+        if(lblDia) lblDia.textContent = `- ${diaHojeStr}, ${dataHojePT}`;
         
         const container = document.getElementById('lista-hoje-container');
+        if(!container) return;
         
-        // 🚀 O MOTOR RELACIONAL (Dispara as 3 buscas em simultâneo)
-        google.script.run.withSuccessHandler(aulasLive => {
-            google.script.run.withSuccessHandler(locaisFixos => {
-                google.script.run.withSuccessHandler(todasTurmas => {
+        // 🚀 O MOTOR RELACIONAL (Tratando as promessas com segurança)
+        google.script.run
+            .withFailureHandler(e => registrarLogFront("ERRO", "carregarTreinosDeHoje", "Aulas Live Falharam: " + e.message))
+            .withSuccessHandler(aulasLiveRetorno => {
+            
+            google.script.run
+                .withFailureHandler(e => registrarLogFront("ERRO", "carregarTreinosDeHoje", "Locais Fixos Falharam: " + e.message))
+                .withSuccessHandler(locaisFixosRetorno => {
+                
+                google.script.run
+                    .withFailureHandler(e => registrarLogFront("ERRO", "carregarTreinosDeHoje", "Todas Turmas Falharam: " + e.message))
+                    .withSuccessHandler(todasTurmasRetorno => {
                     
+                    // 🛡️ GARANTIA DE ARRAY (Prevê retornos nulos)
+                    const aulasLive = aulasLiveRetorno || [];
+                    const locaisFixos = locaisFixosRetorno || [];
+                    const todasTurmas = todasTurmasRetorno || [];
+
                     container.innerHTML = ""; 
                     let encontrouAlgum = false;
 
                     // Mapeia Locais para pegar o Link do Mapa rapidamente
                     const mapaLocais = {};
-                    if(locaisFixos) locaisFixos.forEach(l => mapaLocais[l.nome.trim().toLowerCase()] = l);
+                    if(locaisFixos.length > 0) locaisFixos.forEach(l => mapaLocais[String(l.nome || l.nome_do_local || "").trim().toLowerCase()] = l);
 
                     // 1. RENDERIZAR AULAS AO VIVO (O Mestre já abriu a sala)
                     const liveTurmasIds = []; // Array para evitar duplicar turmas
-                    if (aulasLive && aulasLive.length > 0) {
+                    if (aulasLive.length > 0) {
                         aulasLive.forEach(aula => {
                             encontrouAlgum = true;
                             const localNorm = String(aula.academia).trim().toLowerCase();
@@ -679,18 +724,20 @@
 
                             const titulo = aula.turma || "Aula Extra/Especial";
                             const dataHoraStr = `📅 ${dataHojePT} | ⏰ ${aula.horario}`;
-                            const detalheTexto = `📍 ${aula.academia} • 🔴 Ao Vivo com ${aula.instrutor.split(' ')[0]}`;
+                            // Evita erro de split no instrutor
+                            const nomeInst = aula.instrutor ? aula.instrutor.split(' ')[0] : "Professor";
+                            const detalheTexto = `📍 ${aula.academia} • 🔴 Ao Vivo com ${nomeInst}`;
                             
                             container.appendChild(criarCardTreino(titulo, dataHoraStr, detalheTexto, true, linkMapa, aula.pin, "var(--dynamic-text)"));
                         });
                     }
 
                     // 2. RENDERIZAR TURMAS AGENDADAS (Que o instrutor ainda não abriu)
-                    if (todasTurmas && todasTurmas.length > 0) {
+                    if (todasTurmas.length > 0) {
                         // Filtra apenas as turmas que acontecem HOJE
                         const turmasHoje = todasTurmas.filter(t => {
                             const d = String(t.dias).toLowerCase();
-                            return t.status === "Ativa" && (d.includes(diaHojeCurto) || d.includes("todos") || d.includes("diario"));
+                            return String(t.status).toLowerCase() === "ativa" && (d.includes(diaHojeCurto) || d.includes("todos") || d.includes("diario"));
                         });
 
                         turmasHoje.forEach(turma => {
@@ -714,9 +761,10 @@
                     }
 
                     // Se encontrou turmas, mostra o Widget, senão oculta.
-                    document.getElementById('widget-treino-hoje').style.display = encontrouAlgum ? 'block' : 'none';
+                    const widgetHoje = document.getElementById('widget-treino-hoje');
+                    if (widgetHoje) widgetHoje.style.display = encontrouAlgum ? 'block' : 'none';
 
-                }).listarTurmasAdmin(); // 👈 Lendo da Aba de Turmas!
+                }).listarTurmasAdmin(currentUser.LOGIN || "TODOS"); // 👈 Evita erro de variável não definida
             }).getLocaisTreino();
         }).buscarAulasDisponiveisAluno("TODOS"); 
     }
@@ -881,7 +929,7 @@
     }).getPixDataFromServer(login);
   }
 
-  </script>
+    </script>
 </body>
 
 </html>
