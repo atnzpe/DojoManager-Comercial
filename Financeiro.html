@@ -477,6 +477,20 @@
       function sentinelaFin(acao, nivel, detalhes) {
         console.log(`[FINANCEIRO - ${nivel}] ${acao}:`, detalhes);
       }
+      // 🛡️ NOVO MOTOR DE LINK BLINDADO (Burla o iFrame e arruma o 5555)
+      function despacharLinkWhatsApp(numeroRaw, mensagem) {
+          var numLimpo = String(numeroRaw).replace(/\D/g, "");
+          if (!numLimpo || numLimpo.length < 10) {
+              alert("O sistema não identificou um contato válido para esta unidade. Procure a recepção.");
+              return;
+          }
+          if (numLimpo.substring(0, 2) !== "55") {
+              numLimpo = "55" + numLimpo;
+          }
+          
+          var urlFinal = "https://api.whatsapp.com/send/?phone=" + numLimpo + "&text=" + encodeURIComponent(mensagem);
+          window.open(urlFinal, "_blank");
+      }
 
       var usuarioAtual = null;
 
@@ -842,12 +856,10 @@
               `;
               if(btnWpp) {
                   btnWpp.style.display = "flex";
-                  if (info && info.contatoWhatsApp) {
-                      const numStr = String(info.contatoWhatsApp).replace(/\D/g, '');
-                      btnWpp.onclick = function(e) {
-                          e.preventDefault(); window.open("https://wa.me/55" + numStr + "?text=Ol%C3%A1!%20Gostaria%20de%20verificar%20meu%20pagamento.");
-                      };
-                  }
+                  btnWpp.onclick = function(e) {
+                      e.preventDefault(); 
+                      despacharLinkWhatsApp(info.contatoWhatsApp, "Olá! Gostaria de verificar as opções para regularizar meu pagamento.");
+                  };
               }
               return;
           }
@@ -958,8 +970,7 @@
             btnWppAcao.style.marginTop = "10px";
             btnWppAcao.innerHTML = '<span class="material-icons">send</span> ENVIAR COMPROVANTE';
             btnWppAcao.onclick = function() {
-                const numStrWpp = info.contatoWhatsApp ? String(info.contatoWhatsApp).replace(/\D/g, '') : '';
-                window.open("https://wa.me/55" + numStrWpp + "?text=Ol%C3%A1!%20Segue%20meu%20comprovante%20de%20pagamento%20PIX%20de%20R$%20" + valorStr.replace('.',','));
+                despacharLinkWhatsApp(info.contatoWhatsApp, "Olá! Segue meu comprovante de pagamento PIX de R$ " + valorStr.replace('.',','));
             };
 
             pixBox.appendChild(infoTitle);
