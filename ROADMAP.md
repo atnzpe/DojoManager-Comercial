@@ -67,5 +67,5 @@ Acompanhe a evolução, as metas e as próximas entregas do nosso sistema.
 - [ ] Criar uma Landing Page comercial e direcionar o tráfego diretamente para a tela de Agendamento do App.
 
 - Fase 6:
-- [ ] Implentar uma base de dados frie base
+- [ ] Implentar uma base de dados friebase google
 - [ ] Implentamentear login com o google
