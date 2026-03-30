@@ -1,0 +1,19 @@
+﻿RESUMO ANALÍTICO DE BI
+"RECEBIDO (Caixa Real +)";"R$ 670,50"
+"A RECEBER (Pendente +)";"R$ 50,00"
+"DESPESAS PAGAS (Caixa Real -)";"R$ 220,50"
+"A PAGAR (Pendente -)";"R$ 20,00"
+"SALDO LÍQUIDO (=)";"R$ 450,00"
+
+DATA;ACADEMIA;TIPO;CATEGORIA;ALUNO_FORNECEDOR;MODALIDADE;FAIXA;FORMA;STATUS;VALOR
+"27/03/2026";"CT Matriz - Absolute";"Despesa";"Inscrição Campeonato";"-";"Geral";"-";"Dinheiro";"Pendente";"20,00"
+"27/03/2026";"CT Matriz - Absolute";"Despesa";"Agua Mineral";"-";"Geral";"-";"Dinheiro";"Concluido";"30,50"
+"27/03/2026";"CT Matriz - Absolute";"Receita";"Venda de porduto Publico externo";"-";"Muay Thai";"-";"PIX";"Pendente";"50,00"
+"27/03/2026";"CT Matriz - Absolute";"Receita";"Venda de porduto Publico externo";"-";"Jiu Jitsu";"-";"PIX";"Concluido";"100,50"
+"24/03/2026";"CT ABSOLUTE TEAM BJJ";"Receita";"Mensalidade";"João Batista da Silva ";"Krav Maga";"Branca";"Dinheiro";"Concluido";"80,00"
+"24/03/2026";"CT ABSOLUTE TEAM BJJ";"Receita";"Mensalidade";"Gleyson Atanazio da Silva";"Krav Maga";"Amarela";"Dinheiro";"Concluido";"100,00"
+"2026-03-02";"CT Filial - Zona Sul";"Despesa";"Luz";"-";"-";"-";"Pix";"Concluido";"110,00"
+"2026-03-15";"CT Filial - Zona Sul";"Receita";"Mensalidade";"-";"-";"-";"Dinheiro";"Concluido";"150,00"
+"2026-03-05";"CT Matriz - Absolute";"Despesa";"Água";"-";"-";"-";"Pix";"Concluido";"80,00"
+"2026-03-12";"CT Matriz - Absolute";"Receita";"Mensalidade";"-";"-";"-";"Cartão";"Concluido";"120,00"
+"2026-03-10";"CT Matriz - Absolute";"Receita";"Mensalidade";"-";"-";"-";"Pix";"Concluido";"120,00"
