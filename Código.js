@@ -3768,3 +3768,153 @@ function darBaixaTransacaoPendente(idTransacao, loginSolicitante) {
     return { success: false, msg: "Erro Crítico: " + e.message };
   }
 }
+
+// ============================================================================
+// 📁 DOSSIÊ DO ALUNO (MOTOR FINAL: LTV, ENGAJAMENTO, DATAS E FICHA)
+// ============================================================================
+function getDossierAlunoAdmin(login) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+    const obterDadosAba = (nomeAba) => {
+      const sheet = ss.getSheetByName(nomeAba);
+      if (!sheet) return [];
+      const data = sheet.getDataRange().getValues();
+      if (data.length < 2) return [];
+      const headers = data[0];
+      return data.slice(1).map(row => {
+        let obj = {}; headers.forEach((h, i) => obj[h] = row[i]); return obj;
+      });
+    };
+
+    const bdAlunos = obterDadosAba("cadastro_de_alunos");
+    const bdTransacoes = obterDadosAba("Fin_Transacoes");
+    const bdChamadas = obterDadosAba("Registro_Chamada");
+    const bdTurmas = obterDadosAba("Config_Turmas");
+    const bdAssinaturas = obterDadosAba("Fin_Assinaturas");
+
+    const aluno = bdAlunos.find(a => String(a.LOGIN).trim().toLowerCase() === String(login).trim().toLowerCase());
+    if (!aluno) throw new Error("Aluno não encontrado na base de dados.");
+
+    // --- 1. CRUZAMENTO: Responsável, Assinaturas e Datas Físicas ---
+    let respTurma = "Não Definido";
+    if (aluno['Turma Vinculada']) {
+      const turmaObj = bdTurmas.find(t => String(t['Nome da Turma']).trim().toLowerCase() === String(aluno['Turma Vinculada']).trim().toLowerCase());
+      if (turmaObj) respTurma = turmaObj['Responsável'];
+    }
+
+    let planoAssociado = "Sem Plano";
+    let dataVencimento = "N/A";
+    const assinatura = bdAssinaturas.find(a => String(a.Login_Aluno).trim().toLowerCase() === String(login).trim().toLowerCase());
+    if (assinatura) {
+      planoAssociado = assinatura['Pacote_Atual'] || "Nenhum";
+      let vData = assinatura['Data_Fim'];
+      if (vData instanceof Date) dataVencimento = Utilities.formatDate(vData, Session.getScriptTimeZone(), "dd/MM/yyyy");
+      else if (vData) dataVencimento = vData;
+    }
+
+    let nascFormatado = "N/A";
+    let idade = "N/A";
+    if (aluno['Data de Nascimento ']) {
+      let dNasc = aluno['Data de Nascimento '];
+      let dateNasc = (dNasc instanceof Date) ? dNasc : new Date(dNasc);
+      if (dateNasc && !isNaN(dateNasc.getTime())) {
+        nascFormatado = Utilities.formatDate(dateNasc, Session.getScriptTimeZone(), "dd/MM/yyyy");
+        idade = Math.floor((Date.now() - dateNasc.getTime()) / (1000 * 60 * 60 * 24 * 365.25)) + " anos";
+      }
+    }
+
+    // --- 2. CONSTRUÇÃO DA FICHA COMPLETA (PERFIL) ---
+    const perfil = {
+      cpf: aluno['CPF'] || "Não informado",
+      foto: aluno['Foto 3x4 (para a carteirinha)'] || "",
+      academia: aluno['Academia Vinculada'] || "Sem Registo",
+      modalidade: aluno['Modalidade'] || "Geral",
+      turma: aluno['Turma Vinculada'] || "Sem Turma",
+      responsavelTurma: respTurma,
+      plano: planoAssociado,
+      vencimento: dataVencimento,
+      graduacao: aluno['GRADUACAO_ATUAL'] || aluno['Graduação'] || "Branca",
+      proxGraduacao: aluno['PROX_GRADUACAO'] || "N/A",
+      idade: idade,
+      nascimento: nascFormatado,
+      peso: aluno['Peso'] ? aluno['Peso'] + " kg" : "---",
+      altura: aluno['Altura'] ? aluno['Altura'] + " m" : "---",
+      mae: aluno['Nome da Mãe'] || "",
+      pai: aluno['Nome do Pai'] || "",
+      endereco: aluno['Endereço'] || "Não informado",
+      telefone: aluno['Telefone'] || "Sem telefone",
+      email: aluno['E-mail'] || aluno['Endereço de e-mail'] || "Sem E-mail"
+    };
+
+    // --- 3. CÁLCULO DE TEMPO E MATRÍCULA ---
+    let mesesAcademia = 0;
+    let dataMatriculaStr = "N/A";
+    if (aluno['Carimbo de data/hora']) {
+      const dataReg = new Date(aluno['Carimbo de data/hora']);
+      if (!isNaN(dataReg.getTime())) {
+        const hoje = new Date();
+        mesesAcademia = (hoje.getFullYear() - dataReg.getFullYear()) * 12 + (hoje.getMonth() - dataReg.getMonth());
+        if (mesesAcademia < 0) mesesAcademia = 0;
+        dataMatriculaStr = Utilities.formatDate(dataReg, Session.getScriptTimeZone(), "dd/MM/yyyy");
+      }
+    }
+
+    // --- 4. LTV (Lifetime Value) ---
+    let ltvTotal = 0;
+    const faturas = [];
+    bdTransacoes.forEach(t => {
+      if (String(t.Login_Aluno).trim().toLowerCase() === String(login).trim().toLowerCase() &&
+        String(t.Tipo).trim().toLowerCase() === "receita" && String(t.Status).trim().toLowerCase().includes("conclui")) {
+        let val = parseFloat(String(t.Valor).replace(/\./g, '').replace(',', '.')) || 0;
+        ltvTotal += val;
+        let dataFormatada = t.Data_Registro instanceof Date ? Utilities.formatDate(t.Data_Registro, Session.getScriptTimeZone(), "dd/MM/yyyy") : t.Data_Registro;
+        faturas.push({ data: dataFormatada, ref: t.Descricao || t.Categoria, valor: val });
+      }
+    });
+    faturas.sort((a, b) => new Date(b.data.split('/').reverse().join('-')) - new Date(a.data.split('/').reverse().join('-')));
+
+    // --- 5. AULAS (Datas da 1ª e Última) ---
+    let totalAulas = 0;
+    const aulasAssistidas = [];
+    bdChamadas.forEach(c => {
+      if (String(c.Lista_Alunos_IDs || "").toLowerCase().includes(String(login).trim().toLowerCase())) {
+        totalAulas++;
+        let dataFormatada = (c.Data_Treino || c.Data_Registro) instanceof Date ? Utilities.formatDate(c.Data_Treino || c.Data_Registro, Session.getScriptTimeZone(), "dd/MM/yyyy") : (c.Data_Treino || c.Data_Registro);
+        aulasAssistidas.push({ data: dataFormatada, conteudo: c.Conteudo || "Treino Regular" });
+      }
+    });
+    aulasAssistidas.sort((a, b) => new Date(b.data.split('/').reverse().join('-')) - new Date(a.data.split('/').reverse().join('-')));
+
+    let primeiraAula = "N/A";
+    let ultimaAula = "N/A";
+    if (aulasAssistidas.length > 0) {
+      ultimaAula = aulasAssistidas[0].data;
+      primeiraAula = aulasAssistidas[aulasAssistidas.length - 1].data;
+    }
+
+    // --- 6. IA DE PARECER ---
+    let parecer = "";
+    if (ltvTotal >= 1000 && totalAulas >= 15) parecer = `⭐⭐⭐ Atleta VIP! Investiu R$ ${ltvTotal.toFixed(2).replace('.', ',')} e treinou ${totalAulas} vezes. Última aula em ${ultimaAula}.`;
+    else if (totalAulas === 0 && mesesAcademia > 1) parecer = `⚠️ ALERTA: Em evasão! Zero aulas, mas matriculado desde ${dataMatriculaStr}.`;
+    else if (ltvTotal === 0) parecer = `ℹ️ Sem registo financeiro. Verifique se tem bolsa ou dívidas.`;
+    else parecer = `✅ Atleta Engajado. Tempo: ${mesesAcademia} meses | Aulas: ${totalAulas} | LTV: R$ ${ltvTotal.toFixed(2).replace('.', ',')}`;
+
+    return {
+      success: true,
+      perfil: perfil,
+      meses: mesesAcademia,
+      dataMatricula: dataMatriculaStr,
+      ltv: ltvTotal,
+      totalAulas: totalAulas,
+      primeiraAula: primeiraAula,
+      ultimaAula: ultimaAula,
+      parecer: parecer,
+      faturas: faturas,
+      aulas: aulasAssistidas
+    };
+
+  } catch (e) {
+    return { success: false, msg: e.message };
+  }
+}

@@ -1,3 +1,4 @@
+<!--MOdal Cadastro Alunos-->
 <div id="adm-modal-aluno" class="adm-modal">
   <div class="adm-modal-box large" style="max-width: 900px; border: 3px solid #FFD700;">
     <div
@@ -114,6 +115,193 @@
   </div>
 </div>
 
+<!-- Inicio Modal Dossiê do Aluno-->
+
+<div id="adm-modal-historico-aluno" class="adm-modal" style="display:none;">
+  <div class="adm-modal-box large" style="width: 95%; max-width: 1000px; background-color: var(--dynamic-bg, #f8f9fa);">
+
+    <div
+      style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--dynamic-prim, #FFD700); padding-bottom:10px; margin-bottom:20px; flex-wrap: wrap; gap: 10px;">
+      <div style="flex: 1; min-width: 250px;">
+        <h3 style="margin:0; color:var(--dynamic-text, #333); font-weight:900; font-size: 20px;">
+          <span class="material-icons" style="vertical-align: middle; color:var(--dynamic-prim, #FFD700);">military_tech</span>
+          Dossiê: <span id="hist-aluno-nome" style="color: #2196f3;">Carregando...</span>
+        </h3>
+        <small style="color: #888; font-weight: bold;">Análise de Retenção, Engajamento e Ficha Completa</small>
+      </div>
+
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button type="button" onclick="window.imprimirDossiePDF()" class="adm-btn has-tooltip" style="background:#f44336; color:#fff; padding: 6px 12px;">
+            <span class="material-icons" style="font-size:16px;">picture_as_pdf</span>
+            <span class="tooltip-text">Gerar Relatório em PDF</span>
+          </button>
+
+        <button type="button" onclick="window.exportarDossieCSV()" class="adm-btn has-tooltip" style="background:#10b981; color:#fff; padding: 6px 12px;">
+            <span class="material-icons" style="font-size:16px;">grid_on</span>
+            <span class="tooltip-text">Exportar Dados para Excel (CSV)</span>
+          </button>
+
+        <button type="button" onclick="window.closeModal('adm-modal-historico-aluno')" style="background:none; border:none; cursor:pointer; font-size:24px; color:#ff5252; margin-left:10px;">✕</button>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+      <button class="adm-btn" id="btn-tab-sintetico" onclick="window.mudarAbaHistorico('sintetico')" style="background: #2196f3; color: #fff;">
+          <span class="material-icons" style="font-size: 16px;">dashboard</span> Visão Sintética & Cadastro
+        </button>
+      <button class="adm-btn adm-btn-outline" id="btn-tab-analitico" onclick="window.mudarAbaHistorico('analitico')">
+          <span class="material-icons" style="font-size: 16px;">list_alt</span> Visão Analítica (Aulas e Extrato)
+        </button>
+    </div>
+
+    <div id="tab-hist-sintetico" style="display: block; animation: fadeIn 0.3s;">
+
+      <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+        <h4 style="margin: 0 0 15px 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 8px;">
+          <span class="material-icons" style="font-size:16px; vertical-align:middle; color:#2196f3;">badge</span> Dados
+          Cadastrais & Matrícula
+        </h4>
+
+        <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+          <div
+            style="flex-shrink: 0; width: 110px; height: 140px; background: #f1f5f9; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <img id="hist-perfil-foto" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;" alt="Foto">
+            <span id="hist-perfil-foto-icon" class="material-icons" style="font-size: 48px; color: #94a3b8;">account_circle</span>
+          </div>
+
+          <div
+            style="flex: 1; min-width: 250px; display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 12px; color: #475569;">
+            <div><b style="color:#1e293b;">CPF:</b>
+              <span id="hist-perfil-cpf" style="color:#2196f3; font-weight:bold;">...</span></div>
+            <div><b style="color:#1e293b;">Academia:</b> <span id="hist-perfil-acad">...</span></div>
+            <div><b style="color:#1e293b;">Modalidade:</b> <span id="hist-perfil-mod">...</span></div>
+            <div><b style="color:#1e293b;">Turma (Resp):</b> <span id="hist-perfil-turma">...</span>
+              <small id="hist-perfil-resp" style="color:#888;"></small></div>
+
+            <div style="border-top: 1px dashed #eee; padding-top: 5px;"><b style="color:#1e293b;">Plano Atual:</b>
+              <span id="hist-perfil-plano" style="color:#10b981; font-weight:bold;">...</span></div>
+            <div style="border-top: 1px dashed #eee; padding-top: 5px;"><b style="color:#1e293b;">Vencimento:</b>
+              <span id="hist-perfil-venc" style="color:#ef4444; font-weight:bold;">...</span></div>
+            <div style="border-top: 1px dashed #eee; padding-top: 5px;"><b style="color:#1e293b;">Graduação:</b>
+              <span id="hist-perfil-grad">...</span></div>
+            <div style="border-top: 1px dashed #eee; padding-top: 5px;"><b style="color:#1e293b;">Próx. Graduação:</b>
+              <span id="hist-perfil-proxgrad">...</span></div>
+
+            <div style="border-top: 1px dashed #eee; padding-top: 5px;"><b style="color:#1e293b;">Idade / Nasc:</b>
+              <span id="hist-perfil-idade">...</span></div>
+            <div style="border-top: 1px dashed #eee; padding-top: 5px;"><b style="color:#1e293b;">Peso / Altura:</b>
+              <span id="hist-perfil-fisico">...</span></div>
+            <div style="border-top: 1px dashed #eee; padding-top: 5px;"><b style="color:#1e293b;">Telefone:</b>
+              <span id="hist-perfil-tel">...</span></div>
+            <div style="border-top: 1px dashed #eee; padding-top: 5px;"><b style="color:#1e293b;">E-mail:</b>
+              <span id="hist-perfil-email" style="word-break: break-all;">...</span></div>
+
+            <div style="grid-column: 1 / -1; border-top: 1px dashed #eee; padding-top: 5px;">
+              <b style="color:#1e293b;">Filiação (Pai/Mãe):</b> <span id="hist-perfil-pais">...</span></div>
+            <div style="grid-column: 1 / -1;"><b style="color:#1e293b;">Endereço:</b>
+              <span id="hist-perfil-end">...</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+        <div class="stat-card" style="border-top: 4px solid #10b981; background: #fff;">
+          <div class="stat-card-title">TOTAL INVESTIDO (LTV)</div>
+          <div id="hist-ltv" class="stat-card-value cor-verde">R$ 0,00</div>
+          <p style="font-size: 10px; color: #888; margin: 5px 0 0 0;">Soma de todas as mensalidades pagas.</p>
+          <span class="material-icons stat-card-icon" style="color: #10b981; opacity: 0.2;">savings</span>
+        </div>
+
+        <div class="stat-card" style="border-top: 4px solid #3b82f6; background: #fff;">
+          <div class="stat-card-title">AULAS ASSISTIDAS</div>
+          <div id="hist-aulas" class="stat-card-value cor-azul">0</div>
+          <div
+            style="margin-top: 8px; font-size: 10px; color: #555; background: #f8fafc; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0;">
+            <b>1ª Aula:</b> <span id="hist-aula-primeira" style="color:#333;">...</span><br>
+            <b style="color:#ef4444;">Última:</b>
+            <span id="hist-aula-ultima" style="color:#ef4444; font-weight:bold;">...</span>
+          </div>
+          <span class="material-icons stat-card-icon" style="color: #3b82f6; opacity: 0.2;">sports_martial_arts</span>
+        </div>
+
+        <div class="stat-card" style="border-top: 4px solid #f59e0b; background: #fff;">
+          <div class="stat-card-title">TEMPO DE ACADEMIA</div>
+          <div id="hist-tempo" class="stat-card-value cor-laranja">0 meses</div>
+          <div
+            style="margin-top: 8px; font-size: 10px; color: #555; background: #f8fafc; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0;">
+            <b>Matrícula:</b> <span id="hist-data-matricula" style="color:#333; font-weight:bold;">...</span>
+          </div>
+          <span class="material-icons stat-card-icon" style="color: #f59e0b; opacity: 0.2;">hourglass_top</span>
+        </div>
+      </div>
+
+      <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; border-radius: 8px;">
+        <h4 style="margin: 0 0 5px 0; color: #0d47a1;">
+          <span class="material-icons" style="font-size: 16px; vertical-align: middle;">lightbulb</span> Parecer do
+          Sistema:</h4>
+        <p id="hist-parecer" style="margin: 0; font-size: 12px; color: #1565c0; font-weight: bold;">Analisando dados do
+          atleta...</p>
+      </div>
+    </div>
+
+    <div id="tab-hist-analitico" style="display: none; animation: fadeIn 0.3s;">
+      <div class="form-grid" style="gap: 20px;">
+        <div style="background: #fff; border: 1px solid #eee; border-radius: 8px; overflow: hidden;">
+          <h4
+            style="margin: 0; padding: 12px; background: #f8fafc; border-bottom: 1px solid #eee; color: #333; font-size: 13px;">
+            <span class="material-icons" style="font-size: 16px; vertical-align: middle; color:#3b82f6;">history_edu</span>
+            Evolução Técnica (Aulas)
+          </h4>
+          <div style="max-height: 300px; overflow-y: auto;">
+            <table class="adm-table" style="margin: 0; box-shadow: none;">
+              <thead style="position: sticky; top: 0; z-index: 1;">
+                <tr>
+                  <th>Data</th>
+                  <th>Conteúdo da Aula</th>
+                </tr>
+              </thead>
+              <tbody id="hist-tbody-aulas">
+                <tr>
+                  <td colspan="2" style="text-align: center;">Carregando diário de treinos...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style="background: #fff; border: 1px solid #eee; border-radius: 8px; overflow: hidden;">
+          <h4
+            style="margin: 0; padding: 12px; background: #f8fafc; border-bottom: 1px solid #eee; color: #333; font-size: 13px;">
+            <span class="material-icons" style="font-size: 16px; vertical-align: middle; color:#10b981;">receipt_long</span>
+            Pagamentos (LTV)
+          </h4>
+          <div style="max-height: 300px; overflow-y: auto;">
+            <table class="adm-table" style="margin: 0; box-shadow: none;">
+              <thead style="position: sticky; top: 0; z-index: 1;">
+                <tr>
+                  <th>Data</th>
+                  <th>Referência</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody id="hist-tbody-fin">
+                <tr>
+                  <td colspan="3" style="text-align: center;">Carregando faturas...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Fim Modal Dossiê do Aluno -->
+
+<!--Inicio MOdal Cadastro Categoria Financeira-->
 <div id="adm-modal-categoria" class="adm-modal">
   <div class="adm-modal-box">
     <div class="adm-h3">Categoria Financeira
@@ -157,7 +345,9 @@
     </form>
   </div>
 </div>
+<!--fim MOdal Cadastro Categoria Financeira-->
 
+<!--MOdal Cadastro Formas de Pagamento-->
 <div id="adm-modal-pagamento" class="adm-modal">
   <div class="adm-modal-box">
     <div class="adm-h3">Forma de Pagamento
@@ -473,7 +663,7 @@
 
 <div id="adm-modal-financeiro" class="adm-modal">
   <div class="adm-modal-box">
-    <div class="adm-h3">Fluxo de Caixa Inteligente
+    <div class="adm-h3">Lançamento Despesas / Receitas
       <button type="button" onclick="window.closeModal('adm-modal-financeiro')" style="background:none;border:none;color:red;cursor:pointer;font-size:20px;">✕</button>
     </div>
     <form onsubmit="window.handleAdmForm(event, 'registrarMovimentacao')">
