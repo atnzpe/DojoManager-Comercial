@@ -188,6 +188,17 @@
       margin-left: 5px;
     }
 
+    .highlight-red {
+      background-color: #ff5252;
+      color: #fff;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 0.7rem;
+      vertical-align: middle;
+      margin-left: 5px;
+      font-weight: bold;
+    }
+
     .chapter-title {
       color: var(--dynamic-text);
       opacity: 0.6;
@@ -207,11 +218,9 @@
       font-size: 11px;
       color: var(--dynamic-text, #ffffff);
       opacity: 0.5;
-      /* Discreto para não roubar a atenção do App */
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-top: auto;
-      /* Empurra para o fundo */
       width: 100%;
       box-sizing: border-box;
       z-index: 10;
@@ -357,7 +366,7 @@
     <div class="chapter-title">3. Mensalidades e Pagamentos PIX</div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">payments</span> Como pagar meu plano com o novo PIX? <span class="highlight">NOVO</span></span>
+      <span><span class="material-icons icon-topic">payments</span> Como pagar meu plano com o novo PIX?</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
@@ -383,21 +392,36 @@
     <div class="chapter-title">4. Para Instrutores e Gestores</div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">admin_panel_settings</span> Permissões (O que o Instrutor vê?)</span>
+      <span><span class="material-icons icon-topic">folder_shared</span> O Dossiê Analítico do Atleta <span class="highlight">NOVO</span></span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>O sistema possui um rigoroso controle de acesso (RBAC):</p>
+      <p>A aba de Gestão de Alunos agora conta com um CRM Integrado para Administradores e Mestres:</p>
       <ul>
-        <li><strong>Admin/Mestre:</strong> Vê o módulo Financeiro completo, configura regras globais e visualiza
-          alunos/turmas de todas as franquias.</li>
-        <li><strong>Instrutor/Professor:</strong> Não tem acesso ao módulo Financeiro da gestão nem ao "Painel Admin".
-          Ele visualiza <strong>apenas</strong> os alunos das Academias em que está vinculado.</li>
+        <li>Ao lado do nome de cada aluno, há um ícone de <strong>Pasta Azul (Dossiê)</strong>.</li>
+        <li>Ao clicar nela, o sistema cruza os dados do atleta e exibe um Raio-X completo: <strong>Aulas Assistidas</strong>, <strong>Total Investido (LTV)</strong>, e as datas da 1ª e última aula.</li>
+        <li>O <strong>Motor de Inteligência</strong> emitirá um parecer automático, classificando o aluno como "Atleta VIP", "Engajado" ou exibindo um "Alerta de Evasão".</li>
+        <li>No topo do Dossiê, você encontra botões para <strong>Exportar a Ficha em PDF</strong> ou fazer o download do extrato completo em <strong>Excel (CSV)</strong>.</li>
       </ul>
     </div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">account_balance_wallet</span> Lançamentos Financeiros (Caixa Inteligente) <span class="highlight">NOVO</span></span>
+      <span><span class="material-icons icon-topic">smart_display</span> Diário de Aula Dinâmico <span class="highlight">NOVO</span></span>
+      <span class="material-icons chevron">expand_more</span>
+    </button>
+    <div class="panel">
+      <p>Ao encerrar uma aula, o Instrutor agora possui uma <strong>Base de Conhecimento Multicanal</strong> para registrar o que foi ensinado:</p>
+      <ol>
+        <li>No campo "Conteúdo da Aula", ao digitar, o sistema sugerirá 3 tipos de materiais diferentes (identificados por Emojis).</li>
+        <li><strong>🎥 Vídeos:</strong> Técnicas específicas da Videoteca.</li>
+        <li><strong>🏆 Cursos:</strong> Seminários e Eventos ativos no sistema.</li>
+        <li><strong>📄 Programas:</strong> Manuais e PDFs técnicos (Módulo de Graduação).</li>
+        <li>Você pode selecionar vários chips diferentes numa mesma aula para um registro perfeito no Dossiê do Aluno!</li>
+      </ol>
+    </div>
+
+    <button class="accordion">
+      <span><span class="material-icons icon-topic">account_balance_wallet</span> Lançamentos Financeiros (Caixa)</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
@@ -414,7 +438,7 @@
     </div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">request_quote</span> Cobrança e PDF de Inadimplentes <span class="highlight">NOVO</span></span>
+      <span><span class="material-icons icon-topic">request_quote</span> Cobrança e PDF de Inadimplentes</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
@@ -424,14 +448,14 @@
           <strong>Painel de Cobrança</strong>.</li>
         <li>Ela detecta exatamente quem está com a assinatura vencida no dia de hoje.</li>
         <li>Clique no botão verde de <strong>WhatsApp</strong> ao lado do nome do aluno para abrir o aplicativo já com
-          uma mensagem de cobrança educada, informando o nome da turma e da academia.</li>
+          uma mensagem de cobrança educada.</li>
         <li>Para reuniões de gestão, clique no botão vermelho <strong>"PDF Inadimplência"</strong> para imprimir ou
           salvar a lista completa dos alunos em atraso.</li>
       </ul>
     </div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">analytics</span> Super Relatório de Atletas <span class="highlight">NOVO</span></span>
+      <span><span class="material-icons icon-topic">analytics</span> Super Relatório de Atletas</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
@@ -440,15 +464,13 @@
         <li>Acesse o <strong>Super Relatório</strong> através do Dashboard ou da Aba Alunos.</li>
         <li>Realize filtros avançados combinando Múltiplas Condições: Idade (Mín/Máx), Peso, Modalidade, Faixa, Unidade
           e Turma Específica.</li>
-        <li><strong>Novo Filtro Financeiro:</strong> Encontre instantaneamente todos os alunos que estão com o status
-          "Em Dia" ou "Atrasado".</li>
-        <li>Exiba os resultados ao vivo na tela e gere um <strong>Documento PDF Oficial</strong> formatado e separado
-          por unidades para impressão.</li>
+        <li>Encontre instantaneamente todos os alunos que estão com o status "Em Dia" ou "Atrasado".</li>
+        <li>Exiba os resultados ao vivo na tela e gere um <strong>Documento PDF Oficial</strong> formatado para impressão.</li>
       </ul>
     </div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">security</span> Proteção Anti-Apagão (Hydration) <span class="highlight">NOVO</span></span>
+      <span><span class="material-icons icon-topic">security</span> Proteção Anti-Apagão (Hydration)</span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
@@ -458,56 +480,24 @@
           ("Hydration V5") faz uma cópia instantânea das informações ocultas na planilha (como a Data Original de
           Ingresso e Status de Pagamentos passados).</li>
         <li>Isso garante que <strong>nenhum dado do histórico do aluno seja apagado acidentalmente</strong>.</li>
-        <li>A renovação de pacotes mensais pelo Caixa também calcula automaticamente a rolagem de dias preservando o
-          histórico de quem pagou em dia.</li>
       </ul>
     </div>
 
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">rule</span> Gestão Multi-Academias de Alunos</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>Ao cadastrar ou editar um aluno, o painel agora permite vinculá-lo a múltiplas unidades:</p>
-      <ul>
-        <li>Na seção "Academias Vinculadas", você pode marcar várias caixinhas (ex: CT Matriz e CT Zona Sul).</li>
-        <li>O menu dropdown de "Turma Oficial" atualizará automaticamente, exibindo apenas as turmas pertencentes às
-          academias selecionadas.</li>
-      </ul>
-    </div>
+    <div class="chapter-title">5. Suporte, Ouvidoria e Ranking</div>
 
     <button class="accordion">
-      <span><span class="material-icons icon-topic">date_range</span> Gestão de Turmas e Dias da Semana</span>
+      <span><span class="material-icons icon-topic">admin_panel_settings</span> Como funciona a Ouvidoria Sigilosa? <span class="highlight-red">ALERTA</span></span>
       <span class="material-icons chevron">expand_more</span>
     </button>
     <div class="panel">
-      <p>A criação de aulas agora é guiada por <strong>Turmas Fixas</strong>:</p>
+      <p>O seu App possui um <strong>Canal de Compliance e Ouvidoria</strong> integrado para garantir a segurança de todos os atletas no tatame.</p>
       <ol>
-        <li>No Painel Administrativo, ao criar uma Nova Turma, você escolhe os dias exatos da semana utilizando
-          <strong>caixas de seleção (Checkboxes)</strong>.
-        </li>
-        <li>Essa turma alimentará automaticamente o widget de "Onde Treinar" dos alunos, exibindo essa academia como
-          aberta apenas nos dias marcados.</li>
+        <li>No canto inferior direito de qualquer tela, clique no botão flutuante de <strong>Suporte (Auscultadores)</strong>.</li>
+        <li>Ao selecionar o Tipo de Solicitação, além de relatar bugs e dúvidas, você terá acesso à categoria vermelha de <strong>Ouvidoria / Compliance</strong>.</li>
+        <li>Você pode submeter, de forma segura, <strong>Denúncias de Irregularidade</strong>, relatos de <strong>Assédio/Abuso</strong> ou suspeitas de <strong>Doping</strong>.</li>
+        <li>Todos os dados submetidos nestas categorias são tratados com sigilo absoluto pela Diretoria da sua Federação/Academia.</li>
       </ol>
     </div>
-
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">group_add</span> Adicionar Aluno Manual / Visitante na Aula</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p>Caso um aluno esteja sem celular no tatame ou seja uma aula experimental:</p>
-      <ol>
-        <li>Na tela da aula aberta (onde o PIN é exibido), clique no botão <strong>"Adicionar Aluno"</strong> (ícone com
-          sinal de +).</li>
-        <li>Digite o nome. O sistema listará alunos matriculados para check-in rápido.</li>
-        <li>Se for um não-aluno, digite o nome completo e selecione a opção azul
-          <strong>"Adicionar como Visitante"</strong> no final da lista.
-        </li>
-      </ol>
-    </div>
-
-    <div class="chapter-title">5. Performance e Suporte</div>
 
     <button class="accordion">
       <span><span class="material-icons icon-topic">emoji_events</span> Entendendo o Ranking e Pontuação</span>
@@ -522,16 +512,6 @@
           sistema.</li>
         <li>Em caso de empate no número de aulas, os alunos dividem a mesma colocação no pódio de forma justa.</li>
       </ul>
-    </div>
-
-    <button class="accordion">
-      <span><span class="material-icons icon-topic">help_outline</span> Dúvidas Frequentes</span>
-      <span class="material-icons chevron">expand_more</span>
-    </button>
-    <div class="panel">
-      <p><strong>Esqueci de registrar presença no dia da aula, e agora?</strong><br>
-      O sistema funciona em tempo real. Se a aula já foi encerrada pelo instrutor, não é possível fazer o check-in retroativo pelo aplicativo. Comunique o seu instrutor ou a administração para ajustes manuais na próxima aula.
-      </p>
     </div>
 
     <div class="chapter-title">6. Captação de Novos Alunos (Leads)</div>

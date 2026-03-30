@@ -51,7 +51,9 @@ Acompanhe a evolução, as metas e as próximas entregas do nosso sistema.
 ## 🔮 Fase 4: Automação, CRM e Compliance (FOCO ATUAL)
 - [x] **Expandir Hydration:** Aplicar blindagem anti-apagão nos CRUDs menores (Cursos, Locais, Vídeos, etc).
 - [x] **Histórico do Aluno (Dossiê/CRM Avançado):** Visão analítica e sintética (LTV total investido, tempo na turma, aulas assistidas, progressão de peso/graduação e pareceres para bolsas/descontos).
-- [ ] **Conteúdo de Aula Dinâmico:** Permitir que, além da Videoteca, possamos listar e selecionar "Cursos" e "Programas Técnicos" como Chips no momento de abertura da aula/chamada.
+- [x] **Conteúdo de Aula Dinâmico:** Permitir que, além da Videoteca, possamos listar e selecionar "Cursos" e "Programas Técnicos" como Chips no momento de abertura da aula/chamada.
+- [x] **Compliance/Canal Seguro:** Incluir os tópicos "Denúncia", "Doping" e "Assédio" no menu de envio de contato para suporte ao atleta.
+- [ ] **Sistema de Alerta Crítico (Compliance):** Disparo imediato de notificação (Email/WhatsApp API) para a diretoria quando houver envio de relatório sigiloso (Denúncia, Doping ou Assédio).
 - [ ] Check-in Antecipado: Permitir que o aluno agende a sua presença na grade de aulas com antecedência.
 - [ ] **Compliance:** Controle de Anuidade (Bloqueio em caso de inadimplência).
 - [ ] **Compliance:** Trava de inatividade por falta de presença no Congresso Oficial.

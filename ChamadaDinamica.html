@@ -1,5 +1,3 @@
-
-
 <style>
   .chamada-wrapper {
     padding: 20px;
@@ -798,7 +796,7 @@
                   dl.innerHTML += `<option value="${tituloSeguro}${mod}">`; 
               }); 
           }
-      }).withFailureHandler(err => window.errApp("Erro Conteúdos", err)).listarVideosAdmin();
+      }).withFailureHandler(err => window.errApp("Erro Conteúdos", err)).getConteudoMulticanal(); // 🔥 ÚNICA PALAVRA ALTERADA AQUI!
       
       // 🛡️ LIMPANDO A TELA NOVA
       document.getElementById('box-tags-conteudo-din').innerHTML = "";

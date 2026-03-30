@@ -3918,3 +3918,65 @@ function getDossierAlunoAdmin(login) {
     return { success: false, msg: e.message };
   }
 }
+
+// ============================================================================
+// 🥋 MOTOR MULTICANAL DE CONTEÚDOS (CHAMADA DINÂMICA)
+// ============================================================================
+function getConteudoMulticanal() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let conteudos = [];
+
+    // 1. VIDEOTECA (Filtrando Ativos)
+    const sheetVid = ss.getSheetByName("Config_Videoteca");
+    if (sheetVid) {
+      const dataVid = sheetVid.getDataRange().getValues();
+      if (dataVid.length > 1) {
+        dataVid.slice(1).forEach(row => {
+          if (String(row[5]).trim().toLowerCase() === 'ativo' && row[1]) {
+            // Entrega titulo e modalidade (coluna 4)
+            conteudos.push({ titulo: "🎥 Vídeo: " + String(row[1]).trim(), modalidade: String(row[4] || "") });
+          }
+        });
+      }
+    }
+
+    // 2. CURSOS (Filtrando Eventos Ativos)
+    const sheetCur = ss.getSheetByName("Cursos");
+    if (sheetCur) {
+      const dataCur = sheetCur.getDataRange().getValues();
+      if (dataCur.length > 1) {
+        dataCur.slice(1).forEach(row => {
+          // Status na Coluna F (5), Nome na Coluna A (0)
+          if (String(row[5]).trim().toLowerCase() === 'ativo' && row[0]) {
+            conteudos.push({ titulo: "🏆 Curso: " + String(row[0]).trim(), modalidade: "Evento Especial" });
+          }
+        });
+      }
+    }
+
+    // 3. PROGRAMAS TÉCNICOS (Filtrando PDFs válidos)
+    const sheetProg = ss.getSheetByName("Config_Programas");
+    if (sheetProg) {
+      const dataProg = sheetProg.getDataRange().getValues();
+      if (dataProg.length > 1) {
+        dataProg.slice(1).forEach(row => {
+          const idArq = String(row[1]).trim().toLowerCase();
+          if (idArq !== 'indisponivel' && idArq !== '' && row[0]) {
+            const desc = row[4] ? " - " + String(row[4]).trim() : "";
+            // Modalidade na Coluna D (3)
+            conteudos.push({ titulo: "📄 Prog: " + String(row[0]).trim() + desc, modalidade: String(row[3] || "") });
+          }
+        });
+      }
+    }
+
+    // Ordena alfabeticamente para agrupar os Emojis no Select
+    conteudos.sort((a, b) => a.titulo.localeCompare(b.titulo));
+    return conteudos;
+
+  } catch (e) {
+    console.error("Erro no getConteudoMulticanal:", e);
+    return [];
+  }
+}
