@@ -30,27 +30,29 @@ Acompanhe a evolução, as metas e as próximas entregas do nosso sistema.
 - [x] Modularizar a tela de Dashboard (Escolher quem vê qual card via níveis de acesso RBAC).
 - [x] Aluno Multimodalidade (Filtrar vídeos e programas baseados nas modalidades cruzadas).
 
-## 🎯 Fase 2.5: Máquina de Vendas e Automação de Base (FOCO ATUAL)
+## 🎯 Fase 2.5: Máquina de Vendas e Automação de Base (Concluído)
 - [x] **Agendamento Dinâmico (Leads):** Criar página externa para Visitantes agendarem Aulas Experimentais com Chips de Turmas.
 - [x] **Integração WhatsApp (Leads):** O agendamento da aula experimental dispara uma mensagem pré-formatada para o WhatsApp da unidade.
 - [x] **Função Auto-Setup e Verificação de Banco de Dados:** Criar uma função para validar e corrigir todas as abas e colunas.
-- [x] **Rodapé White-Label e Direitos:** Incluir em todas as páginas o atalho para a página do desenvolvedor. *
-- [x] **[🔥 ALTO ROI]Blindagem Ultra Militar para registea cada passo do código e erros por menor que sejam** Nenhum erro ou porcedimento pode ser silenciosos. A pagina Adm.html deve ter blindagem miltar desde de seu acesso a sua saida. 
-- [x] **[🔥 ALTO ROI]Implementar Controle MultiAcademia e mono Academia para ADm (Estilo Franquia):** Um usuario ADM só podera acessar a academia que estiver vinclulada ano seu cadastro dentro da coluna academia_vinclulada. Assimum franqueador podera ver todoas as acedemias se no seu cadastro estiver escrito 'todas' e seus franqueados so poderam ver duas ou mais acadeoias se estiver escrito o nome dela na coluna 'academias_vinclualdas'. (revisar Código.gs, Adm.html e GestãoAlunos.html)
-- [x] **[🔥 ALTO ROI] Crud Formas de pagamento:** Cada acedemia deve ter as suas forma de pagamento cadastrada . Nenhuma forma de pagamento pode ser hardcode (revisar Código.gs, Adm.html e Finaiceiro.html)
-- [x] **[🔥 ALTO ROI] Crud Categoria Finaiceira:** Tipo (Se mensalidade, aluguel, pacote procional, curso, despesa propoganda, etc) e dizer se é um despsa ou receita, de qual academia esta vinculda, se uma ou todas, a data de vencimento ou recimento  e o status se esta paga /  recebida ou pendente. Criar um relatori analitivo fiultardo por data, academia, tipo e status. Revisar (Código,gs, Financeiro.html, Adm.html)
-- [ ] Incluir no campo senha a opçõa do suario visualiza senha digitar ants de confirmar
-- 
+- [x] **Rodapé White-Label e Direitos:** Incluir em todas as páginas o atalho para a página do desenvolvedor.
+- [x] **[🔥 ALTO ROI] Blindagem Ultra Militar:** Registrar cada passo do código e erros para que nenhum procedimento seja silencioso (Trilha de Auditoria).
+- [x] **[🔥 ALTO ROI] Implementar Controle MultiAcademia e Mono Academia (Estilo Franquia):** Filtro de visibilidade de dados baseado na coluna `academia_vinculada` do usuário.
+- [x] **[🔥 ALTO ROI] Crud Formas de Pagamento:** Cada academia gere as suas formas de recebimento. Fim do Hardcode.
+- [x] **[🔥 ALTO ROI] Crud Categoria Financeira:** Regras para despesas/receitas vinculadas a unidades específicas.
+- [x] Incluir no campo senha a opção do usuário visualizar a senha digitada antes de confirmar (Olhinho da Senha).
 
-## 💰 Fase 3: Inteligência Financeira e Relatórios (Próximos Passos - Foco Emilly)
-- [x ]Nova Aba "Relatórios" no Adm.html:** Central de Inteligência com relatórios de Cadastros, Inadimplência e Lotação de Turmas.
-- [ x] Contas a Pagar e Receber:** Lançamento de despesas (aluguel, repasse de professores) e receitas cruzadas.
-- [ x] Dashboard de Previsões (Financeiro.html):** Visão de Faturamento Previsto vs. Realizado.
+## 💰 Fase 3: Inteligência Financeira e Relatórios (Em Andamento)
+- [x] **Nova Aba "Relatórios" no Adm.html:** Central de Inteligência com relatórios de Cadastros, Inadimplência e Lotação de Turmas.
+- [x] **Contas a Pagar e Receber:** Lançamento de despesas (aluguel, repasse) e receitas cruzadas.
+- [x] **Dashboard de Previsões (Financeiro.html):** Visão de Faturamento Previsto vs. Realizado (Saldo Final).
+- [ ] Gerar Relatório Específico de Inadimplentes (Focado na Régua de Cobrança).
+- [ ] Gerar Relatório de Alunos "Fantasmas" (Alunos sem Turma vinculada e sem Assinatura de Pacote).
 
-## 🔮 Fase 4: Automação, CRM e Compliance
-- [x ] Expandir Hydration:** Aplicar blindagem anti-apagão nos CRUDs menores (Alunos, financeiros, Cursos, Locais, Vídeos, etc).
+## 🔮 Fase 4: Automação, CRM e Compliance (FOCO ATUAL)
+- [x] **Expandir Hydration:** Aplicar blindagem anti-apagão nos CRUDs menores (Cursos, Locais, Vídeos, etc).
+- [x] **Histórico do Aluno (Dossiê/CRM Avançado):** Visão analítica e sintética (LTV total investido, tempo na turma, aulas assistidas, progressão de peso/graduação e pareceres para bolsas/descontos).
+- [ ] **Conteúdo de Aula Dinâmico:** Permitir que, além da Videoteca, possamos listar e selecionar "Cursos" e "Programas Técnicos" como Chips no momento de abertura da aula/chamada.
 - [ ] Check-in Antecipado: Permitir que o aluno agende a sua presença na grade de aulas com antecedência.
-- [ ] Histórico do Aluno (tempo na turma, aulas assistidas, conteúdo visualizado).
 - [ ] **Compliance:** Controle de Anuidade (Bloqueio em caso de inadimplência).
 - [ ] **Compliance:** Trava de inatividade por falta de presença no Congresso Oficial.
 - [ ] **Compliance:** Controle de Assiduidade em Treinos de Instrutores.
@@ -61,11 +63,18 @@ Acompanhe a evolução, as metas e as próximas entregas do nosso sistema.
 - [ ] Alertas Automáticos de Aniversário via API.
 - [ ] Criar alertas de limite de escalabilidade (Avisar QA/Dev quando o banco Sheets chegar a 50% da capacidade).
 
-## 🌐 Projetos Especiais (Customizações)
+## 🌐 Projetos Especiais (Customizações Institucionais)
 - [ ] Criar uma apresentação institucional do App para vender a outras academias.
-- [ ] Adaptação do sistema base para a **Confederação Pernambucana de Sambo**. 
 - [ ] Criar uma Landing Page comercial e direcionar o tráfego diretamente para a tela de Agendamento do App.
+- [ ] Adaptação do sistema base para a **Confederação Brasileira de Sambo (Pauta Março/2026):**
+  - [ ] **Módulo de Gestão de Eventos/Competições:** Coleta obrigatória de peso, tamanho de camisa para credenciamento.
+  - [ ] **Gestão de Comissões Oficiais:** Módulo de indicação de membros com controle de prazos para as federações estaduais.
+  - [ ] **Padronização Sistêmica de Exames de Faixa:** Workflow de aprovação pelas federações (Trava de aprovação por nível).
+  - [ ] **Módulo de Compliance e Documentação (GED):** Upload e gestão de estatutos, alvarás e atestados médicos com semáforo de status.
+  - [ ] **Motor de Ranking Nacional Dinâmico:** Lançamento de resultados de eventos e cálculo automático de ranking pontuado.
+  - [ ] **Trilha de Carreira para Árbitros e Técnicos:** Cadastro de níveis de formação (ex: Nível 1, 2, 3) e travas de inscrição.
+  - [ ] **Centro de Custos Específico para Projetos (Leis de Incentivo):** Tags de projetos nas transações financeiras para exportação rápida de prestação de contas.
 
-- Fase 6:
-- [ ] Implentar uma base de dados friebase google
-- [ ] Implentamentear login com o google
+## 🚀 Fase 6: Escalabilidade e Nuvem
+- [ ] Implementar uma base de dados estruturada Firebase (Google).
+- [ ] Implementar login OAuth 2.0 (Google Login).
