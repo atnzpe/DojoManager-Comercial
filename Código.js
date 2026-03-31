@@ -142,7 +142,7 @@ function verificarCriarAbasSistema() {
   // 🗺️ O Dicionário da Verdade (Single Source of Truth)
   const estrutura = [
     { nome: "cadastro_de_alunos", colunas: ["Carimbo de data/hora", "Endereço de e-mail", "Nome Completo", "Data de Nascimento", "Peso", "Altura", "Telefone", "CPF", "Nome do Pai", "Nome da Mãe", "Endereço", "Turma Vinculada", "Academia Vinculada", "LOGIN", "Senha", "GRADUACAO_ATUAL", "Foto 3x4 (para a carteirinha)", "Data Ultima Carteirinha", "STATUS", "PROX_GRADUACAO", "Nível do Praticante", "NivelAdministrativo", "Modalidade", "Data Próximo Exame"] },
-    { nome: "Locais_de_treino", colunas: ["Nome do Local", "Endereço", "Cidade/Estado", "Contato", "Link_Google_Maps", "html_mapa_off_lline", "Responsavel", "Status", "Pix_Chave_Local_de_Treino", "Pix_Nome_Local_de_Treino", "Banco_Local_de_Treino", "btn_pix_copia_e_cola_Local_de_Treino", "Ativo", "Pix_Cidade_Local_de_Treino"] },
+    { nome: "Locais_de_treino", colunas: ["Nome do Local", "Endereço", "Cidade/Estado", "Contato", "Link_Google_Maps", "html_mapa_off_lline", "Responsavel", "Status", "Pix_Chave_Local_de_Treino", "Pix_Nome_Local_de_Treino", "Banco_Local_de_Treino", "btn_pix_copia_e_cola_Local_de_Treino", "Ativo", "Pix_Cidade_Local_de_Treino", "Email_Contato", "Email_Compliance"] },
     { nome: "Config_Turmas", colunas: ["ID_Turma", "Nome da Turma", "Modalidade", "Faixa Etária", "Local Vinculado", "Dias da Semana", "Horário Início", "Horário Fim", "Status", "Responsável", "Telefone"] },
     { nome: "Config_App", colunas: ["Logo_URL", "Fundo_URL", "Cor_Fundo", "Cor_Primaria", "Cor_Secundaria", "Cor_Texto", "Cor_Texto_Botao", "Link_Loja", "Link_Instagram", "Link_YouTube", "Link_Cadastro", "Nome_Academia", "Pix_Global_Ativo", "Pix_Chave_Global", "Pix_Nome", "Nome_Banco_PIX_Global", "Pix_Cidade"] },
     { nome: "Fin_Transacoes", colunas: ["ID_Transacao", "Data_Registro", "Tipo", "Categoria", "Descricao", "Valor", "Forma_Pagto", "Responsavel", "Login_Aluno", "Academia_Ref", "Status", "Comprovante_Url", "Modalidade"] },
@@ -1397,6 +1397,8 @@ function salvarLocal(form) {
       "Nome do Local": form.loc_nome,
       "Responsavel": form.loc_resp,
       "Status": form.loc_status,
+      "Email_Contato": form.loc_email_contato,
+      "Email_Compliance": form.loc_email_compliance,
       "Cidade/Estado": form.loc_cidade,
       "Endereço": form.loc_end,
       "Contato": form.loc_contato,
@@ -1732,12 +1734,86 @@ function atualizarFotoPerfil(form) {
   } catch (e) { throw new Error(e.message); }
 }
 
+// ============================================================================
+// 🚨 O MOTOR INTELIGENTE DE SUPORTE E ALERTA CRÍTICO (COMPLIANCE 100% SEGURO)
+// ============================================================================
 function salvarTicketSuporte(form) {
   try {
-    const dados = { "Data/Hora": new Date(), "Login": "'" + form.sup_login, "Nome": form.sup_nome, "Tipo": form.sup_tipo, "Assunto": form.sup_assunto, "Mensagem": form.sup_msg, "Status": "Aberto" };
-    salvarDadosSeguro("Suporte", dados);
-    return "✅ Mensagem enviada!";
-  } catch (e) { throw new Error(e.message); }
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheetSup = ss.getSheetByName("Suporte");
+    if (!sheetSup) throw new Error("Aba Suporte não encontrada.");
+
+    const dataHora = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
+
+    // 1. DADOS BRUTOS DO FORMULÁRIO
+    const isAnonimo = (form.sup_anonimo === "Sim");
+    const tipo = form.sup_tipo || "Geral";
+    const academia = form.sup_academia || "Não informada";
+    const mensagemOriginal = form.sup_msg || "";
+    const isCritico = ["Denúncia", "Assédio", "Doping"].includes(tipo);
+
+    // 2. BLINDAGEM DE IDENTIDADE (Se for anônimo, nem Deus sabe quem foi)
+    const loginPlanilha = isAnonimo ? "SIGILOSO" : (form.sup_login || "Desconhecido");
+    const nomePlanilha = isAnonimo ? "Atleta Anônimo" : (form.sup_nome || "Anônimo");
+
+    // 3. BLINDAGEM DE CONTEÚDO (A Regra de Ouro do Compliance)
+    // Se for denúncia grave, a planilha recebe uma tarja. Se for dúvida comum, salva o texto normal.
+    const mensagemParaPlanilha = isCritico
+      ? "⚠️ [CONTEÚDO SIGILOSO] - O relato detalhado foi enviado exclusivamente para o E-mail de Compliance da unidade."
+      : mensagemOriginal;
+
+    // GRAVA NA PLANILHA DE FORMA SEGURA E AUDITÁVEL
+    sheetSup.appendRow([dataHora, loginPlanilha, nomePlanilha, tipo, "Unidade: " + academia, mensagemParaPlanilha, "Aberto"]);
+
+    // ==========================================
+    // 4. ROTEAMENTO DE E-MAIL (O DISPARO OFICIAL)
+    // ==========================================
+    const sheetLocais = ss.getSheetByName("Locais_de_treino");
+    let emailDestino = "";
+
+    if (sheetLocais) {
+      const dataLocais = sheetLocais.getDataRange().getValues();
+      const headers = dataLocais[0];
+
+      const idxNomeLocal = headers.findIndex(h => String(h).trim().toLowerCase() === "nome do local");
+      const idxEmailContato = headers.findIndex(h => String(h).trim().toLowerCase() === "email_contato" || String(h).trim().toLowerCase() === "email contato");
+      const idxEmailCompliance = headers.findIndex(h => String(h).trim().toLowerCase() === "email_compliance" || String(h).trim().toLowerCase() === "email compliance");
+
+      if (idxNomeLocal > -1) {
+        const localRow = dataLocais.find(row => String(row[idxNomeLocal]).trim().toLowerCase() === academia.trim().toLowerCase());
+
+        if (localRow) {
+          // Manda para o canal exato daquela unidade
+          if (isCritico && idxEmailCompliance > -1 && localRow[idxEmailCompliance]) {
+            emailDestino = String(localRow[idxEmailCompliance]).trim();
+          } else if (!isCritico && idxEmailContato > -1 && localRow[idxEmailContato]) {
+            emailDestino = String(localRow[idxEmailContato]).trim();
+          }
+        }
+      }
+    }
+
+    if (emailDestino !== "") {
+      let subjectEmail = `[DojoManager Suporte] Solicitação: ${tipo} (${academia})`;
+      if (isCritico) subjectEmail = `🚨 [URGENTE - COMPLIANCE] Relato de ${tipo} - Unidade: ${academia}`;
+
+      let bodyEmail = `Olá,\n\nUm novo relato foi registrado no sistema DojoManager para a sua unidade.\n\n`;
+      bodyEmail += `👤 Emitente: ${nomePlanilha} ${isAnonimo ? '' : '(@' + loginPlanilha + ')'}\n`;
+      bodyEmail += `🏢 Unidade Ocorrida: ${academia}\n`;
+      bodyEmail += `🏷️ Classificação: ${tipo}\n`;
+      bodyEmail += `📅 Data do Registro: ${dataHora}\n\n`;
+      // O e-mail DEVE receber a mensagem original para a diretoria atuar
+      bodyEmail += `--- MENSAGEM DO RELATO ---\n"${mensagemOriginal}"\n---------------------------\n\n`;
+      bodyEmail += `Acesse o painel administrativo para atualizar o status deste protocolo.\n`;
+      bodyEmail += `(Mensagem automática gerada pelo sistema de Ouvidoria DojoManager)`;
+
+      GmailApp.sendEmail(emailDestino, subjectEmail, bodyEmail);
+    }
+
+    return { success: true, msg: "Mensagem enviada com sucesso! Protocolo registrado de forma segura." };
+  } catch (e) {
+    return { success: false, msg: e.message };
+  }
 }
 
 // ============================================================================
@@ -3978,5 +4054,72 @@ function getConteudoMulticanal() {
   } catch (e) {
     console.error("Erro no getConteudoMulticanal:", e);
     return [];
+  }
+}
+
+function autorizarEmail() {
+  GmailApp.sendEmail(Session.getActiveUser().getEmail(), "Permissão OK", "O sistema agora pode enviar e-mails!");
+}
+
+// ============================================================================
+// 🛡️ API DA OUVIDORIA E SUPORTE (COM TRAVA DE FRANQUIA)
+// ============================================================================
+function listarSuporteAdmin(login) {
+  try {
+    const auth = getPermissoesUsuario(login);
+    const sheet = getSheet("Suporte");
+    const data = sheet.getDataRange().getDisplayValues();
+    if (data.length < 2) return [];
+
+    const headers = data[0].map(h => String(h).trim().toLowerCase());
+    const colData = headers.indexOf("data/hora");
+    const colNome = headers.indexOf("nome");
+    const colTipo = headers.indexOf("tipo");
+    const colAssunto = headers.indexOf("assunto");
+    const colMsg = headers.indexOf("mensagem");
+    const colStatus = headers.indexOf("status");
+
+    const chamados = [];
+    for (let i = 1; i < data.length; i++) {
+      // Extrai o nome da unidade que está escrito na coluna "Assunto"
+      const unidadeOriginal = String(data[i][colAssunto]).replace("Unidade:", "").trim();
+      const unidadeBusca = unidadeOriginal.toLowerCase();
+
+      // Trava de segurança: Ele é dono desta unidade?
+      const temPermissao = auth.isMaster || auth.academias.some(myAcad => unidadeBusca.includes(myAcad));
+
+      if (temPermissao) {
+        const tipoChamado = String(data[i][colTipo]).trim();
+        const isCritico = ["Denúncia", "Assédio", "Doping"].includes(tipoChamado);
+
+        chamados.push({
+          linha: i + 1,
+          data: data[i][colData],
+          nome: data[i][colNome] || "Anônimo",
+          tipo: tipoChamado,
+          isCritico: isCritico,
+          unidade: unidadeOriginal,
+          mensagem: data[i][colMsg] || "---",
+          status: data[i][colStatus] || "Aberto"
+        });
+      }
+    }
+    // Retorna do mais recente para o mais antigo
+    return chamados.reverse();
+  } catch (e) {
+    return [];
+  }
+}
+
+function mudarStatusSuporte(linha, novoStatus) {
+  try {
+    const sheet = getSheet("Suporte");
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim().toLowerCase());
+    const colStatus = headers.indexOf("status") + 1; // +1 porque o getRange começa em 1
+
+    sheet.getRange(parseInt(linha), colStatus).setValue(novoStatus);
+    return { success: true };
+  } catch (e) {
+    return { success: false, msg: e.message };
   }
 }

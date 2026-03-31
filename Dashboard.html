@@ -478,12 +478,12 @@
           <span class="material-icons" style="vertical-align:bottom; color:var(--dynamic-prim);">admin_panel_settings</span>
           Suporte e Ouvidoria
         </h3>
-        <button onclick="fecharModalAjuda()" style="background:none; border:none; cursor:pointer; color:var(--dynamic-text); opacity:0.6;">
+        <button type="button" onclick="fecharModalAjuda()" style="background:none; border:none; cursor:pointer; color:var(--dynamic-text); opacity:0.6;">
           <span class="material-icons">close</span>
         </button>
       </div>
 
-      <button onclick="irParaManual()" style="width:100%; padding:15px; background-color:var(--dynamic-sec); color:var(--dynamic-text); border:2px solid var(--dynamic-prim); border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:20px; display:flex; align-items:center; justify-content:center; gap:10px; transition:0.2s;">
+      <button type="button" onclick="irParaManual()" style="width:100%; padding:15px; background-color:var(--dynamic-sec); color:var(--dynamic-text); border:2px solid var(--dynamic-prim); border-radius:8px; font-weight:bold; cursor:pointer; margin-bottom:20px; display:flex; align-items:center; justify-content:center; gap:10px; transition:0.2s;">
         <span class="material-icons">menu_book</span> LER MANUAL DO APP
       </button>
 
@@ -491,24 +491,37 @@
         <input type="hidden" name="sup_login" id="sup_login">
         <input type="hidden" name="sup_nome" id="sup_nome">
 
+        <label style="color: var(--dynamic-text); font-size: 11px; font-weight: bold; margin-bottom: 5px; display: block; opacity: 0.8; text-transform: uppercase;">1. Tipo de Solicitação</label>
         <select name="sup_tipo" style="width:100%; padding:12px; margin-bottom:12px; background:rgba(0,0,0,0.3); color:var(--dynamic-text); border:1px solid rgba(255,255,255,0.2); border-radius:6px; font-size: 14px;" required>
           <option value="" disabled selected>Classifique o seu contato...</option>
-          
           <optgroup label="Atendimento Comum" style="background:var(--dynamic-sec); color:#fff;">
             <option value="Dúvida">💬 Dúvida Geral</option>
             <option value="Erro">🐛 Relatar Erro no App</option>
           </optgroup>
-          
           <optgroup label="Ouvidoria / Compliance (Sigiloso)" style="background:var(--dynamic-sec); color:#ff5252;">
             <option value="Denúncia">🚨 Denúncia de Irregularidade</option>
             <option value="Assédio">🛑 Relato de Assédio / Abuso</option>
             <option value="Doping">💊 Suspeita de Doping / Antidopagem</option>
           </optgroup>
         </select>
-
+        <label style="color: var(--dynamic-text); font-size: 11px; font-weight: bold; margin-bottom: 5px; display: block; opacity: 0.8; text-transform: uppercase;">2. Selecione a Unidade Ocorrida</label>
+        <select name="sup_academia" id="sup_academia" style="width:100%; padding:12px; margin-bottom:15px; background:rgba(0,0,0,0.3); color:var(--dynamic-text); border:1px solid rgba(255,255,255,0.2); border-radius:6px; font-size: 14px;" required>
+          <option value="" disabled selected>Carregando unidades...</option>
+        </select>
         <textarea name="sup_msg" style="width:100%; padding:12px; background:rgba(0,0,0,0.3); color:var(--dynamic-text); border:1px solid rgba(255,255,255,0.2); border-radius:6px; margin-bottom:15px;" rows="4" placeholder="Descreva a situação. Se for uma denúncia, garantimos sigilo absoluto no tratamento dos dados..." required></textarea>
 
-        <button type="submit" style="width:100%; padding:15px; background-color:var(--dynamic-prim); color:var(--dynamic-btn-text); border:none; border-radius:8px; font-weight:900; cursor:pointer; text-transform:uppercase; transition:0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+        <div
+          style="margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; border-left: 3px solid #ff5252;">
+          <label style="color: var(--dynamic-text); font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: bold;">
+            <input type="checkbox" name="sup_anonimo" value="Sim" style="width: 18px; height: 18px; accent-color: #ff5252; cursor: pointer;">
+            Quero que minha denúncia seja 100% Anônima.
+          </label>
+          <small style="color: #aaa; font-size: 11px; margin-left: 26px; display: block; margin-top: 4px;">
+            Seus dados (Nome e Login) <b>não serão enviados no e-mail</b> e <b>não serão salvos no banco de dados</b>.
+          </small>
+        </div>
+
+        <button type="submit" style="width:100%; padding:15px; background-color:var(--dynamic-prim); color:var(--dynamic-btn-text); border:none; border-radius:8px; font-weight:900; cursor: pointer; text-transform:uppercase; transition:0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
           ENVIAR MENSAGEM
         </button>
       </form>
@@ -845,8 +858,17 @@
         if(currentUser) { 
             document.getElementById('sup_login').value = currentUser.LOGIN || ""; 
             document.getElementById('sup_nome').value = currentUser.nomeCompleto || ""; 
+            
+            // Carrega as academias vinculadas ao aluno
+            const selAcad = document.getElementById('sup_academia');
+            if(selAcad) {
+              selAcad.innerHTML = '<option value="" disabled selected>Carregando...</option>';
+              google.script.run.withSuccessHandler(function(acads) {
+                selAcad.innerHTML = '<option value="" disabled selected>Selecione a Unidade...</option>';
+                acads.forEach(a => selAcad.innerHTML += `<option value="${a}">${a}</option>`);
+              }).getListaAcademias(currentUser.LOGIN);
+            }
         } 
-        // Usa setProperty para forçar e sobrescrever a trava inline '!important'
         document.getElementById('modal-ajuda').style.setProperty('display', 'flex', 'important'); 
     }
 
@@ -861,19 +883,24 @@
     function enviarAjuda(e) {
       e.preventDefault(); 
       const btn = e.target.querySelector('button[type="submit"]'); 
+      const textoOriginal = btn.innerText;
       btn.innerText = "ENVIANDO..."; btn.disabled = true;
       
-      // Forma blindada de envio
       const formData = {};
       new FormData(e.target).forEach((v,k) => formData[k] = v);
 
       google.script.run
         .withFailureHandler(err => {
            alert("Erro ao enviar: " + err.message);
-           btn.innerText = "ENVIAR MENSAGEM"; btn.disabled = false;
+           btn.innerText = textoOriginal; btn.disabled = false;
         })
         .withSuccessHandler(res => { 
-          alert("Enviado com sucesso!"); fecharModalAjuda(); btn.innerText = "ENVIAR MENSAGEM"; btn.disabled = false;
+          alert(res.msg || "Enviado com sucesso!"); 
+          fecharModalAjuda(); 
+          btn.innerText = textoOriginal; 
+          btn.disabled = false;
+          // 🔥 AQUI LIMPA O FORMULÁRIO (APAGA O TEXTO) 🔥
+          e.target.reset(); 
       }).salvarTicketSuporte(formData);
     }
 

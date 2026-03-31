@@ -509,9 +509,12 @@
       Biblioteca</div>
     <div class="adm-nav-item" onclick="window.navAdmin('programas')"><span class="material-icons">description</span>
       Programas</div>
-    <div class="adm-nav-item" onclick="window.navAdmin('certificados')">
-      <span class="material-icons">workspace_premium</span> Certificados
+    <div class="adm-nav-item" onclick="window.navAdmin('certificados')"><span class="material-icons">workspace_premium</span> Certificados
     </div>
+
+    <div class="adm-nav-item" onclick="window.navAdmin('suporte')"><span class="material-icons" style="color: #ff5252;">support_agent</span> Ouvidoria
+    </div>
+
     <div class="adm-nav-item" onclick="window.navAdmin('config')"><span class="material-icons">settings</span> Config
     </div>
     <div class="adm-nav-item" style="margin-left: auto; border-left: 1px solid #333;" onclick="window.fecharAdmin()">
@@ -716,8 +719,7 @@
       <tbody id="lista-pagamentos-body"></tbody>
     </table>
   </div>
-
-  //Aba Gestão Alunos
+  
   <div id="adm-tab-alunos" class="adm-tab-content">
     <div class="adm-h3">Gestão de Alunos (Módulo CRM)
       <div style="display:flex; gap:10px;">
@@ -920,6 +922,35 @@
     </div>
   </div>
 
+  <!--Aba Complice-->
+  <div id="adm-tab-suporte" class="adm-tab-content">
+    <div class="adm-h3">
+      Central de Atendimento e Ouvidoria
+      <button class="adm-btn adm-btn-outline" onclick="window.carregarSuporte()">
+        <span class="material-icons" style="font-size:16px;">refresh</span> Atualizar
+      </button>
+    </div>
+    
+    <div style="background: #fff3f3; border-left: 4px solid #ff5252; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-size: 12px; color: #333;">
+      <b>🛡️ MODO DE SIGILO ATIVADO:</b> Por regras de Compliance, mensagens de Denúncia, Assédio ou Doping são ocultadas deste painel. O texto real é enviado <b>exclusivamente para o E-mail de Compliance</b> da unidade. Use este painel apenas para atualizar o status do chamado.
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th>Data e Unidade</th>
+            <th>Atleta e Classificação</th>
+            <th>Mensagem / Relato</th>
+            <th>Status do Protocolo</th>
+          </tr>
+        </thead>
+        <tbody id="lista-suporte-body">
+           </tbody>
+      </table>
+    </div>
+  </div>
+
   <div id="adm-tab-certificados" class="adm-tab-content">
     <div class="adm-h3">Gestão de
       Certificados<button class="adm-btn" onclick="window.abrirModalCert()"><span class="material-icons" style="font-size:16px;">add</span> Novo Certificado</button>
@@ -1026,6 +1057,8 @@
     </form>
   </div>
 
+  
+
 </div>
 
 <script>
@@ -1112,8 +1145,10 @@
           if(tabName === 'programas') window.carregarProg();
           if(tabName === 'config') window.carregarConfig();
           if(tabName === 'certificados') window.carregarCertificados();
+          if(tabName === 'suporte') window.carregarSuporte();
           if(tabName === 'turmas') window.carregarTurmas();
           if(tabName === 'fin_config') window.carregarConfigFinanceira();
+          if(tabName === 'suporte') window.carregarSuporte();
           
           window.sentinelaAdmin("NAVEGADOR", "SUCESSO", "Navegação concluída.");
       } catch(e) { window.sentinelaAdmin("navAdmin", "ERRO", e.message); }
@@ -2549,8 +2584,38 @@
       try { window.abrirModalProg(); const i = document.getElementById('prog_id'); if(i) i.value=p.id; window.popularFaixasSelect('prog_faixa', p.faixa); const l = document.getElementById('prog_link'); if(l) l.value=p.link_original || ""; const d = document.getElementById('prog_desc'); if(d) d.value=p.descricao || ""; setTimeout(()=>{ const mEl = document.getElementById('prog_mod'); if(mEl) mEl.value = p.modalidade || "Geral"; }, 500); } catch(e) {}
   };
 
-  window.carregarLocais = function() { 
-      try { window.sentinelaAdmin("carregarLocais", "INFO", "Buscando Locais..."); const tb = document.getElementById('lista-locais-body'); if(!tb) return; tb.innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; google.script.run.withSuccessHandler(lista => { window.cacheAdmin.locais = lista; tb.innerHTML = lista.map(l => `<tr><td><b>${window.esc(l.nome)}</b><br><small>${window.esc(l.cidade)}</small></td><td>${window.esc(l.contato)}<br><small>Resp: ${window.esc(l.responsavel)}</small></td><td><span class="adm-badge ${l.status === 'Ativo' ? 'bg-green' : 'bg-red'}">${l.status}</span><br><span style="font-size:10px; color:#888;">PIX: ${l.pixChave ? '✅' : '❌'}</span></td><td><button class="adm-btn" onclick='window.prepEditLocal(${JSON.stringify(l)})'>EDITAR</button></td></tr>`).join(''); }).listarLocaisAdmin(window.editorLogin); } catch(e) { window.sentinelaAdmin("carregarLocais", "ERRO", e.message); }
+  window.carregarLocais = function() {
+    try { 
+        window.sentinelaAdmin("carregarLocais", "INFO", "Buscando Locais..."); 
+        const tb = document.getElementById('lista-locais-body'); 
+        if(!tb) return; 
+        tb.innerHTML = '<tr><td colspan="4" style="text-align:center">Sincronizando...</td></tr>'; 
+        
+        google.script.run.withSuccessHandler(lista => { 
+            window.cacheAdmin.locais = lista; 
+            tb.innerHTML = lista.map(l => `
+              <tr>
+                <td>
+                  <b>${window.esc(l.nome)}</b><br>
+                  <small>${window.esc(l.cidade)}</small>
+                </td>
+                <td>
+                  📞 ${window.esc(l.contato)} <small>(Resp: ${window.esc(l.responsavel)})</small><br>
+                  <small style="color:#2196f3;">✉️ ${window.esc(l.emailContato || 'Sem e-mail')}</small><br>
+                  <small style="color:#ef4444;">🚨 ${window.esc(l.emailCompliance || 'Sem compliance')}</small>
+                </td>
+                <td>
+                  <span class="adm-badge ${l.status === 'Ativo' ? 'bg-green' : 'bg-red'}">${l.status}</span><br>
+                  <span style="font-size:10px; color:#888;">PIX: ${l.pixChave ? '✅' : '❌'}</span>
+                </td>
+                <td>
+                  <button class="adm-btn" onclick='window.prepEditLocal(${JSON.stringify(l)})'>EDITAR</button>
+                </td>
+              </tr>`).join(''); 
+        }).listarLocaisAdmin(window.editorLogin); 
+    } catch(e) { 
+        window.sentinelaAdmin("carregarLocais", "ERRO", e.message); 
+    }
   };
 
   window.openModalLocal = function() { 
@@ -2558,7 +2623,35 @@
   };
 
   window.prepEditLocal = function(l) { 
-      try { window.openModalLocal(); const setValOrEmpty = (id, val) => { const el = document.getElementById(id); if(!el) return; el.value = (val === undefined || val === null) ? "" : String(val).trim(); }; setValOrEmpty('loc_id', l.id); setValOrEmpty('loc_nome', l.nome); setValOrEmpty('loc_resp', l.responsavel); const st = document.getElementById('loc_status'); if(st) st.value = l.status || "Ativo"; setValOrEmpty('loc_cidade', l.cidade); setValOrEmpty('loc_end', l.endereco); setValOrEmpty('loc_contato', l.contato); setValOrEmpty('loc_maps', l.linkMaps); setValOrEmpty('loc_iframe', l.iframeHtml); setValOrEmpty('loc_pix_chave', l.pixChave); setValOrEmpty('loc_pix_nome', l.pixNome); setValOrEmpty('loc_pix_banco', l.pixBanco); setValOrEmpty('loc_pix_cidade', l.pixCidade); } catch(e) {}
+      try {
+        window.openModalLocal();
+        const setValOrEmpty = (id, val) => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.value = (val === undefined || val === null) ? "" : String(val).trim();
+        };
+        setValOrEmpty('loc_id', l.id);
+        setValOrEmpty('loc_nome', l.nome);
+        setValOrEmpty('loc_resp', l.responsavel);
+        
+        const st = document.getElementById('loc_status');
+        if(st) st.value = l.status || "Ativo";
+        
+        setValOrEmpty('loc_cidade', l.cidade);
+        setValOrEmpty('loc_end', l.endereco);
+        setValOrEmpty('loc_contato', l.contato);
+        
+        // 🔥 AS DUAS LINHAS NOVAS DOS E-MAILS 🔥
+        setValOrEmpty('loc_email_contato', l.emailContato);
+        setValOrEmpty('loc_email_compliance', l.emailCompliance);
+        
+        setValOrEmpty('loc_maps', l.linkMaps);
+        setValOrEmpty('loc_iframe', l.iframeHtml);
+        setValOrEmpty('loc_pix_chave', l.pixChave);
+        setValOrEmpty('loc_pix_nome', l.pixNome);
+        setValOrEmpty('loc_pix_banco', l.pixBanco);
+        setValOrEmpty('loc_pix_cidade', l.pixCidade);
+        } catch(e) {}
   };
 
   window.carregarCursos = function() { 
@@ -3138,5 +3231,99 @@ window.preencherValorPorPacoteModal = function() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+  };
+
+  // =========================================================
+  // 🛡️ MOTOR DE OUVIDORIA E SUPORTE
+  // =========================================================
+  window.carregarSuporte = function() {
+      try {
+          const tb = document.getElementById('lista-suporte-body');
+          if(!tb) return;
+          tb.innerHTML = '<tr><td colspan="4" style="text-align:center;"><span class="material-icons spin">sync</span> Carregando chamados...</td></tr>';
+          
+          google.script.run
+              .withFailureHandler(err => { tb.innerHTML = `<tr><td colspan="4" style="color:red;text-align:center;">Erro: ${err.message}</td></tr>`; })
+              .withSuccessHandler(lista => {
+                  if(!lista || lista.length === 0) {
+                      tb.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Nenhum chamado registrado.</td></tr>';
+                      return;
+                  }
+                  tb.innerHTML = lista.map(c => {
+                      let corTipo = c.isCritico ? '#ff5252' : '#2196f3';
+                      let corStatus = c.status === 'Resolvido' ? 'bg-green' : (c.status === 'Em Andamento' ? 'bg-blue' : 'bg-red');
+                      
+                      return `
+                      <tr>
+                        <td><b>${window.esc(c.data)}</b><br><small style="color:#666;">${window.esc(c.unidade)}</small></td>
+                        <td><b>${window.esc(c.nome)}</b><br><span style="color:${corTipo}; font-weight:bold; font-size:11px;">${window.esc(c.tipo)}</span></td>
+                        <td style="max-width:300px; font-size:12px; color:#555;">${window.esc(c.mensagem)}</td>
+                        <td>
+                           <span class="adm-badge ${corStatus}" style="margin-bottom:8px;">${window.esc(c.status)}</span><br>
+                           <select class="adm-input" style="padding:4px; font-size:11px; width:auto; display:inline-block;" onchange="window.alterarStatusSuporte(${c.linha}, this.value)">
+                             <option value="" disabled selected>Alterar...</option>
+                             <option value="Aberto">Aberto</option>
+                             <option value="Em Andamento">Em Andamento</option>
+                             <option value="Resolvido">Resolvido</option>
+                           </select>
+                        </td>
+                      </tr>`;
+                  }).join('');
+              }).listarSuporteAdmin(window.editorLogin);
+      } catch(e) {}
+  };
+
+  window.alterarStatusSuporte = function(linha, novoStatus) {
+      if(!confirm(`Mudar o status para "${novoStatus}"?`)) { window.carregarSuporte(); return; }
+      google.script.run
+        .withSuccessHandler(res => { window.carregarSuporte(); })
+        .mudarStatusSuporte(linha, novoStatus);
+  };
+
+  // =========================================================
+  // 🛡️ MOTOR DE OUVIDORIA E SUPORTE
+  // =========================================================
+  window.carregarSuporte = function() {
+      try {
+          const tb = document.getElementById('lista-suporte-body');
+          if(!tb) return;
+          tb.innerHTML = '<tr><td colspan="4" style="text-align:center;"><span class="material-icons spin">sync</span> Carregando chamados...</td></tr>';
+          
+          google.script.run
+              .withFailureHandler(err => { tb.innerHTML = `<tr><td colspan="4" style="color:red;text-align:center;">Erro: ${err.message}</td></tr>`; })
+              .withSuccessHandler(lista => {
+                  if(!lista || lista.length === 0) {
+                      tb.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Nenhum chamado registrado.</td></tr>';
+                      return;
+                  }
+                  tb.innerHTML = lista.map(c => {
+                      let corTipo = c.isCritico ? '#ff5252' : '#2196f3';
+                      let corStatus = c.status === 'Resolvido' ? 'bg-green' : (c.status === 'Em Andamento' ? 'bg-blue' : 'bg-red');
+                      
+                      return `
+                      <tr>
+                        <td><b>${window.esc(c.data)}</b><br><small style="color:#666;">${window.esc(c.unidade)}</small></td>
+                        <td><b>${window.esc(c.nome)}</b><br><span style="color:${corTipo}; font-weight:bold; font-size:11px;">${window.esc(c.tipo)}</span></td>
+                        <td style="max-width:300px; font-size:12px; color:#555;">${window.esc(c.mensagem)}</td>
+                        <td>
+                           <span class="adm-badge ${corStatus}" style="margin-bottom:8px;">${window.esc(c.status)}</span><br>
+                           <select class="adm-input" style="padding:4px; font-size:11px; width:auto; display:inline-block;" onchange="window.alterarStatusSuporte(${c.linha}, this.value)">
+                             <option value="" disabled selected>Alterar...</option>
+                             <option value="Aberto">Aberto</option>
+                             <option value="Em Andamento">Em Andamento</option>
+                             <option value="Resolvido">Resolvido</option>
+                           </select>
+                        </td>
+                      </tr>`;
+                  }).join('');
+              }).listarSuporteAdmin(window.editorLogin);
+      } catch(e) {}
+  };
+
+  window.alterarStatusSuporte = function(linha, novoStatus) {
+      if(!confirm(`Mudar o status para "${novoStatus}"?`)) { window.carregarSuporte(); return; }
+      google.script.run
+        .withSuccessHandler(res => { window.carregarSuporte(); })
+        .mudarStatusSuporte(linha, novoStatus);
   };
 </script>
