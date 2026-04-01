@@ -46,7 +46,7 @@ Acompanhe a evolução, as metas e as próximas entregas do nosso sistema.
 - [x] **Contas a Pagar e Receber:** Lançamento de despesas (aluguel, repasse) e receitas cruzadas.
 - [x] **Dashboard de Previsões (Financeiro.html):** Visão de Faturamento Previsto vs. Realizado (Saldo Final).
 - [x] **Gerar Relatório Específico de Inadimplentes (Régua de Cobrança CRM com Cascata Inteligente e Exportador PDF/CSV).**
-- [ ] **Gerar Relatório de Alunos "Fantasmas" (Alunos sem Turma vinculada e sem Assinatura de Pacote).** 🎯 *(FOCO ATUAL)*
+- [ x] **Gerar Relatório de Alunos "Fantasmas" (Alunos sem Turma vinculada e sem Assinatura de Pacote).** 🎯 *(FOCO ATUAL)*
 
 ## 🔮 Fase 4: Automação, CRM e Compliance
 - [x] **Expandir Hydration:** Aplicar blindagem anti-apagão nos CRUDs menores (Cursos, Locais, Vídeos, etc).
