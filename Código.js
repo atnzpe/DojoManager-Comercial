@@ -3070,6 +3070,7 @@ function getEstatisticasRelatorio(login, filtros) {
     const idxNome = findColAluno("Nome Completo");
     const idxTurma = findColAluno("Turma Vinculada");
     const idxTel = findColAluno("Telefone");
+    const idxGrad = findColAluno("GRADUACAO_ATUAL") > -1 ? findColAluno("GRADUACAO_ATUAL") : findColAluno("Graduação");
 
     let userAcads = [];
     let isMaster = false;
@@ -3104,7 +3105,7 @@ function getEstatisticasRelatorio(login, filtros) {
     const dFim = dataFimStr ? new Date(dataFimStr + "T23:59:59") : new Date(2100, 0, 1);
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
 
-    // 3. MAPEAR PACOTES E ASSINATURAS... (Permanece igual)
+    // 3. MAPEAR PACOTES E ASSINATURAS...
     const abaPacotes = ws.getSheetByName("Fin_Pacotes");
     const mapPacotes = {};
     if (abaPacotes) {
@@ -3177,6 +3178,7 @@ function getEstatisticasRelatorio(login, filtros) {
       let turmaA = idxTurma > -1 ? String(dadosAlunos[i][idxTurma]).trim() : "Sem Turma";
       let acadA = idxAcad > -1 ? String(dadosAlunos[i][idxAcad]).trim() : "Sem Local";
       let telA = idxTel > -1 ? String(dadosAlunos[i][idxTel]).trim() : "";
+      let gradA = idxGrad > -1 ? String(dadosAlunos[i][idxGrad]).trim() : "Sem Faixa";
 
       let chaveTurma = turmaA + "|||" + acadA;
       if (!contagemTurmas[chaveTurma]) contagemTurmas[chaveTurma] = { nome: turmaA, local: acadA, count: 0 };
@@ -3184,6 +3186,7 @@ function getEstatisticasRelatorio(login, filtros) {
 
       let ass = mapAssinaturas[l];
       let inadimplente = false; let valorPacote = 0; let pacoteNome = ""; let vencStr = "Sem Plano";
+      let diasAtraso = 999; // 999 significa sem data ou irregular
 
       if (ass) {
         pacoteNome = ass.pacote;
@@ -3191,16 +3194,21 @@ function getEstatisticasRelatorio(login, filtros) {
         if (ass.vencimento) {
           let v = ass.vencimento;
           vencStr = ('0' + v.getDate()).slice(-2) + '/' + ('0' + (v.getMonth() + 1)).slice(-2) + '/' + v.getFullYear();
-          if (ass.status !== "ativo" || v < hoje) inadimplente = true;
-        } else inadimplente = true;
-      } else inadimplente = true;
+          if (ass.status !== "ativo" || v < hoje) {
+            inadimplente = true;
+            const diffTime = Math.abs(hoje - v);
+            diasAtraso = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          }
+        } else { inadimplente = true; }
+      } else { inadimplente = true; }
 
       if (inadimplente) {
         if (acadA.toLowerCase() === "todas" || l.includes("master")) {
           totalAtivos--;
         } else {
           totalInadimplentes++; pagamentosPendentes += valorPacote;
-          listaCobranca.push({ nome: nomeA, academia: acadA, turma: turmaA, telefone: telA, plano: pacoteNome, vencimento: vencStr });
+          // 🔥 LISTA DE COBRANÇA AVANÇADA (Com Valor, Atraso e Graduação)
+          listaCobranca.push({ nome: nomeA, academia: acadA, turma: turmaA, telefone: telA, plano: pacoteNome, vencimento: vencStr, valor: valorPacote, diasAtraso: diasAtraso, graduacao: gradA });
         }
       } else {
         receitaPrevista += valorPacote;

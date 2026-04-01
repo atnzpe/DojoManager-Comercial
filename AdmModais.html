@@ -684,7 +684,7 @@
     </form>
   </div>
 </div>
-<!--Modal Cadastro Ouvidoria-->
+
 
 <!--Modal Lançamento Despesas / Receitas-->
 <div id="adm-modal-financeiro" class="adm-modal">
@@ -763,6 +763,120 @@
     </form>
   </div>
 </div>
+
+<!-- Modal de Cobrança -->
+
+<div id="adm-modal-cobranca" class="adm-modal" style="display:none;">
+  <div class="adm-modal-box large" style="width: 95%; max-width: 1200px; background: #f8fafc;">
+    <div class="adm-h3" style="justify-content:space-between; border-left-color:#ef4444; align-items: center;">
+      <span><span class="material-icons" style="color:#ef4444; vertical-align:middle; font-size: 24px;">troubleshoot</span>
+      Régua de Cobrança de Inadimplentes</span>
+      <div style="display: flex; gap: 15px;">
+        <button class="adm-btn adm-btn-outline" onclick="window.abrirModalCobranca()" style="font-size: 11px; padding: 6px 12px;"><span class="material-icons" style="font-size:14px;">refresh</span> Atualizar Dados</button>
+        <button type="button" onclick="window.closeModal('adm-modal-cobranca')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+      </div>
+    </div>
+
+    <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px;">
+
+      <div class="form-grid" style="grid-template-columns: 1fr 2fr; gap: 20px;">
+        <div style="background: #fdf8f6; padding: 15px; border-radius: 8px; border: 1px solid #fde68a;">
+          <h4 style="margin:0 0 10px 0; font-size:11px; color:#b45309; text-transform:uppercase;">1. Período de
+            Vencimento</h4>
+          <div style="display:flex; gap:10px;">
+            <div style="flex:1"><label class="adm-label">A partir de</label><input type="date" id="cob-data-ini" class="adm-input" onchange="window.renderizarTabelaCobranca()">
+            </div>
+            <div style="flex:1"><label class="adm-label">Até o dia</label><input type="date" id="cob-data-fim" class="adm-input" onchange="window.renderizarTabelaCobranca()">
+            </div>
+          </div>
+        </div>
+
+        <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; border: 1px solid #bbf7d0;">
+          <h4 style="margin:0 0 10px 0; font-size:11px; color:#166534; text-transform:uppercase;">2. Unidade / Academia
+          </h4>
+          <select id="cob-academias" class="adm-input" onchange="window.atualizarCascataCobranca()">
+                  <option value="">Todas as minhas Unidades</option>
+              </select>
+        </div>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #cbd5e1; margin: 20px 0;">
+
+      <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+          <h4 style="margin:0 0 10px 0; font-size:11px; color:#334155; text-transform:uppercase;">3. Plano Associado
+          </h4>
+          <select id="cob-planos" class="adm-input" onchange="window.renderizarTabelaCobranca()">
+                  <option value="">Todos os Planos</option>
+              </select>
+        </div>
+        <div>
+          <h4 style="margin:0 0 10px 0; font-size:11px; color:#334155; text-transform:uppercase;">4. Turma (Filtrada
+            pelo Local)</h4>
+          <select id="cob-turmas" class="adm-input" onchange="window.renderizarTabelaCobranca()">
+                  <option value="">Todas as Turmas</option>
+              </select>
+        </div>
+      </div>
+
+      <hr style="border: 0; border-top: 1px dashed #cbd5e1; margin: 20px 0;">
+
+      <div class="form-grid" style="grid-template-columns: 1fr 2fr; gap: 20px;">
+        <div>
+          <h4 style="margin:0 0 10px 0; font-size:11px; color:#334155; text-transform:uppercase;">5. Graduação</h4>
+          <select id="cob-graduacoes" class="adm-input" onchange="window.renderizarTabelaCobranca()">
+                  <option value="">Todas as Graduações</option>
+              </select>
+        </div>
+        <div>
+          <h4 style="margin:0 0 10px 0; font-size:11px; color:#dc2626; text-transform:uppercase;">6. Seleção de Aluno
+          </h4>
+          <select id="cob-alunos" class="adm-input" onchange="window.renderizarTabelaCobranca()" style="border-color: #fecaca; background: #fff5f5;">
+                  <option value="">Todos os Alunos Inadimplentes</option>
+              </select>
+        </div>
+      </div>
+
+    </div>
+
+
+    <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; flex-wrap: wrap;">
+      <div class="stat-card" style="border-top: 4px solid #ef4444; flex: 1; padding: 10px; min-width: 150px;">
+        <div class="stat-card-title">ALUNOS FILTRADOS</div>
+        <div id="cobranca-kpi-qtd" class="stat-card-value" style="color:#ef4444; font-size:20px;">0</div>
+      </div>
+      <div class="stat-card" style="border-top: 4px solid #f59e0b; flex: 1; padding: 10px; min-width: 150px;">
+        <div class="stat-card-title">VALOR FILTRADO</div>
+        <div id="cobranca-kpi-valor" class="stat-card-value" style="color:#f59e0b; font-size:20px;">R$ 0,00</div>
+      </div>
+      <div style="flex: 2; display: flex; justify-content: flex-end; gap: 10px; min-width: 250px;">
+        <button class="adm-btn" onclick="window.exportarCobrancaCSV()" style="background: #10b981; color: white;"><span class="material-icons" style="font-size:16px;">table_view</span> Excel</button>
+        <button class="adm-btn" onclick="window.exportarCobrancaPDF()" style="background: #f44336; color: white;"><span class="material-icons" style="font-size:16px;">picture_as_pdf</span> Imprimir PDF</button>
+      </div>
+    </div>
+
+    <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+      <div style="max-height: 350px; overflow-y: auto;">
+        <table class="adm-table" style="margin: 0; box-shadow: none;">
+          <thead style="position: sticky; top: 0; z-index: 1;">
+            <tr>
+              <th style="background:#1e293b; color:#fff;">Atleta / Contato</th>
+              <th style="background:#1e293b; color:#fff;">Unidade / Turma</th>
+              <th style="background:#1e293b; color:#fff;">Plano Associado</th>
+              <th style="background:#1e293b; color:#fff; text-align:center;">Vencimento</th>
+              <th style="background:#1e293b; color:#fff; text-align:center;">Atraso</th>
+              <th style="background:#1e293b; color:#fff; text-align:center;">Ação Direta</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-modal-cobranca"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Fim Modal de Cobrança -->
+
 <!--Modal Lançamento Listagem de Alunos-->
 <div id="adm-modal-relatorio" class="adm-modal">
   <div class="adm-modal-box large">
@@ -979,4 +1093,3 @@
     </div>
   </div>
 </div>
-

@@ -45,10 +45,10 @@ Acompanhe a evolução, as metas e as próximas entregas do nosso sistema.
 - [x] **Nova Aba "Relatórios" no Adm.html:** Central de Inteligência com relatórios de Cadastros, Inadimplência e Lotação de Turmas.
 - [x] **Contas a Pagar e Receber:** Lançamento de despesas (aluguel, repasse) e receitas cruzadas.
 - [x] **Dashboard de Previsões (Financeiro.html):** Visão de Faturamento Previsto vs. Realizado (Saldo Final).
-- [ ] Gerar Relatório Específico de Inadimplentes (Focado na Régua de Cobrança).
-- [ ] Gerar Relatório de Alunos "Fantasmas" (Alunos sem Turma vinculada e sem Assinatura de Pacote).
+- [x] **Gerar Relatório Específico de Inadimplentes (Régua de Cobrança CRM com Cascata Inteligente e Exportador PDF/CSV).**
+- [ ] **Gerar Relatório de Alunos "Fantasmas" (Alunos sem Turma vinculada e sem Assinatura de Pacote).** 🎯 *(FOCO ATUAL)*
 
-## 🔮 Fase 4: Automação, CRM e Compliance (FOCO ATUAL)
+## 🔮 Fase 4: Automação, CRM e Compliance
 - [x] **Expandir Hydration:** Aplicar blindagem anti-apagão nos CRUDs menores (Cursos, Locais, Vídeos, etc).
 - [x] **Histórico do Aluno (Dossiê/CRM Avançado):** Visão analítica e sintética (LTV total investido, tempo na turma, aulas assistidas, progressão de peso/graduação e pareceres para bolsas/descontos).
 - [x] **Conteúdo de Aula Dinâmico:** Permitir que, além da Videoteca, possamos listar e selecionar "Cursos" e "Programas Técnicos" como Chips no momento de abertura da aula/chamada.

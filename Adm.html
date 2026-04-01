@@ -509,10 +509,12 @@
       Biblioteca</div>
     <div class="adm-nav-item" onclick="window.navAdmin('programas')"><span class="material-icons">description</span>
       Programas</div>
-    <div class="adm-nav-item" onclick="window.navAdmin('certificados')"><span class="material-icons">workspace_premium</span> Certificados
+    <div class="adm-nav-item" onclick="window.navAdmin('certificados')">
+      <span class="material-icons">workspace_premium</span> Certificados
     </div>
 
-    <div class="adm-nav-item" onclick="window.navAdmin('suporte')"><span class="material-icons" style="color: #ff5252;">support_agent</span> Ouvidoria
+    <div class="adm-nav-item" onclick="window.navAdmin('suporte')">
+      <span class="material-icons" style="color: #ff5252;">support_agent</span> Ouvidoria
     </div>
 
     <div class="adm-nav-item" onclick="window.navAdmin('config')"><span class="material-icons">settings</span> Config
@@ -542,7 +544,10 @@
     <div class="adm-toolbar" style="background:#f8fafc; padding:15px; border-radius:12px; border:1px dashed #cbd5e1;">
       <button class="adm-btn" style="background:#10b981; color:white; border:none;" onclick="window.abrirModalLancamentoCaixa()">Nova Transação (Caixa)</button>
 
-      <button class="adm-btn" style="background:#f43f5e; color:white; border:none;" onclick="window.abrirSuperRelatorio('atrasado')">PDF Inadimplência</button>
+      <button class="adm-btn" style="background:#f43f5e; color:white; border:none; box-shadow: 0 4px 10px rgba(244, 63, 94, 0.4);" onclick="window.abrirModalCobranca()">
+        <span class="material-icons" style="font-size:16px; margin-right:5px;">request_quote</span> ALUNOS INADIMPLENTES
+      </button>
+
       <button class="adm-btn" style="background:#f43f5e; color:white; border:none;" onclick="window.abrirRelatorioAnalitico()">RELATÓRIO ANALÍTICO (BI)</button>
 
 
@@ -719,7 +724,7 @@
       <tbody id="lista-pagamentos-body"></tbody>
     </table>
   </div>
-  
+
   <div id="adm-tab-alunos" class="adm-tab-content">
     <div class="adm-h3">Gestão de Alunos (Módulo CRM)
       <div style="display:flex; gap:10px;">
@@ -930,9 +935,12 @@
         <span class="material-icons" style="font-size:16px;">refresh</span> Atualizar
       </button>
     </div>
-    
-    <div style="background: #fff3f3; border-left: 4px solid #ff5252; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-size: 12px; color: #333;">
-      <b>🛡️ MODO DE SIGILO ATIVADO:</b> Por regras de Compliance, mensagens de Denúncia, Assédio ou Doping são ocultadas deste painel. O texto real é enviado <b>exclusivamente para o E-mail de Compliance</b> da unidade. Use este painel apenas para atualizar o status do chamado.
+
+    <div
+      style="background: #fff3f3; border-left: 4px solid #ff5252; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-size: 12px; color: #333;">
+      <b>🛡️ MODO DE SIGILO ATIVADO:</b> Por regras de Compliance, mensagens de Denúncia, Assédio ou Doping são
+      ocultadas deste painel. O texto real é enviado <b>exclusivamente para o E-mail de Compliance</b> da unidade. Use
+      este painel apenas para atualizar o status do chamado.
     </div>
 
     <div style="overflow-x:auto;">
@@ -946,7 +954,7 @@
           </tr>
         </thead>
         <tbody id="lista-suporte-body">
-           </tbody>
+        </tbody>
       </table>
     </div>
   </div>
@@ -1057,7 +1065,7 @@
     </form>
   </div>
 
-  
+
 
 </div>
 
@@ -1291,7 +1299,7 @@
                   if(res.erro) { window.sentinelaAdmin("DASH_LOAD", "ERRO", res.erro); return; }
                   
                   // ----------------------------------------------------
-                  // 1º BLOCO: INJEÇÃO DOS KPIs
+                  // 1º BLOCO: INJEÇÃO DOS KPIs E PONTE DO MODAL
                   // ----------------------------------------------------
                   try {
                       const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) { el.innerText = txt; el.classList.remove('loading-val'); } };
@@ -1307,20 +1315,19 @@
                       setTxt('kpi-pendente', "R$ " + res.kpiPendente);
                       setTxt('kpi-despesa', "R$ " + res.kpiDespesa);
 
-                      // 🔥 LÓGICA DO CAIXA FINAL (FRONTEND) 🔥
                       let valorRecebido = res.kpiRecebido || 0;
                       let valorDespesa = res.kpiDespesa || 0;
 
-                      // Tratamento seguro de strings monetárias (BR) para Floats matemáticos
                       let numRecebido = parseFloat(String(valorRecebido).replace(/\./g, '').replace(',', '.')) || 0;
                       let numDespesa = parseFloat(String(valorDespesa).replace(/\./g, '').replace(',', '.')) || 0;
 
-                      // Matemática
                       let caixaLivre = numRecebido - numDespesa;
 
-                      // Formatação e Injeção
                       let saldoFormatado = caixaLivre.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                       setTxt('kpi-caixafinal', "R$ " + saldoFormatado);
+
+                      // 🔥 A CURA: A PONTE QUE SALVA OS DADOS PARA O MODAL USAR INSTANTANEAMENTE 🔥
+                      window.listaCobrancaGlobal = res.listaCobranca || [];
 
                       window.sentinelaAdmin("DASH_KPI", "SUCESSO", "Todos os KPIs injetados.");
                   } catch(errKPI) { window.sentinelaAdmin("DASH_KPI", "ERRO", errKPI.message); }
@@ -1329,7 +1336,6 @@
                   // 2º BLOCO: INJEÇÃO DAS TABELAS BLINDADAS (Curadas!)
                   // ----------------------------------------------------
                   try {
-                      // Tabela 1: Inadimplentes (Cobrança)
                       if(tbI) {
                           if (!res.listaCobranca || res.listaCobranca.length === 0) {
                               tbI.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#10b981; padding:30px;"><span class="material-icons" style="font-size:32px; display:block; margin-bottom:10px;">verified</span><b>Caixa 100% Saudável! Nenhum atraso registrado.</b></td></tr>';
@@ -1348,7 +1354,6 @@
                           }
                       }
 
-                      // Tabela 2: Lotação das Turmas (Ranking) 🔥 A CURA AQUI 🔥
                       if(tbT) {
                           if (!res.listaRanking || res.listaRanking.length === 0) {
                               tbT.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:30px; color:#64748b;">Sem dados de turmas ativas no período selecionado.</td></tr>';
@@ -3325,5 +3330,180 @@ window.preencherValorPorPacoteModal = function() {
       google.script.run
         .withSuccessHandler(res => { window.carregarSuporte(); })
         .mudarStatusSuporte(linha, novoStatus);
+  };
+
+  // ============================================================================
+  // 🚨 ARMA INDESTRUTÍVEL V7: RÉGUA DE COBRANÇA (DROPDOWNS INTELIGENTES)
+  // ============================================================================
+  window.listaCobrancaGlobal = window.listaCobrancaGlobal || []; 
+  window.listaCobrancaFiltrada = [];
+
+  window.abrirModalCobranca = function() {
+      try {
+          const m = document.getElementById('adm-modal-cobranca');
+          if(m) m.style.display = 'flex';
+
+          const hoje = new Date();
+          document.getElementById('cob-data-fim').value = hoje.toISOString().split('T')[0];
+          document.getElementById('cob-data-ini').value = ''; 
+
+          const selAcad = document.getElementById('cob-academias');
+          selAcad.innerHTML = '<option value="">Carregando unidades...</option>';
+          
+          const myAcads = window.userSessionLocal.academia ? window.userSessionLocal.academia.split(',').map(a => a.trim().toLowerCase()) : [];
+          const isMaster = myAcads.includes("todas");
+
+          google.script.run.withSuccessHandler(acads => {
+              selAcad.innerHTML = '<option value="">Todas as minhas Unidades</option>';
+              acads.forEach(a => {
+                  if (isMaster || myAcads.includes(a.toLowerCase())) {
+                      const safeA = String(a).replace(/"/g, '&quot;').replace(/</g, '&lt;');
+                      selAcad.innerHTML += '<option value="' + safeA + '">' + safeA + '</option>';
+                  }
+              });
+              window.atualizarCascataCobranca(); 
+          }).getListaAcademias(window.editorLogin);
+
+      } catch(e) { console.error("Erro abrirModal:", e); }
+  };
+
+  window.atualizarCascataCobranca = function() {
+      try {
+          const valAcad = document.getElementById('cob-academias').value.toLowerCase();
+          
+          const planSet = new Set(); 
+          const turmSet = new Set(); 
+          const gradSet = new Set(); 
+          const alunoSet = new Set();
+
+          // Varre devedores para extrair as opções da academia selecionada
+          (window.listaCobrancaGlobal || []).forEach(c => {
+              let local = String(c.academia || "").toLowerCase();
+              if (valAcad === "" || local.includes(valAcad)) {
+                  if (c.plano) planSet.add(String(c.plano).trim());
+                  if (c.turma) turmSet.add(String(c.turma).trim());
+                  if (c.graduacao) gradSet.add(String(c.graduacao).trim());
+                  if (c.nome) alunoSet.add(String(c.nome).trim());
+              }
+          });
+
+          // Construtor blindado de Dropdowns (Mantém a seleção se existir)
+          const popularDropdown = (idContainer, setName, textoTodos) => {
+              const sel = document.getElementById(idContainer);
+              if(!sel) return;
+              const valorAtual = sel.value; // Guarda o que estava selecionado
+              
+              sel.innerHTML = '<option value="">' + textoTodos + '</option>';
+              Array.from(setName).sort().forEach(item => {
+                  const safeItem = String(item).replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                  const isSelected = (safeItem === valorAtual) ? 'selected' : '';
+                  sel.innerHTML += '<option value="' + safeItem + '" ' + isSelected + '>' + safeItem + '</option>';
+              });
+              // Se o valor antigo sumiu da nova lista, reseta para "Todos"
+              if(valorAtual !== "" && !setName.has(valorAtual)) sel.value = ""; 
+          };
+
+          popularDropdown('cob-planos', planSet, 'Todos os Planos');
+          popularDropdown('cob-turmas', turmSet, 'Todas as Turmas');
+          popularDropdown('cob-graduacoes', gradSet, 'Todas as Graduações');
+          popularDropdown('cob-alunos', alunoSet, 'Todos os Alunos Inadimplentes');
+
+          window.renderizarTabelaCobranca();
+
+      } catch(e) { console.error("Erro atualizarCascata:", e); }
+  };
+
+  window.renderizarTabelaCobranca = function() {
+      try {
+          const valAcad = document.getElementById('cob-academias').value.toLowerCase();
+          const valPlan = document.getElementById('cob-planos').value.toLowerCase();
+          const valTurm = document.getElementById('cob-turmas').value.toLowerCase();
+          const valGrad = document.getElementById('cob-graduacoes').value.toLowerCase();
+          const valAluno = document.getElementById('cob-alunos').value.toLowerCase();
+
+          const dataIniStr = document.getElementById('cob-data-ini').value;
+          const dataFimStr = document.getElementById('cob-data-fim').value;
+          
+          let dIni = null; let dFim = null;
+          if (dataIniStr) { let p = dataIniStr.split('-'); if(p.length===3) dIni = new Date(p[0], p[1]-1, p[2], 0,0,0); }
+          if (dataFimStr) { let p = dataFimStr.split('-'); if(p.length===3) dFim = new Date(p[0], p[1]-1, p[2], 23,59,59); }
+
+          const tbody = document.getElementById('tbody-modal-cobranca');
+          let html = ""; let count = 0; let somaValor = 0;
+
+          window.listaCobrancaGlobal.sort((a, b) => b.diasAtraso - a.diasAtraso);
+          window.listaCobrancaFiltrada = [];
+
+          window.listaCobrancaGlobal.forEach(c => {
+              // Bypass simples: Se o dropdown não estiver em "Todos" (""), ele aplica o filtro exato
+              if (valAcad !== "" && !String(c.academia).toLowerCase().includes(valAcad)) return;
+              if (valPlan !== "" && String(c.plano).toLowerCase() !== valPlan) return;
+              if (valTurm !== "" && String(c.turma).toLowerCase() !== valTurm) return;
+              if (valGrad !== "" && String(c.graduacao).toLowerCase() !== valGrad) return;
+              if (valAluno !== "" && String(c.nome).toLowerCase() !== valAluno) return;
+              
+              if (dIni || dFim) {
+                  if (c.diasAtraso === 999) {
+                      if (dIni) return; 
+                  } else {
+                      const p = String(c.vencimento).split('/');
+                      if (p.length === 3) {
+                          const dVenc = new Date(p[2], p[1]-1, p[0], 12, 0, 0); 
+                          if (dIni && dVenc < dIni) return;
+                          if (dFim && dVenc > dFim) return;
+                      }
+                  }
+              }
+
+              window.listaCobrancaFiltrada.push(c);
+              count++;
+              somaValor += c.valor || 0;
+
+              const telLimpo = String(c.telefone).replace(/\D/g, '');
+              let btnWpp = '<span style="color:#94a3b8; font-size:10px;">S/ Tel</span>';
+              if (telLimpo.length >= 10) {
+                  const msg = "Olá " + String(c.nome).split(' ')[0] + ", tudo bem? Aqui é da unidade " + c.academia + ". A sua assinatura do " + c.plano + " consta em aberto. Podemos ajudar a regularizar? 🥋";
+                  const link = "https://wa.me/55" + telLimpo + "?text=" + encodeURIComponent(msg);
+                  btnWpp = '<a href="' + link + '" target="_blank" class="adm-btn" style="background:#25D366; color:white; padding:6px 12px; font-size:11px; text-decoration:none;"><span class="material-icons" style="font-size:14px;">whatsapp</span> COBRAR</a>';
+              }
+
+              let badgeAtraso = c.diasAtraso === 999 ? '<span class="adm-badge bg-dark">Irregular</span>' : '<span class="adm-badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #ef4444;">' + c.diasAtraso + ' Dias</span>';
+              const safeHTML = (str) => String(str || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+              html += '<tr style="transition: 0.2s;" onmouseover="this.style.backgroundColor=\'#f1f5f9\'" onmouseout="this.style.backgroundColor=\'transparent\'">' +
+                  '<td><b style="color:#1e293b; font-size:13px;">' + safeHTML(c.nome) + '</b><br><small style="color:#64748b;">📞 ' + safeHTML(c.telefone || '---') + '</small></td>' +
+                  '<td><b style="color:#3b82f6; font-size:12px;">' + safeHTML(c.academia) + '</b><br><small style="color:#64748b;">' + safeHTML(c.turma) + ' | 🛡️ ' + safeHTML(c.graduacao) + '</small></td>' +
+                  '<td><b style="color:#1e293b;">' + safeHTML(c.plano) + '</b><br><span style="color:#f59e0b; font-weight:bold;">R$ ' + (c.valor || 0).toFixed(2).replace('.',',') + '</span></td>' +
+                  '<td style="text-align:center; font-weight:bold; color:#475569;">' + safeHTML(c.vencimento) + '</td>' +
+                  '<td style="text-align:center;">' + badgeAtraso + '</td>' +
+                  '<td style="text-align:center;">' + btnWpp + '</td>' +
+              '</tr>';
+          });
+
+          if (count === 0) html = '<tr><td colspan="6" style="text-align:center; color:#10b981; padding:30px;"><b>Nenhum atraso encontrado com estes filtros!</b></td></tr>';
+
+          tbody.innerHTML = html;
+          document.getElementById('cobranca-kpi-qtd').innerText = count;
+          document.getElementById('cobranca-kpi-valor').innerText = "R$ " + somaValor.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+      } catch(e) { console.error("Erro renderizarTabela:", e); }
+  };
+
+  window.exportarCobrancaCSV = function() {
+      const lista = window.listaCobrancaFiltrada;
+      if (lista.length === 0) { alert("Sem dados."); return; }
+      let csv = "\uFEFFALUNO;TELEFONE;UNIDADE;TURMA;GRADUACAO;PLANO;VENCIMENTO;DIAS_ATRASO;VALOR\n";
+      lista.forEach(c => { csv += '"' + c.nome + '";"' + c.telefone + '";"' + c.academia + '";"' + c.turma + '";"' + c.graduacao + '";"' + c.plano + '";"' + c.vencimento + '";"' + c.diasAtraso + '";"' + (c.valor||0).toFixed(2).replace('.', ',') + '"\n'; });
+      const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); link.download = "Inadimplentes_Filtrado.csv"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  };
+
+  window.exportarCobrancaPDF = function() {
+      const lista = window.listaCobrancaFiltrada;
+      if (lista.length === 0) { alert("Sem dados."); return; }
+      const janela = window.open('', '', 'width=1000,height=700');
+      let html = '<html><head><title>Relatório de Inadimplência</title><style>body{font-family:sans-serif;padding:20px}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:10px;text-align:left;font-size:12px}th{background:#1e293b;color:#fff;text-transform:uppercase}tr:nth-child(even){background:#f8fafc}.red{color:#dc2626;font-weight:bold}</style></head><body><h2 style="color:#dc2626">Régua de Cobrança - Visão Filtrada</h2><p><b>Emissão:</b> ' + new Date().toLocaleString('pt-BR') + '</p><table><thead><tr><th>Atleta</th><th>Telefone</th><th>Unidade / Turma / Grad.</th><th>Plano</th><th>Venc.</th><th>Atraso</th><th style="text-align:right;">Valor</th></tr></thead><tbody>';
+      let total = 0; 
+      lista.forEach(c => { total += (c.valor||0); html += '<tr><td><b>' + c.nome + '</b></td><td>' + c.telefone + '</td><td>' + c.academia + '<br><small>' + c.turma + ' | ' + c.graduacao + '</small></td><td>' + c.plano + '</td><td>' + c.vencimento + '</td><td class="red">' + (c.diasAtraso===999?'S/ Data':c.diasAtraso+' dias') + '</td><td class="red" style="text-align:right;">R$ ' + (c.valor||0).toFixed(2).replace('.',',') + '</td></tr>'; });
+      html += '</tbody></table><h3 style="text-align:right;color:#b91c1c;">Total a Recuperar (' + lista.length + ' alunos): R$ ' + total.toLocaleString('pt-BR',{minimumFractionDigits:2}) + '</h3></body></html>';
+      janela.document.open(); janela.document.write(html); janela.document.close(); setTimeout(() => { try { janela.print(); } catch(e){} }, 1000);
   };
 </script>
