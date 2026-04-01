@@ -3050,7 +3050,7 @@ function salvarTurma(form) {
 }
 
 /**
- * 📊 DASHBOARD DE INTELIGÊNCIA (SUPER RELATÓRIO) - BLINDADO
+ * 📊 DASHBOARD E RÉGUA DE COBRANÇA (Agora soma MÚLTIPLOS PLANOS)
  */
 function getEstatisticasRelatorio(login, filtros) {
   try {
@@ -3072,23 +3072,16 @@ function getEstatisticasRelatorio(login, filtros) {
     const idxTel = findColAluno("Telefone");
     const idxGrad = findColAluno("GRADUACAO_ATUAL") > -1 ? findColAluno("GRADUACAO_ATUAL") : findColAluno("Graduação");
 
-    let userAcads = [];
-    let isMaster = false;
-    let usuarioEncontrado = false;
+    let userAcads = []; let isMaster = false; let usuarioEncontrado = false;
     const loginBuscado = String(login).trim().toLowerCase();
 
-    // VALIDAÇÃO CORTANTE DA ACADEMIA
     for (let i = 1; i < dadosAlunos.length; i++) {
       let loginPlanilha = idxLogin > -1 ? String(dadosAlunos[i][idxLogin]).trim().toLowerCase() : "";
       if (loginPlanilha === loginBuscado) {
         usuarioEncontrado = true;
         let academiasStr = idxAcad > -1 ? String(dadosAlunos[i][idxAcad]).toLowerCase() : "";
         userAcads = academiasStr.split(',').map(a => a.trim());
-
-        // 🚨 REMOVIDA A TRAVA DE "ADMIN/DIRETOR". AGORA SÓ "TODAS" DÁ PODER DE DEUS!
-        if (userAcads.includes("todas")) {
-          isMaster = true;
-        }
+        if (userAcads.includes("todas")) isMaster = true;
         break;
       }
     }
@@ -3097,7 +3090,6 @@ function getEstatisticasRelatorio(login, filtros) {
       return { success: true, kpiAtivos: 0, kpiInadimplentes: 0, kpiReceitaPrevista: "0,00", kpiRecebido: "0,00", kpiPendente: "0,00", kpiDespesa: "0,00", listaCobranca: [], listaRanking: [] };
     }
 
-    // 2. FILTROS DA TELA
     const targetAcad = (filtros && filtros.academia && filtros.academia !== "TODAS") ? String(filtros.academia).trim().toLowerCase() : "";
     const dataIniStr = (filtros && filtros.dataInicio) ? filtros.dataInicio : "";
     const dataFimStr = (filtros && filtros.dataFim) ? filtros.dataFim : "";
@@ -3105,7 +3097,7 @@ function getEstatisticasRelatorio(login, filtros) {
     const dFim = dataFimStr ? new Date(dataFimStr + "T23:59:59") : new Date(2100, 0, 1);
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
 
-    // 3. MAPEAR PACOTES E ASSINATURAS...
+    // MAPEAR PACOTES PARA SOMAR VALORES MÚLTIPLOS
     const abaPacotes = ws.getSheetByName("Fin_Pacotes");
     const mapPacotes = {};
     if (abaPacotes) {
@@ -3149,7 +3141,7 @@ function getEstatisticasRelatorio(login, filtros) {
               dFimPacote = new Date(String(v).split(' ')[0] + "T00:00:00");
             }
             mapAssinaturas[l] = {
-              pacote: String(dadosAssinaturas[i][idxAssPacote]).trim().toLowerCase(),
+              pacote: String(dadosAssinaturas[i][idxAssPacote]).trim(), // Mantém original com vírgulas
               vencimento: dFimPacote,
               status: idxAssStatus > -1 ? String(dadosAssinaturas[i][idxAssStatus]).trim().toLowerCase() : "ativo"
             };
@@ -3167,7 +3159,6 @@ function getEstatisticasRelatorio(login, filtros) {
 
       let aAcad = idxAcad > -1 ? String(dadosAlunos[i][idxAcad]).toLowerCase() : "";
 
-      // 🛡️ A BARREIRA INTRANSPONÍVEL DA ACADEMIA
       if (!isMaster && !userAcads.some(myAcad => aAcad.includes(myAcad))) continue;
       if (targetAcad && !aAcad.includes(targetAcad)) continue;
 
@@ -3180,17 +3171,27 @@ function getEstatisticasRelatorio(login, filtros) {
       let telA = idxTel > -1 ? String(dadosAlunos[i][idxTel]).trim() : "";
       let gradA = idxGrad > -1 ? String(dadosAlunos[i][idxGrad]).trim() : "Sem Faixa";
 
-      let chaveTurma = turmaA + "|||" + acadA;
-      if (!contagemTurmas[chaveTurma]) contagemTurmas[chaveTurma] = { nome: turmaA, local: acadA, count: 0 };
-      contagemTurmas[chaveTurma].count++;
+      // Adiciona o aluno a várias turmas para o Ranking (Densidade) se ele tiver várias!
+      const turmasDoAluno = turmaA.split(',').map(t => t.trim()).filter(t => t !== "");
+      turmasDoAluno.forEach(tNome => {
+        let chaveTurma = tNome + "|||" + acadA;
+        if (!contagemTurmas[chaveTurma]) contagemTurmas[chaveTurma] = { nome: tNome, local: acadA, count: 0 };
+        contagemTurmas[chaveTurma].count++;
+      });
 
       let ass = mapAssinaturas[l];
       let inadimplente = false; let valorPacote = 0; let pacoteNome = ""; let vencStr = "Sem Plano";
-      let diasAtraso = 999; // 999 significa sem data ou irregular
+      let diasAtraso = 999;
 
       if (ass) {
         pacoteNome = ass.pacote;
-        valorPacote = mapPacotes[pacoteNome] || 0;
+
+        // 💰 A MÁGICA: SOMA O VALOR DE TODOS OS PLANOS SEPARADOS POR VÍRGULA
+        const listaDePacotes = pacoteNome.toLowerCase().split(',').map(p => p.trim());
+        listaDePacotes.forEach(p => {
+          valorPacote += (mapPacotes[p] || 0);
+        });
+
         if (ass.vencimento) {
           let v = ass.vencimento;
           vencStr = ('0' + v.getDate()).slice(-2) + '/' + ('0' + (v.getMonth() + 1)).slice(-2) + '/' + v.getFullYear();
@@ -3207,7 +3208,6 @@ function getEstatisticasRelatorio(login, filtros) {
           totalAtivos--;
         } else {
           totalInadimplentes++; pagamentosPendentes += valorPacote;
-          // 🔥 LISTA DE COBRANÇA AVANÇADA (Com Valor, Atraso e Graduação)
           listaCobranca.push({ nome: nomeA, academia: acadA, turma: turmaA, telefone: telA, plano: pacoteNome, vencimento: vencStr, valor: valorPacote, diasAtraso: diasAtraso, graduacao: gradA });
         }
       } else {
@@ -3235,7 +3235,6 @@ function getEstatisticasRelatorio(login, filtros) {
 
             let trxAcad = idxTrxAcad > -1 ? String(dadosTransacoes[i][idxTrxAcad]).toLowerCase() : "";
 
-            // 🛡️ A BARREIRA NA TRANSAÇÃO
             if (!isMaster && !userAcads.some(myAcad => trxAcad.includes(myAcad))) continue;
             if (targetAcad && !trxAcad.includes(targetAcad)) continue;
 
@@ -4129,5 +4128,128 @@ function mudarStatusSuporte(linha, novoStatus) {
     return { success: true };
   } catch (e) {
     return { success: false, msg: e.message };
+  }
+}
+
+/**
+ * 👻 MOTOR DE AUDITORIA OPERACIONAL (Suporte a Múltiplas Turmas/Planos)
+ */
+function varrerAlunosIrregularesAdmin(loginSolicitante) {
+  try {
+    const auth = getPermissoesUsuario(loginSolicitante);
+    const alunos = lerTabelaDinamica("cadastro_de_alunos");
+    const turmasCadastradas = lerTabelaDinamica("Config_Turmas");
+    const assinaturas = lerTabelaDinamica("Fin_Assinaturas");
+
+    const turmasValidasSet = new Set();
+    turmasCadastradas.forEach(t => {
+      if (String(t.status || "").toLowerCase() === "ativa") turmasValidasSet.add(String(t.nome_da_turma).trim().toLowerCase());
+    });
+
+    const fantasmasList = [];
+
+    alunos.forEach(a => {
+      if (String(a.status || "").toLowerCase() !== "ativo") return;
+
+      const acadAluno = String(a.academia_vinculada || "").toLowerCase();
+      if (!auth.isMaster && !auth.academias.some(myAcad => acadAluno.includes(myAcad))) return;
+
+      let isFantasmaTurma = false;
+      let isFantasmaPlano = false;
+
+      // 👻 TESTE 1: FANTASMA DE TATAME (Lê múltiplas turmas divididas por vírgula)
+      const turmasDoAluno = String(a.turma_vinculada || "").toLowerCase().split(',').map(t => t.trim()).filter(t => t !== "");
+      // É fantasma se não tiver nenhuma turma, OU se NENHUMA das turmas que tem existir no sistema
+      if (turmasDoAluno.length === 0 || !turmasDoAluno.some(t => turmasValidasSet.has(t))) {
+        isFantasmaTurma = true;
+      }
+
+      // 💸 TESTE 2: FANTASMA FINANCEIRO (Lê múltiplos planos)
+      const loginAluno = String(a.login || "").trim().toLowerCase();
+      const assinatura = assinaturas.find(as => String(as.login_aluno).trim().toLowerCase() === loginAluno);
+
+      let pacoteAtual = "";
+      let dataVenc = "";
+
+      if (!assinatura) {
+        isFantasmaPlano = true;
+      } else {
+        pacoteAtual = String(assinatura.pacote_atual || "").trim();
+        dataVenc = assinatura.data_fim || "";
+        const pacotesAtuaisArr = pacoteAtual.toLowerCase().split(',').map(p => p.trim()).filter(p => p !== "");
+        if (pacotesAtuaisArr.length === 0 || pacotesAtuaisArr[0] === "sem pacote") {
+          isFantasmaPlano = true;
+        }
+      }
+
+      if (isFantasmaTurma || isFantasmaPlano) {
+        fantasmasList.push({
+          id: a._linha,
+          login: a.login || "---",
+          nome: a.nome_completo || a.nome || "Sem Nome",
+          academia: a.academia_vinculada || "Desconhecida",
+          telefone: a.telefone || "",
+          modalidade: a.modalidade || "Geral",
+          turma: a.turma_vinculada || "",
+          plano: pacoteAtual,
+          vencimento: dataVenc,
+          isFantasmaTurma: isFantasmaTurma,
+          isFantasmaPlano: isFantasmaPlano
+        });
+      }
+    });
+
+    return { success: true, data: fantasmasList };
+  } catch (e) { return { success: false, msg: "Falha na Varredura: " + e.message }; }
+}
+
+/**
+ * 🛠️ SALVAMENTO DA CORREÇÃO RÁPIDA (RADAR DE FANTASMAS)
+ * Modifica as duas tabelas de uma vez (Alunos e Financeiro) de forma cirúrgica.
+ */
+function salvarCorrecaoRapidaAdmin(dados) {
+  try {
+    const idLinha = parseInt(dados.corr_id_aluno);
+    if (isNaN(idLinha)) return "❌ Erro: ID do aluno inválido.";
+
+    // 1. Corrige o lado "Tatame" na aba de Alunos (Muda Modalidade e Turma)
+    salvarDadosSeguro("cadastro_de_alunos", {
+      "Modalidade": dados.corr_mod,
+      "Turma Vinculada": dados.corr_turma
+    }, idLinha);
+
+    // 2. Corrige o lado "Financeiro" na aba Fin_Assinaturas (Plano e Vencimento)
+    const assinaturas = lerTabelaDinamica("Fin_Assinaturas");
+    const loginAluno = String(dados.corr_login).trim().toLowerCase();
+    const assAtual = assinaturas.find(a => String(a.login_aluno || a.Login_Aluno).trim().toLowerCase() === loginAluno);
+
+    // Formata a data de YYYY-MM-DD para o padrão Brasileiro DD/MM/YYYY
+    let dataVenc = dados.corr_venc;
+    if (dataVenc && dataVenc.includes('-')) {
+      const p = dataVenc.split('-');
+      dataVenc = `${p[2]}/${p[1]}/${p[0]}`;
+    }
+
+    const dadosAssinatura = {
+      "Login_Aluno": dados.corr_login,
+      "Pacote_Atual": dados.corr_plano,
+      "Data_Fim": dataVenc,
+      "Status_Assinatura": "Ativo"
+    };
+
+    // Respeita o histórico de matrícula se o aluno já tinha conta
+    if (assAtual && (assAtual.data_inicio || assAtual.Data_Inicio)) {
+      dadosAssinatura["Data_Inicio"] = formatDate(assAtual.data_inicio || assAtual.Data_Inicio);
+    } else {
+      dadosAssinatura["Data_Inicio"] = formatDate(new Date());
+    }
+
+    // Salva na mesma linha se já existia, ou cria uma nova
+    salvarDadosSeguro("Fin_Assinaturas", dadosAssinatura, assAtual ? assAtual._linha : null);
+
+    registrarLogBlindado("SUCESSO", "CORRECAO_FANTASMA", `Atleta ${dados.corr_login} regularizado.`);
+    return "✅ Ficha corrigida e Base regularizada!";
+  } catch (e) {
+    return "❌ Erro na correção: " + e.message;
   }
 }

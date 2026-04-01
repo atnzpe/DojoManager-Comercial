@@ -550,8 +550,12 @@
 
       <button class="adm-btn" style="background:#f43f5e; color:white; border:none;" onclick="window.abrirRelatorioAnalitico()">RELATÓRIO ANALÍTICO (BI)</button>
 
-
+      <button class="adm-btn" style="background:#8b5cf6; color:white; border:none; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.4);" onclick="window.abrirModalAuditoria()">
+        <span class="material-icons" style="font-size:16px; margin-right:5px;">radar</span> RADAR DE FANTASMAS
+      </button>
     </div>
+
+
     <!-- Div Cards KPI -->
     <div
       style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px; margin-bottom:20px;">
@@ -3504,6 +3508,302 @@ window.preencherValorPorPacoteModal = function() {
       let total = 0; 
       lista.forEach(c => { total += (c.valor||0); html += '<tr><td><b>' + c.nome + '</b></td><td>' + c.telefone + '</td><td>' + c.academia + '<br><small>' + c.turma + ' | ' + c.graduacao + '</small></td><td>' + c.plano + '</td><td>' + c.vencimento + '</td><td class="red">' + (c.diasAtraso===999?'S/ Data':c.diasAtraso+' dias') + '</td><td class="red" style="text-align:right;">R$ ' + (c.valor||0).toFixed(2).replace('.',',') + '</td></tr>'; });
       html += '</tbody></table><h3 style="text-align:right;color:#b91c1c;">Total a Recuperar (' + lista.length + ' alunos): R$ ' + total.toLocaleString('pt-BR',{minimumFractionDigits:2}) + '</h3></body></html>';
+      janela.document.open(); janela.document.write(html); janela.document.close(); setTimeout(() => { try { janela.print(); } catch(e){} }, 1000);
+  };
+
+  // ============================================================================
+  // 👻 MOTOR SRE: AUDITORIA OPERACIONAL (RADAR DE FANTASMAS)
+  // ============================================================================
+  window.auditoriaListaGlobal = [];
+  window.auditoriaListaFiltrada = [];
+
+  window.abrirModalAuditoria = function() {
+      try {
+          const m = document.getElementById('adm-modal-auditoria');
+          if(m) m.style.display = 'flex';
+
+          const btn = document.querySelector('#adm-modal-auditoria .adm-btn-outline');
+          const txtOriginal = btn.innerHTML;
+          btn.innerHTML = '<span class="material-icons spin">sync</span> Varrendo...';
+          btn.disabled = true;
+
+          const tb = document.getElementById('tbody-modal-auditoria');
+          if(tb) tb.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px;"><div class="spinner-admin" style="margin:0 auto;"></div><br>Cruzando dados de alunos, turmas e pacotes...</td></tr>';
+
+          // Reseta contadores
+          const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) el.innerText = txt; };
+          setTxt('aud-kpi-turma', "...");
+          setTxt('aud-kpi-plano', "...");
+
+          // Carrega as academias do administrador
+          const selAcad = document.getElementById('aud-academias');
+          if(selAcad) {
+              selAcad.innerHTML = '<option value="">Carregando unidades...</option>';
+              google.script.run.withSuccessHandler(acads => {
+                  const myAcads = window.userSessionLocal.academia ? window.userSessionLocal.academia.split(',').map(a => a.trim().toLowerCase()) : [];
+                  const isMaster = myAcads.includes("todas");
+                  selAcad.innerHTML = '<option value="">Todas as minhas Unidades</option>';
+                  acads.forEach(a => {
+                      if (isMaster || myAcads.includes(a.toLowerCase())) {
+                          const safeA = String(a).replace(/"/g, '&quot;').replace(/</g, '&lt;');
+                          selAcad.innerHTML += `<option value="${safeA}">${safeA}</option>`;
+                      }
+                  });
+              }).getListaAcademias(window.editorLogin);
+          }
+
+          // Chama a função pesada do Back-end
+          google.script.run
+              .withFailureHandler(err => {
+                  if(tb) tb.innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">Erro de Varredura: ${err.message}</td></tr>`;
+                  btn.innerHTML = txtOriginal; btn.disabled = false;
+              })
+              .withSuccessHandler(res => {
+                  if(!res.success) {
+                      if(tb) tb.innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">${res.msg}</td></tr>`;
+                      btn.innerHTML = txtOriginal; btn.disabled = false;
+                      return;
+                  }
+                  
+                  window.auditoriaListaGlobal = res.data;
+                  window.renderizarTabelaAuditoria();
+                  
+                  btn.innerHTML = txtOriginal;
+                  btn.disabled = false;
+                  window.sentinelaAdmin("AUDITORIA_FANTASMAS", "SUCESSO", `Varredura concluída. ${res.data.length} anomalias encontradas.`);
+              })
+              .varrerAlunosIrregularesAdmin(window.editorLogin);
+
+      } catch(e) { window.sentinelaAdmin("MODAL_AUDITORIA", "ERRO", e.message); }
+  };
+
+  // 1. Tabela do Radar ATUALIZADA (Chama a Correção Rápida no clique)
+  window.renderizarTabelaAuditoria = function() {
+      try {
+          const filtroAcad = document.getElementById('aud-academias') ? document.getElementById('aud-academias').value.toLowerCase() : "";
+          const filtroAnomalia = document.getElementById('aud-tipo-anomalia') ? document.getElementById('aud-tipo-anomalia').value : "TODOS";
+          const tbody = document.getElementById('tbody-modal-auditoria');
+
+          let kpiTurma = 0; let kpiPlano = 0;
+          window.auditoriaListaFiltrada = [];
+
+          window.auditoriaListaGlobal.forEach(a => {
+              if (filtroAcad !== "" && !String(a.academia).toLowerCase().includes(filtroAcad)) return;
+
+              let passaFiltro = false; let badges = [];
+
+              if (a.isFantasmaTurma) {
+                  kpiTurma++; badges.push('<span class="adm-badge" style="background:#f3e8ff; color:#7e22ce; border:1px solid #a855f7; margin-bottom:4px; display:block;">👻 Sem Turma</span>');
+                  if (filtroAnomalia === "TODOS" || filtroAnomalia === "SEM_TURMA") passaFiltro = true;
+              }
+              if (a.isFantasmaPlano) {
+                  kpiPlano++; badges.push('<span class="adm-badge" style="background:#fef3c7; color:#b45309; border:1px solid #f59e0b; display:block;">💸 Sem Plano</span>');
+                  if (filtroAnomalia === "TODOS" || filtroAnomalia === "SEM_PLANO") passaFiltro = true;
+              }
+
+              if (!passaFiltro) return;
+              a._badgesHtml = badges.join('');
+              window.auditoriaListaFiltrada.push(a);
+          });
+
+          const setTxt = (id, txt) => { const el = document.getElementById(id); if(el) el.innerText = txt; };
+          setTxt('aud-kpi-turma', kpiTurma); setTxt('aud-kpi-plano', kpiPlano);
+
+          if (window.auditoriaListaFiltrada.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px; color:#10b981;"><b><span class="material-icons" style="font-size:24px; vertical-align:middle;">verified</span> Base 100% íntegra! Nenhum fantasma detectado.</b></td></tr>';
+              return;
+          }
+
+          let html = "";
+          const safeHTML = (str) => String(str || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+          window.auditoriaListaFiltrada.forEach(a => {
+              const telLimpo = String(a.telefone).replace(/\D/g, '');
+              let txtContato = safeHTML(a.telefone || "Sem Telefone");
+              let btnWpp = telLimpo.length >= 10 ? `<a href="https://wa.me/55${telLimpo}" target="_blank" title="Contatar Aluno"><span class="material-icons" style="font-size:16px; color:#25d366; vertical-align:middle;">whatsapp</span></a>` : '';
+
+              // 🔥 CORREÇÃO: O Botão agora chama 'abrirCorrecaoRapida'
+              html += `<tr style="transition: 0.2s;" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='transparent'">
+                  <td><b style="color:#1e293b; font-size:13px;">${safeHTML(a.nome)}</b><br><small style="color:#64748b;">📞 ${txtContato} ${btnWpp}</small></td>
+                  <td><b style="color:#3b82f6; font-size:12px;">${safeHTML(a.academia)}</b><br><small style="color:#64748b;">${safeHTML(a.login)}</small></td>
+                  <td style="text-align:center;">${a._badgesHtml}</td>
+                  <td style="text-align:center;">
+                      <button class="adm-btn" style="padding:6px 12px; font-size:11px; background:#8b5cf6; color:white;" onclick="window.abrirCorrecaoRapida(${a.id})">
+                          <span class="material-icons" style="font-size:14px;">build</span> CORRIGIR FICHA
+                      </button>
+                  </td>
+              </tr>`;
+          });
+          tbody.innerHTML = html;
+      } catch(e) { console.error("Erro renderizar auditoria:", e); }
+  };
+
+  // =========================================================================
+  // 🛠️ MOTOR DO MODAL DE CORREÇÃO RÁPIDA (DROP-DOWNS MÚLTIPLOS UX/UI)
+  // =========================================================================
+  
+  // Função para abrir e fechar os dropdowns
+  window.toggleMultiSel = function(idContainer) {
+      // Fecha todos os outros antes de abrir o selecionado
+      document.querySelectorAll('.multi-sel.open').forEach(el => {
+          if(el.id !== idContainer) el.classList.remove('open');
+      });
+      document.getElementById(idContainer).classList.toggle('open');
+  };
+
+  // Função para atualizar o texto do botão (ex: "2 selecionados" ou "Muay Thai")
+  window.atualizarTextoMultiSel = function(menuId, btnId, textoPadrao) {
+      const checkboxes = document.querySelectorAll(`#${menuId} input:checked`);
+      const btn = document.getElementById(btnId);
+      
+      let corDestaque = "#1e293b";
+      if(btnId === "btn_ms_turma") corDestaque = "#8b5cf6";
+      if(btnId === "btn_ms_plano") corDestaque = "#f59e0b";
+
+      if (checkboxes.length === 0) {
+          btn.innerHTML = `${textoPadrao} <span class="material-icons" style="font-size:16px;">expand_more</span>`;
+      } else if (checkboxes.length === 1) {
+          btn.innerHTML = `<b style="color:${corDestaque};">${checkboxes[0].value}</b> <span class="material-icons" style="font-size:16px;">expand_more</span>`;
+      } else {
+          btn.innerHTML = `<b style="color:${corDestaque};">${checkboxes.length} opções selecionadas</b> <span class="material-icons" style="font-size:16px;">expand_more</span>`;
+      }
+  };
+
+  window.abrirCorrecaoRapida = function(idAluno) {
+      try {
+          const aluno = window.auditoriaListaGlobal.find(a => a.id === idAluno);
+          if (!aluno) return;
+
+          document.getElementById('corr_id_aluno').value = aluno.id;
+          document.getElementById('corr_login').value = aluno.login;
+          document.getElementById('corr_nome_lbl').innerText = aluno.nome;
+          document.getElementById('corr_acad_lbl').innerText = "📍 " + aluno.academia;
+
+          // Fecha todos os dropdowns abertos
+          document.querySelectorAll('.multi-sel').forEach(el => el.classList.remove('open'));
+
+          const modal = document.getElementById('adm-modal-correcao');
+          if(modal) modal.style.display = 'flex';
+
+          // Construtor do Menu Dropdown
+          const construirDrop = (menuId, btnId, txtPadrao, listaOpcoes, strAtuais, inputName) => {
+              const menu = document.getElementById(menuId);
+              menu.innerHTML = '';
+              if(listaOpcoes.length === 0) {
+                  menu.innerHTML = '<span style="font-size:11px; color:#888; padding:5px;">Sem opções</span>';
+                  window.atualizarTextoMultiSel(menuId, btnId, txtPadrao);
+                  return;
+              }
+              
+              const valAtuais = String(strAtuais || "").toLowerCase().split(',').map(s => s.trim());
+              
+              listaOpcoes.forEach(opt => {
+                  const safeOpt = String(opt).replace(/"/g, '&quot;').replace(/</g, '&lt;');
+                  const isChecked = valAtuais.includes(String(opt).toLowerCase()) ? "checked" : "";
+                  menu.innerHTML += `
+                    <label>
+                      <input type="checkbox" name="${inputName}" value="${safeOpt}" ${isChecked} 
+                             onchange="window.atualizarTextoMultiSel('${menuId}', '${btnId}', '${txtPadrao}')"> 
+                      ${safeOpt}
+                    </label>`;
+              });
+              // Atualiza o visual do botão no arranque
+              window.atualizarTextoMultiSel(menuId, btnId, txtPadrao);
+          };
+
+          // 1. Carregar Modalidades
+          google.script.run.withSuccessHandler(lista => {
+              construirDrop('menu_ms_mod', 'btn_ms_mod', 'Sem Modalidade', lista, aluno.modalidade, 'chk_corr_mod');
+          }).getListaModalidades();
+
+          // 2. Carregar Turmas filtradas COM TOLERÂNCIA DE ESPAÇOS
+          google.script.run.withSuccessHandler(turmas => {
+              const acadAlunoNormalizada = String(aluno.academia || "").trim().toLowerCase();
+              const turmasFiltradas = [];
+              turmas.forEach(t => {
+                  const localTurmaNormalizado = String(t.local || t.local_vinculado || "").trim().toLowerCase();
+                  const statusTurma = String(t.status || "").trim().toLowerCase();
+                  if (statusTurma === "ativa" && localTurmaNormalizado === acadAlunoNormalizada) {
+                      turmasFiltradas.push(t.nome || t.nome_da_turma);
+                  }
+              });
+              construirDrop('menu_ms_turma', 'btn_ms_turma', 'Sem Turma', turmasFiltradas, aluno.turma, 'chk_corr_turma');
+          }).listarTurmasAdmin(window.editorLogin);
+
+          // 3. Carregar Planos Financeiros
+          google.script.run.withSuccessHandler(pacotes => {
+              const planosNomes = pacotes.map(p => p.nome_pacote || p.Nome_Pacote || p.nome);
+              construirDrop('menu_ms_plano', 'btn_ms_plano', 'Sem Plano', planosNomes, aluno.plano, 'chk_corr_plano');
+          }).getPacotesDisponiveis(window.editorLogin);
+
+          // 4. Tratar Data Vencimento
+          let v = aluno.vencimento;
+          if (v && v instanceof Date) v = v.toISOString().split('T')[0];
+          else if (v && String(v).includes('/')) {
+              const p = String(v).split('/');
+              if(p.length === 3) v = `${p[2]}-${p[1]}-${p[0]}`;
+          } else if (v) v = String(v).split('T')[0];
+          
+          document.getElementById('corr_venc').value = v || "";
+
+      } catch(e) { console.error("Erro abrirCorrecaoRapida:", e); }
+  };
+
+  // Coleta os dados e salva!
+  window.salvarFichaRapida = function(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<span class="material-icons spin">sync</span> Salvando...';
+      btn.disabled = true;
+
+      const form = e.target;
+      const getChecked = (name) => Array.from(form.querySelectorAll(`input[name="${name}"]:checked`)).map(cb => cb.value).join(', ');
+
+      const dados = {
+          corr_id_aluno: form.corr_id_aluno.value,
+          corr_login: form.corr_login.value,
+          corr_mod: getChecked('chk_corr_mod'),
+          corr_turma: getChecked('chk_corr_turma'),
+          corr_plano: getChecked('chk_corr_plano'),
+          corr_venc: form.corr_venc.value
+      };
+
+      google.script.run
+          .withFailureHandler(err => { alert("Erro: " + err.message); btn.innerHTML = orig; btn.disabled = false; })
+          .withSuccessHandler(res => {
+              alert(res);
+              window.closeModal('adm-modal-correcao');
+              window.abrirModalAuditoria(); // Roda o radar de novo!
+          })
+          .salvarCorrecaoRapidaAdmin(dados);
+  };
+
+  // 🖨️ EXPORTAÇÃO DA AUDITORIA
+  window.exportarAuditoriaCSV = function() {
+      const lista = window.auditoriaListaFiltrada;
+      if (lista.length === 0) { alert("Não há fantasmas listados."); return; }
+      let csv = "\uFEFFALUNO;LOGIN;TELEFONE;UNIDADE;FANTASMA_TATAME(SEM TURMA);FANTASMA_FINANCEIRO(SEM PLANO)\n";
+      lista.forEach(a => { 
+          csv += `"${a.nome}";"${a.login}";"${a.telefone}";"${a.academia}";"${a.isFantasmaTurma ? 'SIM' : 'NAO'}";"${a.isFantasmaPlano ? 'SIM' : 'NAO'}"\n`; 
+      });
+      const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); link.download = "Auditoria_Fantasmas.csv"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  };
+
+  window.exportarAuditoriaPDF = function() {
+      const lista = window.auditoriaListaFiltrada;
+      if (lista.length === 0) { alert("Não há fantasmas listados."); return; }
+      const janela = window.open('', '', 'width=1000,height=700');
+      let html = '<html><head><title>Auditoria Operacional</title><style>body{font-family:sans-serif;padding:20px}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:10px;text-align:left;font-size:12px}th{background:#1e293b;color:#fff;text-transform:uppercase}tr:nth-child(even){background:#f8fafc}</style></head><body><h2 style="color:#5b21b6"><span style="font-size:24px;">👻</span> Auditoria Operacional - Fantasmas Detectados</h2><p><b>Emissão:</b> ' + new Date().toLocaleString('pt-BR') + '</p><table><thead><tr><th>Atleta e Contato</th><th>Unidade (Login)</th><th>Anomalias Identificadas</th></tr></thead><tbody>';
+      
+      lista.forEach(a => { 
+          let msgs = [];
+          if(a.isFantasmaTurma) msgs.push('<span style="color:#7e22ce; font-weight:bold;">[Sem Turma Vinculada]</span>');
+          if(a.isFantasmaPlano) msgs.push('<span style="color:#b45309; font-weight:bold;">[Ativo Sem Plano Financeiro]</span>');
+          
+          html += `<tr><td><b>${a.nome}</b><br><small>${a.telefone}</small></td><td>${a.academia}<br><small>${a.login}</small></td><td>${msgs.join('<br>')}</td></tr>`; 
+      });
+      html += '</tbody></table><h3 style="text-align:right;color:#5b21b6;">Total de Irregularidades: ' + lista.length + ' alunos</h3></body></html>';
       janela.document.open(); janela.document.write(html); janela.document.close(); setTimeout(() => { try { janela.print(); } catch(e){} }, 1000);
   };
 </script>

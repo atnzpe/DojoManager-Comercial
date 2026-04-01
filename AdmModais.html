@@ -946,6 +946,8 @@
     </div>
   </div>
 </div>
+
+
 <!-- Modal Prelatorio BI -->
 <div id="modal-relatorio-analitico" class="adm-modal" style="display:none;">
   <div class="adm-modal-box large" style="width: 95%; max-width: 1200px;">
@@ -1091,5 +1093,234 @@
         </table>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Modal Auditoria Operacional -->
+
+<div id="adm-modal-auditoria" class="adm-modal" style="display:none;">
+  <div class="adm-modal-box large" style="width: 95%; max-width: 1000px; background: #f8fafc;">
+
+    <div class="adm-h3" style="justify-content:space-between; border-left-color:#8b5cf6; align-items: center;">
+      <span><span class="material-icons" style="color:#8b5cf6; vertical-align:middle; font-size: 24px;">radar</span>
+      Auditoria Operacional (Radar de Fantasmas)</span>
+      <div style="display: flex; gap: 15px;">
+        <button class="adm-btn adm-btn-outline" onclick="window.abrirModalAuditoria()" style="font-size: 11px; padding: 6px 12px; color: #8b5cf6; border-color: #8b5cf6;">
+            <span class="material-icons" style="font-size:14px;">refresh</span> Varrer Base
+        </button>
+        <button type="button" onclick="window.closeModal('adm-modal-auditoria')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+      </div>
+    </div>
+
+    <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px;">
+      <div class="form-grid" style="grid-template-columns: 1fr 2fr; gap: 20px;">
+
+        <div style="background: #f5f3ff; padding: 15px; border-radius: 8px; border: 1px solid #ddd6fe;">
+          <h4 style="margin:0 0 10px 0; font-size:11px; color:#5b21b6; text-transform:uppercase;">1. Tipo de Anomalia
+          </h4>
+          <select id="aud-tipo-anomalia" class="adm-input" onchange="window.renderizarTabelaAuditoria()" style="border-color: #c4b5fd;">
+              <option value="TODOS">Todos os Alunos Irregulares</option>
+              <option value="SEM_TURMA">👻 Fantasmas de Tatame (Sem Turma)</option>
+              <option value="SEM_PLANO">💸 Fantasmas Financeiros (Sem Plano)</option>
+          </select>
+        </div>
+
+        <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; border: 1px solid #bbf7d0;">
+          <h4 style="margin:0 0 10px 0; font-size:11px; color:#166534; text-transform:uppercase;">2. Unidade / Academia
+          </h4>
+          <select id="aud-academias" class="adm-input" onchange="window.renderizarTabelaAuditoria()">
+              <option value="">Todas as minhas Unidades</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; flex-wrap: wrap;">
+      <div class="stat-card"
+        style="border-top: 4px solid #8b5cf6; flex: 1; padding: 10px; min-width: 150px; background: #fff;">
+        <div class="stat-card-title" style="color: #64748b;">FANTASMAS DE TATAME</div>
+        <div id="aud-kpi-turma" class="stat-card-value" style="color:#8b5cf6; font-size:20px;">0</div>
+        <small style="color: #94a3b8; font-size: 10px;">Ativos sem turma vinculada</small>
+      </div>
+      <div class="stat-card"
+        style="border-top: 4px solid #f59e0b; flex: 1; padding: 10px; min-width: 150px; background: #fff;">
+        <div class="stat-card-title" style="color: #64748b;">FANTASMAS FINANCEIROS</div>
+        <div id="aud-kpi-plano" class="stat-card-value" style="color:#f59e0b; font-size:20px;">0</div>
+        <small style="color: #94a3b8; font-size: 10px;">Ativos sem plano de pgto</small>
+      </div>
+      <div style="flex: 2; display: flex; justify-content: flex-end; gap: 10px; min-width: 250px;">
+        <button class="adm-btn" onclick="window.exportarAuditoriaCSV()" style="background: #10b981; color: white;"><span class="material-icons" style="font-size:16px;">table_view</span> Excel</button>
+        <button class="adm-btn" onclick="window.exportarAuditoriaPDF()" style="background: #f44336; color: white;"><span class="material-icons" style="font-size:16px;">picture_as_pdf</span> Imprimir PDF</button>
+      </div>
+    </div>
+
+    <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+      <div style="max-height: 350px; overflow-y: auto;">
+        <table class="adm-table" style="margin: 0; box-shadow: none;">
+          <thead style="position: sticky; top: 0; z-index: 1;">
+            <tr>
+              <th style="background:#1e293b; color:#fff;">Aluno / Contato</th>
+              <th style="background:#1e293b; color:#fff;">Unidade Atual</th>
+              <th style="background:#1e293b; color:#fff; text-align:center;">Anomalia Detectada</th>
+              <th style="background:#1e293b; color:#fff; text-align:center;">Ação de Correção</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-modal-auditoria">
+            <tr>
+              <td colspan="4" style="text-align:center; padding:30px; color:#64748b;">Clique em "Varrer Base" para
+                iniciar a auditoria.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal de Correção-->
+
+<style>
+  /* CSS Mágico do Multi-Select Nativo */
+  .multi-sel {
+    position: relative;
+    width: 100%;
+    text-align: left;
+  }
+
+  .multi-sel-btn {
+    width: 100%;
+    padding: 10px;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #334155;
+    transition: 0.2s;
+  }
+
+  .multi-sel-btn:hover {
+    border-color: #8b5cf6;
+  }
+
+  .multi-sel-menu {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    max-height: 180px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    padding: 10px;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .multi-sel.open .multi-sel-menu {
+    display: flex;
+  }
+
+  .multi-sel-menu label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    transition: 0.2s;
+    font-weight: bold;
+    color: #1e293b;
+    border: 1px solid transparent;
+  }
+
+  .multi-sel-menu label:hover {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+  }
+
+  .multi-sel-menu input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #8b5cf6;
+    cursor: pointer;
+  }
+</style>
+
+<div id="adm-modal-correcao" class="adm-modal" style="display:none; z-index: 99999;">
+  <div class="adm-modal-box" style="border-top: 4px solid #8b5cf6; width: 450px;">
+
+    <div class="adm-h3" style="border:none; padding:0; margin-bottom: 15px;">
+      <span><span class="material-icons" style="color:#8b5cf6; vertical-align:middle;">build</span> Correção
+      Rápida</span>
+      <button type="button" onclick="window.closeModal('adm-modal-correcao')" style="background:none;border:none;cursor:pointer;color:#ff5252;font-size:24px;">✕</button>
+    </div>
+
+    <form onsubmit="window.salvarFichaRapida(event)">
+      <input type="hidden" name="corr_id_aluno" id="corr_id_aluno">
+      <input type="hidden" name="corr_login" id="corr_login">
+
+      <div
+        style="background:#f8fafc; padding:15px; border-radius:6px; margin-bottom:15px; border:1px solid #e2e8f0; text-align:center;">
+        <b style="color:#334155; font-size:16px;" id="corr_nome_lbl">Nome do Aluno</b><br>
+        <span class="adm-badge bg-blue" id="corr_acad_lbl" style="margin-top:5px;">Academia</span>
+      </div>
+
+      <div class="form-grid">
+        <div style="display:flex; flex-direction:column;">
+          <label class="adm-label">Modalidade(s)</label>
+          <div id="ms_mod" class="multi-sel">
+            <div class="multi-sel-btn" id="btn_ms_mod" onclick="window.toggleMultiSel('ms_mod')">
+              Carregando... <span class="material-icons" style="font-size:16px;">expand_more</span>
+            </div>
+            <div id="menu_ms_mod" class="multi-sel-menu"></div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column;">
+          <label class="adm-label" style="color:#8b5cf6;">Turma(s) Vinculada(s)</label>
+          <div id="ms_turma" class="multi-sel">
+            <div class="multi-sel-btn" id="btn_ms_turma" style="border-color:#c4b5fd;"
+              onclick="window.toggleMultiSel('ms_turma')">
+              Carregando... <span class="material-icons" style="font-size:16px; color:#8b5cf6;">expand_more</span>
+            </div>
+            <div id="menu_ms_turma" class="multi-sel-menu"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-top: 15px;">
+        <div style="display:flex; flex-direction:column;">
+          <label class="adm-label" style="color:#f59e0b;">Plano(s) Financeiro(s)</label>
+          <div id="ms_plano" class="multi-sel">
+            <div class="multi-sel-btn" id="btn_ms_plano" style="border-color:#fcd34d;"
+              onclick="window.toggleMultiSel('ms_plano')">
+              Carregando... <span class="material-icons" style="font-size:16px; color:#f59e0b;">expand_more</span>
+            </div>
+            <div id="menu_ms_plano" class="multi-sel-menu"></div>
+          </div>
+        </div>
+
+        <div>
+          <label class="adm-label" style="color:#f59e0b;">Data de Venc. (Unificada)</label>
+          <input type="date" name="corr_venc" id="corr_venc" class="adm-input" style="border-color:#fcd34d;">
+          <small style="color:#888; font-size:10px; display:block; margin-top:5px;">Aplicada aos planos selecionados.</small>
+        </div>
+      </div>
+
+      <button type="submit" class="adm-btn" style="width:100%; margin-top:25px; background:#8b5cf6; color:white; font-size:14px; padding:12px;">
+        <span class="material-icons" style="font-size:18px;">save</span> SALVAR CORREÇÃO
+      </button>
+    </form>
   </div>
 </div>
